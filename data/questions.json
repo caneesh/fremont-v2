@@ -1,0 +1,257 @@
+{
+  "questions": [
+    {
+      "id": "mech-rot-001",
+      "title": "Bead on Rotating Hoop",
+      "statement": "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop.",
+      "topic": "mechanics",
+      "subtopic": "rotational-motion",
+      "difficulty": "Hard",
+      "concepts": ["Non-inertial frames", "Centrifugal force", "Effective potential", "Stability analysis"],
+      "expectedTime": 25,
+      "source": "Irodov-inspired"
+    },
+    {
+      "id": "mech-rot-002",
+      "title": "Rod on Rotating Table",
+      "statement": "A uniform rod of length L rotates in a horizontal plane with constant angular velocity ω about a vertical axis passing through one of its ends. A bead of mass m can slide without friction along the rod. At what distance r from the axis will the bead be in equilibrium?",
+      "topic": "mechanics",
+      "subtopic": "rotational-motion",
+      "difficulty": "Medium",
+      "concepts": ["Rotating reference frame", "Centrifugal force", "Equilibrium conditions"],
+      "expectedTime": 15,
+      "source": "JEE Advanced pattern"
+    },
+    {
+      "id": "mech-rot-003",
+      "title": "Disc Rolling on Incline",
+      "statement": "A disc of mass M and radius R rolls without slipping down an inclined plane of angle α. Find the acceleration of the disc and the minimum coefficient of friction required to prevent slipping.",
+      "topic": "mechanics",
+      "subtopic": "rotational-motion",
+      "difficulty": "Medium",
+      "concepts": ["Rolling motion", "Torque", "Friction", "Energy conservation"],
+      "expectedTime": 20,
+      "source": "JEE Advanced 2018 pattern"
+    },
+    {
+      "id": "mech-lom-001",
+      "title": "Block on Accelerating Wedge",
+      "statement": "A wedge of mass M and angle α rests on a frictionless horizontal surface. A block of mass m is placed on the wedge. What horizontal acceleration must be given to the wedge so that the block does not slide down? Assume all surfaces are frictionless.",
+      "topic": "mechanics",
+      "subtopic": "laws-of-motion",
+      "difficulty": "Hard",
+      "concepts": ["Non-inertial frames", "Pseudo forces", "Constraint motion"],
+      "expectedTime": 20,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "mech-lom-002",
+      "title": "Three Block System",
+      "statement": "Three blocks of masses m₁ = 1 kg, m₂ = 2 kg, and m₃ = 3 kg are connected by strings and placed on a horizontal frictionless surface. A force F = 12 N is applied on m₃. Find the tension in the string connecting m₁ and m₂.",
+      "topic": "mechanics",
+      "subtopic": "laws-of-motion",
+      "difficulty": "Easy",
+      "concepts": ["Newton's laws", "Free body diagram", "Tension"],
+      "expectedTime": 10,
+      "source": "JEE Mains pattern"
+    },
+    {
+      "id": "mech-lom-003",
+      "title": "Circular Motion with Friction",
+      "statement": "A car moves on a horizontal circular road of radius r with speed v. The coefficient of friction between the tires and road is μ. What is the maximum speed at which the car can take the turn without skidding?",
+      "topic": "mechanics",
+      "subtopic": "laws-of-motion",
+      "difficulty": "Easy",
+      "concepts": ["Circular motion", "Friction", "Centripetal force"],
+      "expectedTime": 8,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "mech-wen-001",
+      "title": "Spring Block System",
+      "statement": "A block of mass m is attached to a spring of spring constant k. The block is pulled a distance A from equilibrium and released. Find (a) the maximum velocity of the block, (b) the velocity when the block is at distance A/2 from equilibrium.",
+      "topic": "mechanics",
+      "subtopic": "work-energy",
+      "difficulty": "Medium",
+      "concepts": ["Simple harmonic motion", "Energy conservation", "Spring potential energy"],
+      "expectedTime": 12,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "mech-wen-002",
+      "title": "Variable Force Work",
+      "statement": "A particle moves along the x-axis under the action of a force F = (6x² - 4x) N, where x is in meters. Calculate the work done by the force as the particle moves from x = 0 to x = 2 m.",
+      "topic": "mechanics",
+      "subtopic": "work-energy",
+      "difficulty": "Easy",
+      "concepts": ["Work by variable force", "Integration", "Power"],
+      "expectedTime": 10,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "mech-wen-003",
+      "title": "Loop-the-Loop",
+      "statement": "A small block slides down a frictionless track from height h and enters a circular loop of radius R. What is the minimum height h such that the block completes the loop without losing contact with the track?",
+      "topic": "mechanics",
+      "subtopic": "work-energy",
+      "difficulty": "Medium",
+      "concepts": ["Energy conservation", "Circular motion", "Normal force"],
+      "expectedTime": 15,
+      "source": "JEE Advanced pattern"
+    },
+    {
+      "id": "mech-grav-001",
+      "title": "Satellite Orbital Velocity",
+      "statement": "A satellite is orbiting Earth at a height h above the surface. Given Earth's radius R and surface gravity g, derive the orbital velocity and period of the satellite.",
+      "topic": "mechanics",
+      "subtopic": "gravitation",
+      "difficulty": "Medium",
+      "concepts": ["Orbital mechanics", "Gravitational force", "Centripetal acceleration"],
+      "expectedTime": 15,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "mech-grav-002",
+      "title": "Escape Velocity",
+      "statement": "Derive the expression for escape velocity from Earth's surface. Calculate the escape velocity if the radius of Earth is 6400 km and g = 10 m/s².",
+      "topic": "mechanics",
+      "subtopic": "gravitation",
+      "difficulty": "Easy",
+      "concepts": ["Gravitational potential energy", "Energy conservation"],
+      "expectedTime": 10,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "em-elec-001",
+      "title": "Electric Field of Ring",
+      "statement": "A uniform ring of charge Q and radius R lies in the xy-plane centered at the origin. Find the electric field at a point P on the z-axis at distance z from the center. At what value of z is the field maximum?",
+      "topic": "electromagnetism",
+      "subtopic": "electrostatics",
+      "difficulty": "Medium",
+      "concepts": ["Electric field", "Symmetry", "Integration", "Maxima/minima"],
+      "expectedTime": 18,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "em-elec-002",
+      "title": "Capacitor Network",
+      "statement": "Four capacitors of capacitance 2 μF, 3 μF, 4 μF, and 6 μF are connected in a network. Find the equivalent capacitance between points A and B when: (a) all are in series, (b) all are in parallel, (c) 2 μF and 3 μF in series, then parallel with 4 μF and 6 μF in series.",
+      "topic": "electromagnetism",
+      "subtopic": "electrostatics",
+      "difficulty": "Easy",
+      "concepts": ["Capacitance", "Series and parallel combinations"],
+      "expectedTime": 12,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "em-curr-001",
+      "title": "Wheatstone Bridge",
+      "statement": "In a Wheatstone bridge, three resistances P, Q, and R are connected in the three arms and the fourth arm has unknown resistance S. When the bridge is balanced, what is the value of S in terms of P, Q, and R? If P = 100 Ω, Q = 10 Ω, and R = 400 Ω, find S.",
+      "topic": "electromagnetism",
+      "subtopic": "current-electricity",
+      "difficulty": "Easy",
+      "concepts": ["Wheatstone bridge", "Kirchhoff's laws", "Balanced bridge"],
+      "expectedTime": 10,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "em-curr-002",
+      "title": "RC Circuit Charging",
+      "statement": "A capacitor C is charged through a resistor R by a battery of voltage V. Derive the expression for charge on the capacitor as a function of time. What is the time constant? After how many time constants does the capacitor reach 99% of full charge?",
+      "topic": "electromagnetism",
+      "subtopic": "current-electricity",
+      "difficulty": "Medium",
+      "concepts": ["RC circuits", "Charging", "Exponential functions", "Time constant"],
+      "expectedTime": 15,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "em-mag-001",
+      "title": "Magnetic Force on Current Loop",
+      "statement": "A rectangular current loop of dimensions a × b carrying current I is placed in a uniform magnetic field B perpendicular to the plane of the loop. Calculate the net force and net torque on the loop.",
+      "topic": "electromagnetism",
+      "subtopic": "magnetism",
+      "difficulty": "Medium",
+      "concepts": ["Magnetic force", "Torque", "Current loop in magnetic field"],
+      "expectedTime": 15,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "therm-kin-001",
+      "title": "Gas Molecular Speeds",
+      "statement": "For an ideal gas, derive the expressions for (a) most probable speed, (b) average speed, and (c) RMS speed. Show that v_rms > v_avg > v_mp.",
+      "topic": "thermodynamics",
+      "subtopic": "kinetic-theory",
+      "difficulty": "Hard",
+      "concepts": ["Kinetic theory", "Maxwell-Boltzmann distribution", "Statistical mechanics"],
+      "expectedTime": 25,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "therm-law-001",
+      "title": "Carnot Engine Efficiency",
+      "statement": "A Carnot engine operates between temperatures T₁ = 600 K and T₂ = 300 K. Calculate (a) the efficiency of the engine, (b) the work output if 1000 J of heat is absorbed from the hot reservoir, (c) the heat rejected to the cold reservoir.",
+      "topic": "thermodynamics",
+      "subtopic": "laws-thermo",
+      "difficulty": "Medium",
+      "concepts": ["Carnot cycle", "Efficiency", "Heat engines"],
+      "expectedTime": 12,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "therm-law-002",
+      "title": "Adiabatic Process",
+      "statement": "One mole of an ideal gas (γ = 1.4) expands adiabatically from volume V to 2V. If the initial temperature is T, find the final temperature and the work done by the gas.",
+      "topic": "thermodynamics",
+      "subtopic": "laws-thermo",
+      "difficulty": "Medium",
+      "concepts": ["Adiabatic process", "First law", "Work done"],
+      "expectedTime": 15,
+      "source": "JEE Advanced"
+    },
+    {
+      "id": "opt-geo-001",
+      "title": "Lens Combination",
+      "statement": "Two thin lenses of focal lengths f₁ = 20 cm and f₂ = -10 cm are placed in contact. Find the focal length of the combination. If an object is placed 30 cm from this combination, where is the image formed?",
+      "topic": "optics",
+      "subtopic": "geometrical-optics",
+      "difficulty": "Easy",
+      "concepts": ["Lens formula", "Combination of lenses", "Image formation"],
+      "expectedTime": 10,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "opt-wave-001",
+      "title": "Young's Double Slit",
+      "statement": "In Young's double slit experiment, the slits are separated by 0.5 mm and the screen is 1 m away. Light of wavelength 600 nm is used. Calculate (a) the fringe width, (b) the position of the 5th bright fringe from the center.",
+      "topic": "optics",
+      "subtopic": "wave-optics",
+      "difficulty": "Easy",
+      "concepts": ["Interference", "Double slit", "Fringe width"],
+      "expectedTime": 10,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "mod-dual-001",
+      "title": "Photoelectric Effect",
+      "statement": "Light of wavelength 400 nm is incident on a metal surface with work function 2.0 eV. Calculate (a) the maximum kinetic energy of ejected electrons, (b) the stopping potential, (c) the threshold wavelength.",
+      "topic": "modern-physics",
+      "subtopic": "dual-nature",
+      "difficulty": "Medium",
+      "concepts": ["Photoelectric effect", "Einstein equation", "Stopping potential"],
+      "expectedTime": 12,
+      "source": "JEE Mains"
+    },
+    {
+      "id": "mod-atom-001",
+      "title": "Bohr Model Energy Levels",
+      "statement": "Using the Bohr model, calculate (a) the radius of the first orbit of hydrogen, (b) the energy of the electron in the ground state, (c) the wavelength of the photon emitted when the electron transitions from n=3 to n=2.",
+      "topic": "modern-physics",
+      "subtopic": "atoms-nuclei",
+      "difficulty": "Medium",
+      "concepts": ["Bohr model", "Energy levels", "Spectral lines"],
+      "expectedTime": 15,
+      "source": "JEE Advanced"
+    }
+  ]
+}

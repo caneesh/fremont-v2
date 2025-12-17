@@ -1,0 +1,162 @@
+{
+  "topics": [
+    {
+      "id": "mechanics",
+      "name": "Classical Mechanics",
+      "description": "Foundation of physics - motion, forces, energy, and momentum",
+      "icon": "⚙️",
+      "order": 1,
+      "totalQuestions": 15,
+      "subtopics": [
+        {
+          "id": "kinematics",
+          "name": "Kinematics",
+          "description": "Motion in 1D, 2D, projectile motion, relative velocity",
+          "questions": ["mech-kin-001", "mech-kin-002", "mech-kin-003"]
+        },
+        {
+          "id": "laws-of-motion",
+          "name": "Laws of Motion",
+          "description": "Newton's laws, friction, circular motion",
+          "questions": ["mech-lom-001", "mech-lom-002", "mech-lom-003"]
+        },
+        {
+          "id": "work-energy",
+          "name": "Work, Energy & Power",
+          "description": "Work-energy theorem, conservation of energy",
+          "questions": ["mech-wen-001", "mech-wen-002", "mech-wen-003"]
+        },
+        {
+          "id": "rotational-motion",
+          "name": "Rotational Motion",
+          "description": "Moment of inertia, torque, angular momentum",
+          "questions": ["mech-rot-001", "mech-rot-002", "mech-rot-003"]
+        },
+        {
+          "id": "gravitation",
+          "name": "Gravitation",
+          "description": "Universal gravitation, satellites, planetary motion",
+          "questions": ["mech-grav-001", "mech-grav-002", "mech-grav-003"]
+        }
+      ]
+    },
+    {
+      "id": "thermodynamics",
+      "name": "Thermodynamics",
+      "description": "Heat, temperature, and laws of thermodynamics",
+      "icon": "🌡️",
+      "order": 2,
+      "totalQuestions": 12,
+      "subtopics": [
+        {
+          "id": "thermal-properties",
+          "name": "Thermal Properties",
+          "description": "Heat transfer, expansion, calorimetry",
+          "questions": ["therm-prop-001", "therm-prop-002", "therm-prop-003"]
+        },
+        {
+          "id": "kinetic-theory",
+          "name": "Kinetic Theory of Gases",
+          "description": "Ideal gas, molecular speeds, degrees of freedom",
+          "questions": ["therm-kin-001", "therm-kin-002", "therm-kin-003"]
+        },
+        {
+          "id": "laws-thermo",
+          "name": "Laws of Thermodynamics",
+          "description": "First and second law, entropy, Carnot cycle",
+          "questions": ["therm-law-001", "therm-law-002", "therm-law-003"]
+        }
+      ]
+    },
+    {
+      "id": "electromagnetism",
+      "name": "Electromagnetism",
+      "description": "Electric and magnetic fields, circuits, and EM waves",
+      "icon": "⚡",
+      "order": 3,
+      "totalQuestions": 18,
+      "subtopics": [
+        {
+          "id": "electrostatics",
+          "name": "Electrostatics",
+          "description": "Coulomb's law, electric field, Gauss's law",
+          "questions": ["em-elec-001", "em-elec-002", "em-elec-003"]
+        },
+        {
+          "id": "current-electricity",
+          "name": "Current Electricity",
+          "description": "Ohm's law, circuits, Kirchhoff's laws",
+          "questions": ["em-curr-001", "em-curr-002", "em-curr-003"]
+        },
+        {
+          "id": "magnetism",
+          "name": "Magnetism",
+          "description": "Magnetic force, Biot-Savart law, Ampere's law",
+          "questions": ["em-mag-001", "em-mag-002", "em-mag-003"]
+        },
+        {
+          "id": "em-induction",
+          "name": "Electromagnetic Induction",
+          "description": "Faraday's law, Lenz's law, inductance",
+          "questions": ["em-ind-001", "em-ind-002", "em-ind-003"]
+        },
+        {
+          "id": "ac-circuits",
+          "name": "AC Circuits",
+          "description": "AC voltage, impedance, resonance, transformers",
+          "questions": ["em-ac-001", "em-ac-002", "em-ac-003"]
+        }
+      ]
+    },
+    {
+      "id": "optics",
+      "name": "Optics",
+      "description": "Light, reflection, refraction, and wave optics",
+      "icon": "🔭",
+      "order": 4,
+      "totalQuestions": 10,
+      "subtopics": [
+        {
+          "id": "geometrical-optics",
+          "name": "Geometrical Optics",
+          "description": "Reflection, refraction, lenses, mirrors",
+          "questions": ["opt-geo-001", "opt-geo-002", "opt-geo-003"]
+        },
+        {
+          "id": "wave-optics",
+          "name": "Wave Optics",
+          "description": "Interference, diffraction, polarization",
+          "questions": ["opt-wave-001", "opt-wave-002", "opt-wave-003"]
+        }
+      ]
+    },
+    {
+      "id": "modern-physics",
+      "name": "Modern Physics",
+      "description": "Quantum mechanics, atomic structure, and nuclear physics",
+      "icon": "⚛️",
+      "order": 5,
+      "totalQuestions": 12,
+      "subtopics": [
+        {
+          "id": "dual-nature",
+          "name": "Dual Nature of Matter",
+          "description": "Photoelectric effect, de Broglie wavelength",
+          "questions": ["mod-dual-001", "mod-dual-002", "mod-dual-003"]
+        },
+        {
+          "id": "atoms-nuclei",
+          "name": "Atoms and Nuclei",
+          "description": "Bohr model, radioactivity, nuclear reactions",
+          "questions": ["mod-atom-001", "mod-atom-002", "mod-atom-003"]
+        },
+        {
+          "id": "semiconductor",
+          "name": "Semiconductor Electronics",
+          "description": "Diodes, transistors, logic gates",
+          "questions": ["mod-semi-001", "mod-semi-002", "mod-semi-003"]
+        }
+      ]
+    }
+  ]
+}

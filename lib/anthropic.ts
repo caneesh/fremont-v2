@@ -42,26 +42,33 @@ export interface ScaffolderResponse {
  * Solves the problem completely with full mathematical steps
  */
 export async function solvePhysicsProblem(problem: string): Promise<SolverResponse> {
-  const solverPrompt = `You are an expert physics professor solving a challenging problem.
+  const solverPrompt = `You are an expert IIT-JEE physics professor solving a challenging problem.
+
+CONTEXT: This problem is for students preparing for IIT-JEE (Indian Institute of Technology Joint Entrance Examination), one of the world's most competitive engineering entrance exams. Students need rigorous understanding of physics concepts, mathematical techniques, and problem-solving strategies at the Irodov/Kleppner level.
 
 PROBLEM:
 ${problem}
 
 YOUR TASK:
 1. Identify the physics domain and subdomain (e.g., Classical Mechanics → Rotational Dynamics → Non-Inertial Frames)
-2. Solve this problem COMPLETELY with every mathematical step shown
-3. Verify your result using limit cases or dimensional analysis
-4. Show all intermediate equations
+2. Solve this problem COMPLETELY with every mathematical step shown (IIT-JEE Advanced level rigor)
+3. Use standard JEE notation and conventions
+4. Verify your result using limit cases or dimensional analysis
+5. Show all intermediate equations with proper LaTeX formatting
+6. Identify any common pitfalls or conceptual subtleties
 
 Format your response as:
 DOMAIN: [Main domain]
 SUBDOMAIN: [Specific subdomain]
 
 SOLUTION:
-[Complete step-by-step solution with all mathematics]
+[Complete step-by-step solution with all mathematics - IIT-JEE Advanced standard]
 
 VERIFICATION:
-[Check limits, dimensions, or special cases]`
+[Check limits, dimensions, or special cases]
+
+COMMON PITFALLS:
+[Mention any common mistakes students make on such problems]`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-5-20250929',
@@ -97,7 +104,9 @@ export async function scaffoldSolution(
   problem: string,
   solverResponse: SolverResponse
 ): Promise<ScaffolderResponse> {
-  const scaffolderPrompt = `You are a strict Socratic Physics Tutor. You have a complete solution to a problem, and your job is to create a "Solvability Map" - a framework that guides the student without giving away the answer.
+  const scaffolderPrompt = `You are a strict Socratic Physics Tutor for IIT-JEE preparation. You have a complete solution to a problem, and your job is to create a "Solvability Map" - a framework that guides the student without giving away the answer.
+
+CONTEXT: This is for IIT-JEE (Indian Institute of Technology Joint Entrance Examination) preparation. Students need to develop deep conceptual understanding and systematic problem-solving skills. The scaffold should encourage independent thinking while providing strategic guidance.
 
 PROBLEM:
 ${problem}
@@ -110,18 +119,22 @@ Create a structured learning scaffold with the following components:
 
 1. CONCEPTS: List 4-6 key physics concepts needed (e.g., "Non-inertial Frames", "Centrifugal Force")
    - Each concept needs: id (lowercase with dashes), name, definition (2-3 sentences), and optional formula
+   - Use standard JEE notation and conventions
    - Use LaTeX notation in formulas wrapped in $ for inline or $$ for display math
+   - Include both the physical intuition and mathematical form
 
 2. STEPS: Break the solution into 3-6 logical milestones (NOT the full solution steps!)
    - Each step should be a THINKING milestone (e.g., "Choose Reference Frame", "Build Effective Potential")
    - Include a guiding hint (what to consider, NOT how to do it)
    - List required concept IDs
    - Add a Socratic question that prompts reasoning
+   - Encourage students to think about: symmetry, conservation laws, dimensional analysis
 
-3. SANITY CHECK: Create ONE final reality check
+3. SANITY CHECK: Create ONE final reality check (crucial for JEE)
    - A limiting case question (e.g., "What happens when ω → 0?")
-   - The expected physical behavior
+   - The expected physical behavior with reasoning
    - Type: 'limit', 'dimension', or 'symmetry'
+   - This helps build physical intuition and catch calculation errors
 
 CRITICAL RULES:
 - NEVER output the final numerical answer or complete derivation
@@ -129,6 +142,7 @@ CRITICAL RULES:
 - Focus on the REASONING STRUCTURE, not the calculation steps
 - Use proper LaTeX notation: $\\theta$ for inline, $$F = ma$$ for display
 - Each hint should guide WHAT to think about, not HOW to calculate
+- Emphasize physical intuition and conceptual understanding (key for JEE Advanced)
 
 Output your response as valid JSON with this EXACT structure:
 {
