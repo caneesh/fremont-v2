@@ -6,10 +6,11 @@ import MathRenderer from './MathRenderer'
 
 interface SanityCheckStepProps {
   sanityCheck: SanityCheck
+  userAnswer: string
+  onAnswerChange: (answer: string) => void
 }
 
-export default function SanityCheckStep({ sanityCheck }: SanityCheckStepProps) {
-  const [userAnswer, setUserAnswer] = useState('')
+export default function SanityCheckStep({ sanityCheck, userAnswer, onAnswerChange }: SanityCheckStepProps) {
   const [showAnswer, setShowAnswer] = useState(false)
 
   const getCheckTypeEmoji = (type: string) => {
@@ -55,7 +56,7 @@ export default function SanityCheckStep({ sanityCheck }: SanityCheckStepProps) {
           className="w-full px-4 py-3 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
           rows={4}
           value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
+          onChange={(e) => onAnswerChange(e.target.value)}
         />
       </div>
 

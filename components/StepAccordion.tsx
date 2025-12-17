@@ -11,6 +11,8 @@ interface StepAccordionProps {
   isCompleted: boolean
   isLocked: boolean
   concepts: Concept[]
+  userAnswer: string
+  onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
 }
@@ -22,11 +24,12 @@ export default function StepAccordion({
   isCompleted,
   isLocked,
   concepts,
+  userAnswer,
+  onAnswerChange,
   onComplete,
   onActivate,
 }: StepAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [userAnswer, setUserAnswer] = useState('')
 
   const handleToggle = () => {
     if (!isLocked) {
@@ -150,7 +153,7 @@ export default function StepAccordion({
                   className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                   rows={3}
                   value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
+                  onChange={(e) => onAnswerChange(e.target.value)}
                 />
               </div>
             )}
