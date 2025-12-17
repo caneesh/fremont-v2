@@ -247,6 +247,7 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
                   isLocked={index > 0 && !completedSteps.includes(index - 1)}
                   concepts={data.concepts}
                   userAnswer={stepAnswers.get(index) || ''}
+                  problemStatement={data.problem}
                   onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                   onComplete={() => handleStepComplete(index)}
                   onActivate={() => setCurrentStep(index)}

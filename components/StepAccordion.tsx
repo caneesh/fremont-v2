@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import type { Step, Concept } from '@/types/scaffold'
+import type { FeynmanScript } from '@/types/feynman'
 import MathRenderer from './MathRenderer'
+import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
 
 interface StepAccordionProps {
   step: Step
@@ -12,6 +14,7 @@ interface StepAccordionProps {
   isLocked: boolean
   concepts: Concept[]
   userAnswer: string
+  problemStatement?: string
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -25,11 +28,15 @@ export default function StepAccordion({
   isLocked,
   concepts,
   userAnswer,
+  problemStatement,
   onAnswerChange,
   onComplete,
   onActivate,
 }: StepAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [feynmanScript, setFeynmanScript] = useState<FeynmanScript | null>(null)
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false)
+  const [audioError, setAudioError] = useState<string | null>(null)
 
   const handleToggle = () => {
     if (!isLocked) {
@@ -43,6 +50,40 @@ export default function StepAccordion({
   const handleComplete = () => {
     onComplete()
     setIsExpanded(false)
+  }
+
+  const handleAudioHint = async () => {
+    setIsLoadingAudio(true)
+    setAudioError(null)
+
+    try {
+      // Generate concept summary from required concepts
+      const conceptNames = relatedConcepts.map(c => c.name).join(', ')
+
+      const response = await fetch('/api/feynman', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          concept: conceptNames || step.title,
+          context: step.hint,
+          stepTitle: step.title,
+          problemStatement,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate audio explanation')
+      }
+
+      const script: FeynmanScript = await response.json()
+      setFeynmanScript(script)
+    } catch (error) {
+      setAudioError(error instanceof Error ? error.message : 'Failed to load audio hint')
+    } finally {
+      setIsLoadingAudio(false)
+    }
   }
 
   const relatedConcepts = concepts.filter(c => step.requiredConcepts.includes(c.id))
@@ -134,10 +175,35 @@ export default function StepAccordion({
 
             {/* Hint */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h5 className="text-sm font-semibold text-yellow-900 mb-2">
-                💡 Guiding Hint:
-              </h5>
+              <div className="flex items-start justify-between mb-2">
+                <h5 className="text-sm font-semibold text-yellow-900">
+                  💡 Guiding Hint:
+                </h5>
+                <button
+                  onClick={handleAudioHint}
+                  disabled={isLoadingAudio}
+                  className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-300 text-xs font-medium flex items-center gap-2"
+                  title="Get an intuitive audio explanation"
+                >
+                  {isLoadingAudio ? (
+                    <>
+                      <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      🎭 Audio Hint
+                    </>
+                  )}
+                </button>
+              </div>
               <MathRenderer text={step.hint} />
+              {audioError && (
+                <p className="text-xs text-red-600 mt-2">{audioError}</p>
+              )}
             </div>
 
             {/* Socratic Question */}
@@ -169,6 +235,14 @@ export default function StepAccordion({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Feynman Dialogue Player Modal */}
+      {feynmanScript && (
+        <FeynmanDialoguePlayer
+          script={feynmanScript}
+          onClose={() => setFeynmanScript(null)}
+        />
       )}
     </div>
   )
