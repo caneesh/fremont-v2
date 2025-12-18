@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ScaffoldData } from '@/types/scaffold'
 import type { StepProgress, ProblemProgress } from '@/types/history'
 import { problemHistoryService } from '@/lib/problemHistory'
+import { generateProblemId, generateProblemTitle } from '@/lib/utils'
 import StepAccordion from './StepAccordion'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
@@ -23,13 +24,13 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
   const [saveMessage, setSaveMessage] = useState('')
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Generate a unique problem ID based on the problem text
+  // Generate a unique problem ID based on the problem text hash
   const problemId = useCallback(() => {
-    return `problem_${data.problem.slice(0, 50).replace(/\s+/g, '_')}`
+    return generateProblemId(data.problem)
   }, [data.problem])
 
   const problemTitle = useCallback(() => {
-    return data.problem.slice(0, 100) + (data.problem.length > 100 ? '...' : '')
+    return generateProblemTitle(data.problem)
   }, [data.problem])
 
   // Load saved progress on mount
@@ -110,34 +111,59 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)
 
-    const progress = getCurrentProgress()
-    problemHistoryService.saveDraft(problemId(), problemTitle(), progress)
+    try {
+      const progress = getCurrentProgress()
+      problemHistoryService.saveDraft(problemId(), problemTitle(), progress)
 
-    if (!silent) {
-      setSaveMessage('Draft saved!')
-      setTimeout(() => setSaveMessage(''), 2000)
-      setIsSaving(false)
+      if (!silent) {
+        setSaveMessage('Draft saved!')
+        setTimeout(() => setSaveMessage(''), 2000)
+        setIsSaving(false)
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save draft'
+      console.error('Save error:', error)
+      if (!silent) {
+        setSaveMessage(`Error: ${errorMessage}`)
+        setTimeout(() => setSaveMessage(''), 4000)
+        setIsSaving(false)
+      }
     }
   }, [getCurrentProgress, problemId, problemTitle])
 
   const handleMarkSolved = useCallback(() => {
     setIsSaving(true)
 
-    const progress = getCurrentProgress()
-    problemHistoryService.markSolved(problemId(), problemTitle(), progress)
+    try {
+      const progress = getCurrentProgress()
+      problemHistoryService.markSolved(problemId(), problemTitle(), progress)
 
-    setSaveMessage('Marked as solved! ✓')
-    setTimeout(() => setSaveMessage(''), 3000)
-    setIsSaving(false)
+      setSaveMessage('Marked as solved! ✓')
+      setTimeout(() => setSaveMessage(''), 3000)
+      setIsSaving(false)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark as solved'
+      console.error('Save error:', error)
+      setSaveMessage(`Error: ${errorMessage}`)
+      setTimeout(() => setSaveMessage(''), 4000)
+      setIsSaving(false)
+    }
   }, [getCurrentProgress, problemId, problemTitle])
 
   const handleToggleReview = useCallback(() => {
-    const newFlag = !isReviewFlagged
-    setIsReviewFlagged(newFlag)
-    problemHistoryService.toggleReview(problemId())
+    try {
+      const newFlag = !isReviewFlagged
+      setIsReviewFlagged(newFlag)
+      problemHistoryService.toggleReview(problemId())
 
-    setSaveMessage(newFlag ? 'Marked for review 📌' : 'Unmarked for review')
-    setTimeout(() => setSaveMessage(''), 2000)
+      setSaveMessage(newFlag ? 'Marked for review 📌' : 'Unmarked for review')
+      setTimeout(() => setSaveMessage(''), 2000)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to toggle review'
+      console.error('Toggle review error:', error)
+      setSaveMessage(`Error: ${errorMessage}`)
+      setTimeout(() => setSaveMessage(''), 4000)
+    }
   }, [isReviewFlagged, problemId])
 
   const handleStepComplete = (stepId: number) => {

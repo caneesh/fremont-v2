@@ -1,4 +1,5 @@
 import type { ProblemAttempt, ProblemProgress, ProblemStatus, HistoryFilters } from '@/types/history'
+import { checkLocalStorageAvailable, hasLocalStorageSpace } from '@/lib/utils'
 
 const STORAGE_KEY = 'physiscaffold_problem_attempts'
 
@@ -28,10 +29,31 @@ class ProblemHistoryService {
   private saveAllAttempts(attempts: ProblemAttempt[]): void {
     if (typeof window === 'undefined') return
 
+    // Check if localStorage is available
+    const { available, error: availError } = checkLocalStorageAvailable()
+    if (!available) {
+      console.error('localStorage not available:', availError)
+      throw new Error(`Cannot save: ${availError}`)
+    }
+
+    // Check if there's enough space
+    if (!hasLocalStorageSpace()) {
+      console.warn('localStorage is running low on space')
+      // Try to continue anyway, but warn the user
+    }
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(attempts))
+      const data = JSON.stringify(attempts)
+      localStorage.setItem(STORAGE_KEY, data)
     } catch (error) {
       console.error('Failed to save problem attempts:', error)
+      if (error instanceof Error) {
+        if (error.name === 'QuotaExceededError') {
+          throw new Error('Storage quota exceeded. Please delete some old problem attempts.')
+        }
+        throw new Error(`Failed to save: ${error.message}`)
+      }
+      throw new Error('Failed to save problem attempts')
     }
   }
 

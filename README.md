@@ -46,6 +46,16 @@ Every problem ends with a mandatory "Reality Check":
 - Dimensional analysis
 - Symmetry checks
 
+### 4. Problem History & Progress Tracking
+Track your learning journey with comprehensive history management:
+- **Save Draft**: Store in-progress solutions with all your step-by-step work
+- **Mark as Solved**: Mark completed problems with final solution
+- **Mark for Review**: Flag problems you want to revisit later
+- **Autosave**: Automatic draft saving every 30 seconds
+- **History Page**: View, filter, and search all problem attempts
+- **Progress Restoration**: Resume problems exactly where you left off
+- **Guest Mode**: Works offline using localStorage (no account required)
+
 ## Tech Stack
 
 - **Frontend**: Next.js 15 with React 18
@@ -109,6 +119,7 @@ Every problem ends with a mandatory "Reality Check":
 fremont-v2/
 ├── app/
 │   ├── api/solve/          # API route for problem solving
+│   ├── history/            # Problem history page
 │   ├── layout.tsx          # Root layout with KaTeX
 │   ├── page.tsx            # Main application page
 │   └── globals.css         # Global styles
@@ -120,9 +131,12 @@ fremont-v2/
 │   ├── SolutionScaffold.tsx # Main scaffold container
 │   └── StepAccordion.tsx   # Individual step component
 ├── lib/
-│   └── anthropic.ts        # Two-pass LLM logic
+│   ├── anthropic.ts        # Two-pass LLM logic
+│   ├── problemHistory.ts   # localStorage history service
+│   └── utils.ts            # Utility functions (hashing, storage checks)
 ├── types/
-│   └── scaffold.ts         # TypeScript interfaces
+│   ├── history.ts          # History data interfaces
+│   └── scaffold.ts         # Scaffold data interfaces
 └── README.md
 ```
 
@@ -176,12 +190,16 @@ The system uses carefully crafted prompts to ensure:
 - ✅ Concept panel with definitions
 - ✅ LaTeX math rendering
 - ✅ Sanity check module
+- ✅ Problem history and progress tracking
+- ✅ Save/restore drafts with autosave
+- ✅ Mark problems as solved or for review
 
 ### V2 (Planned)
 - Image upload with OCR for problem ingestion
 - Handwriting recognition for student answers
 - Step validation with AI feedback
-- Progress tracking across sessions
+- Server-side storage with user authentication
+- Cross-device sync
 - Expanded problem library (Irodov, Kleppner, Morin)
 
 ## Contributing
