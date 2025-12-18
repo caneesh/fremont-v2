@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { FeynmanScript } from '@/types/feynman'
 
 interface FeynmanDialoguePlayerProps {
@@ -12,34 +12,126 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
   const [currentLine, setCurrentLine] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
+  const [ttsSupported, setTtsSupported] = useState(false)
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  const synthRef = useRef<SpeechSynthesis | null>(null)
+
+  // Check if TTS is supported
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      setTtsSupported(true)
+      synthRef.current = window.speechSynthesis
+    }
+  }, [])
+
+  // Stop any currently playing speech
+  const stopSpeech = () => {
+    if (synthRef.current) {
+      synthRef.current.cancel()
+    }
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopSpeech()
+    }
+  }, [])
+
+  // Stop speech when playback speed changes during playback
+  useEffect(() => {
+    if (isPlaying) {
+      stopSpeech()
+      setIsPlaying(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbackSpeed])
 
   const handleNext = () => {
+    stopSpeech()
     if (currentLine < script.dialogue.length - 1) {
       setCurrentLine(currentLine + 1)
     }
   }
 
   const handlePrevious = () => {
+    stopSpeech()
     if (currentLine > 0) {
       setCurrentLine(currentLine - 1)
     }
   }
 
+  // Speak a single line
+  const speakLine = (lineIndex: number, onEnd?: () => void) => {
+    if (!synthRef.current || !ttsSupported) {
+      // Fallback: just advance after delay
+      setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
+      return
+    }
+
+    const line = script.dialogue[lineIndex]
+    const utterance = new SpeechSynthesisUtterance(line.text)
+
+    // Choose voice based on speaker
+    const voices = synthRef.current.getVoices()
+    if (line.speaker === 'Alex') {
+      // Try to find a younger/female voice for student
+      const studentVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha'))
+      if (studentVoice) utterance.voice = studentVoice
+    } else {
+      // Try to find a male/authoritative voice for professor
+      const profVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Daniel'))
+      if (profVoice) utterance.voice = profVoice
+    }
+
+    utterance.rate = playbackSpeed
+    utterance.pitch = line.speaker === 'Alex' ? 1.1 : 0.9
+
+    utterance.onend = () => {
+      onEnd?.()
+    }
+
+    utterance.onerror = () => {
+      console.error('TTS error, using fallback')
+      setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
+    }
+
+    utteranceRef.current = utterance
+    synthRef.current.speak(utterance)
+  }
+
   const handlePlayAll = () => {
+    stopSpeech()
     setIsPlaying(true)
     setCurrentLine(0)
-    // In production, this would trigger TTS playback
-    // For now, we'll auto-advance through dialogue
+
+    // Play lines sequentially
     let lineIndex = 0
-    const interval = setInterval(() => {
-      lineIndex++
+
+    const playNext = () => {
       if (lineIndex >= script.dialogue.length) {
-        clearInterval(interval)
         setIsPlaying(false)
-      } else {
-        setCurrentLine(lineIndex)
+        return
       }
-    }, 3000 / playbackSpeed) // 3 seconds per line, adjusted by speed
+
+      setCurrentLine(lineIndex)
+      speakLine(lineIndex, () => {
+        lineIndex++
+        playNext()
+      })
+    }
+
+    playNext()
+  }
+
+  const handleStop = () => {
+    stopSpeech()
+    setIsPlaying(false)
+  }
+
+  const handlePlaySingle = () => {
+    stopSpeech()
+    speakLine(currentLine)
   }
 
   const getSpeakerIcon = (speaker: 'Alex' | 'Prof') => {
@@ -133,10 +225,10 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-3">
             <button
               onClick={handlePrevious}
-              disabled={currentLine === 0}
+              disabled={currentLine === 0 || isPlaying}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,31 +238,42 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
             </button>
 
             <button
-              onClick={handlePlayAll}
+              onClick={handlePlaySingle}
               disabled={isPlaying}
-              className="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 flex items-center justify-center gap-2 font-medium"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-300 flex items-center gap-2"
+              title="Play current line"
             >
-              {isPlaying ? (
-                <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Playing...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  Play All
-                </>
-              )}
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+              </svg>
+              Play Line
             </button>
+
+            {isPlaying ? (
+              <button
+                onClick={handleStop}
+                className="flex-1 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-medium"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                </svg>
+                Stop
+              </button>
+            ) : (
+              <button
+                onClick={handlePlayAll}
+                className="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 font-medium"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Play All
+              </button>
+            )}
 
             <button
               onClick={handleNext}
-              disabled={currentLine === script.dialogue.length - 1}
+              disabled={currentLine === script.dialogue.length - 1 || isPlaying}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               Next
@@ -180,8 +283,16 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
             </button>
           </div>
 
-          <p className="text-xs text-gray-500 mt-4 text-center">
-            💡 TIP: Listen to understand the concept intuitively, then return to solve the step!
+          {!ttsSupported && (
+            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+              ⚠️ Text-to-speech not supported in your browser. Audio playback unavailable.
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 text-center">
+            💡 TIP: {ttsSupported
+              ? 'Click "Play Line" to hear the current dialogue, or "Play All" to hear the full conversation!'
+              : 'Read through the dialogue to understand the concept intuitively, then return to solve the step!'}
           </p>
         </div>
       </div>
