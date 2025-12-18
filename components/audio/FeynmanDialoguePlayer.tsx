@@ -27,10 +27,14 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
       // Load voices
       const loadVoices = () => {
         const voices = synthRef.current?.getVoices() || []
+        console.log('Attempting to load voices, found:', voices.length)
         if (voices.length > 0) {
           voicesRef.current = voices
           setVoicesLoaded(true)
-          console.log('Voices loaded:', voices.length)
+          console.log('✅ Voices loaded successfully:', voices.length)
+          console.log('Available voice names:', voices.map(v => v.name).join(', '))
+        } else {
+          console.log('⚠️ No voices found yet, will retry...')
         }
       }
 
@@ -39,7 +43,33 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
 
       // Also listen for voiceschanged event (Chrome/Edge needs this)
       if (synthRef.current) {
-        synthRef.current.onvoiceschanged = loadVoices
+        synthRef.current.onvoiceschanged = () => {
+          console.log('voiceschanged event fired')
+          loadVoices()
+        }
+      }
+
+      // Fallback: Keep trying to load voices for 3 seconds
+      const retryInterval = setInterval(() => {
+        if (!voicesRef.current.length) {
+          loadVoices()
+        } else {
+          clearInterval(retryInterval)
+        }
+      }, 200)
+
+      // Give up after 3 seconds and mark as "loaded" anyway
+      const timeout = setTimeout(() => {
+        clearInterval(retryInterval)
+        if (!voicesRef.current.length) {
+          console.log('⚠️ Timeout waiting for voices, will use default voice')
+        }
+        setVoicesLoaded(true)
+      }, 3000)
+
+      return () => {
+        clearInterval(retryInterval)
+        clearTimeout(timeout)
       }
     }
   }, [])
@@ -84,19 +114,19 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
   // Speak a single line
   const speakLine = (lineIndex: number, onEnd?: () => void) => {
     if (!synthRef.current || !ttsSupported) {
-      console.log('TTS not supported, using fallback')
+      console.log('❌ TTS not supported, using fallback')
       setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
       return
     }
 
     const line = script.dialogue[lineIndex]
-    console.log('Speaking line:', lineIndex, line.text.substring(0, 50))
+    console.log('🎤 Speaking line:', lineIndex, '-', line.text.substring(0, 50) + '...')
 
     const utterance = new SpeechSynthesisUtterance(line.text)
 
     // Choose voice based on speaker
     const voices = voicesRef.current
-    console.log('Available voices:', voices.length)
+    console.log('📢 Available voices:', voices.length)
 
     if (voices.length > 0) {
       if (line.speaker === 'Alex') {
@@ -108,9 +138,9 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
         )
         if (studentVoice) {
           utterance.voice = studentVoice
-          console.log('Using Alex voice:', studentVoice.name)
+          console.log('✅ Using Alex voice:', studentVoice.name)
         } else {
-          console.log('Using default voice for Alex')
+          console.log('⚠️ Using default voice for Alex (no female voice found)')
         }
       } else {
         // Try to find a male/authoritative voice for professor
@@ -121,28 +151,32 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
         )
         if (profVoice) {
           utterance.voice = profVoice
-          console.log('Using Prof voice:', profVoice.name)
+          console.log('✅ Using Prof voice:', profVoice.name)
         } else {
-          console.log('Using default voice for Prof')
+          console.log('⚠️ Using default voice for Prof (no male voice found)')
         }
       }
+    } else {
+      console.log('⚠️ No voices loaded, using system default voice')
     }
 
     utterance.rate = playbackSpeed
     utterance.pitch = line.speaker === 'Alex' ? 1.1 : 0.9
     utterance.volume = 1.0 // Ensure volume is at maximum
+    utterance.lang = 'en-US' // Explicitly set language
 
     utterance.onstart = () => {
-      console.log('Speech started')
+      console.log('✅ Speech started successfully!')
     }
 
     utterance.onend = () => {
-      console.log('Speech ended')
+      console.log('✅ Speech ended')
       onEnd?.()
     }
 
     utterance.onerror = (event) => {
-      console.error('TTS error:', event.error, event)
+      console.error('❌ TTS error:', event.error)
+      console.error('Error details:', event)
       setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
     }
 
@@ -150,11 +184,20 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
 
     // Make sure synthesis is not paused
     if (synthRef.current.paused) {
+      console.log('⚠️ Synthesis was paused, resuming...')
       synthRef.current.resume()
     }
 
-    console.log('Calling speak()')
-    synthRef.current.speak(utterance)
+    // Cancel any ongoing speech first
+    synthRef.current.cancel()
+
+    console.log('🚀 Calling speechSynthesis.speak()...')
+    try {
+      synthRef.current.speak(utterance)
+      console.log('✅ speak() called successfully')
+    } catch (error) {
+      console.error('❌ Exception calling speak():', error)
+    }
   }
 
   const handlePlayAll = () => {
