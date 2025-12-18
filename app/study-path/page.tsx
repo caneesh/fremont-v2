@@ -3,19 +3,59 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
-import type { Topic, StudyStats } from '@/types/studyPath'
+import type { Topic, StudyStats, Question } from '@/types/studyPath'
 
 export default function StudyPathPage() {
   const router = useRouter()
   const [topics, setTopics] = useState<Topic[]>([])
   const [stats, setStats] = useState<StudyStats | null>(null)
+  const [recommendedQuestions, setRecommendedQuestions] = useState<Question[]>([])
 
   useEffect(() => {
-    const allTopics = studyPathService.getAllTopics()
-    const studyStats = studyPathService.getStudyStats()
+    const loadData = async () => {
+      try {
+        // Fetch topics and questions from API
+        const [topicsResponse, questionsResponse] = await Promise.all([
+          fetch('/api/study-path/topics'),
+          fetch('/api/study-path/questions')
+        ])
 
-    setTopics(allTopics)
-    setStats(studyStats)
+        if (topicsResponse.ok) {
+          const topicsData = await topicsResponse.json()
+          setTopics(topicsData.topics || [])
+        }
+
+        // Get stats from localStorage
+        const studyStats = studyPathService.getStudyStats()
+        setStats(studyStats)
+
+        // Calculate recommended questions
+        if (questionsResponse.ok) {
+          const questionsData = await questionsResponse.json()
+          const allQuestions = questionsData.questions || []
+
+          // Find questions not yet attempted
+          const unattempted = allQuestions.filter(
+            (q: Question) => !Object.values(studyStats.topicProgress).some(
+              p => p.questionsAttempted.includes(q.id)
+            )
+          )
+
+          // Prioritize: Easy unattempted -> Medium unattempted -> Hard unattempted
+          const prioritized = [
+            ...unattempted.filter((q: Question) => q.difficulty === 'Easy'),
+            ...unattempted.filter((q: Question) => q.difficulty === 'Medium'),
+            ...unattempted.filter((q: Question) => q.difficulty === 'Hard'),
+          ]
+
+          setRecommendedQuestions(prioritized.slice(0, 5))
+        }
+      } catch (error) {
+        console.error('Error loading study path data:', error)
+      }
+    }
+
+    loadData()
   }, [])
 
   const getTopicProgress = (topicId: string) => {
@@ -192,7 +232,7 @@ export default function StudyPathPage() {
           </p>
 
           <div className="space-y-4">
-            {studyPathService.getRecommendedQuestions(5).map((question) => (
+            {recommendedQuestions.map((question) => (
               <button
                 key={question.id}
                 onClick={() => {
