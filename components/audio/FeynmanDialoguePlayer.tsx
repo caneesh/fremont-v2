@@ -13,14 +13,34 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
   const [ttsSupported, setTtsSupported] = useState(false)
+  const [voicesLoaded, setVoicesLoaded] = useState(false)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null)
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([])
 
-  // Check if TTS is supported
+  // Check if TTS is supported and load voices
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setTtsSupported(true)
       synthRef.current = window.speechSynthesis
+
+      // Load voices
+      const loadVoices = () => {
+        const voices = synthRef.current?.getVoices() || []
+        if (voices.length > 0) {
+          voicesRef.current = voices
+          setVoicesLoaded(true)
+          console.log('Voices loaded:', voices.length)
+        }
+      }
+
+      // Try to load voices immediately
+      loadVoices()
+
+      // Also listen for voiceschanged event (Chrome/Edge needs this)
+      if (synthRef.current) {
+        synthRef.current.onvoiceschanged = loadVoices
+      }
     }
   }, [])
 
@@ -64,39 +84,76 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
   // Speak a single line
   const speakLine = (lineIndex: number, onEnd?: () => void) => {
     if (!synthRef.current || !ttsSupported) {
-      // Fallback: just advance after delay
+      console.log('TTS not supported, using fallback')
       setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
       return
     }
 
     const line = script.dialogue[lineIndex]
+    console.log('Speaking line:', lineIndex, line.text.substring(0, 50))
+
     const utterance = new SpeechSynthesisUtterance(line.text)
 
     // Choose voice based on speaker
-    const voices = synthRef.current.getVoices()
-    if (line.speaker === 'Alex') {
-      // Try to find a younger/female voice for student
-      const studentVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha'))
-      if (studentVoice) utterance.voice = studentVoice
-    } else {
-      // Try to find a male/authoritative voice for professor
-      const profVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Daniel'))
-      if (profVoice) utterance.voice = profVoice
+    const voices = voicesRef.current
+    console.log('Available voices:', voices.length)
+
+    if (voices.length > 0) {
+      if (line.speaker === 'Alex') {
+        // Try to find a younger/female voice for student
+        const studentVoice = voices.find(v =>
+          v.name.toLowerCase().includes('female') ||
+          v.name.toLowerCase().includes('samantha') ||
+          v.name.toLowerCase().includes('zira')
+        )
+        if (studentVoice) {
+          utterance.voice = studentVoice
+          console.log('Using Alex voice:', studentVoice.name)
+        } else {
+          console.log('Using default voice for Alex')
+        }
+      } else {
+        // Try to find a male/authoritative voice for professor
+        const profVoice = voices.find(v =>
+          v.name.toLowerCase().includes('male') ||
+          v.name.toLowerCase().includes('daniel') ||
+          v.name.toLowerCase().includes('david')
+        )
+        if (profVoice) {
+          utterance.voice = profVoice
+          console.log('Using Prof voice:', profVoice.name)
+        } else {
+          console.log('Using default voice for Prof')
+        }
+      }
     }
 
     utterance.rate = playbackSpeed
     utterance.pitch = line.speaker === 'Alex' ? 1.1 : 0.9
+    utterance.volume = 1.0 // Ensure volume is at maximum
+
+    utterance.onstart = () => {
+      console.log('Speech started')
+    }
 
     utterance.onend = () => {
+      console.log('Speech ended')
       onEnd?.()
     }
 
-    utterance.onerror = () => {
-      console.error('TTS error, using fallback')
+    utterance.onerror = (event) => {
+      console.error('TTS error:', event.error, event)
       setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
     }
 
     utteranceRef.current = utterance
+
+    // Make sure synthesis is not paused
+    if (synthRef.current.paused) {
+      synthRef.current.resume()
+    }
+
+    console.log('Calling speak()')
     synthRef.current.speak(utterance)
   }
 
@@ -286,6 +343,18 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
           {!ttsSupported && (
             <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
               ⚠️ Text-to-speech not supported in your browser. Audio playback unavailable.
+            </div>
+          )}
+
+          {ttsSupported && !voicesLoaded && (
+            <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+              ⏳ Loading voices... If this persists, try clicking &quot;Play Line&quot; anyway.
+            </div>
+          )}
+
+          {ttsSupported && voicesLoaded && (
+            <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
+              ✅ Audio ready! {voicesRef.current.length} voices available. Click &quot;Play Line&quot; or &quot;Play All&quot;.
             </div>
           )}
 
