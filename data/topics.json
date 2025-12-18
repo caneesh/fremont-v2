@@ -6,7 +6,7 @@
       "description": "Foundation of physics - motion, forces, energy, and momentum",
       "icon": "⚙️",
       "order": 1,
-      "totalQuestions": 15,
+      "totalQuestions": 11,
       "subtopics": [
         {
           "id": "kinematics",
@@ -46,7 +46,7 @@
       "description": "Heat, temperature, and laws of thermodynamics",
       "icon": "🌡️",
       "order": 2,
-      "totalQuestions": 12,
+      "totalQuestions": 3,
       "subtopics": [
         {
           "id": "thermal-properties",
@@ -74,7 +74,7 @@
       "description": "Electric and magnetic fields, circuits, and EM waves",
       "icon": "⚡",
       "order": 3,
-      "totalQuestions": 18,
+      "totalQuestions": 5,
       "subtopics": [
         {
           "id": "electrostatics",
@@ -114,7 +114,7 @@
       "description": "Light, reflection, refraction, and wave optics",
       "icon": "🔭",
       "order": 4,
-      "totalQuestions": 10,
+      "totalQuestions": 2,
       "subtopics": [
         {
           "id": "geometrical-optics",
@@ -136,7 +136,7 @@
       "description": "Quantum mechanics, atomic structure, and nuclear physics",
       "icon": "⚛️",
       "order": 5,
-      "totalQuestions": 12,
+      "totalQuestions": 2,
       "subtopics": [
         {
           "id": "dual-nature",
