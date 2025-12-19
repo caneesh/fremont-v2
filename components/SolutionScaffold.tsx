@@ -7,13 +7,15 @@ import { problemHistoryService } from '@/lib/problemHistory'
 import StepAccordion from './StepAccordion'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
+import NextChallenge from './NextChallenge'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData
   onReset: () => void
+  onLoadNewProblem?: (problemText: string) => void
 }
 
-export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProps) {
+export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: SolutionScaffoldProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const [stepAnswers, setStepAnswers] = useState<Map<number, string>>(new Map())
@@ -21,6 +23,7 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
   const [isReviewFlagged, setIsReviewFlagged] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [isProblemSolved, setIsProblemSolved] = useState(false)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text
@@ -127,6 +130,7 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
     problemHistoryService.markSolved(problemId(), problemTitle(), progress)
 
     setSaveMessage('Marked as solved! ✓')
+    setIsProblemSolved(true) // Show next challenge
     setTimeout(() => setSaveMessage(''), 3000)
     setIsSaving(false)
   }, [getCurrentProgress, problemId, problemTitle])
@@ -262,6 +266,18 @@ export default function SolutionScaffold({ data, onReset }: SolutionScaffoldProp
               sanityCheck={data.sanityCheck}
               userAnswer={sanityCheckAnswer}
               onAnswerChange={setSanityCheckAnswer}
+            />
+          )}
+
+          {/* Next Challenge - show after problem is marked as solved */}
+          {isProblemSolved && onLoadNewProblem && (
+            <NextChallenge
+              currentProblem={data.problem}
+              topicTags={[data.domain, data.subdomain]}
+              onAcceptChallenge={(problemText) => {
+                onReset() // Clear current problem
+                onLoadNewProblem(problemText) // Load next challenge
+              }}
             />
           )}
         </div>

@@ -134,6 +134,7 @@ function HomeContent() {
           <SolutionScaffold
             data={scaffoldData}
             onReset={handleReset}
+            onLoadNewProblem={handleProblemSubmit}
           />
         )}
       </div>
