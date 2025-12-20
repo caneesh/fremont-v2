@@ -9,6 +9,9 @@ import StepAccordion from './StepAccordion'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
 import NextChallenge from './NextChallenge'
+import ReflectionStep from './ReflectionStep'
+import ProblemVariations from './ProblemVariations'
+import type { ReflectionAnswer } from '@/types/history'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData
@@ -20,11 +23,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const [stepAnswers, setStepAnswers] = useState<Map<number, string>>(new Map())
+  const [stepHintLevels, setStepHintLevels] = useState<Map<number, number>>(new Map())
   const [sanityCheckAnswer, setSanityCheckAnswer] = useState('')
   const [isReviewFlagged, setIsReviewFlagged] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [isProblemSolved, setIsProblemSolved] = useState(false)
+  const [showReflection, setShowReflection] = useState(false)
+  const [reflectionAnswers, setReflectionAnswers] = useState<ReflectionAnswer[]>([])
+  const [isReflectionComplete, setIsReflectionComplete] = useState(false)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text hash
@@ -42,6 +49,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (attempt) {
       setIsReviewFlagged(attempt.reviewFlag)
 
+      // If problem was previously solved, set the solved state
+      if (attempt.status === 'SOLVED') {
+        setIsProblemSolved(true)
+      }
+
       // Load draft or final solution
       const progress = attempt.status === 'SOLVED'
         ? problemHistoryService.loadFinalSolution(problemId())
@@ -50,6 +62,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       if (progress) {
         const answers = new Map<number, string>()
         const completed: number[] = []
+        const hintLevels = new Map<number, number>()
 
         progress.stepProgress.forEach((sp: StepProgress) => {
           if (sp.userAnswer) {
@@ -58,12 +71,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           if (sp.isCompleted) {
             completed.push(sp.stepId)
           }
+          if (sp.currentHintLevel) {
+            hintLevels.set(sp.stepId, sp.currentHintLevel)
+          }
         })
 
         setStepAnswers(answers)
         setCompletedSteps(completed)
+        setStepHintLevels(hintLevels)
         setSanityCheckAnswer(progress.sanityCheckAnswer || '')
         setCurrentStep(progress.currentStep || 0)
+
+        // Load reflection if it exists
+        if (progress.reflectionAnswers && progress.reflectionAnswers.length > 0) {
+          setReflectionAnswers(progress.reflectionAnswers)
+          setIsReflectionComplete(true)
+        }
       }
     }
 
@@ -94,13 +117,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepAnswers, completedSteps, currentStep, sanityCheckAnswer])
+  }, [stepAnswers, completedSteps, stepHintLevels, currentStep, sanityCheckAnswer])
 
   const getCurrentProgress = useCallback((): ProblemProgress => {
     const stepProgress: StepProgress[] = data.steps.map((_, index) => ({
       stepId: index,
       isCompleted: completedSteps.includes(index),
       userAnswer: stepAnswers.get(index),
+      currentHintLevel: stepHintLevels.get(index),
     }))
 
     return {
@@ -108,8 +132,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       stepProgress,
       sanityCheckAnswer,
       currentStep,
+      reflectionAnswers: reflectionAnswers.length > 0 ? reflectionAnswers : undefined,
     }
-  }, [data, completedSteps, stepAnswers, sanityCheckAnswer, currentStep])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, sanityCheckAnswer, currentStep, reflectionAnswers])
 
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)
@@ -135,24 +160,55 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   }, [getCurrentProgress, problemId, problemTitle])
 
   const handleMarkSolved = useCallback(() => {
+    // Show reflection step instead of immediately marking solved
+    setShowReflection(true)
+    setSaveMessage('Complete reflection before finalizing')
+    setTimeout(() => setSaveMessage(''), 3000)
+  }, [])
+
+  const handleReflectionComplete = useCallback((reflections: ReflectionAnswer[]) => {
+    setReflectionAnswers(reflections)
+    setIsReflectionComplete(true)
     setIsSaving(true)
 
     try {
       const progress = getCurrentProgress()
-      problemHistoryService.markSolved(problemId(), problemTitle(), progress)
+      // Update progress with reflections
+      const progressWithReflection = {
+        ...progress,
+        reflectionAnswers: reflections,
+      }
 
-      setSaveMessage('Marked as solved! ✓')
+      problemHistoryService.markSolved(problemId(), problemTitle(), progressWithReflection)
+
+      setSaveMessage('Problem solved and reflection saved! ✓')
       setIsProblemSolved(true) // Show next challenge
       setTimeout(() => setSaveMessage(''), 3000)
       setIsSaving(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to mark as solved'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save'
       console.error('Save error:', error)
       setSaveMessage(`Error: ${errorMessage}`)
       setTimeout(() => setSaveMessage(''), 4000)
       setIsSaving(false)
     }
   }, [getCurrentProgress, problemId, problemTitle])
+
+  // Calculate student outcome based on hint usage
+  const getStudentOutcome = useCallback((): 'solved' | 'assisted' | 'struggled' => {
+    const allHintLevels = Array.from(stepHintLevels.values())
+    if (allHintLevels.length === 0) return 'solved'
+
+    const maxHintLevel = Math.max(...allHintLevels)
+
+    if (maxHintLevel === 5) return 'struggled'
+    if (maxHintLevel >= 3) return 'assisted'
+    return 'solved'
+  }, [stepHintLevels])
+
+  const getAllHintsUsed = useCallback((): number[] => {
+    return Array.from(stepHintLevels.values())
+  }, [stepHintLevels])
 
   const handleToggleReview = useCallback(() => {
     try {
@@ -183,6 +239,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setStepAnswers(prev => {
       const newMap = new Map(prev)
       newMap.set(stepId, answer)
+      return newMap
+    })
+  }
+
+  const handleHintLevelChange = (stepId: number, level: number) => {
+    setStepHintLevels(prev => {
+      const newMap = new Map(prev)
+      newMap.set(stepId, level)
       return newMap
     })
   }
@@ -277,17 +341,19 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                   isLocked={index > 0 && !completedSteps.includes(index - 1)}
                   concepts={data.concepts}
                   userAnswer={stepAnswers.get(index) || ''}
+                  currentHintLevel={stepHintLevels.get(index) || 0}
                   problemStatement={data.problem}
                   onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                   onComplete={() => handleStepComplete(index)}
                   onActivate={() => setCurrentStep(index)}
+                  onHintLevelChange={(level) => handleHintLevelChange(index, level)}
                 />
               ))}
             </div>
           </div>
 
           {/* Sanity Check - only show after all steps completed */}
-          {completedSteps.length === data.steps.length && (
+          {completedSteps.length === data.steps.length && !showReflection && (
             <SanityCheckStep
               sanityCheck={data.sanityCheck}
               userAnswer={sanityCheckAnswer}
@@ -295,16 +361,44 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
-          {/* Next Challenge - show after problem is marked as solved */}
-          {isProblemSolved && onLoadNewProblem && (
-            <NextChallenge
-              currentProblem={data.problem}
-              topicTags={[data.domain, data.subdomain]}
-              onAcceptChallenge={(problemText) => {
-                onReset() // Clear current problem
-                onLoadNewProblem(problemText) // Load next challenge
-              }}
+          {/* Reflection - show after marking solved, before next challenge */}
+          {showReflection && !isReflectionComplete && (
+            <ReflectionStep
+              problemText={data.problem}
+              studentOutcome={getStudentOutcome()}
+              hintsUsed={getAllHintsUsed()}
+              savedReflections={reflectionAnswers.length > 0 ? reflectionAnswers : undefined}
+              onReflectionComplete={handleReflectionComplete}
             />
+          )}
+
+          {/* Practice Options - show after reflection is complete */}
+          {isProblemSolved && isReflectionComplete && (
+            <div className="space-y-4">
+              {/* Problem Variations - Practice same concept */}
+              <ProblemVariations
+                originalProblem={data.problem}
+                coreConcept={`${data.domain} - ${data.subdomain}`}
+                onSelectVariation={(problemText) => {
+                  if (onLoadNewProblem) {
+                    onReset() // Clear current problem
+                    onLoadNewProblem(problemText) // Load variation
+                  }
+                }}
+              />
+
+              {/* Next Challenge - Progressive difficulty */}
+              {onLoadNewProblem && (
+                <NextChallenge
+                  currentProblem={data.problem}
+                  topicTags={[data.domain, data.subdomain]}
+                  onAcceptChallenge={(problemText) => {
+                    onReset() // Clear current problem
+                    onLoadNewProblem(problemText) // Load next challenge
+                  }}
+                />
+              )}
+            </div>
           )}
         </div>
 

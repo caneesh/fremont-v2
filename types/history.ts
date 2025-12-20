@@ -19,6 +19,12 @@ export interface StepProgress {
   stepId: number
   isCompleted: boolean
   userAnswer?: string
+  currentHintLevel?: number // Tracks which hint level (1-5) the user has unlocked
+}
+
+export interface ReflectionAnswer {
+  question: string
+  answer: string
 }
 
 export interface ProblemProgress {
@@ -26,6 +32,7 @@ export interface ProblemProgress {
   stepProgress: StepProgress[]
   sanityCheckAnswer?: string
   currentStep: number
+  reflectionAnswers?: ReflectionAnswer[]
 }
 
 export interface HistoryFilters {

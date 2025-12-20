@@ -24,7 +24,11 @@ export interface ScaffolderResponse {
   steps: Array<{
     id: number
     title: string
-    hint: string
+    hints: Array<{
+      level: 1 | 2 | 3 | 4 | 5
+      title: 'Concept Identification' | 'Visualization' | 'Strategy Selection' | 'Structural Equation' | 'Full Solution'
+      content: string
+    }>
     requiredConcepts: string[]
     question?: string
     validationPrompt?: string
@@ -33,6 +37,154 @@ export interface ScaffolderResponse {
     question: string
     expectedBehavior: string
     type: 'limit' | 'dimension' | 'symmetry'
+  }
+}
+
+/**
+ * ULTRA-FAST: Progressive Hint Loading
+ * Only generates Levels 1-3 initially (15-20s)
+ * Levels 4-5 generated on-demand when user clicks (~3s each)
+ */
+export async function generateScaffold(problem: string): Promise<ScaffolderResponse> {
+  const combinedPrompt = `You are an expert IIT-JEE Physics teacher with 20+ years of experience.
+
+CONTEXT: This problem is for students preparing for IIT-JEE (Indian Institute of Technology Joint Entrance Examination), one of the world's most competitive engineering entrance exams. Students need rigorous understanding of physics concepts, mathematical techniques, and problem-solving strategies at the Irodov/Kleppner level.
+
+PROBLEM:
+${problem}
+
+YOUR TASK (TWO INTERNAL STEPS):
+
+STEP 1 (INTERNAL - DO NOT OUTPUT):
+First, solve this problem completely in your mind:
+- Identify the physics domain and subdomain
+- Solve with full mathematical rigor (IIT-JEE Advanced level)
+- Verify using limit cases or dimensional analysis
+- Identify common pitfalls
+
+STEP 2 (OUTPUT THIS):
+Based on your internal solution, create a Socratic learning scaffold with:
+
+1. CONCEPTS: List 4-6 key physics concepts needed
+   - Each: id (lowercase-with-dashes), name, definition (2-3 sentences), optional formula
+   - Use standard JEE notation and LaTeX: $ for inline, $$ for display
+
+2. STEPS: Break into 3-6 logical thinking milestones (NOT calculation steps!)
+   For EACH step, provide ONLY THE FIRST 3 HINT LEVELS (for faster generation):
+
+   Level 1 - Concept Identification:
+   • Guide student to identify applicable laws/concepts WITHOUT stating them
+   • Example: "Think about what happens to quantities in a rotating system"
+
+   Level 2 - Visualization:
+   • Help visualize without showing diagram
+   • Prompt about coordinate systems, forces, trajectories
+   • Example: "Sketch forces as seen from the rotating platform"
+
+   Level 3 - Strategy Selection:
+   • Guide toward solution strategy without revealing equations
+   • Example: "Consider energy methods vs force balance - which is cleaner?"
+
+   NOTE: Levels 4-5 will be generated on-demand when the student requests them.
+   IMPORTANT: Only include hints for levels 1, 2, and 3 in the JSON output.
+
+3. SANITY CHECK: One reality check question
+   - Limiting case (e.g., "What happens when ω → 0?")
+   - Expected physical behavior with reasoning
+   - Type: 'limit', 'dimension', or 'symmetry'
+
+CRITICAL RULES:
+- NEVER output final numerical answer in Steps 1-4 hints
+- Focus on REASONING, not calculation
+- Each hint: WHAT to think about, not HOW to calculate
+
+JSON FORMATTING RULES (CRITICAL):
+- All strings must be on a single line (no newlines within strings)
+- Use \\n for line breaks within hint content if needed
+- Escape all quotes within strings using \\"
+- Keep hint content concise (2-3 sentences max per hint)
+- If content is long, break into multiple short sentences
+
+Output ONLY valid JSON with this EXACT structure:
+{
+  "domain": "Main physics domain",
+  "subdomain": "Specific subdomain",
+  "concepts": [
+    {
+      "id": "concept-id",
+      "name": "Concept Name",
+      "definition": "Clear definition in 2-3 sentences.",
+      "formula": "$F = ma$"
+    }
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Step Title",
+      "hints": [
+        {
+          "level": 1,
+          "title": "Concept Identification",
+          "content": "What underlying physics principles apply here?"
+        },
+        {
+          "level": 2,
+          "title": "Visualization",
+          "content": "How would you sketch this situation? What's the geometry?"
+        },
+        {
+          "level": 3,
+          "title": "Strategy Selection",
+          "content": "What approach would work best for this problem?"
+        }
+      ],
+      "requiredConcepts": ["concept-id-1", "concept-id-2"],
+      "question": "A Socratic question to prompt reasoning?"
+    }
+  ],
+  "sanityCheck": {
+    "question": "What happens in a limiting case? Use $\\\\LaTeX$ notation.",
+    "expectedBehavior": "The expected physical behavior described clearly.",
+    "type": "limit"
+  }
+}
+
+Respond with ONLY the JSON, no other text.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 6144, // Reduced since we're only generating 3 hint levels
+    messages: [
+      {
+        role: 'user',
+        content: combinedPrompt,
+      },
+    ],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  // Extract JSON from response
+  const jsonMatch = responseText.match(/\{[\s\S]+\}/)
+  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  try {
+    const scaffoldData = JSON.parse(jsonStr)
+
+    return {
+      problem,
+      ...scaffoldData,
+    }
+  } catch (error) {
+    console.error('Failed to parse scaffold JSON:', error)
+    console.error('Raw JSON string (first 500 chars):', jsonStr.substring(0, 500))
+    console.error('Raw JSON string (around error position):')
+    const errorMatch = error instanceof Error && error.message.match(/position (\d+)/)
+    if (errorMatch) {
+      const pos = parseInt(errorMatch[1])
+      console.error(jsonStr.substring(Math.max(0, pos - 100), Math.min(jsonStr.length, pos + 100)))
+    }
+    throw new Error('Failed to generate proper scaffold structure')
   }
 }
 
@@ -125,9 +277,37 @@ Create a structured learning scaffold with the following components:
 
 2. STEPS: Break the solution into 3-6 logical milestones (NOT the full solution steps!)
    - Each step should be a THINKING milestone (e.g., "Choose Reference Frame", "Build Effective Potential")
-   - Include a guiding hint (what to consider, NOT how to do it)
+   - For each step, provide a PROGRESSIVE 5-LEVEL HINT LADDER:
+
+     Level 1 - Concept Identification (hint title: "Concept Identification"):
+       • "What physics concepts or principles are relevant here?"
+       • Guide student to identify applicable laws/concepts WITHOUT stating them directly
+       • Example: "Think about what happens to quantities in a rotating system" (don't say "use centrifugal force")
+
+     Level 2 - Visualization (hint title: "Visualization"):
+       • "How would you draw this? What does the geometry/setup look like?"
+       • Help student visualize the problem without showing the diagram
+       • Prompt them to think about coordinate systems, forces, trajectories
+       • Example: "Sketch the forces as seen from the rotating platform"
+
+     Level 3 - Strategy Selection (hint title: "Strategy Selection"):
+       • "What approach or method should you use to tackle this?"
+       • Guide toward the solution strategy without revealing equations
+       • Example: "Consider energy methods vs force balance - which is cleaner here?"
+
+     Level 4 - Structural Equation (hint title: "Structural Equation"):
+       • Set up the governing equation(s) symbolically WITHOUT numbers
+       • Show the mathematical framework but let student fill in specifics
+       • Use LaTeX: $$\sum F = ma$$ style
+       • Example: "The equation of motion in the rotating frame: $$m\ddot{r} = F_{real} + F_{centrifugal} + F_{coriolis}$$"
+
+     Level 5 - Full Solution (hint title: "Full Solution"):
+       • Complete step-by-step solution for this milestone
+       • Include all mathematical steps and reasoning
+       • This is the "last resort" - student should avoid needing this
+
    - List required concept IDs
-   - Add a Socratic question that prompts reasoning
+   - Add a Socratic question that prompts reasoning (separate from hints)
    - Encourage students to think about: symmetry, conservation laws, dimensional analysis
 
 3. SANITY CHECK: Create ONE final reality check (crucial for JEE)
@@ -144,6 +324,13 @@ CRITICAL RULES:
 - Each hint should guide WHAT to think about, not HOW to calculate
 - Emphasize physical intuition and conceptual understanding (key for JEE Advanced)
 
+JSON FORMATTING RULES (CRITICAL):
+- All strings must be on a single line (no newlines within strings)
+- Use \\n for line breaks within hint content if needed
+- Escape all quotes within strings using \"
+- Keep hint content concise (2-3 sentences max per hint)
+- If content is long, break into multiple short sentences
+
 Output your response as valid JSON with this EXACT structure:
 {
   "concepts": [
@@ -158,7 +345,33 @@ Output your response as valid JSON with this EXACT structure:
     {
       "id": 1,
       "title": "Step Title",
-      "hint": "Guiding hint about what to consider. Use $\\LaTeX$ for math.",
+      "hints": [
+        {
+          "level": 1,
+          "title": "Concept Identification",
+          "content": "What underlying physics principles apply here?"
+        },
+        {
+          "level": 2,
+          "title": "Visualization",
+          "content": "How would you sketch this situation? What's the geometry?"
+        },
+        {
+          "level": 3,
+          "title": "Strategy Selection",
+          "content": "What approach would work best for this problem?"
+        },
+        {
+          "level": 4,
+          "title": "Structural Equation",
+          "content": "Set up the governing equation: $$F = ma$$"
+        },
+        {
+          "level": 5,
+          "title": "Full Solution",
+          "content": "Step 1: Identify all forces acting on the system. Step 2: Apply Newton's second law in the chosen reference frame. Step 3: Solve the resulting equations for the unknown quantity."
+        }
+      ],
       "requiredConcepts": ["concept-id-1", "concept-id-2"],
       "question": "A Socratic question to prompt reasoning?"
     }
@@ -174,7 +387,7 @@ Respond with ONLY the JSON, no other text.`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 4096,
+    max_tokens: 8192, // Increased for 5-level hint ladder
     messages: [
       {
         role: 'user',
@@ -200,6 +413,13 @@ Respond with ONLY the JSON, no other text.`
     }
   } catch (error) {
     console.error('Failed to parse scaffold JSON:', error)
+    console.error('Raw JSON string (first 500 chars):', jsonStr.substring(0, 500))
+    console.error('Raw JSON string (around error position):')
+    const errorMatch = error instanceof Error && error.message.match(/position (\d+)/)
+    if (errorMatch) {
+      const pos = parseInt(errorMatch[1])
+      console.error(jsonStr.substring(Math.max(0, pos - 100), Math.min(jsonStr.length, pos + 100)))
+    }
     throw new Error('Failed to generate proper scaffold structure')
   }
 }

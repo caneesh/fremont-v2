@@ -5,10 +5,16 @@ export interface Concept {
   formula?: string
 }
 
+export interface HintLevel {
+  level: 1 | 2 | 3 | 4 | 5
+  title: 'Concept Identification' | 'Visualization' | 'Strategy Selection' | 'Structural Equation' | 'Full Solution'
+  content: string
+}
+
 export interface Step {
   id: number
   title: string
-  hint: string
+  hints: HintLevel[] // Progressive 5-level hint ladder
   requiredConcepts: string[] // IDs of concepts needed for this step
   question?: string // Optional Socratic question
   validationPrompt?: string // How to validate user's answer

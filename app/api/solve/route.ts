@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { solvePhysicsProblem, scaffoldSolution } from '@/lib/anthropic'
+import { generateScaffold } from '@/lib/anthropic'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,15 +21,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TWO-PASS ARCHITECTURE
-
-    // Pass 1: Solve the problem completely (hidden from user)
-    console.log('Pass 1: Solving problem...')
-    const solverResponse = await solvePhysicsProblem(problem)
-
-    // Pass 2: Generate the scaffold based on the solution
-    console.log('Pass 2: Generating scaffold...')
-    const scaffoldData = await scaffoldSolution(problem, solverResponse)
+    // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
+    // Combines solving + scaffolding into one API call
+    console.log('Generating scaffold...')
+    const startTime = Date.now()
+    const scaffoldData = await generateScaffold(problem)
+    const endTime = Date.now()
+    console.log(`Scaffold generated in ${(endTime - startTime) / 1000}s`)
 
     return NextResponse.json(scaffoldData)
   } catch (error) {

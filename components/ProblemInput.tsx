@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ProblemInputProps {
   onSubmit: (problem: string) => void
   isLoading: boolean
   error: string | null
 }
+
+const LOADING_STAGES = [
+  { message: "Analyzing problem structure...", progress: 20, duration: 3000 },
+  { message: "Identifying physics concepts...", progress: 40, duration: 5000 },
+  { message: "Building solution roadmap...", progress: 60, duration: 8000 },
+  { message: "Generating progressive hints...", progress: 80, duration: 12000 },
+  { message: "Finalizing scaffold...", progress: 95, duration: 15000 },
+]
 
 const SAMPLE_PROBLEMS = [
   {
@@ -25,6 +33,42 @@ const SAMPLE_PROBLEMS = [
 
 export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInputProps) {
   const [problemText, setProblemText] = useState('')
+  const [currentStage, setCurrentStage] = useState(0)
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    if (!isLoading) {
+      setCurrentStage(0)
+      setProgress(0)
+      return
+    }
+
+    // Advance through stages based on time
+    const startTime = Date.now()
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+
+      // Find current stage based on elapsed time
+      let newStage = 0
+      for (let i = 0; i < LOADING_STAGES.length; i++) {
+        if (elapsed >= LOADING_STAGES[i].duration) {
+          newStage = i
+        }
+      }
+
+      setCurrentStage(Math.min(newStage, LOADING_STAGES.length - 1))
+
+      // Smooth progress animation
+      const targetProgress = LOADING_STAGES[newStage]?.progress || 95
+      setProgress(prev => {
+        const diff = targetProgress - prev
+        return prev + diff * 0.1 // Smooth easing
+      })
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [isLoading])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,12 +110,68 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
             </div>
           )}
 
+          {/* Animated Loading Progress */}
+          {isLoading && (
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-6">
+              <div className="space-y-4">
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-semibold text-blue-900">
+                      {LOADING_STAGES[currentStage]?.message || 'Processing...'}
+                    </span>
+                    <span className="text-blue-700 font-medium">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-full rounded-full transition-all duration-300 ease-out relative"
+                      style={{ width: `${progress}%` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stage Indicators */}
+                <div className="flex justify-between items-center pt-2">
+                  {LOADING_STAGES.map((stage, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex flex-col items-center space-y-1 ${
+                        idx === currentStage ? 'scale-110' : ''
+                      } transition-transform duration-300`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors duration-300 ${
+                          idx <= currentStage
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-400 border-gray-300'
+                        }`}
+                      >
+                        {idx < currentStage ? '✓' : idx + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Estimated Time */}
+                <div className="text-center pt-2">
+                  <p className="text-xs text-blue-700 font-medium">
+                    Estimated time: ~{Math.max(5, 20 - Math.floor(progress / 5))} seconds remaining
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading || !problemText.trim()}
-            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            {isLoading ? 'Analyzing Problem...' : 'Generate Solution Scaffold'}
+            {isLoading ? 'Generating Scaffold...' : 'Generate Solution Scaffold'}
           </button>
         </form>
 

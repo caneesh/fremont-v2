@@ -15,9 +15,11 @@ interface StepAccordionProps {
   concepts: Concept[]
   userAnswer: string
   problemStatement?: string
+  currentHintLevel?: number
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
+  onHintLevelChange: (level: number) => void
 }
 
 export default function StepAccordion({
@@ -29,14 +31,18 @@ export default function StepAccordion({
   concepts,
   userAnswer,
   problemStatement,
+  currentHintLevel = 0,
   onAnswerChange,
   onComplete,
   onActivate,
+  onHintLevelChange,
 }: StepAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [feynmanScript, setFeynmanScript] = useState<FeynmanScript | null>(null)
   const [isLoadingAudio, setIsLoadingAudio] = useState(false)
   const [audioError, setAudioError] = useState<string | null>(null)
+  const [generatedHints, setGeneratedHints] = useState<Map<number, { level: number; title: string; content: string }>>(new Map())
+  const [isGeneratingHint, setIsGeneratingHint] = useState<number | null>(null)
 
   const handleToggle = () => {
     if (!isLocked) {
@@ -60,6 +66,10 @@ export default function StepAccordion({
       // Generate concept summary from required concepts
       const conceptNames = relatedConcepts.map(c => c.name).join(', ')
 
+      // Get the current hint content for context
+      const currentHint = step.hints.find(h => h.level === currentHintLevel)
+      const hintContext = currentHint?.content || step.hints[0]?.content || ''
+
       const response = await fetch('/api/feynman', {
         method: 'POST',
         headers: {
@@ -67,7 +77,7 @@ export default function StepAccordion({
         },
         body: JSON.stringify({
           concept: conceptNames || step.title,
-          context: step.hint,
+          context: hintContext,
           stepTitle: step.title,
           problemStatement,
         }),
@@ -83,6 +93,53 @@ export default function StepAccordion({
       setAudioError(error instanceof Error ? error.message : 'Failed to load audio hint')
     } finally {
       setIsLoadingAudio(false)
+    }
+  }
+
+  const handleUnlockNextHint = async () => {
+    const nextLevel = currentHintLevel + 1
+    if (nextLevel > 5) return
+
+    // If Level 4 or 5, and not already generated, fetch from API
+    if ((nextLevel === 4 || nextLevel === 5) && !generatedHints.has(nextLevel)) {
+      setIsGeneratingHint(nextLevel)
+
+      try {
+        const response = await fetch('/api/generate-hint', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            problemText: problemStatement,
+            stepTitle: step.title,
+            stepHints: step.hints,
+            level: nextLevel,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to generate hint')
+        }
+
+        const hint = await response.json()
+        setGeneratedHints(prev => {
+          const newMap = new Map(prev)
+          newMap.set(nextLevel, hint)
+          return newMap
+        })
+
+        onHintLevelChange(nextLevel)
+      } catch (error) {
+        console.error('Failed to generate hint:', error)
+        // Still unlock the level even if generation fails
+        onHintLevelChange(nextLevel)
+      } finally {
+        setIsGeneratingHint(null)
+      }
+    } else {
+      // Levels 1-3 or already generated, just unlock
+      onHintLevelChange(nextLevel)
     }
   }
 
@@ -173,34 +230,147 @@ export default function StepAccordion({
               </div>
             )}
 
-            {/* Hint */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h5 className="text-sm font-semibold text-yellow-900">
-                  💡 Guiding Hint:
-                </h5>
-                <button
-                  onClick={handleAudioHint}
-                  disabled={isLoadingAudio}
-                  className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-300 text-xs font-medium flex items-center gap-2"
-                  title="Get an intuitive audio explanation"
-                >
-                  {isLoadingAudio ? (
-                    <>
-                      <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      🎭 Audio Hint
-                    </>
-                  )}
-                </button>
+            {/* Progressive Hint Ladder */}
+            <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h5 className="text-base font-bold text-gray-900">
+                    💡 Progressive Hint Ladder
+                  </h5>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Unlock hints progressively. Try thinking before revealing each level.
+                  </p>
+                </div>
+                {currentHintLevel > 0 && (
+                  <button
+                    onClick={handleAudioHint}
+                    disabled={isLoadingAudio}
+                    className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-300 text-xs font-medium flex items-center gap-2"
+                    title="Get an intuitive audio explanation"
+                  >
+                    {isLoadingAudio ? (
+                      <>
+                        <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                      </>
+                    ) : (
+                      <>🎭 Audio</>
+                    )}
+                  </button>
+                )}
               </div>
-              <MathRenderer text={step.hint} />
+
+              {/* Hint Ladder Steps */}
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((level) => {
+                  // Get hint from either original hints or generated hints
+                  const originalHint = step.hints.find(h => h.level === level)
+                  const generatedHint = generatedHints.get(level)
+                  const hint = originalHint || generatedHint
+
+                  const isUnlocked = level <= currentHintLevel
+                  const isNextHint = level === currentHintLevel + 1
+                  const isFutureHint = level > currentHintLevel + 1
+                  const isGenerating = isGeneratingHint === level
+
+                  return (
+                    <div
+                      key={level}
+                      className={`border-2 rounded-lg transition-all ${
+                        isUnlocked
+                          ? level === 5
+                            ? 'border-red-400 bg-red-50'
+                            : 'border-green-400 bg-green-50'
+                          : isNextHint
+                          ? 'border-yellow-400 bg-yellow-50'
+                          : 'border-gray-300 bg-gray-100 opacity-60'
+                      }`}
+                    >
+                      <div className="p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                isUnlocked
+                                  ? level === 5
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-green-600 text-white'
+                                  : isNextHint
+                                  ? 'bg-yellow-600 text-white'
+                                  : 'bg-gray-400 text-white'
+                              }`}
+                            >
+                              {isUnlocked ? '✓' : level}
+                            </div>
+                            <h6
+                              className={`text-sm font-semibold ${
+                                isUnlocked ? 'text-gray-900' : 'text-gray-600'
+                              }`}
+                            >
+                              Level {level}: {hint?.title || (level === 4 ? 'Structural Equation' : level === 5 ? 'Full Solution' : 'Hint')}
+                            </h6>
+                          </div>
+
+                          {isNextHint && (
+                            <button
+                              onClick={handleUnlockNextHint}
+                              disabled={isGenerating}
+                              className="px-3 py-1 bg-yellow-600 text-white rounded text-xs font-medium hover:bg-yellow-700 disabled:bg-yellow-400 flex items-center gap-1"
+                            >
+                              {isGenerating ? (
+                                <>
+                                  <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Generating...
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                  </svg>
+                                  {level >= 4 ? 'Generate' : 'Unlock'}
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+
+                        {isUnlocked && hint ? (
+                          <div className="mt-2 text-sm text-gray-800">
+                            <MathRenderer text={hint.content} />
+                          </div>
+                        ) : isFutureHint ? (
+                          <p className="text-xs text-gray-500 italic">
+                            Locked - unlock previous hints first
+                          </p>
+                        ) : isNextHint && level >= 4 ? (
+                          <p className="text-xs text-gray-700 italic">
+                            Click &quot;Generate&quot; to create this hint (~3 seconds)
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-700 italic">
+                            Click &quot;Unlock&quot; to reveal this hint
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {currentHintLevel === 5 && (
+                <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
+                  <p className="text-xs text-red-800 font-medium">
+                    ⚠️ You&apos;ve unlocked the full solution. Make sure you understand each step before moving forward.
+                  </p>
+                </div>
+              )}
+
               {audioError && (
                 <p className="text-xs text-red-600 mt-2">{audioError}</p>
               )}
