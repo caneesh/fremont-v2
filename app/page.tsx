@@ -63,14 +63,25 @@ function HomeContent() {
       router.replace('/')
     } else if (questionId) {
       // Load question from study path
-      const question = studyPathService.getQuestionById(questionId)
-      if (question) {
-        handleProblemSubmit(question.statement)
-        // Mark as attempted
-        studyPathService.markQuestionAttempted(question.topic, question.id)
+      const loadQuestion = async () => {
+        try {
+          const response = await fetch('/api/study-path/questions')
+          if (response.ok) {
+            const data = await response.json()
+            const question = data.questions.find((q: any) => q.id === questionId)
+            if (question) {
+              handleProblemSubmit(question.statement)
+              // Mark as attempted
+              studyPathService.markQuestionAttempted(question.topic, question.id)
+            }
+          }
+        } catch (error) {
+          console.error('Error loading question:', error)
+        }
+        // Clear the query parameter
+        router.replace('/')
       }
-      // Clear the query parameter
-      router.replace('/')
+      loadQuestion()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])

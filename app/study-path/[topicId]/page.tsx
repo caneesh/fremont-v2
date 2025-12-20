@@ -15,11 +15,30 @@ export default function TopicDetailPage() {
   const [selectedSubtopic, setSelectedSubtopic] = useState<string>('all')
 
   useEffect(() => {
-    const topicData = studyPathService.getTopicById(topicId)
-    const questionsData = studyPathService.getQuestionsByTopic(topicId)
+    const loadData = async () => {
+      try {
+        // Fetch topics and questions from API
+        const [topicsResponse, questionsResponse] = await Promise.all([
+          fetch('/api/study-path/topics'),
+          fetch('/api/study-path/questions')
+        ])
 
-    setTopic(topicData)
-    setQuestions(questionsData)
+        if (topicsResponse.ok && questionsResponse.ok) {
+          const topicsData = await topicsResponse.json()
+          const questionsData = await questionsResponse.json()
+
+          const topicData = topicsData.topics.find((t: Topic) => t.id === topicId)
+          const topicQuestions = questionsData.questions.filter((q: Question) => q.topic === topicId)
+
+          setTopic(topicData || null)
+          setQuestions(topicQuestions || [])
+        }
+      } catch (error) {
+        console.error('Error loading topic data:', error)
+      }
+    }
+
+    loadData()
   }, [topicId])
 
   if (!topic) {

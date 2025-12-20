@@ -1,6 +1,7 @@
 import topicsData from '@/data/topics.json'
 import questionsData from '@/data/questions.json'
 import type { Topic, Question, StudyProgress, StudyStats } from '@/types/studyPath'
+import { checkLocalStorageAvailable, hasLocalStorageSpace } from '@/lib/utils'
 
 const STORAGE_KEY_PROGRESS = 'physiscaffold_study_progress'
 
@@ -94,10 +95,31 @@ class StudyPathService {
   private saveProgress(progress: Record<string, StudyProgress>): void {
     if (typeof window === 'undefined') return
 
+    // Check if localStorage is available
+    const { available, error: availError } = checkLocalStorageAvailable()
+    if (!available) {
+      console.error('localStorage not available:', availError)
+      throw new Error(`Cannot save study progress: ${availError}`)
+    }
+
+    // Check if there's enough space
+    if (!hasLocalStorageSpace()) {
+      console.warn('localStorage is running low on space')
+      // Try to continue anyway, but warn the user
+    }
+
     try {
-      localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(progress))
+      const data = JSON.stringify(progress)
+      localStorage.setItem(STORAGE_KEY_PROGRESS, data)
     } catch (error) {
       console.error('Failed to save study progress:', error)
+      if (error instanceof Error) {
+        if (error.name === 'QuotaExceededError') {
+          throw new Error('Storage quota exceeded. Please delete some old progress data.')
+        }
+        throw new Error(`Failed to save study progress: ${error.message}`)
+      }
+      throw new Error('Failed to save study progress')
     }
   }
 
@@ -195,10 +217,16 @@ class StudyPathService {
       return { topicId, solveRate }
     })
 
+    // Only calculate strength/weak areas if there's meaningful data
     topicScores.sort((a, b) => b.solveRate - a.solveRate)
 
-    const strengthAreas = topicScores.slice(0, 2).map(t => t.topicId)
-    const weakAreas = topicScores.slice(-2).map(t => t.topicId)
+    const strengthAreas = topicScores.length > 0
+      ? topicScores.slice(0, Math.min(2, topicScores.length)).map(t => t.topicId)
+      : []
+
+    const weakAreas = topicScores.length > 0
+      ? topicScores.slice(Math.max(0, topicScores.length - 2)).map(t => t.topicId)
+      : []
 
     return {
       totalQuestionsAttempted,
