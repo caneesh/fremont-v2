@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { ProblemVariation } from '@/types/variation'
+import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 
 interface ProblemVariationsProps {
   originalProblem: string
@@ -31,16 +32,21 @@ export default function ProblemVariations({
     setIsExpanded(true)
 
     try {
-      const response = await fetch('/api/variations', {
+      const response = await authenticatedFetch('/api/variations', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           problemText: originalProblem,
           coreConcept,
         }),
       })
+
+      // Check for quota exceeded
+      if (await handleQuotaExceeded(response)) {
+        setIsLoading(false)
+        setError('Daily variations limit reached')
+        setIsExpanded(false)
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Failed to generate problem variations')

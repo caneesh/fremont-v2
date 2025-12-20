@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { ReflectionAnswer } from '@/types/history'
+import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 
 interface ReflectionStepProps {
   problemText: string
@@ -42,17 +43,21 @@ export default function ReflectionStep({
     setError(null)
 
     try {
-      const response = await fetch('/api/reflection', {
+      const response = await authenticatedFetch('/api/reflection', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           problemText,
           studentOutcome,
           hintsUsed,
         }),
       })
+
+      // Check for quota exceeded
+      if (await handleQuotaExceeded(response)) {
+        setIsLoading(false)
+        setError('Daily reflection limit reached')
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Failed to generate reflection questions')

@@ -1,8 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateScaffold } from '@/lib/anthropic'
+import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
+import { serverQuotaService } from '@/lib/auth/serverQuotaService'
+import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const authContext = validateAuthHeader(request)
+    if (!authContext) {
+      return unauthorizedResponse()
+    }
+
+    // Check quota
+    if (!serverQuotaService.checkQuota(authContext.userId, 'problems')) {
+      return quotaExceededResponse('problem generations', DEFAULT_QUOTA_LIMITS.dailyProblems)
+    }
+
     const body = await request.json()
     const { problem } = body
 
@@ -23,13 +37,22 @@ export async function POST(request: NextRequest) {
 
     // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
     // Combines solving + scaffolding into one API call
-    console.log('Generating scaffold...')
+    console.log(`[${authContext.userId}] Generating scaffold...`)
     const startTime = Date.now()
     const scaffoldData = await generateScaffold(problem)
     const endTime = Date.now()
-    console.log(`Scaffold generated in ${(endTime - startTime) / 1000}s`)
+    console.log(`[${authContext.userId}] Scaffold generated in ${(endTime - startTime) / 1000}s`)
 
-    return NextResponse.json(scaffoldData)
+    // Increment quota after successful generation
+    serverQuotaService.incrementQuota(authContext.userId, 'problems')
+
+    // Add remaining quota to response
+    const remaining = serverQuotaService.getRemainingQuota(authContext.userId)
+
+    return NextResponse.json({
+      ...scaffoldData,
+      _quota: remaining,
+    })
   } catch (error) {
     console.error('Error processing problem:', error)
     return NextResponse.json(

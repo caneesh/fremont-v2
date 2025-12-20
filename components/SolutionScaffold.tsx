@@ -11,7 +11,10 @@ import SanityCheckStep from './SanityCheckStep'
 import NextChallenge from './NextChallenge'
 import ReflectionStep from './ReflectionStep'
 import ProblemVariations from './ProblemVariations'
+import MistakeWarning from './MistakeWarning'
 import type { ReflectionAnswer } from '@/types/history'
+import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
+import { mistakeTrackingService } from '@/lib/mistakeTracking'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData
@@ -32,6 +35,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showReflection, setShowReflection] = useState(false)
   const [reflectionAnswers, setReflectionAnswers] = useState<ReflectionAnswer[]>([])
   const [isReflectionComplete, setIsReflectionComplete] = useState(false)
+  const [mistakeWarnings, setMistakeWarnings] = useState<MistakeWarningType[]>([])
+  const [showWarnings, setShowWarnings] = useState(true)
+  const [problemStartTime] = useState(Date.now())
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text hash
@@ -43,8 +49,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     return generateProblemTitle(data.problem)
   }, [data.problem])
 
-  // Load saved progress on mount
+  // Load saved progress and generate mistake warnings on mount
   useEffect(() => {
+    // Generate warnings based on past patterns
+    const warnings = mistakeTrackingService.generateWarnings(
+      data.concepts,
+      `${data.domain} - ${data.subdomain}`
+    )
+    setMistakeWarnings(warnings)
+
     const attempt = problemHistoryService.getAttempt(problemId())
     if (attempt) {
       setIsReviewFlagged(attempt.reviewFlag)
@@ -181,6 +194,25 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
       problemHistoryService.markSolved(problemId(), problemTitle(), progressWithReflection)
 
+      // Record mistake pattern for tracking
+      const allHintLevels = Array.from(stepHintLevels.values())
+      const maxHintLevel = allHintLevels.length > 0 ? Math.max(...allHintLevels) : 0
+      const timeSpent = Date.now() - problemStartTime
+
+      // Record pattern for each concept
+      data.concepts.forEach(concept => {
+        mistakeTrackingService.recordPattern({
+          conceptId: concept.id,
+          conceptName: concept.name,
+          problemType: `${data.domain} - ${data.subdomain}`,
+          struggledSteps: completedSteps.filter((_, idx) => (stepHintLevels.get(idx) || 0) >= 4),
+          maxHintLevelUsed: maxHintLevel,
+          timeSpent,
+          timestamp: new Date().toISOString(),
+          commonMistake: reflections[0]?.answer.substring(0, 100), // First reflection as mistake indicator
+        })
+      })
+
       setSaveMessage('Problem solved and reflection saved! ✓')
       setIsProblemSolved(true) // Show next challenge
       setTimeout(() => setSaveMessage(''), 3000)
@@ -192,7 +224,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setTimeout(() => setSaveMessage(''), 4000)
       setIsSaving(false)
     }
-  }, [getCurrentProgress, problemId, problemTitle])
+  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime])
 
   // Calculate student outcome based on hint usage
   const getStudentOutcome = useCallback((): 'solved' | 'assisted' | 'struggled' => {
@@ -322,6 +354,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main solving area - Steps */}
         <div className="lg:col-span-3 space-y-4">
+          {/* Mistake Warnings */}
+          {showWarnings && mistakeWarnings.length > 0 && (
+            <MistakeWarning
+              warnings={mistakeWarnings}
+              onDismiss={() => setShowWarnings(false)}
+            />
+          )}
+
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Solution Roadmap

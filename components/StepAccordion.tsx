@@ -5,6 +5,7 @@ import type { Step, Concept } from '@/types/scaffold'
 import type { FeynmanScript } from '@/types/feynman'
 import MathRenderer from './MathRenderer'
 import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
+import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 
 interface StepAccordionProps {
   step: Step
@@ -105,11 +106,8 @@ export default function StepAccordion({
       setIsGeneratingHint(nextLevel)
 
       try {
-        const response = await fetch('/api/generate-hint', {
+        const response = await authenticatedFetch('/api/generate-hint', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             problemText: problemStatement,
             stepTitle: step.title,
@@ -117,6 +115,12 @@ export default function StepAccordion({
             level: nextLevel,
           }),
         })
+
+        // Check for quota exceeded
+        if (await handleQuotaExceeded(response)) {
+          setIsGeneratingHint(null)
+          return
+        }
 
         if (!response.ok) {
           throw new Error('Failed to generate hint')

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AuthGate from '@/components/AuthGate'
 
 export const metadata: Metadata = {
   title: 'PhysiScaffold - The Socratic Physics Engine',
@@ -21,7 +22,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AuthGate>{children}</AuthGate>
+      </body>
     </html>
   )
 }

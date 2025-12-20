@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
+import { serverQuotaService } from '@/lib/auth/serverQuotaService'
+import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -7,6 +10,17 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const authContext = validateAuthHeader(request)
+    if (!authContext) {
+      return unauthorizedResponse()
+    }
+
+    // Check quota
+    if (!serverQuotaService.checkQuota(authContext.userId, 'reflections')) {
+      return quotaExceededResponse('reflections', DEFAULT_QUOTA_LIMITS.dailyReflections)
+    }
+
     const body = await request.json()
     const { problemText, studentOutcome, hintsUsed } = body
 
@@ -117,6 +131,10 @@ Respond with ONLY the JSON, no other text.`
 
     try {
       const reflectionData = JSON.parse(jsonStr)
+
+      // Increment quota after successful generation
+      serverQuotaService.incrementQuota(authContext.userId, 'reflections')
+
       return NextResponse.json(reflectionData)
     } catch (error) {
       console.error('Failed to parse reflection JSON:', error)

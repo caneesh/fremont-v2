@@ -4,9 +4,12 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import ProblemInput from '@/components/ProblemInput'
 import SolutionScaffold from '@/components/SolutionScaffold'
+import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import type { ScaffoldData } from '@/types/scaffold'
+import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
+import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 
 function HomeContent() {
   const searchParams = useSearchParams()
@@ -14,32 +17,61 @@ function HomeContent() {
   const [scaffoldData, setScaffoldData] = useState<ScaffoldData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
+  const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
 
   const handleProblemSubmit = async (problemText: string) => {
     setIsLoading(true)
     setError(null)
     setScaffoldData(null)
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(false)
 
     try {
-      const response = await fetch('/api/solve', {
+      const response = await authenticatedFetch('/api/solve', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ problem: problemText }),
       })
 
+      // Check for quota exceeded
+      if (await handleQuotaExceeded(response)) {
+        setIsLoading(false)
+        return
+      }
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || response.statusText)
       }
 
       const data = await response.json()
       setScaffoldData(data)
+      // Show prerequisite check after scaffold loads
+      setShowPrerequisiteCheck(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handlePrerequisiteComplete = (result: PrerequisiteResult) => {
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(result.passed)
+
+    if (!result.passed && result.weakConcepts.length > 0) {
+      // Show failure message with weak concepts
+      alert(
+        `You got ${result.correctAnswers}/${result.totalQuestions} correct.\n\n` +
+        `Weak areas: ${result.weakConcepts.join(', ')}\n\n` +
+        `Consider reviewing these concepts before attempting this problem. You can still proceed, but it might be challenging.`
+      )
+    }
+  }
+
+  const handlePrerequisiteSkip = () => {
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(true)
   }
 
   // Load problem from history or study path if specified in URL
@@ -89,6 +121,8 @@ function HomeContent() {
   const handleReset = () => {
     setScaffoldData(null)
     setError(null)
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(false)
   }
 
   return (
@@ -104,6 +138,15 @@ function HomeContent() {
               </h1>
             </div>
             <div className="flex-1 flex justify-end gap-3">
+              <button
+                onClick={() => router.push('/concept-network')}
+                className="px-6 py-3 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 flex items-center gap-2 font-medium"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                Network
+              </button>
               <button
                 onClick={() => router.push('/study-path')}
                 className="px-6 py-3 bg-white border-2 border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 flex items-center gap-2 font-medium"
@@ -140,6 +183,12 @@ function HomeContent() {
             onSubmit={handleProblemSubmit}
             isLoading={isLoading}
             error={error}
+          />
+        ) : showPrerequisiteCheck ? (
+          <PrerequisiteCheck
+            concepts={scaffoldData.concepts}
+            onComplete={handlePrerequisiteComplete}
+            onSkip={handlePrerequisiteSkip}
           />
         ) : (
           <SolutionScaffold
