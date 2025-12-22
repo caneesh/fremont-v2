@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import VoiceInput from './VoiceInput'
 
 interface ProblemInputProps {
   onSubmit: (problem: string) => void
   isLoading: boolean
   error: string | null
 }
+
+type InputMode = 'text' | 'voice'
 
 const LOADING_STAGES = [
   { message: "Analyzing problem structure...", progress: 20, duration: 3000 },
@@ -35,6 +38,7 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
   const [problemText, setProblemText] = useState('')
   const [currentStage, setCurrentStage] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [inputMode, setInputMode] = useState<InputMode>('text')
 
   useEffect(() => {
     if (!isLoading) {
@@ -88,12 +92,52 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
           Enter Your Physics Problem
         </h2>
 
+        {/* Input Mode Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => setInputMode('text')}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+              inputMode === 'text'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } disabled:opacity-50`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Type
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setInputMode('voice')}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+              inputMode === 'voice'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } disabled:opacity-50`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              </svg>
+              Speak
+            </div>
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          <div>
-            <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
-              Problem Statement
-            </label>
-            <textarea
+          {/* Text Input Mode */}
+          {inputMode === 'text' && (
+            <div>
+              <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
+                Problem Statement
+              </label>
+              <textarea
               id="problem"
               rows={6}
               className="w-full px-3 py-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-900 text-base"
@@ -102,7 +146,17 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
               onChange={(e) => setProblemText(e.target.value)}
               disabled={isLoading}
             />
-          </div>
+            </div>
+          )}
+
+          {/* Voice Input Mode */}
+          {inputMode === 'voice' && (
+            <VoiceInput
+              onTranscriptChange={(transcript) => setProblemText(transcript)}
+              language="en-US"
+              className="mb-4"
+            />
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
