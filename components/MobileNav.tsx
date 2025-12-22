@@ -1,0 +1,117 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function MobileNav() {
+  const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+
+  const navItems = [
+    {
+      name: 'Network',
+      path: '/concept-network',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+      ),
+      color: 'purple'
+    },
+    {
+      name: 'Study Path',
+      path: '/study-path',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+      color: 'blue'
+    },
+    {
+      name: 'History',
+      path: '/history',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      color: 'gray'
+    },
+  ]
+
+  const handleNavigate = (path: string) => {
+    router.push(path)
+    setIsOpen(false)
+  }
+
+  return (
+    <>
+      {/* Hamburger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 right-4 z-50 p-3 bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:bg-gray-50 active:scale-95 transition-transform"
+        aria-label="Toggle menu"
+      >
+        <svg
+          className="w-6 h-6 text-gray-700"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {isOpen ? (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          ) : (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile Menu Overlay */}
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Menu Panel */}
+          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out">
+            <div className="p-6 pt-20">
+              <h2 className="text-lg font-bold text-gray-900 mb-6">Navigation</h2>
+              <nav className="space-y-2">
+                {navItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigate(item.path)}
+                    className={`w-full flex items-center gap-3 p-4 rounded-lg text-left transition-colors ${
+                      item.color === 'purple'
+                        ? 'hover:bg-purple-50 text-purple-700'
+                        : item.color === 'blue'
+                        ? 'hover:bg-blue-50 text-blue-700'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="font-medium">{item.name}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  )
+}

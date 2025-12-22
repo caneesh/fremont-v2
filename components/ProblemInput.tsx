@@ -83,20 +83,20 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
           Enter Your Physics Problem
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
               Problem Statement
             </label>
             <textarea
               id="problem"
-              rows={8}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-900"
+              rows={6}
+              className="w-full px-3 py-3 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-900 text-base"
               placeholder="Paste your physics problem here..."
               value={problemText}
               onChange={(e) => setProblemText(e.target.value)}
@@ -169,28 +169,28 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
           <button
             type="submit"
             disabled={isLoading || !problemText.trim()}
-            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-primary-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors active:scale-98 min-h-[48px] text-base"
           >
             {isLoading ? 'Generating Scaffold...' : 'Generate Solution Scaffold'}
           </button>
         </form>
 
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+          <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">
             Or try a sample problem:
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {SAMPLE_PROBLEMS.map((sample, idx) => (
               <button
                 key={idx}
                 onClick={() => loadSample(sample.text)}
-                className="text-left p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 group"
+                className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 group active:scale-98 transition-all min-h-[100px]"
                 disabled={isLoading}
               >
-                <h4 className="font-medium text-gray-900 mb-2 group-hover:text-primary-700">
+                <h4 className="font-medium text-gray-900 mb-2 group-hover:text-primary-700 text-sm sm:text-base">
                   {sample.title}
                 </h4>
-                <p className="text-sm text-gray-600 line-clamp-3">
+                <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">
                   {sample.text}
                 </p>
               </button>

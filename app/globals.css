@@ -35,3 +35,29 @@
 * {
   @apply transition-colors duration-200;
 }
+
+/* Mobile-specific utilities */
+@layer utilities {
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  /* Prevent text selection on buttons for better mobile UX */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* Improve touch scrolling on iOS */
+  .overflow-scroll,
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Safe area insets for mobile devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
