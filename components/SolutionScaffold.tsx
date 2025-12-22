@@ -13,10 +13,12 @@ import ReflectionStep from './ReflectionStep'
 import ProblemVariations from './ProblemVariations'
 import MistakeWarning from './MistakeWarning'
 import ErrorPatternInsights from './ErrorPatternInsights'
+import ExplainToFriend from './ExplainToFriend'
 import type { ReflectionAnswer } from '@/types/history'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
 import { mistakeTrackingService } from '@/lib/mistakeTracking'
 import { errorPatternService } from '@/lib/errorPatternService'
+import { explainToFriendService } from '@/lib/explainToFriendService'
 import type { ErrorAnalysisResponse } from '@/types/errorPatterns'
 
 interface SolutionScaffoldProps {
@@ -35,6 +37,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [isProblemSolved, setIsProblemSolved] = useState(false)
+  const [showExplainToFriend, setShowExplainToFriend] = useState(false)
+  const [friendExplanation, setFriendExplanation] = useState('')
+  const [friendExplanationQuality, setFriendExplanationQuality] = useState<string>('')
   const [showReflection, setShowReflection] = useState(false)
   const [reflectionAnswers, setReflectionAnswers] = useState<ReflectionAnswer[]>([])
   const [isReflectionComplete, setIsReflectionComplete] = useState(false)
@@ -178,9 +183,40 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   }, [getCurrentProgress, problemId, problemTitle])
 
   const handleMarkSolved = useCallback(() => {
-    // Show reflection step instead of immediately marking solved
+    // Show Explain to a Friend first (Feynman Technique)
+    setShowExplainToFriend(true)
+    setSaveMessage('Explain the solution to proceed')
+    setTimeout(() => setSaveMessage(''), 3000)
+  }, [])
+
+  const handleExplainToFriendComplete = useCallback((explanation: string, quality: string) => {
+    setFriendExplanation(explanation)
+    setFriendExplanationQuality(quality)
+    setShowExplainToFriend(false)
+
+    // Record explanation
+    if (typeof window !== 'undefined') {
+      const studentId = localStorage.getItem('physiscaffold_user') || 'anonymous'
+      explainToFriendService.recordExplanation(
+        studentId,
+        problemId(),
+        explanation,
+        quality as 'excellent' | 'good' | 'needs_work',
+        undefined
+      )
+    }
+
+    // Now show reflection
     setShowReflection(true)
     setSaveMessage('Complete reflection before finalizing')
+    setTimeout(() => setSaveMessage(''), 3000)
+  }, [problemId])
+
+  const handleSkipExplanation = useCallback(() => {
+    // Allow skipping but note it
+    setShowExplainToFriend(false)
+    setShowReflection(true)
+    setSaveMessage('Skipped explanation - Complete reflection')
     setTimeout(() => setSaveMessage(''), 3000)
   }, [])
 
@@ -476,7 +512,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           </div>
 
           {/* Sanity Check - only show after all steps completed */}
-          {completedSteps.length === data.steps.length && !showReflection && (
+          {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
             <SanityCheckStep
               sanityCheck={data.sanityCheck}
               userAnswer={sanityCheckAnswer}
@@ -484,7 +520,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
-          {/* Reflection - show after marking solved, before next challenge */}
+          {/* Explain to a Friend - Feynman Technique (before reflection) */}
+          {showExplainToFriend && (
+            <ExplainToFriend
+              problemText={data.problem}
+              steps={data.steps.map(s => s.title)}
+              topic={`${data.domain} - ${data.subdomain}`}
+              onComplete={handleExplainToFriendComplete}
+              onSkip={handleSkipExplanation}
+            />
+          )}
+
+          {/* Reflection - show after explaining to a friend */}
           {showReflection && !isReflectionComplete && (
             <ReflectionStep
               problemText={data.problem}
