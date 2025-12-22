@@ -6,11 +6,14 @@ import ProblemInput from '@/components/ProblemInput'
 import SolutionScaffold from '@/components/SolutionScaffold'
 import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import MobileNav from '@/components/MobileNav'
+import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import type { ScaffoldData } from '@/types/scaffold'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 
 function HomeContent() {
   const searchParams = useSearchParams()
@@ -126,8 +129,33 @@ function HomeContent() {
     setPrerequisitesPassed(false)
   }
 
+  // Pull to refresh
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    handleReset()
+  }
+
+  const { isPulling, pullDistance } = usePullToRefresh(handleRefresh)
+
+  // Swipe gestures for navigation
+  useSwipeGesture({
+    onSwipeLeft: () => {
+      // Swipe left to go to concept network
+      if (window.innerWidth < 768) {
+        router.push('/concept-network')
+      }
+    },
+    onSwipeRight: () => {
+      // Swipe right to go to history
+      if (window.innerWidth < 768) {
+        router.push('/history')
+      }
+    },
+  })
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}

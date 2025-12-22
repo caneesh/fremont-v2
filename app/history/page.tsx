@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ProblemAttempt, ProblemStatus } from '@/types/history'
 import { problemHistoryService } from '@/lib/problemHistory'
+import MobileNav from '@/components/MobileNav'
+import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 
 export default function HistoryPage() {
   const router = useRouter()
@@ -61,47 +65,73 @@ export default function HistoryPage() {
   const getStatusBadge = (status: ProblemStatus) => {
     if (status === 'SOLVED') {
       return (
-        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+        <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
           ✓ Solved
         </span>
       )
     }
     return (
-      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+      <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
         ⏳ In Progress
       </span>
     )
   }
 
+  // Pull to refresh
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    loadHistory()
+  }
+
+  const { isPulling, pullDistance } = usePullToRefresh(handleRefresh)
+
+  // Swipe gestures
+  useSwipeGesture({
+    onSwipeLeft: () => {
+      if (window.innerWidth < 768) {
+        router.push('/')
+      }
+    },
+    onSwipeRight: () => {
+      if (window.innerWidth < 768) {
+        router.push('/study-path')
+      }
+    },
+  })
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
+      <MobileNav />
+      <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Problem History
-            </h1>
-            <p className="text-gray-600">
-              {total} {total === 1 ? 'attempt' : 'attempts'} recorded
-            </p>
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Problem History
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                {total} {total === 1 ? 'attempt' : 'attempts'} recorded
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 active:scale-98 flex items-center justify-center gap-2 transition-all min-h-[48px]"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              New Problem
+            </button>
           </div>
-          <button
-            onClick={() => router.push('/')}
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Problem
-          </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Filters</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

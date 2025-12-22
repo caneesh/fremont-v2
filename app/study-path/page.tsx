@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
 import type { Topic, StudyStats, Question } from '@/types/studyPath'
+import MobileNav from '@/components/MobileNav'
+import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
+import { usePullToRefresh } from '@/hooks/usePullToRefresh'
+import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 
 export default function StudyPathPage() {
   const router = useRouter()
@@ -75,23 +79,48 @@ export default function StudyPathPage() {
     }
   }
 
+  // Pull to refresh
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    window.location.reload()
+  }
+
+  const { isPulling, pullDistance } = usePullToRefresh(handleRefresh)
+
+  // Swipe gestures
+  useSwipeGesture({
+    onSwipeLeft: () => {
+      if (window.innerWidth < 768) {
+        router.push('/history')
+      }
+    },
+    onSwipeRight: () => {
+      if (window.innerWidth < 768) {
+        router.push('/concept-network')
+      }
+    },
+  })
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
+      <MobileNav />
+      <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 md:mb-8">
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               IIT-JEE Physics Study Path
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Systematic preparation for IIT-JEE Advanced
             </p>
           </div>
-          <div className="flex gap-3">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex gap-3 justify-end">
             <button
               onClick={() => router.push('/history')}
-              className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -100,7 +129,7 @@ export default function StudyPathPage() {
             </button>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2"
+              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -112,55 +141,55 @@ export default function StudyPathPage() {
 
         {/* Study Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Questions Attempted</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.totalQuestionsAttempted}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                <div className="mb-2 sm:mb-0">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Attempted</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalQuestionsAttempted}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">📝</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Questions Solved</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.totalQuestionsSolved}</p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">✓</span>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl sm:text-2xl">📝</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Time Spent</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.totalTimeSpent}m</p>
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                <div className="mb-2 sm:mb-0">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Solved</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.totalQuestionsSolved}</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">⏱️</span>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl sm:text-2xl">✓</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Success Rate</p>
-                  <p className="text-3xl font-bold text-amber-600">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                <div className="mb-2 sm:mb-0">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Time</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-purple-600">{stats.totalTimeSpent}m</p>
+                </div>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl sm:text-2xl">⏱️</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                <div className="mb-2 sm:mb-0">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Success</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-amber-600">
                     {stats.totalQuestionsAttempted > 0
                       ? Math.round((stats.totalQuestionsSolved / stats.totalQuestionsAttempted) * 100)
                       : 0}%
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🎯</span>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl sm:text-2xl">🎯</span>
                 </div>
               </div>
             </div>
@@ -168,16 +197,16 @@ export default function StudyPathPage() {
         )}
 
         {/* Topics Grid */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Study Topics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Study Topics</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {topics.map((topic) => {
               const progress = getTopicProgress(topic.id)
               return (
                 <button
                   key={topic.id}
                   onClick={() => router.push(`/study-path/${topic.id}`)}
-                  className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all text-left group"
+                  className="bg-white rounded-lg shadow-lg p-4 sm:p-6 hover:shadow-xl active:scale-98 transition-all text-left group min-h-[120px]"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
