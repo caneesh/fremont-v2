@@ -20,27 +20,37 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
     setError(null)
 
     try {
+      const requestBody = {
+        previousProblem: currentProblem,
+        userPerformance: 'Solved successfully',
+        topicTags,
+        difficulty: 'Medium', // Could be dynamic based on actual difficulty
+      }
+
+      console.log('Step-Up Request:', requestBody)
+
       const response = await fetch('/api/step-up', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          previousProblem: currentProblem,
-          userPerformance: 'Solved successfully',
-          topicTags,
-          difficulty: 'Medium', // Could be dynamic based on actual difficulty
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate next challenge')
+        const errorData = await response.json()
+        console.error('Step-Up API Error:', errorData)
+        const errorMessage = errorData.error || 'Failed to generate next challenge'
+        const details = errorData.details ? ` (${errorData.details})` : ''
+        throw new Error(errorMessage + details)
       }
 
       const problem: StepUpProblem = await response.json()
+      console.log('Step-Up Response:', problem)
       setNextProblem(problem)
       setShowDetails(false)
     } catch (err) {
+      console.error('Step-Up Generation Error:', err)
       setError(err instanceof Error ? err.message : 'Failed to generate next challenge')
     } finally {
       setIsGenerating(false)
