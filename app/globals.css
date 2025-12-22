@@ -6,10 +6,54 @@
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
+  margin: 1em 0;
+  text-align: center;
 }
 
 .katex {
   font-size: 1.1em;
+}
+
+/* Mobile-optimized math rendering */
+@media (max-width: 768px) {
+  .katex {
+    font-size: 1em;
+  }
+
+  .katex-display {
+    font-size: 0.95em;
+    margin: 0.75em 0;
+  }
+
+  /* Better scrolling for long equations on mobile */
+  .katex-display > .katex {
+    display: inline-block;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: left;
+  }
+}
+
+/* Enhanced math styling */
+.katex-html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Better fraction rendering */
+.katex .frac-line {
+  border-bottom-width: 0.06em;
+}
+
+/* Improved matrix rendering */
+.katex .arraycolsep {
+  width: 0.5em;
+}
+
+/* Better spacing for operators */
+.katex .mbin, .katex .mrel {
+  margin: 0 0.2em;
 }
 
 /* Custom scrollbar for better UX */
