@@ -44,7 +44,7 @@ export default function ErrorPatternsPage() {
               Error Pattern Analytics
             </h1>
             <p className="text-gray-600">
-              Track HOW you're making mistakes, not just IF you're making them.
+              Track HOW you&apos;re making mistakes, not just IF you&apos;re making them.
               Identify recurring patterns and improve systematically.
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function ErrorPatternsPage() {
                 2
               </div>
               <div>
-                <strong>Pattern Tracking:</strong> Each mistake is categorized (e.g., "Chooses energy when force analysis is required")
+                <strong>Pattern Tracking:</strong> Each mistake is categorized (e.g., &quot;Chooses energy when force analysis is required&quot;)
                 and tracked over time across different problems.
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function ErrorPatternsPage() {
                 3
               </div>
               <div>
-                <strong>Insights & Warnings:</strong> Get personalized insights like "You've made this mistake 3 times"
+                <strong>Insights & Warnings:</strong> Get personalized insights like &quot;You&apos;ve made this mistake 3 times&quot;
                 and receive targeted remediation advice to fix each pattern.
               </div>
             </div>
@@ -89,7 +89,7 @@ export default function ErrorPatternsPage() {
                 4
               </div>
               <div>
-                <strong>Mastery Tracking:</strong> Patterns are marked as "Mastered" when you haven't made
+                <strong>Mastery Tracking:</strong> Patterns are marked as &quot;Mastered&quot; when you haven&apos;t made
                 that mistake in your last 5 relevant problems.
               </div>
             </div>

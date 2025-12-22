@@ -103,11 +103,11 @@ export default function ExplainToFriend({
               Explain to a Friend
             </h2>
             <p className="text-gray-700 text-base leading-relaxed">
-              Before marking this problem as mastered, explain the solution as if you're teaching a friend.
+              Before marking this problem as mastered, explain the solution as if you&apos;re teaching a friend.
               <strong className="text-blue-600"> Use exactly 3 lines.</strong>
             </p>
             <p className="text-sm text-gray-600 mt-2 italic">
-              "If you can't explain it simply, you don't understand it well enough." — Richard Feynman
+              &quot;If you can&apos;t explain it simply, you don&apos;t understand it well enough.&quot; — Richard Feynman
             </p>
           </div>
         </div>
@@ -115,8 +115,8 @@ export default function ExplainToFriend({
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
           <p className="text-sm font-semibold text-blue-900 mb-2">What to include:</p>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• <strong>Line 1:</strong> What's the main concept or approach?</li>
-            <li>• <strong>Line 2:</strong> What's the key step or insight?</li>
+            <li>• <strong>Line 1:</strong> What&apos;s the main concept or approach?</li>
+            <li>• <strong>Line 2:</strong> What&apos;s the key step or insight?</li>
             <li>• <strong>Line 3:</strong> Why does this method work?</li>
           </ul>
         </div>

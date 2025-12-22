@@ -69,7 +69,7 @@ export default function VoiceInput({
           <div>
             <h3 className="font-semibold text-yellow-900 mb-1">Voice Input Not Supported</h3>
             <p className="text-sm text-yellow-800">
-              Your browser doesn't support voice input. Please use Chrome, Edge, or Safari.
+              Your browser doesn&apos;t support voice input. Please use Chrome, Edge, or Safari.
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function VoiceInput({
         <p className="mb-1">💡 <strong>Tips:</strong></p>
         <ul className="list-disc list-inside space-y-1 ml-2">
           <li>Speak clearly and at a normal pace</li>
-          <li>Say "period" or "comma" for punctuation</li>
+          <li>Say &quot;period&quot; or &quot;comma&quot; for punctuation</li>
           <li>You can edit the transcript after recording</li>
         </ul>
       </div>

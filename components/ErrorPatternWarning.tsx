@@ -68,7 +68,7 @@ export default function ErrorPatternWarning({
           </div>
 
           <p className={`text-sm mb-3 ${getTrendTextColor()}`}>
-            <strong>You've made this mistake {summary.occurrences} times</strong> in different problems.
+            <strong>You&apos;ve made this mistake {summary.occurrences} times</strong> in different problems.
           </p>
 
           <div className="bg-white rounded-lg p-3 mb-3 border border-gray-200">
