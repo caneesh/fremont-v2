@@ -24,7 +24,7 @@ function HomeContent() {
   const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
 
-  const handleProblemSubmit = async (problemText: string) => {
+  const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
     setIsLoading(true)
     setError(null)
     setScaffoldData(null)
@@ -34,7 +34,10 @@ function HomeContent() {
     try {
       const response = await authenticatedFetch('/api/solve', {
         method: 'POST',
-        body: JSON.stringify({ problem: problemText }),
+        body: JSON.stringify({
+          problem: problemText,
+          diagramImage: diagramImage || undefined
+        }),
       })
 
       // Check for quota exceeded

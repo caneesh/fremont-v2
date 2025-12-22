@@ -44,9 +44,12 @@ export interface ScaffolderResponse {
  * ULTRA-FAST: Progressive Hint Loading
  * Only generates Levels 1-3 initially (15-20s)
  * Levels 4-5 generated on-demand when user clicks (~3s each)
+ *
+ * @param problem - The problem statement text
+ * @param diagramImage - Optional base64-encoded diagram image (data:image/...)
  */
-export async function generateScaffold(problem: string): Promise<ScaffolderResponse> {
-  const combinedPrompt = `You are an expert IIT-JEE Physics teacher with 20+ years of experience.
+export async function generateScaffold(problem: string, diagramImage?: string): Promise<ScaffolderResponse> {
+  const combinedPrompt = `You are an expert IIT-JEE Physics teacher with 20+ years of experience.${diagramImage ? '\n\nNOTE: The student has provided a diagram for this problem. Analyze it carefully along with the problem text.' : ''}
 
 CONTEXT: This problem is for students preparing for IIT-JEE (Indian Institute of Technology Joint Entrance Examination), one of the world's most competitive engineering entrance exams. Students need rigorous understanding of physics concepts, mathematical techniques, and problem-solving strategies at the Irodov/Kleppner level.
 
@@ -151,13 +154,39 @@ Output ONLY valid JSON with this EXACT structure:
 
 Respond with ONLY the JSON, no other text.`
 
+  // Build content array with optional image
+  const contentBlocks: Array<{ type: string; text?: string; source?: { type: string; media_type: string; data: string } }> = []
+
+  // Add image first if provided (so Claude sees it before the text)
+  if (diagramImage) {
+    // Extract media type and base64 data
+    const match = diagramImage.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (match) {
+      const [, mediaType, base64Data] = match
+      contentBlocks.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: `image/${mediaType}`,
+          data: base64Data,
+        },
+      })
+    }
+  }
+
+  // Add text prompt
+  contentBlocks.push({
+    type: 'text',
+    text: combinedPrompt,
+  })
+
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 6144, // Reduced since we're only generating 3 hint levels
     messages: [
       {
         role: 'user',
-        content: combinedPrompt,
+        content: contentBlocks as any,
       },
     ],
   })

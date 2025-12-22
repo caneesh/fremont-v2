@@ -18,11 +18,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problem } = body
+    const { problem, diagramImage } = body
 
     if (!problem || typeof problem !== 'string') {
       return NextResponse.json(
         { error: 'Problem text is required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate diagram image if provided
+    if (diagramImage && typeof diagramImage !== 'string') {
+      return NextResponse.json(
+        { error: 'Diagram image must be a base64 string' },
         { status: 400 }
       )
     }
@@ -37,9 +45,9 @@ export async function POST(request: NextRequest) {
 
     // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
     // Combines solving + scaffolding into one API call
-    console.log(`[${authContext.userId}] Generating scaffold...`)
+    console.log(`[${authContext.userId}] Generating scaffold${diagramImage ? ' with diagram' : ''}...`)
     const startTime = Date.now()
-    const scaffoldData = await generateScaffold(problem)
+    const scaffoldData = await generateScaffold(problem, diagramImage)
     const endTime = Date.now()
     console.log(`[${authContext.userId}] Scaffold generated in ${(endTime - startTime) / 1000}s`)
 

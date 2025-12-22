@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import VoiceInput from './VoiceInput'
 
 interface ProblemInputProps {
-  onSubmit: (problem: string) => void
+  onSubmit: (problem: string, diagramImage?: string | null) => void
   isLoading: boolean
   error: string | null
 }
@@ -39,6 +39,8 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
   const [currentStage, setCurrentStage] = useState(0)
   const [progress, setProgress] = useState(0)
   const [inputMode, setInputMode] = useState<InputMode>('text')
+  const [diagramImage, setDiagramImage] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoading) {
@@ -74,15 +76,48 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
     return () => clearInterval(interval)
   }, [isLoading])
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file (PNG, JPG, etc.)')
+      return
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB')
+      return
+    }
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target?.result as string
+      setImagePreview(result)
+      setDiagramImage(result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeImage = () => {
+    setDiagramImage(null)
+    setImagePreview(null)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (problemText.trim()) {
-      onSubmit(problemText.trim())
+      onSubmit(problemText.trim(), diagramImage)
     }
   }
 
   const loadSample = (sampleText: string) => {
     setProblemText(sampleText)
+    setDiagramImage(null)
+    setImagePreview(null)
   }
 
   return (
@@ -157,6 +192,58 @@ export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInpu
               className="mb-4"
             />
           )}
+
+          {/* Diagram Upload Section */}
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-gray-700">
+              Problem Diagram (Optional)
+            </label>
+
+            {!imagePreview ? (
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="mb-1 text-sm text-gray-600">
+                      <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">PNG, JPG, or GIF (max 5MB)</p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={isLoading}
+                  />
+                </label>
+              </div>
+            ) : (
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Problem diagram"
+                  className="w-full max-h-64 object-contain rounded-lg border-2 border-gray-300"
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  disabled={isLoading}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg disabled:opacity-50"
+                  aria-label="Remove image"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <p className="mt-2 text-xs text-gray-600 text-center">
+                  Claude will analyze this diagram along with your problem text
+                </p>
+              </div>
+            )}
+          </div>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
