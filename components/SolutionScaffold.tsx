@@ -12,9 +12,12 @@ import NextChallenge from './NextChallenge'
 import ReflectionStep from './ReflectionStep'
 import ProblemVariations from './ProblemVariations'
 import MistakeWarning from './MistakeWarning'
+import ErrorPatternInsights from './ErrorPatternInsights'
 import type { ReflectionAnswer } from '@/types/history'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
 import { mistakeTrackingService } from '@/lib/mistakeTracking'
+import { errorPatternService } from '@/lib/errorPatternService'
+import type { ErrorAnalysisResponse } from '@/types/errorPatterns'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData
@@ -38,6 +41,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [mistakeWarnings, setMistakeWarnings] = useState<MistakeWarningType[]>([])
   const [showWarnings, setShowWarnings] = useState(true)
   const [problemStartTime] = useState(Date.now())
+  const [isAnalyzingError, setIsAnalyzingError] = useState(false)
+  const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysisResponse | null>(null)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text hash
@@ -179,7 +184,72 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setTimeout(() => setSaveMessage(''), 3000)
   }, [])
 
-  const handleReflectionComplete = useCallback((reflections: ReflectionAnswer[]) => {
+  // Analyze error patterns when student struggled
+  const analyzeErrorPattern = useCallback(async (
+    studentAttempt: string,
+    correctApproach: string,
+    hintsUsed: number
+  ) => {
+    setIsAnalyzingError(true)
+    try {
+      const response = await fetch('/api/analyze-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          problemText: data.problem,
+          studentAttempt,
+          correctApproach,
+          topic: `${data.domain} - ${data.subdomain}`,
+          hintsUsed,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze error pattern')
+      }
+
+      const analysis: ErrorAnalysisResponse = await response.json()
+      setErrorAnalysis(analysis)
+
+      // Record the highest-confidence pattern
+      if (analysis.patterns.length > 0 && typeof window !== 'undefined') {
+        const studentId = localStorage.getItem('physiscaffold_user') || 'anonymous'
+        const topPattern = analysis.patterns.reduce((prev, current) =>
+          current.confidence > prev.confidence ? current : prev
+        )
+
+        if (topPattern.confidence >= 0.6) { // Only record if confidence is high enough
+          const timeSpent = Date.now() - problemStartTime
+          const allHintLevels = Array.from(stepHintLevels.values())
+          const maxHintLevel = allHintLevels.length > 0 ? Math.max(...allHintLevels) : 0
+
+          errorPatternService.recordError(
+            studentId,
+            topPattern.patternId,
+            problemId(),
+            data.problem,
+            studentAttempt,
+            correctApproach,
+            {
+              topic: `${data.domain} - ${data.subdomain}`,
+              difficulty: maxHintLevel >= 5 ? 'hard' : maxHintLevel >= 3 ? 'medium' : 'easy',
+              hintsUsed,
+              timeSpent: Math.floor(timeSpent / 1000), // Convert to seconds
+            }
+          )
+        }
+      }
+
+      return analysis
+    } catch (error) {
+      console.error('Error analyzing pattern:', error)
+      return null
+    } finally {
+      setIsAnalyzingError(false)
+    }
+  }, [data, problemId, problemStartTime, stepHintLevels])
+
+  const handleReflectionComplete = useCallback(async (reflections: ReflectionAnswer[]) => {
     setReflectionAnswers(reflections)
     setIsReflectionComplete(true)
     setIsSaving(true)
@@ -213,6 +283,19 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         })
       })
 
+      // Analyze error patterns if student struggled (used hints level 3+)
+      if (maxHintLevel >= 3 && reflections.length > 0) {
+        const studentAttempt = reflections.find(r => r.question.includes('mistake'))?.answer || ''
+        const correctApproach = data.steps.map((s, idx) => `${idx + 1}. ${s.title}`).join('\n')
+
+        if (studentAttempt) {
+          // Trigger error pattern analysis (async, don't block)
+          analyzeErrorPattern(studentAttempt, correctApproach, maxHintLevel).catch(err => {
+            console.error('Error pattern analysis failed:', err)
+          })
+        }
+      }
+
       setSaveMessage('Problem solved and reflection saved! ✓')
       setIsProblemSolved(true) // Show next challenge
       setTimeout(() => setSaveMessage(''), 3000)
@@ -224,7 +307,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setTimeout(() => setSaveMessage(''), 4000)
       setIsSaving(false)
     }
-  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime])
+  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern])
 
   // Calculate student outcome based on hint usage
   const getStudentOutcome = useCallback((): 'solved' | 'assisted' | 'struggled' => {
@@ -409,6 +492,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
               hintsUsed={getAllHintsUsed()}
               savedReflections={reflectionAnswers.length > 0 ? reflectionAnswers : undefined}
               onReflectionComplete={handleReflectionComplete}
+            />
+          )}
+
+          {/* Error Pattern Insights - show after reflection is complete */}
+          {isProblemSolved && isReflectionComplete && typeof window !== 'undefined' && (
+            <ErrorPatternInsights
+              studentId={localStorage.getItem('physiscaffold_user') || 'anonymous'}
+              maxInsights={3}
             />
           )}
 
