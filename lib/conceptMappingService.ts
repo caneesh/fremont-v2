@@ -113,8 +113,11 @@ class ConceptMappingService {
     })
 
     // Verify the concept exists in the network
-    if (bestMatch && networkConcepts.some((c) => c.id === bestMatch.id)) {
-      return bestMatch.id
+    if (bestMatch) {
+      const matchId = bestMatch.id
+      if (networkConcepts.some((c) => c.id === matchId)) {
+        return matchId
+      }
     }
 
     return null
