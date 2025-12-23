@@ -3,6 +3,13 @@ import { validateAuthHeader, unauthorizedResponse } from '@/lib/auth/apiAuth'
 import type { AnalyzeMistakeRequest, AnalyzeMistakeResponse } from '@/types/spotTheMistake'
 import { getMistakeLocation, cleanupOldEntries } from '@/lib/spotMistakeStorage'
 
+export async function GET() {
+  return NextResponse.json(
+    { error: 'This endpoint only accepts POST requests. Use the Spot the Mistake page to submit analysis.' },
+    { status: 405 }
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication

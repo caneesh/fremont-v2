@@ -10,6 +10,13 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 })
 
+export async function GET() {
+  return NextResponse.json(
+    { error: 'This endpoint only accepts POST requests. Use the Spot the Mistake page to generate solutions.' },
+    { status: 405 }
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
