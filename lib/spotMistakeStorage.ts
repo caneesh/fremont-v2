@@ -2,12 +2,24 @@ import fs from 'fs'
 import path from 'path'
 
 // File-based storage for mistake locations (persists across API route reloads)
-const STORAGE_DIR = path.join(process.cwd(), '.next', 'cache', 'spot-mistake')
+// Use /tmp in production (Vercel, etc.) since filesystem is read-only
+const STORAGE_DIR = process.env.NODE_ENV === 'production'
+  ? path.join('/tmp', 'spot-mistake')
+  : path.join(process.cwd(), '.next', 'cache', 'spot-mistake')
+
 const STORAGE_FILE = path.join(STORAGE_DIR, 'mistakes.json')
 
-// Ensure storage directory exists
-if (!fs.existsSync(STORAGE_DIR)) {
-  fs.mkdirSync(STORAGE_DIR, { recursive: true })
+// Ensure storage directory exists - do this lazily, not at module load
+function ensureStorageDir() {
+  try {
+    if (!fs.existsSync(STORAGE_DIR)) {
+      fs.mkdirSync(STORAGE_DIR, { recursive: true })
+      console.log(`[Storage] Created storage directory: ${STORAGE_DIR}`)
+    }
+  } catch (error) {
+    console.error('[Storage] Error creating storage directory:', error)
+    throw error
+  }
 }
 
 type MistakeLocation = {
@@ -20,13 +32,14 @@ type MistakeLocation = {
 // Load existing storage
 function loadStorage(): Map<string, MistakeLocation> {
   try {
+    ensureStorageDir()
     if (fs.existsSync(STORAGE_FILE)) {
       const data = fs.readFileSync(STORAGE_FILE, 'utf-8')
       const entries = JSON.parse(data)
       return new Map(entries)
     }
   } catch (error) {
-    console.error('Error loading mistake storage:', error)
+    console.error('[Storage] Error loading mistake storage:', error)
   }
   return new Map()
 }
@@ -34,10 +47,11 @@ function loadStorage(): Map<string, MistakeLocation> {
 // Save storage to disk
 function saveStorage(storage: Map<string, MistakeLocation>) {
   try {
+    ensureStorageDir()
     const entries = Array.from(storage.entries())
     fs.writeFileSync(STORAGE_FILE, JSON.stringify(entries), 'utf-8')
   } catch (error) {
-    console.error('Error saving mistake storage:', error)
+    console.error('[Storage] Error saving mistake storage:', error)
   }
 }
 
