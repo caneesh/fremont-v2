@@ -26,6 +26,8 @@ export default function SpotMistakePage() {
     setFeedback(null)
 
     try {
+      console.log('Generating solution for problem:', problemText.substring(0, 50) + '...')
+
       const response = await authenticatedFetch('/api/spot-mistake/generate', {
         method: 'POST',
         body: JSON.stringify({
@@ -35,14 +37,37 @@ export default function SpotMistakePage() {
         }),
       })
 
+      console.log('Generate response status:', response.status)
+      console.log('Generate response headers:', response.headers.get('content-type'))
+
+      // Check if response has content
+      const contentLength = response.headers.get('content-length')
+      if (contentLength === '0') {
+        throw new Error('Server returned empty response. Please check server logs.')
+      }
+
       if (!response.ok) {
-        const errorData = await response.json()
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch (jsonErr) {
+          throw new Error(`Server error (${response.status}): Unable to parse error response`)
+        }
         throw new Error(errorData.error || 'Failed to generate solution')
       }
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonErr) {
+        console.error('Failed to parse JSON response:', jsonErr)
+        throw new Error('Server returned invalid response. Please check server logs.')
+      }
+
+      console.log('Generated solution:', data)
       setSolution(data)
     } catch (err) {
+      console.error('Generation error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsLoading(false)
@@ -69,15 +94,34 @@ export default function SpotMistakePage() {
         }),
       })
 
-      console.log('Response status:', response.status)
+      console.log('Analyze response status:', response.status)
+      console.log('Analyze response headers:', response.headers.get('content-type'))
+
+      // Check if response has content
+      const contentLength = response.headers.get('content-length')
+      if (contentLength === '0') {
+        throw new Error('Server returned empty response. Please check server logs.')
+      }
 
       if (!response.ok) {
-        const errorData = await response.json()
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch (jsonErr) {
+          throw new Error(`Server error (${response.status}): Unable to parse error response`)
+        }
         console.error('API error:', errorData)
         throw new Error(errorData.error || 'Failed to analyze')
       }
 
-      const data: AnalyzeMistakeResponse = await response.json()
+      let data: AnalyzeMistakeResponse
+      try {
+        data = await response.json()
+      } catch (jsonErr) {
+        console.error('Failed to parse JSON response:', jsonErr)
+        throw new Error('Server returned invalid response. Please check server logs.')
+      }
+
       console.log('Analysis result:', data)
       setFeedback(data)
     } catch (err) {
