@@ -347,14 +347,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern])
 
-  // Show post-solve activity popup after problem is solved
+  // Show post-solve activity popup RANDOMLY after problem is solved
   useEffect(() => {
     if (isProblemSolved && isReflectionComplete && !showPostSolveActivity) {
-      // Small delay to let the user see the completion message
-      const timer = setTimeout(() => {
-        setShowPostSolveActivity(true)
-      }, 1500)
-      return () => clearTimeout(timer)
+      // Random chance: 40% probability of showing the popup
+      // You can also use other logic like:
+      // - Show after every N problems: (problemCount % 3 === 0)
+      // - Show based on prime numbers, even numbers, etc.
+      const shouldShow = Math.random() < 0.4 // 40% chance
+
+      if (shouldShow) {
+        // Small delay to let the user see the completion message
+        const timer = setTimeout(() => {
+          setShowPostSolveActivity(true)
+        }, 1500)
+        return () => clearTimeout(timer)
+      }
     }
   }, [isProblemSolved, isReflectionComplete, showPostSolveActivity])
 
