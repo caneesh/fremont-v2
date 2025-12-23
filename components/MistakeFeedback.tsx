@@ -1,6 +1,7 @@
 'use client'
 
 import type { AnalyzeMistakeResponse } from '@/types/spotTheMistake'
+import { BlockMath, InlineMath } from 'react-katex'
 
 interface MistakeFeedbackProps {
   feedback: AnalyzeMistakeResponse
@@ -9,6 +10,45 @@ interface MistakeFeedbackProps {
 
 export default function MistakeFeedback({ feedback, onTryAnother }: MistakeFeedbackProps) {
   const { isCorrect, feedback: message, correctApproach, encouragement } = feedback
+
+  // Render text with LaTeX support
+  const renderLatex = (text: string) => {
+    const parts: React.ReactNode[] = []
+    let remaining = text
+    let key = 0
+
+    while (remaining) {
+      // Check for display math $$...$$
+      const displayMatch = remaining.match(/\$\$(.*?)\$\$/)
+      if (displayMatch) {
+        const beforeMatch = remaining.substring(0, displayMatch.index)
+        if (beforeMatch) {
+          parts.push(<span key={key++}>{beforeMatch}</span>)
+        }
+        parts.push(<BlockMath key={key++} math={displayMatch[1]} />)
+        remaining = remaining.substring(displayMatch.index! + displayMatch[0].length)
+        continue
+      }
+
+      // Check for inline math $...$
+      const inlineMatch = remaining.match(/\$(.*?)\$/)
+      if (inlineMatch) {
+        const beforeMatch = remaining.substring(0, inlineMatch.index)
+        if (beforeMatch) {
+          parts.push(<span key={key++}>{beforeMatch}</span>)
+        }
+        parts.push(<InlineMath key={key++} math={inlineMatch[1]} />)
+        remaining = remaining.substring(inlineMatch.index! + inlineMatch[0].length)
+        continue
+      }
+
+      // No more math, add remaining text
+      parts.push(<span key={key++}>{remaining}</span>)
+      break
+    }
+
+    return <>{parts}</>
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -44,7 +84,7 @@ export default function MistakeFeedback({ feedback, onTryAnother }: MistakeFeedb
             isCorrect ? 'bg-white border-green-300' : 'bg-white border-yellow-300'
           }`}>
             <h3 className="font-semibold text-gray-900 mb-2">Feedback</h3>
-            <p className="text-sm sm:text-base text-gray-800">{message}</p>
+            <div className="text-sm sm:text-base text-gray-800">{renderLatex(message)}</div>
           </div>
 
           {/* Correct Approach */}
@@ -55,16 +95,16 @@ export default function MistakeFeedback({ feedback, onTryAnother }: MistakeFeedb
               </svg>
               Correct Approach
             </h3>
-            <p className="text-sm text-blue-900">{correctApproach}</p>
+            <div className="text-sm text-blue-900">{renderLatex(correctApproach)}</div>
           </div>
 
           {/* Encouragement */}
           <div className={`p-4 rounded-lg border-2 ${
             isCorrect ? 'bg-green-100 border-green-400' : 'bg-yellow-100 border-yellow-400'
           }`}>
-            <p className={`text-sm sm:text-base font-medium ${isCorrect ? 'text-green-900' : 'text-yellow-900'}`}>
-              💡 {encouragement}
-            </p>
+            <div className={`text-sm sm:text-base font-medium ${isCorrect ? 'text-green-900' : 'text-yellow-900'}`}>
+              💡 {renderLatex(encouragement)}
+            </div>
           </div>
         </div>
 
