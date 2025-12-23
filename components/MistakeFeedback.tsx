@@ -62,7 +62,7 @@ export default function MistakeFeedback({ feedback, onTryAnother }: MistakeFeedb
           <div className={`p-4 rounded-lg border-2 ${
             isCorrect ? 'bg-green-100 border-green-400' : 'bg-yellow-100 border-yellow-400'
           }`}>
-            <p className="text-sm sm:text-base font-medium ${isCorrect ? 'text-green-900' : 'text-yellow-900'}">
+            <p className={`text-sm sm:text-base font-medium ${isCorrect ? 'text-green-900' : 'text-yellow-900'}`}>
               💡 {encouragement}
             </p>
           </div>

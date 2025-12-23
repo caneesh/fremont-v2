@@ -50,8 +50,12 @@ export default function SpotMistakePage() {
   }
 
   const handleSubmitAnalysis = async (stepIndex: number | null, explanation: string) => {
-    if (!solution) return
+    if (!solution) {
+      console.error('No solution available')
+      return
+    }
 
+    console.log('Submitting analysis:', { solutionId: solution.id, stepIndex, explanation })
     setIsLoading(true)
     setError(null)
 
@@ -65,14 +69,19 @@ export default function SpotMistakePage() {
         }),
       })
 
+      console.log('Response status:', response.status)
+
       if (!response.ok) {
         const errorData = await response.json()
+        console.error('API error:', errorData)
         throw new Error(errorData.error || 'Failed to analyze')
       }
 
       const data: AnalyzeMistakeResponse = await response.json()
+      console.log('Analysis result:', data)
       setFeedback(data)
     } catch (err) {
+      console.error('Analysis error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsLoading(false)
@@ -177,11 +186,20 @@ export default function SpotMistakePage() {
         ) : feedback ? (
           <MistakeFeedback feedback={feedback} onTryAnother={handleTryAnother} />
         ) : solution ? (
-          <SpotTheMistake
-            solution={solution}
-            onSubmitAnalysis={handleSubmitAnalysis}
-            isLoading={isLoading}
-          />
+          <>
+            {error && (
+              <div className="max-w-4xl mx-auto mb-6">
+                <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              </div>
+            )}
+            <SpotTheMistake
+              solution={solution}
+              onSubmitAnalysis={handleSubmitAnalysis}
+              isLoading={isLoading}
+            />
+          </>
         ) : null}
       </div>
     </main>
