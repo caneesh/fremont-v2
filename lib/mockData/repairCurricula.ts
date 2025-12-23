@@ -145,7 +145,7 @@ Force on charge $q$ in field $E$: $F = qE$
 - Wrong sign for force direction (like charges repel, unlike attract)
 - Not converting units (cm to m, μC to C)`,
     diagnosticQuestion: 'Two charges, $+3 \\mu\\text{C}$ and $-3 \\mu\\text{C}$, are $2 \\text{ m}$ apart. What is the magnitude of force between them?',
-    diagnosticAnswer: 'Using Coulomb\\'s law: $F = k\\frac{|q_1 q_2|}{r^2} = (9 \\times 10^9)\\frac{(3 \\times 10^{-6})(3 \\times 10^{-6})}{2^2} = (9 \\times 10^9)\\frac{9 \\times 10^{-12}}{4} = 0.02025 \\text{ N} \\approx 0.02 \\text{ N}$.',
+    diagnosticAnswer: "Using Coulomb's law: $F = k\\frac{|q_1 q_2|}{r^2} = (9 \\times 10^9)\\frac{(3 \\times 10^{-6})(3 \\times 10^{-6})}{2^2} = (9 \\times 10^9)\\frac{9 \\times 10^{-12}}{4} = 0.02025 \\text{ N} \\approx 0.02 \\text{ N}$.",
     practiceProblems: [
       {
         problemText: 'What is the electric field at a distance of $3 \\text{ m}$ from a $+5 \\mu\\text{C}$ charge?',
