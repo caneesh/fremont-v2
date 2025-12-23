@@ -104,7 +104,7 @@ export default function ConceptNetworkPage() {
         <div className="mt-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
           <h3 className="font-semibold text-blue-900 mb-2">How to Use the Concept Map</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• <strong>Green nodes</strong>: High mastery (≥75%) - You've got this!</li>
+            <li>• <strong>Green nodes</strong>: High mastery (≥75%) - You&apos;ve got this!</li>
             <li>• <strong>Yellow nodes</strong>: Medium mastery (40-75%) - Keep practicing</li>
             <li>• <strong>Red nodes</strong>: Low mastery (&lt;40%) - Click to start Repair Mode</li>
             <li>• <strong>Gray nodes</strong>: No practice data yet - Solve problems to build mastery</li>
