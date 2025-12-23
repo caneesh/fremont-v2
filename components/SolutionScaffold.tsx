@@ -378,7 +378,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         })
 
         // Cleanup old concept mastery data periodically (every 10th problem)
-        const problemCount = problemHistoryService.getHistory().length
+        const problemCount = problemHistoryService.getHistory().total
         if (problemCount % 10 === 0) {
           conceptMasteryService.cleanup(studentId)
         }
