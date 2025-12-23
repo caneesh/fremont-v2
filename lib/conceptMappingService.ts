@@ -95,7 +95,8 @@ class ConceptMappingService {
   private keywordMatch(aiConceptName: string, networkConcepts: ConceptNode[]): string | null {
     const normalizedAI = this.normalize(aiConceptName)
 
-    let bestMatch: { id: string; score: number } | null = null
+    let bestMatchId: string | null = null
+    let bestScore = 0
 
     // Check each network concept's keywords
     Object.entries(PHYSICS_KEYWORDS).forEach(([conceptId, keywords]) => {
@@ -107,14 +108,15 @@ class ConceptMappingService {
         }
       })
 
-      if (matchScore > 0 && (!bestMatch || matchScore > bestMatch.score)) {
-        bestMatch = { id: conceptId, score: matchScore }
+      if (matchScore > 0 && matchScore > bestScore) {
+        bestMatchId = conceptId
+        bestScore = matchScore
       }
     })
 
     // Verify the concept exists in the network
-    if (bestMatch && networkConcepts.some((c) => c.id === bestMatch.id)) {
-      return bestMatch.id
+    if (bestMatchId && networkConcepts.some((c) => c.id === bestMatchId)) {
+      return bestMatchId
     }
 
     return null
