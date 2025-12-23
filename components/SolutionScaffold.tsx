@@ -21,6 +21,9 @@ import { mistakeTrackingService } from '@/lib/mistakeTracking'
 import { errorPatternService } from '@/lib/errorPatternService'
 import { explainToFriendService } from '@/lib/explainToFriendService'
 import type { ErrorAnalysisResponse } from '@/types/errorPatterns'
+import { conceptMasteryService } from '@/lib/conceptMasteryService'
+import { conceptMappingService } from '@/lib/conceptMappingService'
+import { CONCEPT_NETWORK_DATA } from '@/lib/conceptNetworkData'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData
@@ -331,6 +334,53 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           analyzeErrorPattern(studentAttempt, correctApproach, maxHintLevel).catch(err => {
             console.error('Error pattern analysis failed:', err)
           })
+        }
+      }
+
+      // Update concept mastery tracking
+      if (typeof window !== 'undefined') {
+        const studentId = localStorage.getItem('physiscaffold_user') || 'anonymous'
+        const currentProblemId = problemId()
+
+        // Map AI concepts to network concepts
+        const networkConcepts = CONCEPT_NETWORK_DATA.network.nodes
+        const conceptMapping = conceptMappingService.mapConcepts(
+          data.concepts,
+          networkConcepts
+        )
+
+        // Process each step to track concept mastery
+        data.steps.forEach((step, stepIdx) => {
+          const stepHintLevel = stepHintLevels.get(stepIdx) || 0
+          const stepCompleted = completedSteps.includes(stepIdx)
+
+          // Record mastery for each concept used in this step
+          step.requiredConcepts.forEach(aiConceptId => {
+            const aiConcept = data.concepts.find(c => c.id === aiConceptId)
+            if (!aiConcept) return
+
+            // Get mapped network concept ID (or use AI concept ID if unmapped)
+            const networkConceptId = conceptMapping.get(aiConceptId) || aiConceptId
+
+            // Record the attempt
+            conceptMasteryService.recordAttempt(
+              studentId,
+              networkConceptId,
+              aiConcept.name,
+              {
+                problemId: currentProblemId,
+                hintLevel: stepHintLevel,
+                timeSpent: timeSpent / data.steps.length, // Distribute time across steps
+                success: stepCompleted && stepHintLevel < 5, // Success if completed without max hints
+              }
+            )
+          })
+        })
+
+        // Cleanup old concept mastery data periodically (every 10th problem)
+        const problemCount = problemHistoryService.getHistory().length
+        if (problemCount % 10 === 0) {
+          conceptMasteryService.cleanup(studentId)
         }
       }
 

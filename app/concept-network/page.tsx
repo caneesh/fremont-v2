@@ -1,14 +1,18 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import ConceptNetworkVisualization from '@/components/ConceptNetworkVisualization'
+import ConceptMapVisualization from '@/components/ConceptMapVisualization'
+import RepairModeModal from '@/components/RepairModeModal'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
+import type { ConceptMasteryData } from '@/types/conceptMastery'
 
 export default function ConceptNetworkPage() {
   const router = useRouter()
+  const [repairConcept, setRepairConcept] = useState<{ id: string; name: string } | null>(null)
 
   // Pull to refresh - reload the page
   const handleRefresh = async () => {
@@ -39,7 +43,7 @@ export default function ConceptNetworkPage() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <header className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
+          <div className="mb-4">
             <button
               onClick={() => router.push('/')}
               className="px-3 py-2 text-gray-700 hover:text-gray-900 flex items-center gap-2 active:scale-95 transition-transform min-h-[44px]"
@@ -49,7 +53,17 @@ export default function ConceptNetworkPage() {
               </svg>
               <span className="text-sm sm:text-base">Back to Home</span>
             </button>
+          </div>
 
+          <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500 mb-4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Concept Mastery Map</h1>
+            <p className="text-gray-600">
+              Track your mastery across all physics concepts. Click on weak concepts (red nodes) to start targeted practice.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div></div>
             {/* Desktop Navigation */}
             <div className="hidden md:flex gap-3">
               <button
@@ -75,8 +89,43 @@ export default function ConceptNetworkPage() {
         </header>
 
         {/* Network Visualization */}
-        <ConceptNetworkVisualization />
+        <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200" style={{ height: '70vh', minHeight: '500px' }}>
+          <ConceptMapVisualization
+            onNodeClick={(conceptId, masteryData) => {
+              // Open repair mode for weak concepts (mastery < 0.4)
+              if (masteryData && masteryData.masteryScore < 0.4) {
+                setRepairConcept({ id: conceptId, name: masteryData.conceptName })
+              }
+            }}
+          />
+        </div>
+
+        {/* Help Text */}
+        <div className="mt-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+          <h3 className="font-semibold text-blue-900 mb-2">How to Use the Concept Map</h3>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• <strong>Green nodes</strong>: High mastery (≥75%) - You've got this!</li>
+            <li>• <strong>Yellow nodes</strong>: Medium mastery (40-75%) - Keep practicing</li>
+            <li>• <strong>Red nodes</strong>: Low mastery (&lt;40%) - Click to start Repair Mode</li>
+            <li>• <strong>Gray nodes</strong>: No practice data yet - Solve problems to build mastery</li>
+            <li>• Click on any node to see details and practice history</li>
+            <li>• Use the minimap (bottom right) to navigate large graphs</li>
+          </ul>
+        </div>
       </div>
+
+      {/* Repair Mode Modal */}
+      {repairConcept && (
+        <RepairModeModal
+          conceptId={repairConcept.id}
+          conceptName={repairConcept.name}
+          onClose={() => setRepairConcept(null)}
+          onComplete={() => {
+            // Could trigger a refresh of mastery data here
+            console.log('Repair mode completed for', repairConcept.name)
+          }}
+        />
+      )}
     </main>
   )
 }
