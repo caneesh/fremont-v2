@@ -14,6 +14,7 @@ import ProblemVariations from './ProblemVariations'
 import MistakeWarning from './MistakeWarning'
 import ErrorPatternInsights from './ErrorPatternInsights'
 import ExplainToFriend from './ExplainToFriend'
+import PostSolveActivity from './PostSolveActivity'
 import type { ReflectionAnswer } from '@/types/history'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
 import { mistakeTrackingService } from '@/lib/mistakeTracking'
@@ -48,6 +49,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [problemStartTime] = useState(Date.now())
   const [isAnalyzingError, setIsAnalyzingError] = useState(false)
   const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysisResponse | null>(null)
+  const [showPostSolveActivity, setShowPostSolveActivity] = useState(false)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text hash
@@ -345,6 +347,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern])
 
+  // Show post-solve activity popup after problem is solved
+  useEffect(() => {
+    if (isProblemSolved && isReflectionComplete && !showPostSolveActivity) {
+      // Small delay to let the user see the completion message
+      const timer = setTimeout(() => {
+        setShowPostSolveActivity(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [isProblemSolved, isReflectionComplete, showPostSolveActivity])
+
   // Calculate student outcome based on hint usage
   const getStudentOutcome = useCallback((): 'solved' | 'assisted' | 'struggled' => {
     const allHintLevels = Array.from(stepHintLevels.values())
@@ -585,6 +598,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           <ConceptPanel concepts={data.concepts} />
         </div>
       </div>
+
+      {/* Post-Solve Activity Popup */}
+      {showPostSolveActivity && (
+        <PostSolveActivity
+          problemText={data.problem}
+          onDismiss={() => setShowPostSolveActivity(false)}
+        />
+      )}
     </div>
   )
 }

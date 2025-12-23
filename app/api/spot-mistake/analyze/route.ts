@@ -1,22 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAuthHeader, unauthorizedResponse } from '@/lib/auth/apiAuth'
 import type { AnalyzeMistakeRequest, AnalyzeMistakeResponse } from '@/types/spotTheMistake'
-
-// In-memory storage for mistake locations (in production, use a database)
-const mistakeStorage = new Map<string, {
-  stepIndex: number
-  mistakeType: string
-  correctApproach: string
-}>()
-
-// Function to store mistake location (called from generate endpoint)
-export function storeMistakeLocation(solutionId: string, location: {
-  stepIndex: number
-  mistakeType: string
-  correctApproach: string
-}) {
-  mistakeStorage.set(solutionId, location)
-}
+import { getMistakeLocation, cleanupOldEntries } from '@/lib/spotMistakeStorage'
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Retrieve the actual mistake location
-    const actualMistake = mistakeStorage.get(solutionId)
+    const actualMistake = getMistakeLocation(solutionId)
 
     if (!actualMistake) {
       return NextResponse.json(
@@ -75,10 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Clean up old entries (simple cleanup - in production use TTL)
-    if (mistakeStorage.size > 1000) {
-      const entries = Array.from(mistakeStorage.entries())
-      entries.slice(0, 500).forEach(([key]) => mistakeStorage.delete(key))
-    }
+    cleanupOldEntries(1000)
 
     return NextResponse.json(response)
   } catch (error) {
@@ -92,6 +74,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
-// Export for use in generate route
-export { mistakeStorage }

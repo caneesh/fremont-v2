@@ -4,7 +4,7 @@ import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from 
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { GenerateMistakeSolutionRequest, StudentSolution } from '@/types/spotTheMistake'
-import { mistakeStorage } from '../analyze/route'
+import { storeMistakeLocation } from '@/lib/spotMistakeStorage'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -139,7 +139,7 @@ Respond with ONLY the JSON, no other text.`
       console.log(`[${authContext.userId}] Flawed solution generated in ${(endTime - startTime) / 1000}s`)
 
       // Store mistake location server-side for later verification
-      mistakeStorage.set(solutionId, studentSolution.mistakeLocation)
+      storeMistakeLocation(solutionId, studentSolution.mistakeLocation)
 
       // Increment quota
       serverQuotaService.incrementQuota(authContext.userId, 'problems')
