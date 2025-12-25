@@ -199,9 +199,12 @@ function HomeContent() {
               <ThemeToggle />
             </div>
             <div className="flex-1 text-center md:text-center">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-dark-text-primary mb-2 md:mb-4">
+              <button
+                onClick={handleReset}
+                className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-2 md:mb-4 hover:opacity-80 transition-opacity cursor-pointer"
+              >
                 PhysiScaffold
-              </h1>
+              </button>
             </div>
             {/* Desktop Navigation - Hidden on mobile */}
             <div className="hidden md:flex flex-1 justify-end gap-3">

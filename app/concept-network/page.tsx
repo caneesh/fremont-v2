@@ -44,17 +44,7 @@ export default function ConceptNetworkPage() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <header className="mb-6 md:mb-8">
-          <div className="mb-4">
-            <button
-              onClick={() => router.push('/')}
-              className="px-3 py-2 text-gray-700 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary flex items-center gap-2 active:scale-95 transition-all min-h-[44px]"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="text-sm sm:text-base">Back to Home</span>
-            </button>
-          </div>
+          <PageHeader />
 
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-l-4 border-purple-500 dark:border-purple-400 mb-4 border-r border-t border-b border-transparent dark:border-r-dark-border dark:border-t-dark-border dark:border-b-dark-border">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Concept Mastery Map</h1>

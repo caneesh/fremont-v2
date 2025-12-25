@@ -142,18 +142,11 @@ export default function SpotMistakePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app py-6 md:py-8 px-4">
+      <MobileNav />
       <div className="container mx-auto">
         {/* Header */}
         <header className="mb-6 md:mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary mb-4 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </Link>
+          <PageHeader />
 
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-l-4 border-orange-500 dark:border-orange-400 border-r border-t border-b border-transparent dark:border-r-dark-border dark:border-t-dark-border dark:border-b-dark-border">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">

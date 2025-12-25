@@ -107,6 +107,7 @@ export default function HistoryPage() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <div className="mb-6 md:mb-8">
+          <PageHeader />
           <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">

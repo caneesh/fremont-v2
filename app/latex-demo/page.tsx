@@ -47,17 +47,9 @@ export default function LaTeXDemoPage() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <header className="mb-6 md:mb-8">
-          <button
-            onClick={() => router.push('/')}
-            className="px-3 py-2 text-gray-700 hover:text-gray-900 flex items-center gap-2 mb-4 active:scale-95 transition-transform"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            <span className="text-sm sm:text-base">Back to Home</span>
-          </button>
+          <PageHeader />
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
             LaTeX Math Rendering Demo
           </h1>
           <p className="text-sm sm:text-base text-gray-600">

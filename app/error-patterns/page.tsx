@@ -26,19 +26,12 @@ export default function ErrorPatternsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app py-8 px-4">
+      <MobileNav />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </Link>
+          <PageHeader />
 
           <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">

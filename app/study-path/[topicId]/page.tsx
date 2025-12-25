@@ -60,15 +60,11 @@ export default function TopicDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <div className="mb-6 md:mb-8">
-          <button
-            onClick={() => router.push('/study-path')}
-            className="text-accent hover:text-accent-strong mb-4 flex items-center gap-2 text-sm md:text-base transition-colors"
-          >
-            ← Back to Study Path
-          </button>
+          <PageHeader backButtonText="Back to Study Path" backButtonPath="/study-path" />
 
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 md:p-8 border border-transparent dark:border-dark-border">
             <div className="flex items-center gap-4 mb-4">
