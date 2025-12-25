@@ -8,6 +8,7 @@ import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import ContinueBanner from '@/components/ContinueBanner'
+import DemoTour from '@/components/DemoTour'
 import type { ScaffoldData } from '@/types/scaffold'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
@@ -19,6 +20,8 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
 import ThemeToggle from '@/components/ThemeToggle'
 
+const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
+
 function HomeContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -29,6 +32,7 @@ function HomeContent() {
   const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
+  const [isDemoMode, setIsDemoMode] = useState(false)
 
   const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
     setCurrentProblemText(problemText)
@@ -202,6 +206,19 @@ function HomeContent() {
             {/* Desktop Navigation - Hidden on mobile */}
             <div className="hidden md:flex flex-1 justify-end gap-3">
               <button
+                onClick={() => {
+                  handleReset()
+                  setIsDemoMode(true)
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-lg hover:shadow-lg flex items-center gap-2 font-medium transition-all hover:scale-105"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Demo
+              </button>
+              <button
                 onClick={() => router.push('/concept-network')}
                 className="px-5 py-2.5 bg-white dark:bg-dark-card border border-purple-600 dark:border-purple-500 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-2 font-medium transition-all hover:shadow-md dark:hover:shadow-dark-sm"
               >
@@ -246,6 +263,20 @@ function HomeContent() {
             <p className="text-xs md:text-sm text-gray-500 dark:text-dark-text-muted mt-2">
               Active Decomposition: We don&apos;t give answers; we give the framework for the answer.
             </p>
+            {/* Mobile Demo Button */}
+            <button
+              onClick={() => {
+                handleReset()
+                setIsDemoMode(true)
+              }}
+              className="md:hidden mt-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:shadow-lg flex items-center gap-2 font-medium transition-all mx-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Watch Demo
+            </button>
           </div>
         </header>
 
@@ -281,6 +312,15 @@ function HomeContent() {
       <KeyboardShortcutsHelp
         isOpen={showShortcutsHelp}
         onClose={() => setShowShortcutsHelp(false)}
+      />
+
+      {/* Demo Tour */}
+      <DemoTour
+        isActive={isDemoMode}
+        onEnd={() => setIsDemoMode(false)}
+        onStartDemo={() => {
+          handleProblemSubmit(DEMO_PROBLEM)
+        }}
       />
     </main>
   )
