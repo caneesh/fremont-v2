@@ -230,6 +230,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
               </div>
             ) : (
               <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
                   alt="Problem diagram"

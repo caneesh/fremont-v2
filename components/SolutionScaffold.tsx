@@ -129,7 +129,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         clearTimeout(autosaveTimerRef.current)
       }
     }
-  }, [problemId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [problemId, data.concepts, data.domain, data.subdomain])
 
   // Autosave every 30 seconds
   useEffect(() => {

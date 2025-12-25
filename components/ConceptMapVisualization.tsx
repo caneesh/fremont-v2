@@ -181,7 +181,8 @@ export default function ConceptMapVisualization({
   // Get statistics
   const stats = useMemo(() => {
     return conceptMasteryService.getStatistics(effectiveStudentId)
-  }, [effectiveStudentId, masteryData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveStudentId])
 
   return (
     <div className="w-full h-full relative">

@@ -29,6 +29,7 @@ export default function RepairModeModal({
   // Load curriculum from API
   useEffect(() => {
     loadCurriculum()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conceptId])
 
   const loadCurriculum = async () => {

@@ -35,6 +35,7 @@ export default function ConceptNetworkVisualization() {
 
   useEffect(() => {
     loadNetwork()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadNetwork = async () => {

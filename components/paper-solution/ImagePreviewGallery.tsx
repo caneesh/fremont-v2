@@ -59,6 +59,7 @@ export default function ImagePreviewGallery({
             </div>
 
             {/* Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.url}
               alt={`Page ${index + 1}`}
@@ -132,6 +133,7 @@ export default function ImagePreviewGallery({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={images.find(i => i.id === expandedImage)?.url}
               alt="Expanded view"
