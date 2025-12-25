@@ -210,7 +210,8 @@ export default function PaperSolutionUploader({
       const dataUrls = await Promise.all(
         state.images.map(img => img.file ? fileToDataUrl(img.file) : Promise.resolve(''))
       )
-      const dataUrlsHeader = dataUrls.filter(Boolean).join(',')
+      // Use '|' as delimiter since data URLs contain commas
+      const dataUrlsHeader = dataUrls.filter(Boolean).join('|')
 
       const extractResponse = await authenticatedFetch('/api/paper-solution/extract', {
         method: 'POST',

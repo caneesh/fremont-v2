@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
     // In a real implementation, we'd fetch images from storage
     // For MVP, expect the images to be passed in the request body
     // This is a workaround - in production, we'd look up by uploadId
-    const imageDataUrls = (request.headers.get('x-image-data') || '').split(',').filter(Boolean)
+    // Note: Use '|' as delimiter since data URLs contain commas
+    const imageDataUrls = (request.headers.get('x-image-data') || '').split('|').filter(Boolean)
 
     if (imageDataUrls.length === 0) {
       return NextResponse.json(
