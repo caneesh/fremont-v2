@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { StepUpProblem } from '@/types/stepUp'
+import { authenticatedFetch } from '@/lib/api/apiClient'
 
 interface NextChallengeProps {
   currentProblem: string
@@ -20,11 +21,8 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
     setError(null)
 
     try {
-      const response = await fetch('/api/step-up', {
+      const response = await authenticatedFetch('/api/step-up', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           previousProblem: currentProblem,
           userPerformance: 'Solved successfully',
