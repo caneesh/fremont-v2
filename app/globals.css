@@ -173,33 +173,147 @@
   animation: bounce-in 0.6s ease-out forwards;
 }
 
-/* Dark mode support */
+/* ============================================
+   DARK MODE DESIGN SYSTEM
+   A layered, premium dark theme
+   ============================================ */
+
+/* CSS Custom Properties for dark mode */
+:root {
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-soft: #f1f5f9;
+  --bg-input: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-placeholder: #94a3b8;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --accent: #0ea5e9;
+  --accent-strong: #0284c7;
+}
+
+.dark {
+  --bg-app: #0F172A;
+  --bg-card: #1E293B;
+  --bg-card-soft: #334155;
+  --bg-input: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-placeholder: #64748B;
+  --border-default: #475569;
+  --border-strong: #64748B;
+  --accent: #38BDF8;
+  --accent-strong: #0EA5E9;
+}
+
+/* Dark mode base overrides */
 .dark .bg-white {
-  background-color: #1f2937;
+  background-color: var(--bg-card);
 }
 
 .dark .shadow-lg {
-  --tw-shadow-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark mode scrollbar */
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar - refined */
 .dark::-webkit-scrollbar-track {
-  background: #374151;
+  background: #1E293B;
 }
 
 .dark::-webkit-scrollbar-thumb {
-  background: #6b7280;
+  background: #475569;
+  border: 2px solid #1E293B;
 }
 
 .dark::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #64748B;
 }
 
-/* KaTeX dark mode */
+/* Dark mode text colors */
+.dark .text-gray-900 {
+  color: var(--text-primary);
+}
+
+.dark .text-gray-800 {
+  color: var(--text-primary);
+}
+
+.dark .text-gray-700 {
+  color: var(--text-secondary);
+}
+
+.dark .text-gray-600 {
+  color: var(--text-secondary);
+}
+
+.dark .text-gray-500 {
+  color: var(--text-muted);
+}
+
+/* Dark mode borders */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: var(--border-default);
+}
+
+/* KaTeX dark mode - improved contrast */
 .dark .katex {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .dark .katex .frac-line {
-  border-color: #e5e7eb;
+  border-color: var(--text-primary);
+}
+
+/* Dark mode input focus states */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 0 1px var(--accent);
+  outline: none;
+}
+
+/* Dark mode placeholder text */
+.dark ::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+/* Dark mode card surfaces - layered approach */
+.dark .bg-gray-50 {
+  background-color: #1E293B;
+}
+
+.dark .bg-gray-100 {
+  background-color: #334155;
+}
+
+/* Dark mode primary button glow on hover */
+.dark .bg-primary-600:hover {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+/* Dark mode disabled states - clearly distinct */
+.dark button:disabled,
+.dark input:disabled,
+.dark textarea:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dark .disabled\:bg-gray-300:disabled {
+  background-color: #374151;
+  color: #64748B;
 }
