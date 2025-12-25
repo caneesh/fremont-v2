@@ -8,6 +8,7 @@ import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
+import PageHeader from '@/components/PageHeader'
 
 export default function HistoryPage() {
   const router = useRouter()

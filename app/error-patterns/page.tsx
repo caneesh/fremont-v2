@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import ErrorPatternAnalytics from '@/components/ErrorPatternAnalytics'
-import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
+import MobileNav from '@/components/MobileNav'
 
 export default function ErrorPatternsPage() {
   const [studentId, setStudentId] = useState<string>('anonymous')

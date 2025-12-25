@@ -176,7 +176,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Text Input Mode */}
           {inputMode === 'text' && (
-            <div>
+            <div className="demo-step-input">
               <label htmlFor="problem" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                 Problem Statement
               </label>
@@ -319,13 +319,13 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
           <button
             type="submit"
             disabled={isLoading || !problemText.trim()}
-            className="w-full bg-accent dark:bg-accent text-white py-4 px-6 rounded-lg font-semibold hover:bg-accent-strong dark:hover:bg-accent-strong disabled:bg-gray-300 dark:disabled:bg-dark-card-soft disabled:text-gray-500 dark:disabled:text-dark-text-muted disabled:cursor-not-allowed transition-all active:scale-98 min-h-[48px] text-base shadow-md hover:shadow-lg dark:shadow-dark-md dark:hover:shadow-dark-glow-strong"
+            className="demo-step-submit w-full bg-accent dark:bg-accent text-white py-4 px-6 rounded-lg font-semibold hover:bg-accent-strong dark:hover:bg-accent-strong disabled:bg-gray-300 dark:disabled:bg-dark-card-soft disabled:text-gray-500 dark:disabled:text-dark-text-muted disabled:cursor-not-allowed transition-all active:scale-98 min-h-[48px] text-base shadow-md hover:shadow-lg dark:shadow-dark-md dark:hover:shadow-dark-glow-strong"
           >
             {isLoading ? 'Generating Scaffold...' : 'Generate Solution Scaffold'}
           </button>
         </form>
 
-        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 dark:border-dark-border">
+        <div className="demo-step-samples mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 dark:border-dark-border">
           <h3 className="text-base sm:text-lg font-medium text-gray-800 dark:text-dark-text-primary mb-3 sm:mb-4">
             Or try a sample problem:
           </h3>

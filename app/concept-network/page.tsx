@@ -9,6 +9,7 @@ import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import type { ConceptMasteryData } from '@/types/conceptMastery'
+import PageHeader from '@/components/PageHeader'
 
 export default function ConceptNetworkPage() {
   const router = useRouter()

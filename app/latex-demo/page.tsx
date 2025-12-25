@@ -6,6 +6,7 @@ import MathRenderer from '@/components/MathRenderer'
 import LaTeXEditor from '@/components/LaTeXEditor'
 import LaTeXHelp from '@/components/LaTeXHelp'
 import MobileNav from '@/components/MobileNav'
+import PageHeader from '@/components/PageHeader'
 
 const DEMO_EXAMPLES = [
   {

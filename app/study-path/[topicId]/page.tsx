@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
 import type { Topic, Question } from '@/types/studyPath'
+import MobileNav from '@/components/MobileNav'
+import PageHeader from '@/components/PageHeader'
 
 export default function TopicDetailPage() {
   const router = useRouter()

@@ -9,6 +9,16 @@ export default function MobileNav() {
 
   const navItems = [
     {
+      name: 'Home',
+      path: '/',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      ),
+      color: 'blue'
+    },
+    {
       name: 'Network',
       path: '/concept-network',
       icon: (
@@ -67,10 +77,10 @@ export default function MobileNav() {
 
   return (
     <>
-      {/* Hamburger Button */}
+      {/* Menu Button - Visible on all screens */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 right-4 z-50 p-3 bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card-soft active:scale-95 transition-all"
+        className="fixed top-4 right-4 z-50 p-3 bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card-soft active:scale-95 transition-all"
         aria-label="Toggle menu"
       >
         <svg
@@ -97,17 +107,17 @@ export default function MobileNav() {
         </svg>
       </button>
 
-      {/* Mobile Menu Overlay */}
+      {/* Menu Overlay */}
       {isOpen && (
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-40"
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 z-40"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Menu Panel */}
-          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white dark:bg-dark-card shadow-2xl dark:shadow-dark-lg border-l border-transparent dark:border-dark-border z-40 transform transition-transform duration-300 ease-in-out">
+          <div className="fixed top-0 right-0 h-full w-64 bg-white dark:bg-dark-card shadow-2xl dark:shadow-dark-lg border-l border-transparent dark:border-dark-border z-40 transform transition-transform duration-300 ease-in-out">
             <div className="p-6 pt-20">
               <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-6">Navigation</h2>
               <nav className="space-y-2">

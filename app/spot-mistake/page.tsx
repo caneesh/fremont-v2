@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SpotTheMistake from '@/components/SpotTheMistake'
 import MistakeFeedback from '@/components/MistakeFeedback'
-import Link from 'next/link'
 import type { StudentSolution, AnalyzeMistakeResponse } from '@/types/spotTheMistake'
 import { authenticatedFetch } from '@/lib/api/apiClient'
+import PageHeader from '@/components/PageHeader'
+import MobileNav from '@/components/MobileNav'
 
 export default function SpotMistakePage() {
   const router = useRouter()

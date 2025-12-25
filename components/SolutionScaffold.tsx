@@ -558,7 +558,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
-          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
+          <div className="demo-step-steps bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
             <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
               Solution Roadmap
             </h3>
@@ -590,11 +590,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
           {/* Sanity Check - only show after all steps completed */}
           {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
+            <div className="demo-step-sanity">
             <SanityCheckStep
               sanityCheck={data.sanityCheck}
               userAnswer={sanityCheckAnswer}
               onAnswerChange={setSanityCheckAnswer}
             />
+            </div>
           )}
 
           {/* Explain to a Friend - Feynman Technique (before reflection) */}
@@ -658,7 +660,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         </div>
 
         {/* Right sidebar - Concept panel */}
-        <div className="lg:col-span-1">
+        <div className="demo-step-concepts lg:col-span-1">
           <ConceptPanel concepts={data.concepts} />
         </div>
       </div>
