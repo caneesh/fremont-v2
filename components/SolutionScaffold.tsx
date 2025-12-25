@@ -592,11 +592,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           {/* Sanity Check - only show after all steps completed */}
           {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
             <div className="demo-step-sanity">
-            <SanityCheckStep
-              sanityCheck={data.sanityCheck}
-              userAnswer={sanityCheckAnswer}
-              onAnswerChange={setSanityCheckAnswer}
-            />
+              <SanityCheckStep
+                sanityCheck={data.sanityCheck}
+                userAnswer={sanityCheckAnswer}
+                onAnswerChange={setSanityCheckAnswer}
+              />
             </div>
           )}
 

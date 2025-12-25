@@ -4,12 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 
 interface TourStep {
-  target: string // CSS selector
+  target: string
   title: string
   content: string
   position: 'top' | 'bottom' | 'left' | 'right'
-  action?: () => void
-  waitFor?: string // Wait for this element to appear
 }
 
 interface DemoTourProps {
@@ -45,21 +43,18 @@ const SCAFFOLD_TOUR_STEPS: TourStep[] = [
     title: 'Key Concepts',
     content: 'These are the physics concepts needed to solve this problem. Review them to strengthen your understanding.',
     position: 'left',
-    waitFor: '.demo-step-concepts',
   },
   {
     target: '.demo-step-steps',
     title: 'Solution Steps',
     content: 'Work through each step progressively. Expand steps when ready - we guide you without giving away the answer.',
     position: 'right',
-    waitFor: '.demo-step-steps',
   },
   {
     target: '.demo-step-sanity',
     title: 'Sanity Check',
     content: 'Verify your answer makes physical sense. Check units, limiting cases, and reasonableness.',
     position: 'top',
-    waitFor: '.demo-step-sanity',
   },
 ]
 
@@ -85,12 +80,9 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
 
     const element = document.querySelector(step.target)
     if (!element) {
-      // If element not found and we have a waitFor, keep checking
-      if (step.waitFor) {
-        const timer = setTimeout(updatePosition, 100)
-        return () => clearTimeout(timer)
-      }
-      return
+      // If element not found, try again
+      const timer = setTimeout(updatePosition, 100)
+      return () => clearTimeout(timer)
     }
 
     const rect = element.getBoundingClientRect()
@@ -156,7 +148,6 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
     }
   }, [updatePosition])
 
-  // Watch for scaffold to appear
   useEffect(() => {
     if (!isActive || phase !== 'scaffold') return
 
@@ -176,12 +167,10 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else if (phase === 'input') {
-      // Transition to scaffold phase
       onStartDemo()
       setPhase('scaffold')
       setCurrentStep(0)
       setIsVisible(false)
-      // Wait for scaffold to load
       setTimeout(() => {
         updatePosition()
       }, 2000)
@@ -305,7 +294,6 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
           </div>
         </div>
 
-        {/* Phase indicator */}
         {phase === 'scaffold' && (
           <div className="px-4 pb-3">
             <div className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">

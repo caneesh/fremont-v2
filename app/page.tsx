@@ -322,7 +322,6 @@ function HomeContent() {
         isActive={isDemoMode}
         onEnd={() => setIsDemoMode(false)}
         onStartDemo={() => {
-          // Load the demo problem and trigger scaffold generation
           handleProblemSubmit(DEMO_PROBLEM)
         }}
       />
