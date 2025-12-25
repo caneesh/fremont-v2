@@ -145,7 +145,7 @@ export default function PaperSolutionUploader({
     }))
   }
 
-  // Convert file to base64
+  // Convert file to base64 (without prefix, for upload API)
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -154,6 +154,18 @@ export default function PaperSolutionUploader({
         // Remove data URL prefix
         const base64 = result.split(',')[1]
         resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // Convert file to full data URL (with prefix, for extract API)
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        resolve(reader.result as string)
       }
       reader.onerror = reject
       reader.readAsDataURL(file)
@@ -194,13 +206,16 @@ export default function PaperSolutionUploader({
       setState(prev => ({ ...prev, uploadId: uploadResult.uploadId }))
 
       // Now extract text
-      // Pass image data URLs in header (workaround for MVP)
-      const dataUrls = state.images.map(img => img.url).join(',')
+      // Convert files to proper data URLs (blob: URLs don't work server-side)
+      const dataUrls = await Promise.all(
+        state.images.map(img => img.file ? fileToDataUrl(img.file) : Promise.resolve(''))
+      )
+      const dataUrlsHeader = dataUrls.filter(Boolean).join(',')
 
       const extractResponse = await authenticatedFetch('/api/paper-solution/extract', {
         method: 'POST',
         headers: {
-          'x-image-data': dataUrls,
+          'x-image-data': dataUrlsHeader,
         },
         body: JSON.stringify({
           uploadId: uploadResult.uploadId,
