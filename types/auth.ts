@@ -22,6 +22,7 @@ export interface UsageQuota {
   prerequisitesChecked: number
   reflectionsGenerated: number
   variationsGenerated: number
+  paperUploadsGenerated: number
 }
 
 export interface QuotaLimits {
@@ -30,6 +31,7 @@ export interface QuotaLimits {
   dailyPrerequisites: number
   dailyReflections: number
   dailyVariations: number
+  dailyPaperUploads: number
 }
 
 export const DEFAULT_QUOTA_LIMITS: QuotaLimits = {
@@ -38,4 +40,5 @@ export const DEFAULT_QUOTA_LIMITS: QuotaLimits = {
   dailyPrerequisites: 2,
   dailyReflections: 2,
   dailyVariations: 2,
+  dailyPaperUploads: 20,
 }

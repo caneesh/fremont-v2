@@ -1,7 +1,7 @@
 import type { UsageQuota, QuotaLimits } from '@/types/auth'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
-type QuotaType = 'problems' | 'hints' | 'prerequisites' | 'reflections' | 'variations'
+type QuotaType = 'problems' | 'hints' | 'prerequisites' | 'reflections' | 'variations' | 'paperUploads'
 
 class QuotaService {
   private readonly QUOTA_KEY_PREFIX = 'quota_'
@@ -43,6 +43,7 @@ class QuotaService {
       prerequisitesChecked: 0,
       reflectionsGenerated: 0,
       variationsGenerated: 0,
+      paperUploadsGenerated: 0,
     }
   }
 
@@ -72,6 +73,9 @@ class QuotaService {
       case 'variations':
         quota.variationsGenerated++
         break
+      case 'paperUploads':
+        quota.paperUploadsGenerated++
+        break
     }
 
     this.saveQuota(quota)
@@ -92,6 +96,8 @@ class QuotaService {
         return quota.reflectionsGenerated < limits.dailyReflections
       case 'variations':
         return quota.variationsGenerated < limits.dailyVariations
+      case 'paperUploads':
+        return quota.paperUploadsGenerated < limits.dailyPaperUploads
       default:
         return false
     }
@@ -106,6 +112,7 @@ class QuotaService {
       prerequisites: Math.max(0, limits.dailyPrerequisites - quota.prerequisitesChecked),
       reflections: Math.max(0, limits.dailyReflections - quota.reflectionsGenerated),
       variations: Math.max(0, limits.dailyVariations - quota.variationsGenerated),
+      paperUploads: Math.max(0, limits.dailyPaperUploads - quota.paperUploadsGenerated),
     }
   }
 

@@ -1,7 +1,7 @@
 import type { UsageQuota, QuotaLimits } from '@/types/auth'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
-type QuotaType = 'problems' | 'hints' | 'prerequisites' | 'reflections' | 'variations'
+type QuotaType = 'problems' | 'hints' | 'prerequisites' | 'reflections' | 'variations' | 'paperUploads'
 
 // In-memory quota tracking (in production, use database or Redis)
 // Map structure: userId -> date -> UsageQuota
@@ -33,6 +33,7 @@ class ServerQuotaService {
         prerequisitesChecked: 0,
         reflectionsGenerated: 0,
         variationsGenerated: 0,
+        paperUploadsGenerated: 0,
       }
       userQuotas.set(today, newQuota)
       return newQuota
@@ -60,6 +61,9 @@ class ServerQuotaService {
       case 'variations':
         quota.variationsGenerated++
         break
+      case 'paperUploads':
+        quota.paperUploadsGenerated++
+        break
     }
 
     return quota
@@ -79,6 +83,8 @@ class ServerQuotaService {
         return quota.reflectionsGenerated < limits.dailyReflections
       case 'variations':
         return quota.variationsGenerated < limits.dailyVariations
+      case 'paperUploads':
+        return quota.paperUploadsGenerated < limits.dailyPaperUploads
       default:
         return false
     }
@@ -93,6 +99,7 @@ class ServerQuotaService {
       prerequisites: Math.max(0, limits.dailyPrerequisites - quota.prerequisitesChecked),
       reflections: Math.max(0, limits.dailyReflections - quota.reflectionsGenerated),
       variations: Math.max(0, limits.dailyVariations - quota.variationsGenerated),
+      paperUploads: Math.max(0, limits.dailyPaperUploads - quota.paperUploadsGenerated),
     }
   }
 
@@ -141,6 +148,7 @@ class ServerQuotaService {
         total += todayQuota.prerequisitesChecked
         total += todayQuota.reflectionsGenerated
         total += todayQuota.variationsGenerated
+        total += todayQuota.paperUploadsGenerated
       }
     })
 
@@ -160,6 +168,7 @@ class ServerQuotaService {
         totalCost += todayQuota.prerequisitesChecked * 0.03 // $0.03 per prerequisite
         totalCost += todayQuota.reflectionsGenerated * 0.02 // $0.02 per reflection
         totalCost += todayQuota.variationsGenerated * 0.03 // $0.03 per variation
+        totalCost += todayQuota.paperUploadsGenerated * 0.05 // $0.05 per paper upload analysis
       }
     })
 
