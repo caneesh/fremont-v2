@@ -266,6 +266,18 @@ export default function PaperSolutionUploader({
   const handleAnalyze = async () => {
     if (!state.extractionResult || !state.editedText) return
 
+    // If "just store" mode, skip analysis and save directly
+    if (!state.analyzeMode) {
+      setState(prev => ({
+        ...prev,
+        step: 'idle',
+        isProcessing: false,
+      }))
+      // Notify parent that text was saved (without analysis)
+      onExtractedTextChange?.(state.editedText)
+      return
+    }
+
     setState(prev => ({ ...prev, step: 'analyzing', isProcessing: true, error: null }))
 
     try {
