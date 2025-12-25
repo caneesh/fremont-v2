@@ -15,6 +15,7 @@ import MistakeWarning from './MistakeWarning'
 import ErrorPatternInsights from './ErrorPatternInsights'
 import ExplainToFriend from './ExplainToFriend'
 import PostSolveActivity from './PostSolveActivity'
+import Celebration from './Celebration'
 import type { ReflectionAnswer } from '@/types/history'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
 import { mistakeTrackingService } from '@/lib/mistakeTracking'
@@ -53,6 +54,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [isAnalyzingError, setIsAnalyzingError] = useState(false)
   const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysisResponse | null>(null)
   const [showPostSolveActivity, setShowPostSolveActivity] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate a unique problem ID based on the problem text hash
@@ -384,8 +386,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         }
       }
 
-      setSaveMessage('Problem solved and reflection saved! ✓')
+      setSaveMessage('Problem solved and reflection saved!')
       setIsProblemSolved(true) // Show next challenge
+      setShowCelebration(true) // Trigger celebration animation
       setTimeout(() => setSaveMessage(''), 3000)
       setIsSaving(false)
     } catch (error) {
@@ -664,6 +667,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           onDismiss={() => setShowPostSolveActivity(false)}
         />
       )}
+
+      {/* Celebration Animation */}
+      <Celebration
+        show={showCelebration}
+        onComplete={() => setShowCelebration(false)}
+      />
     </div>
   )
 }

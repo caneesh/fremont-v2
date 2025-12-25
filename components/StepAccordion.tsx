@@ -239,7 +239,7 @@ export default function StepAccordion({
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h5 className="text-base font-bold text-gray-900">
-                    💡 Progressive Hint Ladder
+                    Progressive Hint Ladder
                   </h5>
                   <p className="text-xs text-gray-600 mt-1">
                     Unlock hints progressively. Try thinking before revealing each level.
@@ -264,6 +264,67 @@ export default function StepAccordion({
                       <>🎭 Audio</>
                     )}
                   </button>
+                )}
+              </div>
+
+              {/* Visual Hint Progress Stepper */}
+              <div className="mb-5 px-2">
+                <div className="relative flex items-center justify-between">
+                  {/* Progress Line Background */}
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded-full" />
+                  {/* Progress Line Filled */}
+                  <div
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.max(0, (currentHintLevel - 1) / 4) * 100}%` }}
+                  />
+
+                  {/* Stepper Nodes */}
+                  {[1, 2, 3, 4, 5].map((level) => {
+                    const isUnlocked = level <= currentHintLevel
+                    const isCurrent = level === currentHintLevel
+                    const isNext = level === currentHintLevel + 1
+                    const labels = ['Concept', 'Visual', 'Strategy', 'Equation', 'Solution']
+
+                    return (
+                      <div key={level} className="relative z-10 flex flex-col items-center">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300 ${
+                            isUnlocked
+                              ? level === 5
+                                ? 'bg-red-500 border-red-500 text-white'
+                                : 'bg-green-500 border-green-500 text-white'
+                              : isNext
+                              ? 'bg-yellow-100 border-yellow-500 text-yellow-700 animate-pulse'
+                              : 'bg-white border-gray-300 text-gray-400'
+                          } ${isCurrent ? 'ring-2 ring-offset-2 ring-green-400' : ''}`}
+                        >
+                          {isUnlocked ? '✓' : level}
+                        </div>
+                        <span className={`mt-1.5 text-[10px] font-medium ${
+                          isUnlocked ? 'text-green-700' : isNext ? 'text-yellow-700' : 'text-gray-400'
+                        }`}>
+                          {labels[level - 1]}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Current Position Indicator */}
+                {currentHintLevel > 0 && currentHintLevel < 5 && (
+                  <p className="text-center text-xs text-gray-500 mt-3">
+                    Level {currentHintLevel} of 5 unlocked
+                  </p>
+                )}
+                {currentHintLevel === 0 && (
+                  <p className="text-center text-xs text-gray-500 mt-3">
+                    Start by unlocking Level 1
+                  </p>
+                )}
+                {currentHintLevel === 5 && (
+                  <p className="text-center text-xs text-red-600 font-medium mt-3">
+                    Full solution revealed
+                  </p>
                 )}
               </div>
 

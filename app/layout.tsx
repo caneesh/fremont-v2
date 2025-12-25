@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import AuthGate from '@/components/AuthGate'
+import { ThemeProvider } from '@/lib/ThemeContext'
 
 export const metadata: Metadata = {
   title: 'PhysiScaffold - The Socratic Physics Engine',
@@ -22,8 +23,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="font-sans antialiased">
-        <AuthGate>{children}</AuthGate>
+      <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        <ThemeProvider>
+          <AuthGate>{children}</AuthGate>
+        </ThemeProvider>
       </body>
     </html>
   )

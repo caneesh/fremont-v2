@@ -134,3 +134,72 @@
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
 }
+
+/* Celebration animations */
+@keyframes confetti {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-confetti {
+  animation: confetti 3s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s ease-out forwards;
+}
+
+/* Dark mode support */
+.dark .bg-white {
+  background-color: #1f2937;
+}
+
+.dark .shadow-lg {
+  --tw-shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+.dark::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* KaTeX dark mode */
+.dark .katex {
+  color: #e5e7eb;
+}
+
+.dark .katex .frac-line {
+  border-color: #e5e7eb;
+}

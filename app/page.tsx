@@ -7,6 +7,7 @@ import SolutionScaffold from '@/components/SolutionScaffold'
 import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
+import ContinueBanner from '@/components/ContinueBanner'
 import type { ScaffoldData } from '@/types/scaffold'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
@@ -14,6 +15,9 @@ import { studyPathService } from '@/lib/studyPath/studyPathService'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
+import ThemeToggle from '@/components/ThemeToggle'
 
 function HomeContent() {
   const searchParams = useSearchParams()
@@ -24,6 +28,7 @@ function HomeContent() {
   const [currentProblemText, setCurrentProblemText] = useState<string>('')
   const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
 
   const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
     setCurrentProblemText(problemText)
@@ -159,16 +164,38 @@ function HomeContent() {
     },
   })
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'n', action: handleReset, description: 'New problem' },
+    { key: 'h', action: () => router.push('/history'), description: 'Go to history' },
+    { key: 's', action: () => router.push('/study-path'), description: 'Go to study path' },
+    { key: 'c', action: () => router.push('/concept-network'), description: 'Go to concept network' },
+    { key: '?', shiftKey: true, action: () => setShowShortcutsHelp(true), description: 'Show shortcuts' },
+    { key: 'Escape', action: () => setShowShortcutsHelp(false), description: 'Close dialogs' },
+  ], !isLoading)
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <header className="mb-8 md:mb-12">
           <div className="flex items-center justify-between mb-4 md:mb-6">
+            {/* Keyboard Shortcut Hint & Theme Toggle - Desktop only */}
+            <div className="hidden md:flex flex-1 justify-start items-center gap-3">
+              <button
+                onClick={() => setShowShortcutsHelp(true)}
+                className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 flex items-center gap-1 transition-colors"
+                title="Keyboard shortcuts"
+              >
+                <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-[10px]">?</kbd>
+                <span>Shortcuts</span>
+              </button>
+              <ThemeToggle />
+            </div>
             <div className="flex-1 text-center md:text-center">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2 md:mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2 md:mb-4">
                 PhysiScaffold
               </h1>
             </div>
@@ -213,10 +240,10 @@ function HomeContent() {
             </div>
           </div>
           <div className="text-center px-4">
-            <p className="text-lg md:text-xl text-gray-600 italic">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 italic">
               The Socratic Physics Engine
             </p>
-            <p className="text-xs md:text-sm text-gray-500 mt-2">
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-500 mt-2">
               Active Decomposition: We don&apos;t give answers; we give the framework for the answer.
             </p>
           </div>
@@ -224,12 +251,17 @@ function HomeContent() {
 
         {/* Main Content */}
         {!scaffoldData ? (
-          <ProblemInput
-            onSubmit={handleProblemSubmit}
-            isLoading={isLoading}
-            error={error}
-            initialProblem={currentProblemText}
-          />
+          <>
+            {!isLoading && (
+              <ContinueBanner onContinue={handleProblemSubmit} />
+            )}
+            <ProblemInput
+              onSubmit={handleProblemSubmit}
+              isLoading={isLoading}
+              error={error}
+              initialProblem={currentProblemText}
+            />
+          </>
         ) : showPrerequisiteCheck ? (
           <PrerequisiteCheck
             concepts={scaffoldData.concepts}
@@ -244,6 +276,12 @@ function HomeContent() {
           />
         )}
       </div>
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsHelp
+        isOpen={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
+      />
     </main>
   )
 }
