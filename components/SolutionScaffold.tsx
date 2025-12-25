@@ -479,65 +479,68 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header with problem statement and actions */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div className="flex justify-between items-start mb-4">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 mb-6 border border-transparent dark:border-dark-border">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4">
           <div>
-            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-2">
+            <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-accent/20 text-primary-700 dark:text-accent rounded-full text-sm font-medium mb-2">
               {data.domain} → {data.subdomain}
             </span>
-            <h2 className="text-2xl font-semibold text-gray-900">Problem Statement</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-dark-text-primary">Problem Statement</h2>
           </div>
           <button
             onClick={onReset}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:border-gray-400"
+            className="px-4 py-2 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary border border-gray-300 dark:border-dark-border rounded-lg hover:border-gray-400 dark:hover:border-dark-border-strong hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors"
           >
             ← New Problem
           </button>
         </div>
-        <p className="text-gray-800 leading-relaxed text-lg mb-6">
+        <p className="text-gray-800 dark:text-dark-text-secondary leading-relaxed text-base sm:text-lg mb-6">
           {data.problem}
         </p>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={() => handleSaveDraft(false)}
             disabled={isSaving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-300 dark:disabled:bg-blue-900/30 disabled:text-blue-100 flex items-center gap-2 text-sm transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>
-            Save Draft
+            <span className="hidden sm:inline">Save Draft</span>
+            <span className="sm:hidden">Save</span>
           </button>
 
           <button
             onClick={handleMarkSolved}
             disabled={isSaving}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-300 flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 disabled:bg-green-300 dark:disabled:bg-green-900/30 disabled:text-green-100 flex items-center gap-2 text-sm transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Mark as Solved
+            <span className="hidden sm:inline">Mark as Solved</span>
+            <span className="sm:hidden">Solved</span>
           </button>
 
           <button
             onClick={handleToggleReview}
-            className={`px-4 py-2 rounded-lg border-2 flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg border flex items-center gap-2 text-sm transition-colors ${
               isReviewFlagged
-                ? 'bg-yellow-50 border-yellow-500 text-yellow-700 hover:bg-yellow-100'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 dark:border-yellow-500/50 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'
+                : 'bg-white dark:bg-dark-card-soft border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-border'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            {isReviewFlagged ? 'Marked for Review' : 'Mark for Review'}
+            <span className="hidden sm:inline">{isReviewFlagged ? 'Marked for Review' : 'Mark for Review'}</span>
+            <span className="sm:hidden">{isReviewFlagged ? 'Review' : 'Review'}</span>
           </button>
 
           {saveMessage && (
-            <span className="text-sm text-green-600 font-medium ml-auto animate-fade-in">
+            <span className="text-sm text-green-600 dark:text-green-400 font-medium ml-auto animate-fade-in">
               {saveMessage}
             </span>
           )}
@@ -555,11 +558,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
               Solution Roadmap
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 dark:text-dark-text-muted mb-6">
               Work through each step. Click to expand and see hints. The framework guides you - you provide the reasoning.
             </p>
 

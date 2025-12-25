@@ -70,11 +70,11 @@ export default function MobileNav() {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 right-4 z-50 p-3 bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:bg-gray-50 active:scale-95 transition-transform"
+        className="md:hidden fixed top-4 right-4 z-50 p-3 bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card-soft active:scale-95 transition-all"
         aria-label="Toggle menu"
       >
         <svg
-          className="w-6 h-6 text-gray-700"
+          className="w-6 h-6 text-gray-700 dark:text-dark-text-primary"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -102,14 +102,14 @@ export default function MobileNav() {
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-40"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Menu Panel */}
-          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out">
+          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white dark:bg-dark-card shadow-2xl dark:shadow-dark-lg border-l border-transparent dark:border-dark-border z-40 transform transition-transform duration-300 ease-in-out">
             <div className="p-6 pt-20">
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Navigation</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-6">Navigation</h2>
               <nav className="space-y-2">
                 {navItems.map((item) => (
                   <button
@@ -117,14 +117,14 @@ export default function MobileNav() {
                     onClick={() => handleNavigate(item.path)}
                     className={`w-full flex items-center gap-3 p-4 rounded-lg text-left transition-colors ${
                       item.color === 'purple'
-                        ? 'hover:bg-purple-50 text-purple-700'
+                        ? 'hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-700 dark:text-purple-400'
                         : item.color === 'blue'
-                        ? 'hover:bg-blue-50 text-blue-700'
+                        ? 'hover:bg-blue-50 dark:hover:bg-accent/10 text-blue-700 dark:text-accent'
                         : item.color === 'orange'
-                        ? 'hover:bg-orange-50 text-orange-700'
+                        ? 'hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-700 dark:text-orange-400'
                         : item.color === 'red'
-                        ? 'hover:bg-red-50 text-red-700'
-                        : 'hover:bg-gray-50 text-gray-700'
+                        ? 'hover:bg-red-50 dark:hover:bg-red-900/20 text-red-700 dark:text-red-400'
+                        : 'hover:bg-gray-50 dark:hover:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary'
                     }`}
                   >
                     {item.icon}

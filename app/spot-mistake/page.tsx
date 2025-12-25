@@ -140,13 +140,13 @@ export default function SpotMistakePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app py-6 md:py-8 px-4">
       <div className="container mx-auto">
         {/* Header */}
-        <header className="mb-8">
+        <header className="mb-6 md:mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary mb-4 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -154,11 +154,11 @@ export default function SpotMistakePage() {
             Back to Home
           </Link>
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-orange-500">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-l-4 border-orange-500 dark:border-orange-400 border-r border-t border-b border-transparent dark:border-r-dark-border dark:border-t-dark-border dark:border-b-dark-border">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
               Spot the Mistake
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-dark-text-secondary">
               Sharpen your critical thinking by finding conceptual errors in student solutions.
               Each solution contains exactly ONE deliberate mistake - can you spot it?
             </p>
@@ -168,20 +168,20 @@ export default function SpotMistakePage() {
         {/* Main Content */}
         {!solution && !feedback ? (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 md:p-8 border border-transparent dark:border-dark-border">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-dark-text-primary mb-6">
                 Enter a Physics Problem
               </h2>
 
               <form onSubmit={handleGenerate} className="space-y-6">
                 <div>
-                  <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="problem" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                     Problem Statement
                   </label>
                   <textarea
                     id="problem"
                     rows={6}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-gray-900"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-soft text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-placeholder focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400/50 focus:border-transparent resize-none transition-colors"
                     placeholder="Enter any IIT-JEE Physics problem..."
                     value={problemText}
                     onChange={(e) => setProblemText(e.target.value)}
@@ -190,16 +190,16 @@ export default function SpotMistakePage() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
                     {error}
                   </div>
                 )}
 
                 {isLoading && (
-                  <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-3">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
-                      <p className="text-orange-800 font-medium">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600 dark:border-orange-400"></div>
+                      <p className="text-orange-800 dark:text-orange-400 font-medium">
                         Generating a flawed student solution...
                       </p>
                     </div>
@@ -209,16 +209,16 @@ export default function SpotMistakePage() {
                 <button
                   type="submit"
                   disabled={isLoading || !problemText.trim()}
-                  className="w-full px-6 py-4 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="w-full px-6 py-4 bg-orange-600 dark:bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 disabled:bg-gray-300 dark:disabled:bg-dark-card-soft disabled:text-gray-500 dark:disabled:text-dark-text-muted disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg dark:hover:shadow-orange-500/20"
                 >
                   {isLoading ? 'Generating...' : 'Generate Student Solution'}
                 </button>
               </form>
 
               {/* Info Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">How It Works</h3>
-                <div className="space-y-2 text-sm text-gray-700">
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-dark-border">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-3">How It Works</h3>
+                <div className="space-y-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                   <p>• We generate a student solution that&apos;s mostly correct (~90%)</p>
                   <p>• It contains exactly ONE conceptual error (not a calculation typo)</p>
                   <p>• Your task: identify which step has the mistake and explain why</p>
@@ -233,7 +233,7 @@ export default function SpotMistakePage() {
           <>
             {error && (
               <div className="max-w-4xl mx-auto mb-6">
-                <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
                   {error}
                 </div>
               </div>

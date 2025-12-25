@@ -42,10 +42,10 @@ export default function TopicDetailPage() {
   }, [topicId])
 
   if (!topic) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center">
       <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
+        <p className="text-gray-600 dark:text-dark-text-secondary">Loading...</p>
       </div>
     </div>
   }
@@ -57,35 +57,35 @@ export default function TopicDetailPage() {
   const progress = studyPathService.getTopicCompletionPercentage(topicId)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <button
             onClick={() => router.push('/study-path')}
-            className="text-primary-600 hover:text-primary-700 mb-4 flex items-center gap-2"
+            className="text-accent hover:text-accent-strong mb-4 flex items-center gap-2 text-sm md:text-base transition-colors"
           >
             ← Back to Study Path
           </button>
 
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 md:p-8 border border-transparent dark:border-dark-border">
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-6xl">{topic.icon}</span>
+              <span className="text-5xl md:text-6xl">{topic.icon}</span>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">{topic.name}</h1>
-                <p className="text-gray-600 mt-2">{topic.description}</p>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary">{topic.name}</h1>
+                <p className="text-sm md:text-base text-gray-600 dark:text-dark-text-secondary mt-2">{topic.description}</p>
               </div>
             </div>
 
             {/* Progress */}
             <div className="mt-6">
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600">Your Progress</span>
-                <span className="font-semibold text-gray-900">{progress}%</span>
+                <span className="text-gray-600 dark:text-dark-text-muted">Your Progress</span>
+                <span className="font-semibold text-gray-900 dark:text-dark-text-primary">{progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-gray-200 dark:bg-dark-card-soft rounded-full h-3 overflow-hidden">
                 <div
-                  className="bg-primary-600 h-3 rounded-full transition-all"
+                  className="bg-accent h-3 rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -98,10 +98,10 @@ export default function TopicDetailPage() {
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedSubtopic('all')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base transition-all ${
                 selectedSubtopic === 'all'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-accent text-white shadow-md dark:shadow-dark-glow'
+                  : 'bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-card-soft border border-gray-200 dark:border-dark-border'
               }`}
             >
               All ({questions.length})
@@ -112,10 +112,10 @@ export default function TopicDetailPage() {
                 <button
                   key={subtopic.id}
                   onClick={() => setSelectedSubtopic(subtopic.id)}
-                  className={`px-4 py-2 rounded-lg font-medium ${
+                  className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base transition-all ${
                     selectedSubtopic === subtopic.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'bg-accent text-white shadow-md dark:shadow-dark-glow'
+                      : 'bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-card-soft border border-gray-200 dark:border-dark-border'
                   }`}
                 >
                   {subtopic.name} ({count})
@@ -126,38 +126,38 @@ export default function TopicDetailPage() {
         </div>
 
         {/* Questions List */}
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {filteredQuestions.map((question) => (
             <button
               key={question.id}
               onClick={() => router.push(`/?question=${question.id}`)}
-              className="w-full bg-white rounded-lg shadow-lg p-6 text-left hover:shadow-xl transition-all group"
+              className="w-full bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md p-4 md:p-6 text-left hover:shadow-xl dark:hover:shadow-dark-lg transition-all group border border-transparent dark:border-dark-border hover:border-accent dark:hover:border-accent"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600">
+                  <div className="flex items-center gap-2 md:gap-3 mb-3 flex-wrap">
+                    <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-dark-text-primary group-hover:text-accent">
                       {question.title}
                     </h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${
                       question.difficulty === 'Easy'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
                         : question.difficulty === 'Medium'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                     }`}>
                       {question.difficulty}
                     </span>
                   </div>
-                  <p className="text-gray-700 mb-4 line-clamp-2">{question.statement}</p>
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
+                  <p className="text-sm md:text-base text-gray-700 dark:text-dark-text-secondary mb-3 md:mb-4 line-clamp-2">{question.statement}</p>
+                  <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-gray-500 dark:text-dark-text-muted flex-wrap">
                     <span>⏱️ {question.expectedTime} min</span>
                     <span>📚 {question.concepts.join(', ')}</span>
                     {question.source && <span>📖 {question.source}</span>}
                   </div>
                 </div>
                 <svg
-                  className="w-6 h-6 text-gray-400 group-hover:text-primary-600 ml-4"
+                  className="w-5 h-5 md:w-6 md:h-6 text-gray-400 dark:text-dark-text-muted group-hover:text-accent ml-3 md:ml-4 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
