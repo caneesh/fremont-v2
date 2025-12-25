@@ -64,8 +64,10 @@ function HomeContent() {
 
       const data = await response.json()
       setScaffoldData(data)
-      // Show prerequisite check after scaffold loads
-      setShowPrerequisiteCheck(true)
+      // Show prerequisite check after scaffold loads (skip in demo mode)
+      if (!isDemoMode) {
+        setShowPrerequisiteCheck(true)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
