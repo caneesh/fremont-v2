@@ -7,6 +7,7 @@ interface ProblemInputProps {
   onSubmit: (problem: string, diagramImage?: string | null) => void
   isLoading: boolean
   error: string | null
+  initialProblem?: string
 }
 
 type InputMode = 'text' | 'voice'
@@ -34,13 +35,20 @@ const SAMPLE_PROBLEMS = [
   }
 ]
 
-export default function ProblemInput({ onSubmit, isLoading, error }: ProblemInputProps) {
-  const [problemText, setProblemText] = useState('')
+export default function ProblemInput({ onSubmit, isLoading, error, initialProblem }: ProblemInputProps) {
+  const [problemText, setProblemText] = useState(initialProblem || '')
   const [currentStage, setCurrentStage] = useState(0)
   const [progress, setProgress] = useState(0)
   const [inputMode, setInputMode] = useState<InputMode>('text')
   const [diagramImage, setDiagramImage] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  // Update problemText when initialProblem changes (e.g., from study path)
+  useEffect(() => {
+    if (initialProblem) {
+      setProblemText(initialProblem)
+    }
+  }, [initialProblem])
 
   useEffect(() => {
     if (!isLoading) {

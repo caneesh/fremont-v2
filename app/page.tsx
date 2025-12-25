@@ -21,10 +21,12 @@ function HomeContent() {
   const [scaffoldData, setScaffoldData] = useState<ScaffoldData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentProblemText, setCurrentProblemText] = useState<string>('')
   const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
 
   const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
+    setCurrentProblemText(problemText)
     setIsLoading(true)
     setError(null)
     setScaffoldData(null)
@@ -128,6 +130,7 @@ function HomeContent() {
   const handleReset = () => {
     setScaffoldData(null)
     setError(null)
+    setCurrentProblemText('')
     setShowPrerequisiteCheck(false)
     setPrerequisitesPassed(false)
   }
@@ -225,6 +228,7 @@ function HomeContent() {
             onSubmit={handleProblemSubmit}
             isLoading={isLoading}
             error={error}
+            initialProblem={currentProblemText}
           />
         ) : showPrerequisiteCheck ? (
           <PrerequisiteCheck
