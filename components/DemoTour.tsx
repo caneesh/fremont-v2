@@ -196,44 +196,50 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] pointer-events-none">
-      {/* Overlay with cutout */}
-      <div className="absolute inset-0 pointer-events-auto">
-        <svg className="w-full h-full" style={{ position: 'absolute', top: 0, left: 0 }}>
-          <defs>
-            <mask id="demo-mask">
-              <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              <rect
-                x={highlightPosition.left}
-                y={highlightPosition.top}
-                width={highlightPosition.width}
-                height={highlightPosition.height}
-                rx="8"
-                fill="black"
-              />
-            </mask>
-          </defs>
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="rgba(0,0,0,0.7)"
-            mask="url(#demo-mask)"
-          />
-        </svg>
+      {/* Overlay regions around the highlighted element (4 rectangles) */}
+      {/* Top overlay */}
+      <div
+        className="absolute left-0 right-0 top-0 bg-black/70 pointer-events-auto"
+        style={{ height: highlightPosition.top }}
+      />
+      {/* Bottom overlay */}
+      <div
+        className="absolute left-0 right-0 bg-black/70 pointer-events-auto"
+        style={{
+          top: highlightPosition.top + highlightPosition.height,
+          bottom: 0
+        }}
+      />
+      {/* Left overlay */}
+      <div
+        className="absolute left-0 bg-black/70 pointer-events-auto"
+        style={{
+          top: highlightPosition.top,
+          height: highlightPosition.height,
+          width: highlightPosition.left
+        }}
+      />
+      {/* Right overlay */}
+      <div
+        className="absolute right-0 bg-black/70 pointer-events-auto"
+        style={{
+          top: highlightPosition.top,
+          height: highlightPosition.height,
+          left: highlightPosition.left + highlightPosition.width
+        }}
+      />
 
-        {/* Highlight border */}
-        <div
-          className="absolute border-2 border-blue-500 rounded-lg pointer-events-none"
-          style={{
-            top: highlightPosition.top,
-            left: highlightPosition.left,
-            width: highlightPosition.width,
-            height: highlightPosition.height,
-            boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.4)',
-          }}
-        />
-      </div>
+      {/* Highlight border - pointer-events-none so user can interact with element */}
+      <div
+        className="absolute border-2 border-blue-500 rounded-lg pointer-events-none"
+        style={{
+          top: highlightPosition.top,
+          left: highlightPosition.left,
+          width: highlightPosition.width,
+          height: highlightPosition.height,
+          boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.4)',
+        }}
+      />
 
       {/* Tooltip */}
       <div
