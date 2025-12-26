@@ -128,15 +128,22 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
     setIsVisible(true)
   }, [isActive, currentStep, steps])
 
+  // Only reset when isActive changes from false to true
   useEffect(() => {
     if (isActive) {
       setCurrentStep(0)
       setPhase('input')
-      updatePosition()
     } else {
       setIsVisible(false)
     }
-  }, [isActive, updatePosition])
+  }, [isActive])
+
+  // Update position when step or phase changes
+  useEffect(() => {
+    if (isActive) {
+      updatePosition()
+    }
+  }, [isActive, currentStep, phase, updatePosition])
 
   useEffect(() => {
     updatePosition()
