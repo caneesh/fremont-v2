@@ -16,7 +16,9 @@ import ErrorPatternInsights from './ErrorPatternInsights'
 import ExplainToFriend from './ExplainToFriend'
 import PostSolveActivity from './PostSolveActivity'
 import Celebration from './Celebration'
+import SubmissionCanvas from './SubmissionCanvas'
 import type { ReflectionAnswer } from '@/types/history'
+import type { GradeSolutionResponse } from '@/types/gradeSolution'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
 import { mistakeTrackingService } from '@/lib/mistakeTracking'
 import { errorPatternService } from '@/lib/errorPatternService'
@@ -56,6 +58,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPostSolveActivity, setShowPostSolveActivity] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [highlightedStepId, setHighlightedStepId] = useState<number | null>(null)
+  const [showSubmissionCanvas, setShowSubmissionCanvas] = useState(false)
+  const [solutionGradeResult, setSolutionGradeResult] = useState<GradeSolutionResponse | null>(null)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
@@ -506,6 +510,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setShowCelebration(true)
   }, [])
 
+  // Handle solution grade complete
+  const handleGradeComplete = useCallback((result: GradeSolutionResponse) => {
+    setSolutionGradeResult(result)
+    if (result.status === 'SUCCESS') {
+      setShowCelebration(true)
+    }
+  }, [])
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header with problem statement and actions */}
@@ -628,6 +640,68 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
               ))}
             </div>
           </div>
+
+          {/* Submit Solution Section - always visible after first step */}
+          {completedSteps.length > 0 && !showExplainToFriend && !showReflection && (
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
+              <button
+                onClick={() => setShowSubmissionCanvas(!showSubmissionCanvas)}
+                className="w-full flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    solutionGradeResult?.status === 'SUCCESS'
+                      ? 'bg-green-500/20 text-green-400'
+                      : solutionGradeResult?.status === 'MINOR_SLIP'
+                      ? 'bg-amber-500/20 text-amber-400'
+                      : solutionGradeResult?.status === 'CONCEPTUAL_GAP'
+                      ? 'bg-red-500/20 text-red-400'
+                      : 'bg-indigo-500/20 text-indigo-400'
+                  }`}>
+                    {solutionGradeResult?.status === 'SUCCESS' ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                      {solutionGradeResult ? 'Solution Graded' : 'Submit Your Solution'}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-muted">
+                      {solutionGradeResult
+                        ? `Status: ${solutionGradeResult.status.replace('_', ' ')}`
+                        : 'Type or scan your handwritten solution for AI grading'}
+                    </p>
+                  </div>
+                </div>
+                <svg
+                  className={`w-5 h-5 text-gray-400 transition-transform ${showSubmissionCanvas ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showSubmissionCanvas && (
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+                  <SubmissionCanvas
+                    problemText={data.problem}
+                    domain={data.domain}
+                    subdomain={data.subdomain}
+                    concepts={data.concepts}
+                    onGradeComplete={handleGradeComplete}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Sanity Check - only show after all steps completed */}
           {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
