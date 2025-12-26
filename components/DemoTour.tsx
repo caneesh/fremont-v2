@@ -171,9 +171,17 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
       setPhase('scaffold')
       setCurrentStep(0)
       setIsVisible(false)
-      setTimeout(() => {
-        updatePosition()
-      }, 2000)
+      // Poll for scaffold elements to appear (API might take time)
+      const pollForScaffold = () => {
+        const scaffoldElement = document.querySelector('.demo-step-steps')
+        if (scaffoldElement) {
+          updatePosition()
+        } else {
+          setTimeout(pollForScaffold, 500)
+        }
+      }
+      // Start polling after a short delay
+      setTimeout(pollForScaffold, 1000)
     } else {
       onEnd()
     }
