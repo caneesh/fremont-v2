@@ -82,9 +82,12 @@ export default function SanityCheckStep({ sanityCheck, userAnswer, onAnswerChang
             </p>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-green-200 dark:border-green-700">
-            <p className="text-sm text-green-800 dark:text-green-400 mb-3">
-              <strong>Next step:</strong> If your prediction matches, click &quot;Mark as Solved&quot; above to complete this problem and reflect on your learning.
+          <div className="mt-6 pt-4 border-t border-green-200 dark:border-green-700 space-y-3">
+            <p className="text-sm text-green-800 dark:text-green-400">
+              <strong>✓ If your prediction matches:</strong> Click &quot;Mark as Solved&quot; above to complete this problem and reflect on your learning.
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              <strong>✗ If your prediction doesn&apos;t match:</strong> Review your solution steps above. Look for calculation errors, sign mistakes, or missing physical considerations. This mismatch often reveals where your understanding needs strengthening.
             </p>
           </div>
         </div>
