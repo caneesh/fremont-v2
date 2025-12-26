@@ -95,36 +95,36 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
       height: rect.height + padding * 2,
     })
 
-    // Calculate tooltip position
+    // Calculate tooltip position (fixed positioning - no scrollY needed)
     const tooltipWidth = 320
     const tooltipHeight = 150
-    let top = 0
-    let left = 0
+    let tooltipTop = 0
+    let tooltipLeft = 0
 
     switch (step.position) {
       case 'bottom':
-        top = rect.bottom + 16 + window.scrollY
-        left = rect.left + rect.width / 2 - tooltipWidth / 2
+        tooltipTop = rect.bottom + 16
+        tooltipLeft = rect.left + rect.width / 2 - tooltipWidth / 2
         break
       case 'top':
-        top = rect.top - tooltipHeight - 16 + window.scrollY
-        left = rect.left + rect.width / 2 - tooltipWidth / 2
+        tooltipTop = rect.top - tooltipHeight - 16
+        tooltipLeft = rect.left + rect.width / 2 - tooltipWidth / 2
         break
       case 'left':
-        top = rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY
-        left = rect.left - tooltipWidth - 16
+        tooltipTop = rect.top + rect.height / 2 - tooltipHeight / 2
+        tooltipLeft = rect.left - tooltipWidth - 16
         break
       case 'right':
-        top = rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY
-        left = rect.right + 16
+        tooltipTop = rect.top + rect.height / 2 - tooltipHeight / 2
+        tooltipLeft = rect.right + 16
         break
     }
 
     // Keep tooltip in viewport
-    left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16))
-    top = Math.max(16, top)
+    tooltipLeft = Math.max(16, Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 16))
+    tooltipTop = Math.max(16, Math.min(tooltipTop, window.innerHeight - tooltipHeight - 16))
 
-    setTooltipPosition({ top, left })
+    setTooltipPosition({ top: tooltipTop, left: tooltipLeft })
     setIsVisible(true)
   }, [isActive, currentStep, steps])
 
