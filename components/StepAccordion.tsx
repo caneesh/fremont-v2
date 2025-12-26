@@ -153,12 +153,12 @@ export default function StepAccordion({
     <div
       className={`border-2 rounded-lg overflow-hidden transition-all ${
         isCompleted
-          ? 'border-green-400 bg-green-50'
+          ? 'border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/20'
           : isActive
-          ? 'border-primary-500 bg-primary-50'
+          ? 'border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20'
           : isLocked
-          ? 'border-gray-200 bg-gray-50 opacity-60'
-          : 'border-gray-300 bg-white hover:border-gray-400'
+          ? 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-card-soft opacity-60'
+          : 'border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card hover:border-gray-400 dark:hover:border-dark-border-strong'
       }`}
     >
       {/* Header */}
@@ -176,8 +176,8 @@ export default function StepAccordion({
                 : isActive
                 ? 'bg-primary-600 text-white'
                 : isLocked
-                ? 'bg-gray-300 text-gray-500'
-                : 'bg-gray-200 text-gray-700'
+                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+                : 'bg-gray-200 dark:bg-dark-border text-gray-700 dark:text-dark-text-secondary'
             }`}
           >
             {isCompleted ? '✓' : stepNumber}
@@ -185,11 +185,11 @@ export default function StepAccordion({
 
           {/* Title */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
               Step {stepNumber}: {step.title}
             </h4>
             {isLocked && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                 Complete previous steps to unlock
               </p>
             )}
@@ -199,7 +199,7 @@ export default function StepAccordion({
         {/* Expand/Collapse Icon */}
         {!isLocked && (
           <svg
-            className={`w-6 h-6 text-gray-600 transition-transform ${
+            className={`w-6 h-6 text-gray-600 dark:text-dark-text-secondary transition-transform ${
               isExpanded ? 'rotate-180' : ''
             }`}
             fill="none"
@@ -213,19 +213,19 @@ export default function StepAccordion({
 
       {/* Expanded Content */}
       {isExpanded && !isLocked && (
-        <div className="px-6 pb-6 border-t border-gray-200">
+        <div className="px-6 pb-6 border-t border-gray-200 dark:border-dark-border">
           <div className="pt-4 space-y-4">
             {/* Required Concepts */}
             {relatedConcepts.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h5 className="text-sm font-semibold text-blue-900 mb-2">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                <h5 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
                   Required Concepts:
                 </h5>
                 <div className="flex flex-wrap gap-2">
                   {relatedConcepts.map(concept => (
                     <span
                       key={concept.id}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-blue-100 dark:bg-blue-800/40 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
                     >
                       {concept.name}
                     </span>
@@ -235,13 +235,13 @@ export default function StepAccordion({
             )}
 
             {/* Progressive Hint Ladder */}
-            <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-5">
+            <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h5 className="text-base font-bold text-gray-900">
+                  <h5 className="text-base font-bold text-gray-900 dark:text-dark-text-primary">
                     Progressive Hint Ladder
                   </h5>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted mt-1">
                     Unlock hints progressively. Try thinking before revealing each level.
                   </p>
                 </div>
@@ -271,7 +271,7 @@ export default function StepAccordion({
               <div className="mb-5 px-2">
                 <div className="relative flex items-center justify-between">
                   {/* Progress Line Background */}
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded-full" />
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-dark-border rounded-full" />
                   {/* Progress Line Filled */}
                   <div
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all duration-500"
@@ -294,14 +294,14 @@ export default function StepAccordion({
                                 ? 'bg-red-500 border-red-500 text-white'
                                 : 'bg-green-500 border-green-500 text-white'
                               : isNext
-                              ? 'bg-yellow-100 border-yellow-500 text-yellow-700 animate-pulse'
-                              : 'bg-white border-gray-300 text-gray-400'
-                          } ${isCurrent ? 'ring-2 ring-offset-2 ring-green-400' : ''}`}
+                              ? 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-500 text-yellow-700 dark:text-yellow-300 animate-pulse'
+                              : 'bg-white dark:bg-dark-card border-gray-300 dark:border-dark-border text-gray-400 dark:text-dark-text-muted'
+                          } ${isCurrent ? 'ring-2 ring-offset-2 dark:ring-offset-dark-card-soft ring-green-400' : ''}`}
                         >
                           {isUnlocked ? '✓' : level}
                         </div>
                         <span className={`mt-1.5 text-[10px] font-medium ${
-                          isUnlocked ? 'text-green-700' : isNext ? 'text-yellow-700' : 'text-gray-400'
+                          isUnlocked ? 'text-green-700 dark:text-green-400' : isNext ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-400 dark:text-dark-text-muted'
                         }`}>
                           {labels[level - 1]}
                         </span>
@@ -312,17 +312,17 @@ export default function StepAccordion({
 
                 {/* Current Position Indicator */}
                 {currentHintLevel > 0 && currentHintLevel < 5 && (
-                  <p className="text-center text-xs text-gray-500 mt-3">
+                  <p className="text-center text-xs text-gray-500 dark:text-dark-text-muted mt-3">
                     Level {currentHintLevel} of 5 unlocked
                   </p>
                 )}
                 {currentHintLevel === 0 && (
-                  <p className="text-center text-xs text-gray-500 mt-3">
+                  <p className="text-center text-xs text-gray-500 dark:text-dark-text-muted mt-3">
                     Start by unlocking Level 1
                   </p>
                 )}
                 {currentHintLevel === 5 && (
-                  <p className="text-center text-xs text-red-600 font-medium mt-3">
+                  <p className="text-center text-xs text-red-600 dark:text-red-400 font-medium mt-3">
                     Full solution revealed
                   </p>
                 )}
@@ -347,11 +347,11 @@ export default function StepAccordion({
                       className={`border-2 rounded-lg transition-all ${
                         isUnlocked
                           ? level === 5
-                            ? 'border-red-400 bg-red-50'
-                            : 'border-green-400 bg-green-50'
+                            ? 'border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
+                            : 'border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/20'
                           : isNextHint
-                          ? 'border-yellow-400 bg-yellow-50'
-                          : 'border-gray-300 bg-gray-100 opacity-60'
+                          ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'
+                          : 'border-gray-300 dark:border-dark-border bg-gray-100 dark:bg-dark-card opacity-60'
                       }`}
                     >
                       <div className="p-3">
@@ -365,14 +365,14 @@ export default function StepAccordion({
                                     : 'bg-green-600 text-white'
                                   : isNextHint
                                   ? 'bg-yellow-600 text-white'
-                                  : 'bg-gray-400 text-white'
+                                  : 'bg-gray-400 dark:bg-gray-600 text-white'
                               }`}
                             >
                               {isUnlocked ? '✓' : level}
                             </div>
                             <h6
                               className={`text-sm font-semibold ${
-                                isUnlocked ? 'text-gray-900' : 'text-gray-600'
+                                isUnlocked ? 'text-gray-900 dark:text-dark-text-primary' : 'text-gray-600 dark:text-dark-text-secondary'
                               }`}
                             >
                               Level {level}: {hint?.title || (level === 4 ? 'Structural Equation' : level === 5 ? 'Full Solution' : 'Hint')}
@@ -406,19 +406,19 @@ export default function StepAccordion({
                         </div>
 
                         {isUnlocked && hint ? (
-                          <div className="mt-2 text-sm text-gray-800">
+                          <div className="mt-2 text-sm text-gray-800 dark:text-dark-text-secondary">
                             <MathRenderer text={hint.content} />
                           </div>
                         ) : isFutureHint ? (
-                          <p className="text-xs text-gray-500 italic">
+                          <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">
                             Locked - unlock previous hints first
                           </p>
                         ) : isNextHint && level >= 4 ? (
-                          <p className="text-xs text-gray-700 italic">
+                          <p className="text-xs text-gray-700 dark:text-dark-text-secondary italic">
                             Click &quot;Generate&quot; to create this hint (~3 seconds)
                           </p>
                         ) : (
-                          <p className="text-xs text-gray-700 italic">
+                          <p className="text-xs text-gray-700 dark:text-dark-text-secondary italic">
                             Click &quot;Unlock&quot; to reveal this hint
                           </p>
                         )}
@@ -429,29 +429,29 @@ export default function StepAccordion({
               </div>
 
               {currentHintLevel === 5 && (
-                <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
-                  <p className="text-xs text-red-800 font-medium">
+                <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-xs text-red-800 dark:text-red-300 font-medium">
                     ⚠️ You&apos;ve unlocked the full solution. Make sure you understand each step before moving forward.
                   </p>
                 </div>
               )}
 
               {audioError && (
-                <p className="text-xs text-red-600 mt-2">{audioError}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-2">{audioError}</p>
               )}
             </div>
 
             {/* Socratic Question */}
             {step.question && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h5 className="text-sm font-semibold text-purple-900 mb-3">
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+                <h5 className="text-sm font-semibold text-purple-900 dark:text-purple-300 mb-3">
                   🤔 Think About This:
                 </h5>
-                <MathRenderer text={step.question} className="mb-3" />
+                <MathRenderer text={step.question} className="mb-3 text-gray-900 dark:text-dark-text-primary" />
 
                 <textarea
                   placeholder="Type your reasoning here..."
-                  className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white dark:bg-dark-card-soft text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-muted"
                   rows={3}
                   value={userAnswer}
                   onChange={(e) => onAnswerChange(e.target.value)}
@@ -463,7 +463,7 @@ export default function StepAccordion({
             <div className="flex justify-end pt-2">
               <button
                 onClick={handleComplete}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                className="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
               >
                 Mark as Complete →
               </button>
