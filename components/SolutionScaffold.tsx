@@ -55,7 +55,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysisResponse | null>(null)
   const [showPostSolveActivity, setShowPostSolveActivity] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
+  const [highlightedStepId, setHighlightedStepId] = useState<number | null>(null)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   // Generate a unique problem ID based on the problem text hash
   const problemId = useCallback(() => {
@@ -477,6 +479,33 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     })
   }
 
+  // Handle targeted rewind from Socratic Debugger
+  const handleTargetStep = useCallback((stepId: number) => {
+    // Convert 1-based stepId to 0-based index
+    const stepIndex = stepId - 1
+    if (stepIndex < 0 || stepIndex >= data.steps.length) return
+
+    // Set the highlighted step
+    setHighlightedStepId(stepIndex)
+
+    // Scroll to the step
+    const stepElement = stepRefs.current.get(stepIndex)
+    if (stepElement) {
+      stepElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+
+    // Remove highlight after 5 seconds
+    setTimeout(() => {
+      setHighlightedStepId(null)
+    }, 5000)
+  }, [data.steps.length])
+
+  // Handle sanity check solved
+  const handleSanityCheckSolved = useCallback(() => {
+    // Trigger celebration and allow proceeding to Mark as Solved
+    setShowCelebration(true)
+  }, [])
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header with problem statement and actions */}
@@ -569,22 +598,33 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
             <div className="space-y-3">
               {data.steps.map((step, index) => (
-                <StepAccordion
+                <div
                   key={step.id}
-                  step={step}
-                  stepNumber={index + 1}
-                  isActive={currentStep === index}
-                  isCompleted={completedSteps.includes(index)}
-                  isLocked={index > 0 && !completedSteps.includes(index - 1)}
-                  concepts={data.concepts}
-                  userAnswer={stepAnswers.get(index) || ''}
-                  currentHintLevel={stepHintLevels.get(index) || 0}
-                  problemStatement={data.problem}
-                  onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
-                  onComplete={() => handleStepComplete(index)}
-                  onActivate={() => setCurrentStep(index)}
-                  onHintLevelChange={(level) => handleHintLevelChange(index, level)}
-                />
+                  ref={(el) => {
+                    if (el) stepRefs.current.set(index, el)
+                  }}
+                  className={`transition-all duration-500 ${
+                    highlightedStepId === index
+                      ? 'ring-4 ring-yellow-400 dark:ring-yellow-500 ring-offset-2 dark:ring-offset-dark-card rounded-lg shadow-lg shadow-yellow-200 dark:shadow-yellow-900/30'
+                      : ''
+                  }`}
+                >
+                  <StepAccordion
+                    step={step}
+                    stepNumber={index + 1}
+                    isActive={currentStep === index}
+                    isCompleted={completedSteps.includes(index)}
+                    isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                    concepts={data.concepts}
+                    userAnswer={stepAnswers.get(index) || ''}
+                    currentHintLevel={stepHintLevels.get(index) || 0}
+                    problemStatement={data.problem}
+                    onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
+                    onComplete={() => handleStepComplete(index)}
+                    onActivate={() => setCurrentStep(index)}
+                    onHintLevelChange={(level) => handleHintLevelChange(index, level)}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -596,6 +636,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                 sanityCheck={data.sanityCheck}
                 userAnswer={sanityCheckAnswer}
                 onAnswerChange={setSanityCheckAnswer}
+                problemText={data.problem}
+                domain={data.domain}
+                subdomain={data.subdomain}
+                steps={data.steps}
+                concepts={data.concepts}
+                onTargetStep={handleTargetStep}
+                onSolved={handleSanityCheckSolved}
               />
             </div>
           )}
