@@ -251,7 +251,7 @@ export default function DemoTour({ isActive, onEnd, onStartDemo }: DemoTourProps
 
       {/* Tooltip */}
       <div
-        className="absolute w-80 bg-white dark:bg-dark-card rounded-xl shadow-2xl dark:shadow-dark-xl pointer-events-auto border border-gray-200 dark:border-dark-border"
+        className="absolute w-80 bg-white dark:bg-dark-card rounded-xl shadow-2xl dark:shadow-dark-xl pointer-events-auto border border-gray-200 dark:border-dark-border z-10"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
