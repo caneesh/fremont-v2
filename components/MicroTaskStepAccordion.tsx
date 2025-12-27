@@ -226,6 +226,7 @@ export default function MicroTaskStepAccordion({
           {/* Current Task Card */}
           {currentTask && !allTasksCompleted && (
             <InsightCard
+              key={`step-${step.id}-level-${currentLevel}`}
               task={currentTask}
               stepTitle={step.title}
               onCorrectAnswer={handleTaskCorrect}
