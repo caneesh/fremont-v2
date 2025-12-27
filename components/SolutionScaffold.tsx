@@ -171,6 +171,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           setReflectionAnswers(progress.reflectionAnswers)
           setIsReflectionComplete(true)
         }
+
+        // Load micro-task progress if it exists
+        if (progress.useMicroTasks && progress.microTaskProgress) {
+          const microProgress = new Map<number, MicroTaskStepProgress>()
+          progress.microTaskProgress.forEach(mp => {
+            microProgress.set(mp.stepId, mp)
+          })
+          setMicroTaskProgress(microProgress)
+        }
       }
     }
 
@@ -202,7 +211,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepAnswers, completedSteps, stepHintLevels, currentStep, sanityCheckAnswer])
+  }, [stepAnswers, completedSteps, stepHintLevels, currentStep, sanityCheckAnswer, microTaskProgress])
 
   const getCurrentProgress = useCallback((): ProblemProgress => {
     const stepProgress: StepProgress[] = data.steps.map((_, index) => ({
@@ -212,14 +221,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       currentHintLevel: stepHintLevels.get(index),
     }))
 
-    return {
+    const progress: ProblemProgress = {
       problemText: data.problem,
       stepProgress,
       sanityCheckAnswer,
       currentStep,
       reflectionAnswers: reflectionAnswers.length > 0 ? reflectionAnswers : undefined,
     }
-  }, [data, completedSteps, stepAnswers, stepHintLevels, sanityCheckAnswer, currentStep, reflectionAnswers])
+
+    // Include micro-task progress if in micro-task mode
+    if (useMicroTasks && microTaskProgress.size > 0) {
+      progress.useMicroTasks = true
+      progress.microTaskProgress = Array.from(microTaskProgress.values())
+    }
+
+    return progress
+  }, [data, completedSteps, stepAnswers, stepHintLevels, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress])
 
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)

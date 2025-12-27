@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import MathRenderer from '../MathRenderer'
 
 interface FillBlankRendererProps {
@@ -28,8 +28,16 @@ export default function FillBlankRenderer({
   const [hasSubmitted, setHasSubmitted] = useState(showResult)
   const [isCorrect, setIsCorrect] = useState(false)
 
-  // Combine correct term with distractors and shuffle
-  const allOptions = [correctTerm, ...distractors].sort(() => Math.random() - 0.5)
+  // Combine correct term with distractors and shuffle (memoized to prevent re-shuffle on re-render)
+  const allOptions = useMemo(() => {
+    const options = [correctTerm, ...distractors]
+    // Fisher-Yates shuffle for proper randomization
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]]
+    }
+    return options
+  }, [correctTerm, distractors])
 
   const handleSelect = (term: string) => {
     // Allow selection if not disabled and either not submitted, or submitted but wrong
