@@ -44,11 +44,21 @@ export default function SubmissionCanvas({
   const [autocompletePosition, setAutocompletePosition] = useState({ top: 0, left: 0 })
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const addMoreInputRef = useRef<HTMLInputElement>(null)
 
-  // Scan/upload state
+  // Scan/upload state - supports multiple sheets
+  interface UploadedSheet {
+    id: string
+    file: File
+    preview: string
+    transcription: string
+    isProcessing: boolean
+    isComplete: boolean
+  }
+
   const [scanState, setScanState] = useState<ScanState>('idle')
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null)
+  const [uploadedSheets, setUploadedSheets] = useState<UploadedSheet[]>([])
+  const [currentProcessingIndex, setCurrentProcessingIndex] = useState(0)
   const [transcribedText, setTranscribedText] = useState('')
   const [scanProgress, setScanProgress] = useState(0)
   const [scanPhase, setScanPhase] = useState('')
@@ -135,84 +145,220 @@ export default function SubmissionCanvas({
     }
   }
 
-  // Handle file upload
-  const handleFileSelect = async (file: File) => {
-    const validation = validateImageFile(file)
-    if (!validation.valid) {
-      setError(validation.error || 'Invalid file')
-      return
+  // Handle multiple file uploads
+  const handleFilesSelect = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const validFiles: File[] = []
+
+    // Validate all files first
+    for (const file of fileArray) {
+      const validation = validateImageFile(file)
+      if (!validation.valid) {
+        setError(`${file.name}: ${validation.error}`)
+        return
+      }
+      validFiles.push(file)
     }
+
+    if (validFiles.length === 0) return
 
     setError(null)
-    setUploadedFile(file)
-    setScanState('uploading')
 
-    // Create preview
-    const reader = new FileReader()
-    reader.onload = () => {
-      setUploadPreview(reader.result as string)
-    }
-    reader.readAsDataURL(file)
+    // Create sheet objects with previews
+    const newSheets: UploadedSheet[] = await Promise.all(
+      validFiles.map(async (file) => {
+        const preview = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        })
 
-    // Start scanning animation
-    setScanState('scanning')
-    setScanProgress(0)
-
-    // Simulate scanning progress
-    const progressInterval = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(progressInterval)
-          return prev
+        return {
+          id: `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview,
+          transcription: '',
+          isProcessing: false,
+          isComplete: false
         }
-        return prev + Math.random() * 15
       })
-    }, 300)
+    )
 
-    const phases = [
-      'Detecting handwriting...',
-      'Enhancing image quality...',
-      'Recognizing mathematical symbols...',
-      'Parsing equations...',
-      'Finalizing transcription...'
-    ]
+    setUploadedSheets(prev => [...prev, ...newSheets])
 
-    let phaseIndex = 0
-    const phaseInterval = setInterval(() => {
-      if (phaseIndex < phases.length) {
-        setScanPhase(phases[phaseIndex])
-        phaseIndex++
-      } else {
-        clearInterval(phaseInterval)
-      }
-    }, 500)
-
-    try {
-      const result = await mockTranscribeImage(file)
-      clearInterval(progressInterval)
-      clearInterval(phaseInterval)
-
-      setScanProgress(100)
-      setScanPhase('Complete!')
-      setTranscribedText(result.text)
-
-      // Small delay before showing transcribed state
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setScanState('transcribed')
-    } catch (err) {
-      clearInterval(progressInterval)
-      clearInterval(phaseInterval)
-      setError('Failed to transcribe image. Please try again.')
-      setScanState('idle')
+    // If this is the first upload, start processing
+    if (uploadedSheets.length === 0) {
+      processAllSheets([...newSheets])
     }
   }
 
-  // Handle drag and drop
+  // Process all sheets sequentially
+  const processAllSheets = async (sheets: UploadedSheet[]) => {
+    setScanState('scanning')
+
+    for (let i = 0; i < sheets.length; i++) {
+      setCurrentProcessingIndex(i)
+      setScanPhase(`Processing sheet ${i + 1} of ${sheets.length}...`)
+      setScanProgress((i / sheets.length) * 100)
+
+      // Mark current sheet as processing
+      setUploadedSheets(prev =>
+        prev.map(s => s.id === sheets[i].id ? { ...s, isProcessing: true } : s)
+      )
+
+      try {
+        const result = await mockTranscribeImage(sheets[i].file)
+
+        // Update sheet with transcription
+        setUploadedSheets(prev =>
+          prev.map(s =>
+            s.id === sheets[i].id
+              ? { ...s, transcription: result.text, isProcessing: false, isComplete: true }
+              : s
+          )
+        )
+      } catch (err) {
+        // Mark as complete but with empty transcription
+        setUploadedSheets(prev =>
+          prev.map(s =>
+            s.id === sheets[i].id
+              ? { ...s, isProcessing: false, isComplete: true }
+              : s
+          )
+        )
+      }
+    }
+
+    // Combine all transcriptions
+    setScanProgress(100)
+    setScanPhase('All sheets processed!')
+
+    // Wait a moment then show transcribed state
+    await new Promise(resolve => setTimeout(resolve, 500))
+    setScanState('transcribed')
+
+    // Combine transcriptions from all sheets
+    setUploadedSheets(prev => {
+      const combined = prev
+        .filter(s => s.transcription)
+        .map((s, idx) => `## Sheet ${idx + 1}\n\n${s.transcription}`)
+        .join('\n\n---\n\n')
+      setTranscribedText(combined)
+      return prev
+    })
+  }
+
+  // Add more sheets to existing upload
+  const handleAddMoreSheets = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const validFiles: File[] = []
+
+    for (const file of fileArray) {
+      const validation = validateImageFile(file)
+      if (validation.valid) {
+        validFiles.push(file)
+      }
+    }
+
+    if (validFiles.length === 0) return
+
+    const newSheets: UploadedSheet[] = await Promise.all(
+      validFiles.map(async (file) => {
+        const preview = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        })
+
+        return {
+          id: `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview,
+          transcription: '',
+          isProcessing: false,
+          isComplete: false
+        }
+      })
+    )
+
+    setUploadedSheets(prev => [...prev, ...newSheets])
+
+    // Process new sheets
+    setScanState('scanning')
+    await processNewSheets(newSheets)
+  }
+
+  // Process only newly added sheets
+  const processNewSheets = async (sheets: UploadedSheet[]) => {
+    for (let i = 0; i < sheets.length; i++) {
+      setScanPhase(`Processing new sheet ${i + 1} of ${sheets.length}...`)
+
+      setUploadedSheets(prev =>
+        prev.map(s => s.id === sheets[i].id ? { ...s, isProcessing: true } : s)
+      )
+
+      try {
+        const result = await mockTranscribeImage(sheets[i].file)
+        setUploadedSheets(prev =>
+          prev.map(s =>
+            s.id === sheets[i].id
+              ? { ...s, transcription: result.text, isProcessing: false, isComplete: true }
+              : s
+          )
+        )
+      } catch {
+        setUploadedSheets(prev =>
+          prev.map(s =>
+            s.id === sheets[i].id ? { ...s, isProcessing: false, isComplete: true } : s
+          )
+        )
+      }
+    }
+
+    setScanState('transcribed')
+
+    // Update combined transcription
+    setUploadedSheets(prev => {
+      const combined = prev
+        .filter(s => s.transcription)
+        .map((s, idx) => `## Sheet ${idx + 1}\n\n${s.transcription}`)
+        .join('\n\n---\n\n')
+      setTranscribedText(combined)
+      return prev
+    })
+  }
+
+  // Remove a sheet
+  const handleRemoveSheet = (sheetId: string) => {
+    setUploadedSheets(prev => {
+      const updated = prev.filter(s => s.id !== sheetId)
+      // Update combined transcription
+      const combined = updated
+        .filter(s => s.transcription)
+        .map((s, idx) => `## Sheet ${idx + 1}\n\n${s.transcription}`)
+        .join('\n\n---\n\n')
+      setTranscribedText(combined)
+
+      // If no sheets left, go back to idle
+      if (updated.length === 0) {
+        setScanState('idle')
+      }
+
+      return updated
+    })
+  }
+
+  // Legacy single file handler (for backwards compatibility)
+  const handleFileSelect = async (file: File) => {
+    handleFilesSelect([file])
+  }
+
+  // Handle drag and drop - supports multiple files
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file) {
-      handleFileSelect(file)
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      handleFilesSelect(files)
     }
   }, [])
 
@@ -282,12 +428,12 @@ export default function SubmissionCanvas({
   // Reset scan state
   const handleResetScan = () => {
     setScanState('idle')
-    setUploadedFile(null)
-    setUploadPreview(null)
+    setUploadedSheets([])
     setTranscribedText('')
     setScanProgress(0)
     setScanPhase('')
     setGradeResult(null)
+    setCurrentProcessingIndex(0)
   }
 
   // Get status color and icon
@@ -466,8 +612,8 @@ export default function SubmissionCanvas({
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  capture="environment"
-                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                  multiple
+                  onChange={(e) => e.target.files && e.target.files.length > 0 && handleFilesSelect(e.target.files)}
                   className="hidden"
                 />
 
@@ -481,7 +627,7 @@ export default function SubmissionCanvas({
                   Drop your handwritten solution here
                 </p>
                 <p className="text-sm text-slate-500 mb-4">
-                  or click to upload / take a photo
+                  Upload one or multiple sheets
                 </p>
 
                 <div className="flex justify-center gap-3">
@@ -501,6 +647,30 @@ export default function SubmissionCanvas({
             {/* Scanning State */}
             {(scanState === 'uploading' || scanState === 'scanning') && (
               <div className="bg-slate-800/50 rounded-xl p-8 text-center">
+                {/* Show sheet thumbnails being processed */}
+                {uploadedSheets.length > 1 && (
+                  <div className="flex justify-center gap-2 mb-4 flex-wrap">
+                    {uploadedSheets.map((sheet, idx) => (
+                      <div
+                        key={sheet.id}
+                        className={`w-12 h-12 rounded-lg border-2 overflow-hidden ${
+                          sheet.isComplete
+                            ? 'border-green-500'
+                            : sheet.isProcessing
+                            ? 'border-indigo-500 animate-pulse'
+                            : 'border-slate-600'
+                        }`}
+                      >
+                        <img
+                          src={sheet.preview}
+                          alt={`Sheet ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* Animated scanning effect */}
                 <div className="relative w-32 h-32 mx-auto mb-6">
                   {/* Outer ring */}
@@ -536,22 +706,61 @@ export default function SubmissionCanvas({
             {/* Transcribed State */}
             {scanState === 'transcribed' && (
               <div className="space-y-4">
-                {/* Image preview */}
-                {uploadPreview && (
-                  <div className="relative">
-                    <img
-                      src={uploadPreview}
-                      alt="Uploaded solution"
-                      className="w-full max-h-48 object-contain rounded-lg border border-slate-700"
-                    />
-                    <button
-                      onClick={handleResetScan}
-                      className="absolute top-2 right-2 p-1 bg-slate-900/80 rounded-full text-slate-400 hover:text-white"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                {/* Multiple sheets preview */}
+                {uploadedSheets.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-300">
+                        {uploadedSheets.length} sheet{uploadedSheets.length > 1 ? 's' : ''} uploaded
+                      </span>
+                      <button
+                        onClick={handleResetScan}
+                        className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                      {uploadedSheets.map((sheet, idx) => (
+                        <div key={sheet.id} className="relative group">
+                          <img
+                            src={sheet.preview}
+                            alt={`Sheet ${idx + 1}`}
+                            className="w-full h-20 object-cover rounded-lg border border-slate-700"
+                          />
+                          <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center rounded-lg text-xs font-medium text-slate-200">
+                            {idx + 1}
+                          </div>
+                          <button
+                            onClick={() => handleRemoveSheet(sheet.id)}
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      {/* Add more sheets button */}
+                      <button
+                        onClick={() => addMoreInputRef.current?.click()}
+                        className="w-full h-20 border-2 border-dashed border-slate-600 rounded-lg hover:border-indigo-500 hover:bg-slate-800/30 transition-all flex flex-col items-center justify-center text-slate-500 hover:text-indigo-400"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span className="text-xs mt-1">Add</span>
+                      </button>
+                      {/* Hidden input for adding more sheets */}
+                      <input
+                        ref={addMoreInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => e.target.files && e.target.files.length > 0 && handleAddMoreSheets(e.target.files)}
+                        className="hidden"
+                      />
+                    </div>
                   </div>
                 )}
 
