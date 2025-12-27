@@ -26,19 +26,27 @@ export default function FillBlankRenderer({
 }: FillBlankRendererProps) {
   const [selected, setSelected] = useState<string | null>(selectedAnswer ?? null)
   const [hasSubmitted, setHasSubmitted] = useState(showResult)
+  const [isCorrect, setIsCorrect] = useState(false)
 
   // Combine correct term with distractors and shuffle
   const allOptions = [correctTerm, ...distractors].sort(() => Math.random() - 0.5)
 
   const handleSelect = (term: string) => {
-    if (disabled || hasSubmitted) return
+    // Allow selection if not disabled and either not submitted, or submitted but wrong
+    if (disabled || (hasSubmitted && isCorrect)) return
     setSelected(term)
+    // If user is selecting after a wrong answer, reset submission state
+    if (hasSubmitted && !isCorrect) {
+      setHasSubmitted(false)
+    }
   }
 
   const handleSubmit = () => {
-    if (selected === null || disabled || hasSubmitted) return
+    if (selected === null || disabled) return
+    const correct = selected === correctTerm
+    setIsCorrect(correct)
     setHasSubmitted(true)
-    onSubmit(selected, selected === correctTerm)
+    onSubmit(selected, correct)
   }
 
   // Split sentence by ____ placeholder to render with blank
@@ -104,7 +112,7 @@ export default function FillBlankRenderer({
           <button
             key={term}
             onClick={() => handleSelect(term)}
-            disabled={disabled || hasSubmitted}
+            disabled={disabled || (hasSubmitted && isCorrect)}
             className={getOptionStyle(term)}
           >
             <MathRenderer text={term} />

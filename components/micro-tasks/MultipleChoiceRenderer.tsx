@@ -24,16 +24,28 @@ export default function MultipleChoiceRenderer({
 }: MultipleChoiceRendererProps) {
   const [selected, setSelected] = useState<number | null>(selectedAnswer ?? null)
   const [hasSubmitted, setHasSubmitted] = useState(showResult)
+  const [isCorrect, setIsCorrect] = useState(false)
+  const [lastWrongAnswer, setLastWrongAnswer] = useState<number | null>(null)
 
   const handleSelect = (index: number) => {
-    if (disabled || hasSubmitted) return
+    // Allow selection if not disabled and either not submitted, or submitted but wrong
+    if (disabled || (hasSubmitted && isCorrect)) return
     setSelected(index)
+    // If user is selecting after a wrong answer, reset submission state
+    if (hasSubmitted && !isCorrect) {
+      setHasSubmitted(false)
+    }
   }
 
   const handleSubmit = () => {
-    if (selected === null || disabled || hasSubmitted) return
+    if (selected === null || disabled) return
+    const correct = selected === correctIndex
+    setIsCorrect(correct)
     setHasSubmitted(true)
-    onSubmit(selected, selected === correctIndex)
+    if (!correct) {
+      setLastWrongAnswer(selected)
+    }
+    onSubmit(selected, correct)
   }
 
   const getOptionStyle = (index: number) => {
@@ -89,7 +101,7 @@ export default function MultipleChoiceRenderer({
           <button
             key={index}
             onClick={() => handleSelect(index)}
-            disabled={disabled || hasSubmitted}
+            disabled={disabled || (hasSubmitted && isCorrect)}
             className={getOptionStyle(index)}
           >
             <div className={getRadioStyle(index)}>
