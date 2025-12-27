@@ -63,14 +63,20 @@ export default function FillBlankRenderer({
   const getOptionStyle = (term: string) => {
     const baseStyle = 'px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200'
 
-    if (hasSubmitted) {
+    if (hasSubmitted && isCorrect) {
+      // Only show green for correct answer when user got it right
       if (term === correctTerm) {
         return `${baseStyle} border-green-500 bg-green-500/20 text-green-700 dark:text-green-300`
       }
-      if (term === selected && term !== correctTerm) {
+      return `${baseStyle} border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500`
+    }
+
+    if (hasSubmitted && !isCorrect) {
+      // Wrong answer: only highlight the wrong selection in red, don't reveal correct
+      if (term === selected) {
         return `${baseStyle} border-red-500 bg-red-500/20 text-red-700 dark:text-red-300 animate-shake`
       }
-      return `${baseStyle} border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500`
+      return `${baseStyle} border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300`
     }
 
     if (selected === term) {
@@ -81,11 +87,11 @@ export default function FillBlankRenderer({
   }
 
   const getBlankStyle = () => {
-    if (hasSubmitted && selected) {
-      if (selected === correctTerm) {
-        return 'inline-block px-3 py-1 mx-1 rounded bg-green-500/20 border-b-2 border-green-500 text-green-700 dark:text-green-300 font-medium'
-      }
-      return 'inline-block px-3 py-1 mx-1 rounded bg-red-500/20 border-b-2 border-red-500 text-red-700 dark:text-red-300 font-medium line-through'
+    if (hasSubmitted && isCorrect && selected) {
+      return 'inline-block px-3 py-1 mx-1 rounded bg-green-500/20 border-b-2 border-green-500 text-green-700 dark:text-green-300 font-medium'
+    }
+    if (hasSubmitted && !isCorrect && selected) {
+      return 'inline-block px-3 py-1 mx-1 rounded bg-red-500/20 border-b-2 border-red-500 text-red-700 dark:text-red-300 font-medium'
     }
     if (selected) {
       return 'inline-block px-3 py-1 mx-1 rounded bg-indigo-500/20 border-b-2 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-medium'
@@ -137,15 +143,6 @@ export default function FillBlankRenderer({
         >
           Check Answer
         </button>
-      )}
-
-      {/* Show correct answer if wrong */}
-      {hasSubmitted && selected !== correctTerm && (
-        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-          <p className="text-sm text-amber-700 dark:text-amber-300">
-            The correct answer is: <strong>{correctTerm}</strong>
-          </p>
-        </div>
       )}
 
       {/* Result Feedback */}

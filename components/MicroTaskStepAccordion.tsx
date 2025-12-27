@@ -6,6 +6,7 @@ import type { Concept } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
+import MathRenderer from './MathRenderer'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -50,6 +51,8 @@ export default function MicroTaskStepAccordion({
       explanation
     })) || []
   )
+  const [isReadingMode, setIsReadingMode] = useState(false)
+  const [expandedHintLevel, setExpandedHintLevel] = useState<number | null>(null)
 
   // Sync with active state
   useEffect(() => {
@@ -93,6 +96,36 @@ export default function MicroTaskStepAccordion({
       newMap.set(currentLevel, attempts)
       return newMap
     })
+  }
+
+  const handleSwitchToReadingMode = () => {
+    setIsReadingMode(true)
+    // Expand the first non-completed level
+    const firstUncompletedLevel = step.tasks.find(t => t.level >= currentLevel)?.level || 1
+    setExpandedHintLevel(firstUncompletedLevel)
+  }
+
+  const handleHintRead = (level: number) => {
+    const task = step.tasks.find(t => t.level === level)
+    if (!task) return
+
+    // Add to collected insights if not already there
+    const alreadyCollected = collectedInsights.some(i => i.level === level)
+    if (!alreadyCollected) {
+      setCollectedInsights(prev => [...prev, {
+        level,
+        levelTitle: task.levelTitle,
+        explanation: task.explanation
+      }])
+      onTaskComplete(step.id, level, task.explanation)
+    }
+
+    // Move to next level if this was the current level
+    if (level === currentLevel && currentLevel < step.tasks.length) {
+      setCurrentLevel(currentLevel + 1)
+    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+      onComplete(step.id)
+    }
   }
 
   // Get current task
@@ -216,23 +249,108 @@ export default function MicroTaskStepAccordion({
           )}
 
           {/* Collected Insights */}
-          {collectedInsights.length > 0 && (
+          {collectedInsights.length > 0 && !isReadingMode && (
             <CollectedInsights
               insights={collectedInsights}
               totalLevels={step.tasks.length}
             />
           )}
 
-          {/* Current Task Card */}
-          {currentTask && !allTasksCompleted && (
+          {/* Quiz Mode: Current Task Card */}
+          {!isReadingMode && currentTask && !allTasksCompleted && (
             <InsightCard
               key={`step-${step.id}-level-${currentLevel}`}
               task={currentTask}
               stepTitle={step.title}
               onCorrectAnswer={handleTaskCorrect}
               onWrongAnswer={handleTaskWrong}
+              onSwitchToReadingMode={handleSwitchToReadingMode}
               attempts={taskAttempts.get(currentLevel) || 0}
             />
+          )}
+
+          {/* Reading Mode: Hint Ladder */}
+          {isReadingMode && !allTasksCompleted && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  Reading Mode
+                </div>
+                <button
+                  onClick={() => setIsReadingMode(false)}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Back to Quiz Mode
+                </button>
+              </div>
+
+              {/* Hint Ladder */}
+              {step.tasks.map((task) => {
+                const isCollected = collectedInsights.some(i => i.level === task.level)
+                const isExpanded = expandedHintLevel === task.level
+
+                return (
+                  <div
+                    key={task.level}
+                    className={`rounded-lg border overflow-hidden transition-all ${
+                      isCollected
+                        ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/10'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+                    }`}
+                  >
+                    <button
+                      onClick={() => {
+                        setExpandedHintLevel(isExpanded ? null : task.level)
+                        if (!isCollected) {
+                          handleHintRead(task.level)
+                        }
+                      }}
+                      className="w-full flex items-center justify-between p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                          isCollected
+                            ? 'bg-green-500 text-white'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                        }`}>
+                          {isCollected ? (
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            task.level
+                          )}
+                        </div>
+                        <span className={`text-sm font-medium ${
+                          isCollected ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'
+                        }`}>
+                          {task.levelTitle}
+                        </span>
+                      </div>
+                      <svg
+                        className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-2 border-t border-slate-100 dark:border-slate-700">
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
+                          <MathRenderer text={task.explanation} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           )}
 
           {/* Completion Message */}

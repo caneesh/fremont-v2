@@ -51,14 +51,20 @@ export default function MultipleChoiceRenderer({
   const getOptionStyle = (index: number) => {
     const baseStyle = 'w-full p-4 rounded-lg border-2 text-left transition-all duration-200 flex items-start gap-3'
 
-    if (hasSubmitted) {
+    if (hasSubmitted && isCorrect) {
+      // Only show green for correct answer when user got it right
       if (index === correctIndex) {
         return `${baseStyle} border-green-500 bg-green-500/10 dark:bg-green-500/20`
       }
-      if (index === selected && index !== correctIndex) {
+      return `${baseStyle} border-slate-300 dark:border-slate-600 opacity-50`
+    }
+
+    if (hasSubmitted && !isCorrect) {
+      // Wrong answer: only highlight the wrong selection in red, don't reveal correct
+      if (index === selected) {
         return `${baseStyle} border-red-500 bg-red-500/10 dark:bg-red-500/20 animate-shake`
       }
-      return `${baseStyle} border-slate-300 dark:border-slate-600 opacity-50`
+      return `${baseStyle} border-slate-300 dark:border-slate-600`
     }
 
     if (selected === index) {
@@ -71,11 +77,17 @@ export default function MultipleChoiceRenderer({
   const getRadioStyle = (index: number) => {
     const baseStyle = 'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5'
 
-    if (hasSubmitted) {
+    if (hasSubmitted && isCorrect) {
+      // Only show green for correct answer when user got it right
       if (index === correctIndex) {
         return `${baseStyle} border-green-500 bg-green-500`
       }
-      if (index === selected && index !== correctIndex) {
+      return `${baseStyle} border-slate-300 dark:border-slate-600`
+    }
+
+    if (hasSubmitted && !isCorrect) {
+      // Wrong answer: only highlight the wrong selection in red
+      if (index === selected) {
         return `${baseStyle} border-red-500 bg-red-500`
       }
       return `${baseStyle} border-slate-300 dark:border-slate-600`
@@ -105,7 +117,7 @@ export default function MultipleChoiceRenderer({
             className={getOptionStyle(index)}
           >
             <div className={getRadioStyle(index)}>
-              {(selected === index || (hasSubmitted && index === correctIndex)) && (
+              {(selected === index || (hasSubmitted && isCorrect && index === correctIndex)) && (
                 <div className="w-2 h-2 rounded-full bg-white" />
               )}
             </div>
