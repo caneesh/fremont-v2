@@ -22,6 +22,21 @@ export interface StepProgress {
   currentHintLevel?: number // Tracks which hint level (1-5) the user has unlocked
 }
 
+/**
+ * Micro-task progress for a single step (active solver mode)
+ */
+export interface MicroTaskStepProgress {
+  stepId: number
+  isCompleted: boolean
+  currentLevel: number  // Which task level user is on (1-5)
+  taskAttempts: {
+    level: number
+    attempts: number
+    isCompleted: boolean
+  }[]
+  collectedInsights: string[]  // Explanations earned from completed tasks
+}
+
 export interface ReflectionAnswer {
   question: string
   answer: string
@@ -33,6 +48,9 @@ export interface ProblemProgress {
   sanityCheckAnswer?: string
   currentStep: number
   reflectionAnswers?: ReflectionAnswer[]
+  // Micro-task mode fields (optional for backwards compatibility)
+  useMicroTasks?: boolean
+  microTaskProgress?: MicroTaskStepProgress[]
 }
 
 export interface HistoryFilters {

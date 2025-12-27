@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { SanityCheck, Step, Concept } from '@/types/scaffold'
+import type { SanityCheck, Concept } from '@/types/scaffold'
 import type { ChatMessage, DebugConceptRequest, DebugConceptResponse, DebuggerStatus, ProblemContext } from '@/types/debugConcept'
 import MathRenderer from './MathRenderer'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
@@ -14,7 +14,7 @@ interface SanityCheckStepProps {
   problemText: string
   domain: string
   subdomain: string
-  steps: Step[]
+  steps: Array<{ id: number; title: string }> // Generic step interface
   concepts: Concept[]
   onTargetStep?: (stepId: number) => void // Callback to highlight a step
   onSolved?: () => void // Callback when user successfully completes the check

@@ -2,10 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ScaffoldData } from '@/types/scaffold'
-import type { StepProgress, ProblemProgress } from '@/types/history'
+import { isHintScaffold } from '@/types/scaffold'
+import type { MicroTaskScaffoldData, MicroTaskStep } from '@/types/microTask'
+import { isMicroTaskScaffold } from '@/types/microTask'
+import type { StepProgress, ProblemProgress, MicroTaskStepProgress } from '@/types/history'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { generateProblemId, generateProblemTitle } from '@/lib/utils'
 import StepAccordion from './StepAccordion'
+import MicroTaskStepAccordion from './MicroTaskStepAccordion'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
 import NextChallenge from './NextChallenge'
@@ -29,7 +33,7 @@ import { conceptMappingService } from '@/lib/conceptMappingService'
 import { CONCEPT_NETWORK_DATA } from '@/lib/conceptNetworkData'
 
 interface SolutionScaffoldProps {
-  data: ScaffoldData
+  data: ScaffoldData | MicroTaskScaffoldData
   onReset: () => void
   onLoadNewProblem?: (problemText: string) => void
 }
@@ -62,6 +66,50 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [solutionGradeResult, setSolutionGradeResult] = useState<GradeSolutionResponse | null>(null)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  // Micro-task mode state
+  const useMicroTasks = isMicroTaskScaffold(data)
+  const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
+
+  // Handlers for micro-task mode
+  const handleMicroTaskComplete = useCallback((stepId: number, level: number, explanation: string) => {
+    setMicroTaskProgress(prev => {
+      const newMap = new Map(prev)
+      const current = newMap.get(stepId) || {
+        stepId,
+        isCompleted: false,
+        currentLevel: 1,
+        taskAttempts: [],
+        collectedInsights: []
+      }
+
+      current.taskAttempts.push({ level, attempts: 1, isCompleted: true })
+      current.currentLevel = level + 1
+      current.collectedInsights.push(explanation)
+
+      // Check if all tasks are completed for this step
+      const microData = data as MicroTaskScaffoldData
+      const step = microData.steps.find(s => s.id === stepId)
+      if (step && current.currentLevel > step.tasks.length) {
+        current.isCompleted = true
+      }
+
+      newMap.set(stepId, current)
+      return newMap
+    })
+  }, [data])
+
+  const handleMicroStepComplete = useCallback((stepId: number) => {
+    // Mark step as completed
+    if (!completedSteps.includes(stepId)) {
+      setCompletedSteps(prev => [...prev, stepId])
+    }
+    // Move to next step
+    const stepIndex = (data as MicroTaskScaffoldData).steps.findIndex(s => s.id === stepId)
+    if (stepIndex < (data as MicroTaskScaffoldData).steps.length - 1) {
+      setCurrentStep(stepIndex + 1)
+    }
+  }, [completedSteps, data])
 
   // Generate a unique problem ID based on the problem text hash
   const problemId = useCallback(() => {
@@ -621,21 +669,37 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       : ''
                   }`}
                 >
-                  <StepAccordion
-                    step={step}
-                    stepNumber={index + 1}
-                    isActive={currentStep === index}
-                    isCompleted={completedSteps.includes(index)}
-                    isLocked={index > 0 && !completedSteps.includes(index - 1)}
-                    concepts={data.concepts}
-                    userAnswer={stepAnswers.get(index) || ''}
-                    currentHintLevel={stepHintLevels.get(index) || 0}
-                    problemStatement={data.problem}
-                    onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
-                    onComplete={() => handleStepComplete(index)}
-                    onActivate={() => setCurrentStep(index)}
-                    onHintLevelChange={(level) => handleHintLevelChange(index, level)}
-                  />
+                  {useMicroTasks ? (
+                    <MicroTaskStepAccordion
+                      step={step as MicroTaskStep}
+                      stepNumber={index + 1}
+                      isActive={currentStep === index}
+                      isCompleted={completedSteps.includes(index)}
+                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                      concepts={data.concepts}
+                      progress={microTaskProgress.get(step.id)}
+                      problemStatement={data.problem}
+                      onTaskComplete={handleMicroTaskComplete}
+                      onComplete={handleMicroStepComplete}
+                      onActivate={() => setCurrentStep(index)}
+                    />
+                  ) : (
+                    <StepAccordion
+                      step={step as import('@/types/scaffold').Step}
+                      stepNumber={index + 1}
+                      isActive={currentStep === index}
+                      isCompleted={completedSteps.includes(index)}
+                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                      concepts={data.concepts}
+                      userAnswer={stepAnswers.get(index) || ''}
+                      currentHintLevel={stepHintLevels.get(index) || 0}
+                      problemStatement={data.problem}
+                      onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
+                      onComplete={() => handleStepComplete(index)}
+                      onActivate={() => setCurrentStep(index)}
+                      onHintLevelChange={(level) => handleHintLevelChange(index, level)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

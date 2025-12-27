@@ -40,3 +40,17 @@ export interface StepValidation {
   feedback: string
   nextHint?: string
 }
+
+/**
+ * Type guard to check if scaffold uses traditional hints (vs micro-tasks)
+ */
+export function isHintScaffold(data: unknown): data is ScaffoldData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'steps' in data &&
+    Array.isArray((data as ScaffoldData).steps) &&
+    (data as ScaffoldData).steps.length > 0 &&
+    'hints' in (data as ScaffoldData).steps[0]
+  )
+}

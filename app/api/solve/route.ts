@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateScaffold } from '@/lib/anthropic'
+import { generateScaffold, generateMicroTaskScaffold } from '@/lib/anthropic'
 import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problem, diagramImage } = body
+    const { problem, diagramImage, useMicroTasks = false } = body
 
     if (!problem || typeof problem !== 'string') {
       return NextResponse.json(
@@ -45,11 +45,17 @@ export async function POST(request: NextRequest) {
 
     // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
     // Combines solving + scaffolding into one API call
-    console.log(`[${authContext.userId}] Generating scaffold${diagramImage ? ' with diagram' : ''}...`)
+    // Supports both hint mode (default) and micro-task mode
+    const mode = useMicroTasks ? 'micro-task' : 'hint'
+    console.log(`[${authContext.userId}] Generating ${mode} scaffold${diagramImage ? ' with diagram' : ''}...`)
     const startTime = Date.now()
-    const scaffoldData = await generateScaffold(problem, diagramImage)
+
+    const scaffoldData = useMicroTasks
+      ? await generateMicroTaskScaffold(problem, diagramImage)
+      : await generateScaffold(problem, diagramImage)
+
     const endTime = Date.now()
-    console.log(`[${authContext.userId}] Scaffold generated in ${(endTime - startTime) / 1000}s`)
+    console.log(`[${authContext.userId}] ${mode} scaffold generated in ${(endTime - startTime) / 1000}s`)
 
     // Increment quota after successful generation
     serverQuotaService.incrementQuota(authContext.userId, 'problems')

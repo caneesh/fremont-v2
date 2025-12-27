@@ -40,6 +40,44 @@ export interface ScaffolderResponse {
   }
 }
 
+// Micro-Task Response Types
+export interface MicroTaskScaffolderResponse {
+  problem: string
+  domain: string
+  subdomain: string
+  concepts: Array<{
+    id: string
+    name: string
+    definition: string
+    formula?: string
+  }>
+  steps: Array<{
+    id: number
+    title: string
+    tasks: Array<{
+      level: 1 | 2 | 3 | 4 | 5
+      levelTitle: 'Concept' | 'Visual' | 'Strategy' | 'Equation' | 'Solution'
+      type: 'MULTIPLE_CHOICE' | 'FILL_BLANK'
+      question: string
+      // For MULTIPLE_CHOICE
+      options?: string[]
+      correctIndex?: number
+      // For FILL_BLANK
+      sentence?: string
+      correctTerm?: string
+      distractors?: string[]
+      // Common
+      explanation: string
+    }>
+    requiredConcepts: string[]
+  }>
+  sanityCheck: {
+    question: string
+    expectedBehavior: string
+    type: 'limit' | 'dimension' | 'symmetry'
+  }
+}
+
 /**
  * ULTRA-FAST: Progressive Hint Loading
  * Only generates Levels 1-3 initially (15-20s)
@@ -214,6 +252,167 @@ Respond with ONLY the JSON, no other text.`
       console.error(jsonStr.substring(Math.max(0, pos - 100), Math.min(jsonStr.length, pos + 100)))
     }
     throw new Error('Failed to generate proper scaffold structure')
+  }
+}
+
+/**
+ * MICRO-TASK MODE: Active Learning Scaffold
+ * Instead of passive hints, generates micro-tasks that users must complete
+ * to earn each insight. Uses MULTIPLE_CHOICE and FILL_BLANK tasks.
+ *
+ * @param problem - The problem statement text
+ * @param diagramImage - Optional base64-encoded diagram image (data:image/...)
+ */
+export async function generateMicroTaskScaffold(problem: string, diagramImage?: string): Promise<MicroTaskScaffolderResponse> {
+  const microTaskPrompt = `You are an expert IIT-JEE Physics teacher creating an ACTIVE LEARNING scaffold.${diagramImage ? '\n\nNOTE: The student has provided a diagram for this problem. Analyze it carefully along with the problem text.' : ''}
+
+CONTEXT: This problem is for students preparing for IIT-JEE. Instead of passive hints that students just read, you will create MICRO-TASKS that force active engagement. Students must answer a question correctly to unlock each insight.
+
+PROBLEM:
+${problem}
+
+YOUR TASK:
+1. First, solve this problem completely in your mind (do not output the solution).
+2. Create an ACTIVE LEARNING scaffold with micro-tasks instead of hints.
+
+For each of 3-6 thinking milestones (steps), create 3 MICRO-TASKS (one per level 1-3):
+
+LEVEL 1 - Concept (MULTIPLE_CHOICE):
+- Test if student can identify the relevant physics concept
+- 3-4 plausible options, only ONE correct
+- Example: "Which physics principle is most relevant here?"
+- Options should include common misconceptions
+
+LEVEL 2 - Visual (FILL_BLANK):
+- Test visualization/geometric understanding
+- Sentence with ____ placeholder for the blank
+- Provide 2-3 distractors (wrong options) alongside correct term
+- Example: "The angle θ is measured from the ____ of the hoop."
+
+LEVEL 3 - Strategy (MULTIPLE_CHOICE):
+- Test if student can choose the right approach
+- 3-4 approach options, only ONE is optimal
+- Example: "Which method best simplifies this problem?"
+
+Each task has an "explanation" field - this is the INSIGHT the student earns after answering correctly. Make it valuable and educational!
+
+JSON OUTPUT FORMAT:
+{
+  "domain": "Main physics domain",
+  "subdomain": "Specific subdomain",
+  "concepts": [
+    {
+      "id": "concept-id",
+      "name": "Concept Name",
+      "definition": "Clear definition in 2-3 sentences.",
+      "formula": "$F = ma$"
+    }
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Step Title (e.g., Choose Reference Frame)",
+      "tasks": [
+        {
+          "level": 1,
+          "levelTitle": "Concept",
+          "type": "MULTIPLE_CHOICE",
+          "question": "Which physics principle applies here?",
+          "options": ["Option A", "Option B", "Option C"],
+          "correctIndex": 1,
+          "explanation": "Correct! Option B applies because... (this is the insight earned)"
+        },
+        {
+          "level": 2,
+          "levelTitle": "Visual",
+          "type": "FILL_BLANK",
+          "question": "Complete the geometric description:",
+          "sentence": "The force vector points along the ____ direction.",
+          "correctTerm": "radial",
+          "distractors": ["tangential", "vertical"],
+          "explanation": "The radial direction is key because... (insight earned)"
+        },
+        {
+          "level": 3,
+          "levelTitle": "Strategy",
+          "type": "MULTIPLE_CHOICE",
+          "question": "Which approach simplifies this problem?",
+          "options": ["Energy conservation", "Force balance", "Momentum conservation"],
+          "correctIndex": 0,
+          "explanation": "Energy conservation is cleanest here because... (insight earned)"
+        }
+      ],
+      "requiredConcepts": ["concept-id-1", "concept-id-2"]
+    }
+  ],
+  "sanityCheck": {
+    "question": "What happens when ω → 0?",
+    "expectedBehavior": "The bead should slide to the bottom.",
+    "type": "limit"
+  }
+}
+
+CRITICAL RULES:
+- NEVER reveal the final answer in tasks or explanations
+- Each MULTIPLE_CHOICE must have exactly ONE correct option (correctIndex is 0-based)
+- Each FILL_BLANK must have ONE correctTerm and 2-3 distractors
+- Use ____ (4 underscores) as the placeholder in sentences
+- Explanations should teach the insight, not just say "Correct!"
+- Wrong options should be plausible (common misconceptions)
+- Use LaTeX notation: $inline$ or $$display$$
+- All strings on single lines, escape quotes with \\"
+- Only generate tasks for levels 1, 2, and 3 (levels 4-5 generated on-demand)
+
+Respond with ONLY valid JSON, no other text.`
+
+  // Build content array with optional image
+  const contentBlocks: Array<{ type: string; text?: string; source?: { type: string; media_type: string; data: string } }> = []
+
+  if (diagramImage) {
+    const match = diagramImage.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (match) {
+      const [, mediaType, base64Data] = match
+      contentBlocks.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: `image/${mediaType}`,
+          data: base64Data,
+        },
+      })
+    }
+  }
+
+  contentBlocks.push({
+    type: 'text',
+    text: microTaskPrompt,
+  })
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 8192,
+    messages: [
+      {
+        role: 'user',
+        content: contentBlocks as any,
+      },
+    ],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  const jsonMatch = responseText.match(/\{[\s\S]+\}/)
+  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  try {
+    const scaffoldData = JSON.parse(jsonStr)
+    return {
+      problem,
+      ...scaffoldData,
+    }
+  } catch (error) {
+    console.error('Failed to parse micro-task scaffold JSON:', error)
+    console.error('Raw JSON string (first 500 chars):', jsonStr.substring(0, 500))
+    throw new Error('Failed to generate proper micro-task scaffold structure')
   }
 }
 
