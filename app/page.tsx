@@ -10,6 +10,7 @@ import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import ContinueBanner from '@/components/ContinueBanner'
 import DemoTour from '@/components/DemoTour'
 import type { ScaffoldData } from '@/types/scaffold'
+import type { MicroTaskScaffoldData } from '@/types/microTask'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
@@ -25,7 +26,7 @@ const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular ho
 function HomeContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [scaffoldData, setScaffoldData] = useState<ScaffoldData | null>(null)
+  const [scaffoldData, setScaffoldData] = useState<ScaffoldData | MicroTaskScaffoldData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentProblemText, setCurrentProblemText] = useState<string>('')
@@ -33,6 +34,7 @@ function HomeContent() {
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [isDemoMode, setIsDemoMode] = useState(false)
+  const [useMicroTasks, setUseMicroTasks] = useState(false)
 
   const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
     setCurrentProblemText(problemText)
@@ -47,7 +49,8 @@ function HomeContent() {
         method: 'POST',
         body: JSON.stringify({
           problem: problemText,
-          diagramImage: diagramImage || undefined
+          diagramImage: diagramImage || undefined,
+          useMicroTasks
         }),
       })
 
@@ -291,6 +294,29 @@ function HomeContent() {
             {!isLoading && (
               <ContinueBanner onContinue={handleProblemSubmit} />
             )}
+            {/* Active Solver Mode Toggle */}
+            <div className="mb-4 flex items-center justify-end">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                  Active Solver Mode
+                </span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={useMicroTasks}
+                    onChange={(e) => setUseMicroTasks(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </div>
+                {useMicroTasks && (
+                  <span className="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
+                    Earn-to-Learn
+                  </span>
+                )}
+              </label>
+            </div>
+
             <ProblemInput
               onSubmit={handleProblemSubmit}
               isLoading={isLoading}
