@@ -10,6 +10,7 @@ import { problemHistoryService } from '@/lib/problemHistory'
 import { generateProblemId, generateProblemTitle } from '@/lib/utils'
 import StepAccordion from './StepAccordion'
 import MicroTaskStepAccordion from './MicroTaskStepAccordion'
+import DiagramStep from './diagram/DiagramStep'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
 import NextChallenge from './NextChallenge'
@@ -686,7 +687,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       : ''
                   }`}
                 >
-                  {useMicroTasks ? (
+                  {/* Diagram steps get special treatment */}
+                  {'diagramData' in step && step.stepType === 'diagram' && step.diagramData ? (
+                    <DiagramStep
+                      step={step as import('@/types/scaffold').Step}
+                      stepNumber={index + 1}
+                      isActive={currentStep === index}
+                      isCompleted={completedSteps.includes(index)}
+                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                      onComplete={() => handleStepComplete(index)}
+                      onActivate={() => setCurrentStep(index)}
+                    />
+                  ) : useMicroTasks ? (
                     <MicroTaskStepAccordion
                       step={step as MicroTaskStep}
                       stepNumber={index + 1}

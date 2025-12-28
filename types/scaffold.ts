@@ -1,3 +1,5 @@
+import type { DiagramStepData } from './diagram'
+
 /**
  * Scaffold Density Level
  * Level 1 = micro-steps (most detailed, for beginners)
@@ -33,6 +35,7 @@ export interface Step {
   requiredConcepts: string[] // IDs of concepts needed for this step
   question?: string // Optional Socratic question
   validationPrompt?: string // How to validate user's answer
+  diagramData?: DiagramStepData // FBD canvas data for diagram steps
 }
 
 export interface SanityCheck {

@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { FEATURE_FLAGS } from './featureFlags'
+import type { DiagramStepData, RequiredForce, ScenarioType, ObjectShape } from '@/types/diagram'
 
 // Initialize the Anthropic client
 const anthropic = new Anthropic({
@@ -53,6 +55,7 @@ export interface ScaffolderResponse {
     id: number
     title: string
     stepType?: StepType
+    diagramData?: DiagramStepData
     prerequisites?: string[]
     hints: Array<{
       level: 1 | 2 | 3 | 4 | 5
@@ -86,6 +89,7 @@ export interface MicroTaskScaffolderResponse {
     id: number
     title: string
     stepType?: StepType
+    diagramData?: DiagramStepData
     prerequisites?: string[]
     tasks: Array<{
       level: 1 | 2 | 3 | 4 | 5
@@ -336,7 +340,43 @@ Respond with ONLY the JSON, no other text.`
  * @param diagramImage - Optional base64-encoded diagram image (data:image/...)
  */
 export async function generateMicroTaskScaffold(problem: string, diagramImage?: string): Promise<MicroTaskScaffolderResponse> {
-  const microTaskPrompt = `You are an expert IIT-JEE Physics teacher creating an ACTIVE LEARNING scaffold.${diagramImage ? '\n\nNOTE: The student has provided a diagram for this problem. Analyze it carefully along with the problem text.' : ''}
+  // Conditionally include FBD diagram instructions based on feature flag
+  const fbdInstructions = FEATURE_FLAGS.FBD_CANVAS ? `
+
+DIAGRAM STEPS (for mechanics problems with forces):
+If the problem involves force analysis on an object (block on incline, hanging mass, pulley system, object on horizontal surface), add a DIAGRAM step as the FIRST step with stepType: "diagram".
+
+For diagram steps, include "diagramData" with:
+- scenarioType: "incline" | "hanging" | "pulley" | "horizontal" | "rotating"
+- objectShape: "block" | "point" | "sphere"
+- surfaceAngle: (for incline only) angle in degrees from horizontal
+- requiredForces: array of forces the student must draw, each with:
+  - type: "weight" | "normal" | "friction" | "tension" | "applied" | "spring" | "pseudo"
+  - direction: "up" | "down" | "left" | "right" | "up-left" | "up-right" | "down-left" | "down-right" | "perpendicular-surface" | "along-surface"
+  - tolerance: (optional) degrees of tolerance, default 15
+
+Example diagram step:
+{
+  "id": 1,
+  "title": "Draw Free Body Diagram",
+  "stepType": "diagram",
+  "diagramData": {
+    "scenarioType": "incline",
+    "objectShape": "block",
+    "surfaceAngle": 30,
+    "requiredForces": [
+      { "type": "weight", "direction": "down" },
+      { "type": "normal", "direction": "perpendicular-surface" },
+      { "type": "friction", "direction": "along-surface" }
+    ]
+  },
+  "tasks": [],
+  "requiredConcepts": ["free-body-diagram"]
+}
+
+For diagram steps, the "tasks" array should be EMPTY - the interactive canvas handles the learning.` : ''
+
+  const microTaskPrompt = `You are an expert IIT-JEE Physics teacher creating an ACTIVE LEARNING scaffold.${diagramImage ? '\n\nNOTE: The student has provided a diagram for this problem. Analyze it carefully along with the problem text.' : ''}${fbdInstructions}
 
 CONTEXT: This problem is for students preparing for IIT-JEE. Instead of passive hints that students just read, you will create MICRO-TASKS that force active engagement. Students must answer a question correctly to unlock each insight.
 
