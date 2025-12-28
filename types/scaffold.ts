@@ -1,3 +1,16 @@
+/**
+ * Scaffold Density Level
+ * Level 1 = micro-steps (most detailed, for beginners)
+ * Level 5 = macro-milestones (high-level, for advanced students)
+ */
+export type ScaffoldDensity = 1 | 2 | 3 | 4 | 5
+
+/**
+ * Step Type Classification
+ * Used for routing hints and validation feedback
+ */
+export type StepType = 'diagram' | 'physics_concept' | 'math_manipulation' | 'sanity_check'
+
 export interface Concept {
   id: string
   name: string
@@ -14,6 +27,8 @@ export interface HintLevel {
 export interface Step {
   id: number
   title: string
+  stepType?: StepType // Type of step for hint routing (optional for backwards compat)
+  prerequisites?: string[] // Concept tags that must be understood before this step
   hints: HintLevel[] // Progressive 5-level hint ladder
   requiredConcepts: string[] // IDs of concepts needed for this step
   question?: string // Optional Socratic question
@@ -53,15 +68,24 @@ export interface ScaffoldData {
   concepts: Concept[]
   steps: Step[]
   sanityCheck: SanityCheck
+  // Scaffold density (optional for backwards compat)
+  density?: ScaffoldDensity          // 1=micro-steps, 5=macro-milestones
   // Optional Error Anticipator fields (Pass 1.5)
   commonTraps?: ConceptualTrap[]     // Top 3 conceptual traps for this problem
   warningBeacons?: WarningBeacon[]   // Step-specific warning beacons
 }
 
+/**
+ * Error type classification for validation feedback
+ */
+export type ValidationErrorType = 'physics' | 'math' | 'conceptual' | 'procedural'
+
 export interface StepValidation {
   isCorrect: boolean
   feedback: string
   nextHint?: string
+  errorType?: ValidationErrorType   // Whether the error was physics-related or math-related
+  stepType?: StepType               // Type of step where error occurred
 }
 
 /**

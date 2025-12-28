@@ -6,6 +6,7 @@ import type { FeynmanScript } from '@/types/feynman'
 import MathRenderer from './MathRenderer'
 import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
 
 interface StepAccordionProps {
   step: Step
@@ -187,9 +188,17 @@ export default function StepAccordion({
 
           {/* Title */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-              Step {stepNumber}: {step.title}
-            </h4>
+            <div className="flex items-center gap-2">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                Step {stepNumber}: {step.title}
+              </h4>
+              {/* Step Type Badge */}
+              {step.stepType && (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStepTypeBadge(step.stepType).bgClass} ${getStepTypeBadge(step.stepType).textClass}`}>
+                  {getStepTypeBadge(step.stepType).label}
+                </span>
+              )}
+            </div>
             {isLocked && (
               <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                 Complete previous steps to unlock

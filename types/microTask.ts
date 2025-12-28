@@ -6,7 +6,7 @@
  * and improves retention.
  */
 
-import type { Concept, SanityCheck, ConceptualTrap, WarningBeacon } from './scaffold'
+import type { Concept, SanityCheck, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
 
 // Supported micro-task types
 export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK'
@@ -55,6 +55,8 @@ export type MicroTask = MultipleChoiceTask | FillBlankTask
 export interface MicroTaskStep {
   id: number
   title: string
+  stepType?: StepType  // Type of step for hint routing (optional for backwards compat)
+  prerequisites?: string[]  // Concept tags that must be understood before this step
   tasks: MicroTask[]  // 5 tasks, one per level (levels 1-3 pre-generated, 4-5 on-demand)
   requiredConcepts: string[]
   question?: string  // Optional additional Socratic question

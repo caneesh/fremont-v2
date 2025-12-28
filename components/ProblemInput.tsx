@@ -2,12 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import VoiceInput from './VoiceInput'
+import ScaffoldDensityControl from './ScaffoldDensityControl'
+import { localStorageProvider } from '@/lib/storage'
+import { getAdaptiveDensity } from '@/lib/adaptiveDensity'
+import type { ScaffoldDensity } from '@/types/scaffold'
+
+interface AdaptiveHint {
+  show: boolean
+  reason: string
+  confidence: 'low' | 'medium' | 'high'
+}
 
 interface ProblemInputProps {
-  onSubmit: (problem: string, diagramImage?: string | null) => void
+  onSubmit: (problem: string, diagramImage?: string | null, density?: ScaffoldDensity) => void
   isLoading: boolean
   error: string | null
   initialProblem?: string
+  initialDensity?: ScaffoldDensity
 }
 
 type InputMode = 'text' | 'voice'
@@ -35,13 +46,48 @@ const SAMPLE_PROBLEMS = [
   }
 ]
 
-export default function ProblemInput({ onSubmit, isLoading, error, initialProblem }: ProblemInputProps) {
+export default function ProblemInput({ onSubmit, isLoading, error, initialProblem, initialDensity }: ProblemInputProps) {
   const [problemText, setProblemText] = useState(initialProblem || '')
   const [currentStage, setCurrentStage] = useState(0)
   const [progress, setProgress] = useState(0)
   const [inputMode, setInputMode] = useState<InputMode>('text')
   const [diagramImage, setDiagramImage] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [scaffoldDensity, setScaffoldDensity] = useState<ScaffoldDensity>(initialDensity || 3)
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
+  const [adaptiveHint, setAdaptiveHint] = useState<AdaptiveHint>({ show: false, reason: '', confidence: 'low' })
+
+  // Load saved density preference or calculate adaptive density on mount
+  useEffect(() => {
+    if (!initialDensity) {
+      const prefs = localStorageProvider.getPreferences()
+      if (prefs.success && prefs.data?.scaffoldDensity) {
+        // User has explicitly set a preference, use it
+        setScaffoldDensity(prefs.data.scaffoldDensity)
+        setAdaptiveHint({ show: false, reason: '', confidence: 'low' })
+      } else {
+        // No explicit preference - use adaptive density
+        const recommendation = getAdaptiveDensity()
+        setScaffoldDensity(recommendation.recommended)
+
+        // Show hint if we have enough data for a personalized recommendation
+        if (recommendation.metrics.totalProblems >= 3 && recommendation.confidence !== 'low') {
+          setAdaptiveHint({
+            show: true,
+            reason: recommendation.reason,
+            confidence: recommendation.confidence
+          })
+        }
+      }
+    }
+  }, [initialDensity])
+
+  // Save density preference when changed (clears adaptive hint since user is now setting explicit preference)
+  const handleDensityChange = (density: ScaffoldDensity) => {
+    setScaffoldDensity(density)
+    setAdaptiveHint({ show: false, reason: '', confidence: 'low' })
+    localStorageProvider.updatePreferences({ scaffoldDensity: density })
+  }
 
   // Update problemText when initialProblem changes (e.g., from study path)
   useEffect(() => {
@@ -118,7 +164,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (problemText.trim()) {
-      onSubmit(problemText.trim(), diagramImage)
+      onSubmit(problemText.trim(), diagramImage, scaffoldDensity)
     }
   }
 
@@ -259,6 +305,87 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
               {error}
             </div>
           )}
+
+          {/* Advanced Options (Scaffold Density) */}
+          <div className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              disabled={isLoading}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-dark-card-soft hover:bg-gray-100 dark:hover:bg-dark-border transition-colors"
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+                Advanced Options
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 dark:text-dark-text-muted">
+                  Density: {scaffoldDensity}/5
+                </span>
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showAdvancedOptions ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+            {showAdvancedOptions && (
+              <div className="p-4 border-t border-gray-200 dark:border-dark-border space-y-4">
+                {/* Adaptive Density Hint */}
+                {adaptiveHint.show && (
+                  <div className={`flex items-start gap-3 p-3 rounded-lg ${
+                    adaptiveHint.confidence === 'high'
+                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                      : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                  }`}>
+                    <div className={`flex-shrink-0 w-5 h-5 mt-0.5 ${
+                      adaptiveHint.confidence === 'high'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-blue-600 dark:text-blue-400'
+                    }`}>
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${
+                        adaptiveHint.confidence === 'high'
+                          ? 'text-green-800 dark:text-green-300'
+                          : 'text-blue-800 dark:text-blue-300'
+                      }`}>
+                        Personalized for you
+                      </p>
+                      <p className={`text-xs mt-0.5 ${
+                        adaptiveHint.confidence === 'high'
+                          ? 'text-green-700 dark:text-green-400'
+                          : 'text-blue-700 dark:text-blue-400'
+                      }`}>
+                        {adaptiveHint.reason}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAdaptiveHint(prev => ({ ...prev, show: false }))}
+                      className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:text-dark-text-muted dark:hover:text-dark-text-secondary"
+                      aria-label="Dismiss"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                <ScaffoldDensityControl
+                  value={scaffoldDensity}
+                  onChange={handleDensityChange}
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Animated Loading Progress */}
           {isLoading && (

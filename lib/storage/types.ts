@@ -71,6 +71,7 @@ export interface UserPreferences {
   enableAnimations?: boolean
   enableSoundEffects?: boolean
   defaultHintLevel?: number
+  scaffoldDensity?: 1 | 2 | 3 | 4 | 5  // Scaffold detail level (1=micro, 5=macro)
   studyReminders?: boolean
   lastVisitedAt?: string
   customSettings?: Record<string, unknown>
@@ -149,7 +150,10 @@ export type {
   Step,
   HintLevel,
   Concept,
-  SanityCheck
+  SanityCheck,
+  ScaffoldDensity,
+  StepType,
+  ValidationErrorType
 } from '@/types/scaffold'
 
 export type {

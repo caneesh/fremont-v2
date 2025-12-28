@@ -12,6 +12,7 @@ import type {
 import { PHYSICS_AUTOCOMPLETE as AUTOCOMPLETE_DATA } from '@/types/gradeSolution'
 import { mockTranscribeImage, validateImageFile } from '@/lib/mockTranscribe'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { getValidationFeedback, getMathErrorMessage, getPhysicsErrorMessage } from '@/lib/hintEngine'
 import MathRenderer from './MathRenderer'
 
 interface SubmissionCanvasProps {
@@ -854,6 +855,65 @@ export default function SubmissionCanvas({
                 </div>
               </div>
             </div>
+
+            {/* Physics vs Math Error Indicator */}
+            {gradeResult.status !== 'SUCCESS' && gradeResult.detailedAnalysis && (
+              (() => {
+                const feedback = getValidationFeedback(
+                  gradeResult.detailedAnalysis.physicsCorrect,
+                  gradeResult.detailedAnalysis.mathCorrect,
+                  gradeResult.detailedAnalysis.errors
+                )
+                return (
+                  <div className={`p-4 rounded-lg border ${feedback.bgClass} ${feedback.borderClass}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full ${feedback.bgClass} flex items-center justify-center`}>
+                        <svg className={`w-5 h-5 ${feedback.textClass}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feedback.icon} />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h5 className={`text-sm font-semibold ${feedback.textClass}`}>
+                          {feedback.category === 'physics' ? 'Physics Issue' : feedback.category === 'math' ? 'Math Issue' : 'Mixed Issue'}
+                        </h5>
+                        <p className={`text-sm mt-1 ${feedback.textClass} opacity-90`}>
+                          {feedback.encouragement}
+                        </p>
+                        {/* Specific error tips */}
+                        {gradeResult.detailedAnalysis.errors && gradeResult.detailedAnalysis.errors.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {gradeResult.detailedAnalysis.errors.slice(0, 2).map((error, idx) => (
+                              <p key={idx} className="text-xs opacity-75">
+                                {['sign', 'algebra', 'units'].includes(error.type)
+                                  ? getMathErrorMessage(error.type)
+                                  : getPhysicsErrorMessage(error.type)}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {/* Diagnostic badges */}
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          gradeResult.detailedAnalysis.physicsCorrect
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          Physics: {gradeResult.detailedAnalysis.physicsCorrect ? '✓' : '✗'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          gradeResult.detailedAnalysis.mathCorrect
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          Math: {gradeResult.detailedAnalysis.mathCorrect ? '✓' : '✗'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()
+            )}
 
             {/* Feedback */}
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">

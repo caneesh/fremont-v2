@@ -7,6 +7,7 @@ import type { MicroTaskStepProgress } from '@/types/history'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
 import MathRenderer from './MathRenderer'
+import { getStepTypeBadge } from '@/lib/hintEngine'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -186,11 +187,19 @@ export default function MicroTaskStepAccordion({
 
         {/* Title and Progress */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-semibold truncate ${
-            isLocked ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
-          }`}>
-            {step.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className={`font-semibold truncate ${
+              isLocked ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
+            }`}>
+              {step.title}
+            </h3>
+            {/* Step Type Badge */}
+            {step.stepType && (
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStepTypeBadge(step.stepType).bgClass} ${getStepTypeBadge(step.stepType).textClass}`}>
+                {getStepTypeBadge(step.stepType).label}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2 mt-1">
             {/* Progress dots */}
             <div className="flex gap-1">

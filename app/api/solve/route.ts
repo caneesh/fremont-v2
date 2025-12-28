@@ -4,7 +4,8 @@ import {
   generateMicroTaskScaffold,
   solvePhysicsProblem,
   scaffoldSolution,
-  anticipateErrors
+  anticipateErrors,
+  ScaffoldDensity
 } from '@/lib/anthropic'
 import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
@@ -24,7 +25,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problem, diagramImage, useMicroTasks = false, enableErrorAnticipation = false } = body
+    const { problem, diagramImage, useMicroTasks = false, enableErrorAnticipation = false, density = 3 } = body
+
+    // Validate density (1-5)
+    const validDensity: ScaffoldDensity = Math.min(5, Math.max(1, Math.round(density))) as ScaffoldDensity
 
     if (!problem || typeof problem !== 'string') {
       return NextResponse.json(
@@ -59,7 +63,7 @@ export async function POST(request: NextRequest) {
       // Pass 1: Solve the problem (hidden)
       // Pass 1.5: Anticipate common errors
       // Pass 2: Generate scaffold
-      console.log(`[${authContext.userId}] Using 3-pass architecture with Error Anticipator...`)
+      console.log(`[${authContext.userId}] Using 3-pass architecture with Error Anticipator (density=${validDensity})...`)
 
       // Pass 1: Solve
       const solverResponse = await solvePhysicsProblem(problem)
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       // Note: Currently using single-pass for scaffold, then merging error data
       scaffoldData = useMicroTasks
         ? await generateMicroTaskScaffold(problem, diagramImage)
-        : await generateScaffold(problem, diagramImage)
+        : await generateScaffold(problem, diagramImage, validDensity)
       console.log(`[${authContext.userId}] Pass 2 (${mode} Scaffolder) complete`)
 
       // Pass 1.5: Anticipate errors (uses hidden solution + step titles)
@@ -87,11 +91,11 @@ export async function POST(request: NextRequest) {
       // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
       // Combines solving + scaffolding into one API call
       // Supports both hint mode (default) and micro-task mode
-      console.log(`[${authContext.userId}] Generating ${mode} scaffold${diagramImage ? ' with diagram' : ''}...`)
+      console.log(`[${authContext.userId}] Generating ${mode} scaffold (density=${validDensity})${diagramImage ? ' with diagram' : ''}...`)
 
       scaffoldData = useMicroTasks
         ? await generateMicroTaskScaffold(problem, diagramImage)
-        : await generateScaffold(problem, diagramImage)
+        : await generateScaffold(problem, diagramImage, validDensity)
     }
 
     const endTime = Date.now()

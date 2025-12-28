@@ -9,7 +9,7 @@ import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import ContinueBanner from '@/components/ContinueBanner'
 import DemoTour from '@/components/DemoTour'
-import type { ScaffoldData } from '@/types/scaffold'
+import type { ScaffoldData, ScaffoldDensity } from '@/types/scaffold'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { problemHistoryService } from '@/lib/problemHistory'
@@ -37,7 +37,7 @@ function HomeContent() {
   // Active learning mode is the default (Duolingo approach)
   const useMicroTasks = true
 
-  const handleProblemSubmit = async (problemText: string, diagramImage?: string | null) => {
+  const handleProblemSubmit = async (problemText: string, diagramImage?: string | null, density?: ScaffoldDensity) => {
     setCurrentProblemText(problemText)
     setIsLoading(true)
     setError(null)
@@ -51,7 +51,8 @@ function HomeContent() {
         body: JSON.stringify({
           problem: problemText,
           diagramImage: diagramImage || undefined,
-          useMicroTasks
+          useMicroTasks,
+          density: density || 3
         }),
       })
 

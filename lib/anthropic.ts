@@ -28,10 +28,21 @@ export interface ErrorAnticipatorResponse {
   }>
 }
 
+/**
+ * Step type for hint routing
+ */
+export type StepType = 'diagram' | 'physics_concept' | 'math_manipulation' | 'sanity_check'
+
+/**
+ * Scaffold density level (1=micro-steps, 5=macro-milestones)
+ */
+export type ScaffoldDensity = 1 | 2 | 3 | 4 | 5
+
 export interface ScaffolderResponse {
   problem: string
   domain: string
   subdomain: string
+  density?: ScaffoldDensity
   concepts: Array<{
     id: string
     name: string
@@ -41,6 +52,8 @@ export interface ScaffolderResponse {
   steps: Array<{
     id: number
     title: string
+    stepType?: StepType
+    prerequisites?: string[]
     hints: Array<{
       level: 1 | 2 | 3 | 4 | 5
       title: 'Concept Identification' | 'Visualization' | 'Strategy Selection' | 'Structural Equation' | 'Full Solution'
@@ -62,6 +75,7 @@ export interface MicroTaskScaffolderResponse {
   problem: string
   domain: string
   subdomain: string
+  density?: ScaffoldDensity
   concepts: Array<{
     id: string
     name: string
@@ -71,6 +85,8 @@ export interface MicroTaskScaffolderResponse {
   steps: Array<{
     id: number
     title: string
+    stepType?: StepType
+    prerequisites?: string[]
     tasks: Array<{
       level: 1 | 2 | 3 | 4 | 5
       levelTitle: 'Concept' | 'Visual' | 'Strategy' | 'Equation' | 'Solution'
@@ -96,17 +112,37 @@ export interface MicroTaskScaffolderResponse {
 }
 
 /**
+ * Density descriptions for prompt generation
+ */
+const DENSITY_DESCRIPTIONS: Record<ScaffoldDensity, { steps: string; detail: string }> = {
+  1: { steps: '8-12', detail: 'extremely detailed micro-steps, breaking down every small reasoning step' },
+  2: { steps: '6-8', detail: 'detailed steps with explicit sub-tasks' },
+  3: { steps: '4-6', detail: 'balanced steps covering key milestones' },
+  4: { steps: '3-4', detail: 'condensed high-level steps' },
+  5: { steps: '2-3', detail: 'macro-milestones only, for advanced students' },
+}
+
+/**
  * ULTRA-FAST: Progressive Hint Loading
  * Only generates Levels 1-3 initially (15-20s)
  * Levels 4-5 generated on-demand when user clicks (~3s each)
  *
  * @param problem - The problem statement text
  * @param diagramImage - Optional base64-encoded diagram image (data:image/...)
+ * @param density - Scaffold density level (1=micro, 5=macro). Default: 3
  */
-export async function generateScaffold(problem: string, diagramImage?: string): Promise<ScaffolderResponse> {
+export async function generateScaffold(
+  problem: string,
+  diagramImage?: string,
+  density: ScaffoldDensity = 3
+): Promise<ScaffolderResponse> {
+  const densityConfig = DENSITY_DESCRIPTIONS[density]
+
   const combinedPrompt = `You are an expert IIT-JEE Physics teacher with 20+ years of experience.${diagramImage ? '\n\nNOTE: The student has provided a diagram for this problem. Analyze it carefully along with the problem text.' : ''}
 
 CONTEXT: This problem is for students preparing for IIT-JEE (Indian Institute of Technology Joint Entrance Examination), one of the world's most competitive engineering entrance exams. Students need rigorous understanding of physics concepts, mathematical techniques, and problem-solving strategies at the Irodov/Kleppner level.
+
+SCAFFOLD DENSITY: Level ${density}/5 - Generate ${densityConfig.steps} steps with ${densityConfig.detail}.
 
 PROBLEM:
 ${problem}
@@ -127,8 +163,18 @@ Based on your internal solution, create a Socratic learning scaffold with:
    - Each: id (lowercase-with-dashes), name, definition (2-3 sentences), optional formula
    - Use standard JEE notation and LaTeX: $ for inline, $$ for display
 
-2. STEPS: Break into 3-6 logical thinking milestones (NOT calculation steps!)
-   For EACH step, provide ONLY THE FIRST 3 HINT LEVELS (for faster generation):
+2. STEPS: Break into ${densityConfig.steps} logical thinking milestones.
+   For EACH step, you MUST include:
+
+   a) stepType - Classify as one of:
+      - "diagram": Setting up coordinate system, drawing forces, visualizing geometry
+      - "physics_concept": Applying physics laws, identifying principles, conceptual reasoning
+      - "math_manipulation": Algebraic manipulation, calculus, solving equations
+      - "sanity_check": Verifying limits, dimensions, physical reasonableness
+
+   b) prerequisites - Array of concept tags this step requires (use concept ids)
+
+   c) hints - ONLY THE FIRST 3 HINT LEVELS (for faster generation):
 
    Level 1 - Concept Identification:
    • Guide student to identify applicable laws/concepts WITHOUT stating them
@@ -142,6 +188,12 @@ Based on your internal solution, create a Socratic learning scaffold with:
    Level 3 - Strategy Selection:
    • Guide toward solution strategy without revealing equations
    • Example: "Consider energy methods vs force balance - which is cleaner?"
+
+   HINT STYLE BY STEP TYPE:
+   - For "physics_concept" steps: Use Socratic questions, no formula dumps
+   - For "math_manipulation" steps: Provide math-coach hints (identity reminders, algebra tips)
+   - For "diagram" steps: Focus on visualization and setup
+   - For "sanity_check" steps: Guide toward limiting cases and physical intuition
 
    NOTE: Levels 4-5 will be generated on-demand when the student requests them.
    IMPORTANT: Only include hints for levels 1, 2, and 3 in the JSON output.
@@ -167,6 +219,7 @@ Output ONLY valid JSON with this EXACT structure:
 {
   "domain": "Main physics domain",
   "subdomain": "Specific subdomain",
+  "density": ${density},
   "concepts": [
     {
       "id": "concept-id",
@@ -179,6 +232,8 @@ Output ONLY valid JSON with this EXACT structure:
     {
       "id": 1,
       "title": "Step Title",
+      "stepType": "physics_concept",
+      "prerequisites": ["concept-id-1"],
       "hints": [
         {
           "level": 1,
