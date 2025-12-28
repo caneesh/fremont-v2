@@ -146,7 +146,7 @@ export default function ForceArrow({
   return (
     <g
       ref={groupRef}
-      transform={`translate(${force.x}%, ${force.y}%)`}
+      transform={`translate(${force.x}, ${force.y})`}
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       {/* Hit area (larger than visible arrow) */}
