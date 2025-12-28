@@ -98,6 +98,13 @@ export const STORAGE_KEYS = {
   // Feature-specific
   FRIEND_EXPLANATIONS: 'physiscaffold_friend_explanations',
   SPOT_MISTAKE_PREFIX: 'physiscaffold_spot_mistake_',
+
+  // Mistake Notebook + SRS
+  MISTAKE_CARDS: 'physiscaffold_mistake_cards',
+  REVIEW_SESSIONS: 'physiscaffold_review_sessions',
+  DAILY_DEBRIEFS: 'physiscaffold_daily_debriefs',
+  LAST_DEBRIEF_DATE: 'physiscaffold_last_debrief',
+  REVIEW_STREAK: 'physiscaffold_review_streak',
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
