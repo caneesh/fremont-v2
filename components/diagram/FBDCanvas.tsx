@@ -23,8 +23,6 @@ export default function FBDCanvas({
 }: FBDCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [selectedForceId, setSelectedForceId] = useState<string | null>(null)
-  const [draggedType, setDraggedType] = useState<ForceType | null>(null)
-  const [isDragOver, setIsDragOver] = useState(false)
 
   const canvasWidth = 400
   const canvasHeight = 300
@@ -55,46 +53,59 @@ export default function FBDCanvas({
 
   const objectPos = getObjectPosition()
 
-  // Handle dropping a force from palette
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(false)
+  // Get smart default angle based on force type and scenario
+  const getDefaultAngle = useCallback((forceType: ForceType): number => {
+    const surfaceAngle = scenario.surfaceAngle ?? 0
 
-    const forceType = e.dataTransfer.getData('forceType') as ForceType
-    if (!forceType || !svgRef.current) return
+    switch (forceType) {
+      case 'weight':
+        return 270 // Always down
+      case 'normal':
+        // Perpendicular to surface (surface angle + 90°)
+        return scenario.scenarioType === 'incline'
+          ? (surfaceAngle + 90) % 360
+          : 90 // Straight up for horizontal
+      case 'friction':
+        // Along surface (could be either direction, default to up-slope)
+        return scenario.scenarioType === 'incline'
+          ? (surfaceAngle + 180) % 360 // Points up the slope
+          : 180 // Left for horizontal
+      case 'tension':
+        return 90 // Up by default
+      case 'applied':
+        return 0 // Right by default
+      default:
+        return 0
+    }
+  }, [scenario])
 
-    const rect = svgRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
+  // Handle adding a force via click - AUTO-SNAP TO OBJECT CENTER
+  const handleForceAdd = useCallback((forceType: ForceType) => {
+    // Check if this force type is already placed
+    const existingForce = placedForces.find(f => f.type === forceType)
+    if (existingForce) {
+      setSelectedForceId(existingForce.id)
+      return
+    }
 
     const meta = FORCE_METADATA[forceType]
-    const defaultAngle = forceType === 'weight' ? 270 : // Down
-                         forceType === 'normal' ? 90 :  // Up
-                         0                              // Right
+
+    // Place at object center
+    const centerX = (objectPos.x / canvasWidth) * 100
+    const centerY = (objectPos.y / canvasHeight) * 100
 
     const newForce: PlacedForce = {
       id: `force-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: forceType,
       label: meta.defaultLabel,
-      x: Math.max(10, Math.min(90, x)),
-      y: Math.max(10, Math.min(90, y)),
-      angle: defaultAngle
+      x: centerX,
+      y: centerY,
+      angle: getDefaultAngle(forceType)
     }
 
     onPlacedForcesChange([...placedForces, newForce])
     setSelectedForceId(newForce.id)
-    setDraggedType(null)
-  }, [placedForces, onPlacedForcesChange])
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'copy'
-    setIsDragOver(true)
-  }, [])
-
-  const handleDragLeave = useCallback(() => {
-    setIsDragOver(false)
-  }, [])
+  }, [placedForces, onPlacedForcesChange, objectPos, canvasWidth, canvasHeight, getDefaultAngle])
 
   // Force manipulation handlers
   const handleForceSelect = useCallback((id: string) => {
@@ -141,27 +152,23 @@ export default function FBDCanvas({
     <div className="flex gap-4">
       {/* Force Palette */}
       {!isCompleted && (
-        <div className="w-40 flex-shrink-0">
-          <ForcePalette onDragStart={setDraggedType} />
+        <div className="w-48 flex-shrink-0">
+          <ForcePalette
+            onForceAdd={handleForceAdd}
+            placedForces={placedForces.map(f => f.type)}
+          />
         </div>
       )}
 
       {/* Canvas */}
       <div className="flex-1">
         <div
-          className={`relative rounded-xl border-2 transition-colors ${
-            isDragOver
-              ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-              : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
-          } ${isCompleted ? 'opacity-75' : ''}`}
+          className={`relative rounded-xl border-2 transition-colors border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${isCompleted ? 'opacity-75' : ''}`}
         >
           <svg
             ref={svgRef}
             viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
             className="w-full aspect-[4/3]"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
             onClick={handleCanvasClick}
           >
             {/* Grid pattern (subtle) */}
@@ -221,20 +228,6 @@ export default function FBDCanvas({
               ))}
             </g>
 
-            {/* Drop indicator */}
-            {isDragOver && draggedType && (
-              <g opacity={0.5}>
-                <text
-                  x={canvasWidth / 2}
-                  y={canvasHeight / 2}
-                  textAnchor="middle"
-                  fontSize={16}
-                  fill="#6366f1"
-                >
-                  Drop {FORCE_METADATA[draggedType].name} here
-                </text>
-              </g>
-            )}
           </svg>
 
           {/* Completed overlay */}

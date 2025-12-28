@@ -167,9 +167,8 @@ export default function DiagramStep({
           {/* Instructions */}
           <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
             <p className="text-sm text-indigo-700 dark:text-indigo-300">
-              <strong>Instructions:</strong> Drag forces from the palette onto the object.
-              Rotate arrows using the rotate button or ← → keys.
-              Double-click labels to edit them.
+              <strong>Instructions:</strong> Click forces on the left to add them.
+              Use ← → arrow keys to rotate. Press Delete to remove.
             </p>
           </div>
 
