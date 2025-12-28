@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Step, Concept, WarningBeacon } from '@/types/scaffold'
 import type { FeynmanScript } from '@/types/feynman'
 import MathRenderer from './MathRenderer'
 import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
+import { onHintRequested, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 
 interface StepAccordionProps {
   step: Step
@@ -19,6 +20,11 @@ interface StepAccordionProps {
   problemStatement?: string
   currentHintLevel?: number
   warningBeacon?: WarningBeacon  // Optional warning beacon from Error Anticipator
+  // Problem context for mistake tracking
+  problemId?: string
+  problemTitle?: string
+  domain?: string
+  subdomain?: string
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -36,6 +42,10 @@ export default function StepAccordion({
   problemStatement,
   currentHintLevel = 0,
   warningBeacon,
+  problemId,
+  problemTitle,
+  domain,
+  subdomain,
   onAnswerChange,
   onComplete,
   onActivate,
@@ -48,6 +58,20 @@ export default function StepAccordion({
   const [generatedHints, setGeneratedHints] = useState<Map<number, { level: number; title: string; content: string }>>(new Map())
   const [isGeneratingHint, setIsGeneratingHint] = useState<number | null>(null)
 
+  // Track step activation time for timeout detection
+  const stepActivationTimeRef = useRef<number | null>(null)
+
+  // Set activation time when step becomes active
+  useEffect(() => {
+    if (isActive && !isCompleted && stepActivationTimeRef.current === null) {
+      stepActivationTimeRef.current = Date.now()
+    }
+    // Reset when step is completed
+    if (isCompleted) {
+      stepActivationTimeRef.current = null
+    }
+  }, [isActive, isCompleted])
+
   const handleToggle = () => {
     if (!isLocked) {
       setIsExpanded(!isExpanded)
@@ -58,6 +82,24 @@ export default function StepAccordion({
   }
 
   const handleComplete = () => {
+    // Track timeout if step took too long
+    if (problemId && stepActivationTimeRef.current) {
+      const durationMs = Date.now() - stepActivationTimeRef.current
+      const problemContext: ProblemContext = {
+        problemId,
+        problemTitle: problemTitle || 'Untitled Problem',
+        domain: domain || 'physics',
+        subdomain: subdomain || 'general'
+      }
+      const stepContext: StepContext = {
+        stepId: step.id,
+        stepTitle: step.title,
+        stepType: step.stepType || 'physics_concept',
+        requiredConcepts: step.requiredConcepts || []
+      }
+      onStepTimeout(problemContext, stepContext, durationMs)
+    }
+
     onComplete()
     setIsExpanded(false)
   }
@@ -103,6 +145,23 @@ export default function StepAccordion({
   const handleUnlockNextHint = async () => {
     const nextLevel = currentHintLevel + 1
     if (nextLevel > 5) return
+
+    // Track hint request for mistake notebook (level 2+ indicates struggle)
+    if (problemId && nextLevel >= 2) {
+      const problemContext: ProblemContext = {
+        problemId,
+        problemTitle: problemTitle || 'Untitled Problem',
+        domain: domain || 'physics',
+        subdomain: subdomain || 'general'
+      }
+      const stepContext: StepContext = {
+        stepId: step.id,
+        stepTitle: step.title,
+        stepType: step.stepType || 'physics_concept',
+        requiredConcepts: step.requiredConcepts || []
+      }
+      onHintRequested(problemContext, stepContext, nextLevel)
+    }
 
     // If Level 4 or 5, and not already generated, fetch from API
     if ((nextLevel === 4 || nextLevel === 5) && !generatedHints.has(nextLevel)) {

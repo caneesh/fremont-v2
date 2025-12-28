@@ -697,6 +697,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       progress={microTaskProgress.get(step.id)}
                       problemStatement={data.problem}
                       warningBeacon={(data as MicroTaskScaffoldData).warningBeacons?.find(b => b.stepId === step.id)}
+                      problemId={problemId()}
+                      problemTitle={problemTitle()}
+                      domain={data.domain}
+                      subdomain={data.subdomain}
                       onTaskComplete={handleMicroTaskComplete}
                       onComplete={handleMicroStepComplete}
                       onActivate={() => setCurrentStep(index)}
@@ -713,6 +717,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       currentHintLevel={stepHintLevels.get(index) || 0}
                       problemStatement={data.problem}
                       warningBeacon={(data as ScaffoldData).warningBeacons?.find(b => b.stepId === step.id)}
+                      problemId={problemId()}
+                      problemTitle={problemTitle()}
+                      domain={data.domain}
+                      subdomain={data.subdomain}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => setCurrentStep(index)}

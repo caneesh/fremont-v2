@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { MicroTaskStep } from '@/types/microTask'
 import type { Concept, WarningBeacon } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
@@ -8,6 +8,7 @@ import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
 import MathRenderer from './MathRenderer'
 import { getStepTypeBadge } from '@/lib/hintEngine'
+import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -19,6 +20,11 @@ interface MicroTaskStepAccordionProps {
   progress?: MicroTaskStepProgress
   problemStatement?: string
   warningBeacon?: WarningBeacon  // Optional warning beacon from Error Anticipator
+  // Problem context for mistake tracking
+  problemId?: string
+  problemTitle?: string
+  domain?: string
+  subdomain?: string
   onTaskComplete: (stepId: number, level: number, explanation: string) => void
   onComplete: (stepId: number) => void
   onActivate: (stepId: number) => void
@@ -34,11 +40,18 @@ export default function MicroTaskStepAccordion({
   progress,
   problemStatement,
   warningBeacon,
+  problemId,
+  problemTitle,
+  domain,
+  subdomain,
   onTaskComplete,
   onComplete,
   onActivate
 }: MicroTaskStepAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(isActive)
+
+  // Track step activation time for timeout detection
+  const stepActivationTimeRef = useRef<number | null>(null)
   const [currentLevel, setCurrentLevel] = useState(progress?.currentLevel || 1)
   const [taskAttempts, setTaskAttempts] = useState<Map<number, number>>(
     new Map(progress?.taskAttempts.map(t => [t.level, t.attempts]) || [])
@@ -57,10 +70,16 @@ export default function MicroTaskStepAccordion({
   const [isReadingMode, setIsReadingMode] = useState(false)
   const [expandedHintLevel, setExpandedHintLevel] = useState<number | null>(null)
 
-  // Sync with active state
+  // Sync with active state and track activation time
   useEffect(() => {
     setIsExpanded(isActive)
-  }, [isActive])
+    if (isActive && !isCompleted && stepActivationTimeRef.current === null) {
+      stepActivationTimeRef.current = Date.now()
+    }
+    if (isCompleted) {
+      stepActivationTimeRef.current = null
+    }
+  }, [isActive, isCompleted])
 
   const handleToggle = () => {
     if (isLocked) return
@@ -88,7 +107,23 @@ export default function MicroTaskStepAccordion({
     if (currentLevel < step.tasks.length) {
       setCurrentLevel(currentLevel + 1)
     } else {
-      // All tasks completed
+      // All tasks completed - check for timeout
+      if (problemId && stepActivationTimeRef.current) {
+        const durationMs = Date.now() - stepActivationTimeRef.current
+        const problemContext: ProblemContext = {
+          problemId,
+          problemTitle: problemTitle || 'Untitled Problem',
+          domain: domain || 'physics',
+          subdomain: subdomain || 'general'
+        }
+        const stepContext: StepContext = {
+          stepId: step.id,
+          stepTitle: step.title,
+          stepType: step.stepType || 'physics_concept',
+          requiredConcepts: step.requiredConcepts || []
+        }
+        onStepTimeout(problemContext, stepContext, durationMs)
+      }
       onComplete(step.id)
     }
   }
@@ -99,6 +134,23 @@ export default function MicroTaskStepAccordion({
       newMap.set(currentLevel, attempts)
       return newMap
     })
+
+    // Track mistake when 2+ wrong attempts on a task
+    if (problemId && attempts >= 2) {
+      const problemContext: ProblemContext = {
+        problemId,
+        problemTitle: problemTitle || 'Untitled Problem',
+        domain: domain || 'physics',
+        subdomain: subdomain || 'general'
+      }
+      const stepContext: StepContext = {
+        stepId: step.id,
+        stepTitle: step.title,
+        stepType: step.stepType || 'physics_concept',
+        requiredConcepts: step.requiredConcepts || []
+      }
+      onTaskIncorrect(problemContext, stepContext, currentLevel, attempts)
+    }
   }
 
   const handleSwitchToReadingMode = () => {
