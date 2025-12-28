@@ -11,6 +11,23 @@ export interface SolverResponse {
   subdomain: string
 }
 
+/**
+ * Error Anticipator Response (Pass 1.5)
+ * Identifies common conceptual traps and maps them to specific steps
+ */
+export interface ErrorAnticipatorResponse {
+  commonTraps: Array<{
+    title: string           // Short name (e.g., "Sign Convention Error")
+    description: string     // Detailed explanation of the misconception
+    tags: string[]          // Category tags (e.g., ["sign", "vector"])
+  }>
+  warningBeacons: Array<{
+    stepId: number          // Which step this applies to
+    message: string         // Non-spoilery warning (e.g., "Watch your signs here")
+    tag: string             // Links to a trap tag
+  }>
+}
+
 export interface ScaffolderResponse {
   problem: string
   domain: string
@@ -649,5 +666,118 @@ Respond with ONLY the JSON, no other text.`
       console.error(jsonStr.substring(Math.max(0, pos - 100), Math.min(jsonStr.length, pos + 100)))
     }
     throw new Error('Failed to generate proper scaffold structure')
+  }
+}
+
+/**
+ * Pass 1.5: The Error Anticipator
+ * Analyzes the problem and hidden solution to identify common conceptual traps
+ * Returns warning beacons mapped to specific steps (non-spoilery)
+ *
+ * @param problem - The problem statement text
+ * @param solution - The hidden solution from Pass 1 (Solver)
+ * @param stepTitles - Array of step titles from the scaffold (for mapping beacons)
+ */
+export async function anticipateErrors(
+  problem: string,
+  solution: string,
+  stepTitles: string[]
+): Promise<ErrorAnticipatorResponse> {
+  const errorAnticipatorPrompt = `You are an experienced IIT-JEE Physics examiner who has graded thousands of student papers. Your job is to ANTICIPATE the most common conceptual mistakes students will make on this problem.
+
+PROBLEM:
+${problem}
+
+HIDDEN SOLUTION (for your reference only - DO NOT reveal):
+${solution}
+
+SCAFFOLD STEPS:
+${stepTitles.map((title, i) => `${i + 1}. ${title}`).join('\n')}
+
+YOUR TASK:
+Identify the TOP 3 conceptual traps that students commonly fall into on this type of problem. Then, map these traps to specific steps with subtle warning beacons.
+
+REQUIREMENTS FOR CONCEPTUAL TRAPS:
+1. Focus on CONCEPTUAL errors, not calculation mistakes
+2. Each trap should have:
+   - title: Short name (e.g., "Sign Convention Confusion", "Frame Mixing Error")
+   - description: Detailed explanation of WHY students make this mistake and WHAT the correct thinking should be
+   - tags: 1-3 category tags (e.g., ["sign", "direction"], ["reference-frame"], ["constraint"])
+
+REQUIREMENTS FOR WARNING BEACONS:
+1. Map each trap to the step(s) where students are most likely to make that mistake
+2. Keep messages SHORT and NON-SPOILERY (8-12 words max)
+3. Use friendly, encouraging language
+4. The beacon should hint at the CATEGORY of mistake, NOT the correct answer
+5. CRITICAL: NEVER reveal or hint at numerical values or final answers
+
+GOOD BEACON EXAMPLES:
+- "Watch your sign conventions carefully here"
+- "Make sure you're consistent with your reference frame"
+- "Consider all forces, even non-obvious ones"
+- "Double-check which direction is positive"
+
+BAD BEACON EXAMPLES (DO NOT DO):
+- "The answer should be positive" (reveals answer)
+- "Use centrifugal force in rotating frame" (too specific/spoilery)
+- "The angle is 30 degrees" (reveals numerical value)
+
+JSON OUTPUT FORMAT:
+{
+  "commonTraps": [
+    {
+      "title": "Short Trap Name",
+      "description": "Detailed explanation of the conceptual mistake and correct thinking (2-4 sentences).",
+      "tags": ["tag1", "tag2"]
+    }
+  ],
+  "warningBeacons": [
+    {
+      "stepId": 1,
+      "message": "Short non-spoilery warning (8-12 words)",
+      "tag": "tag1"
+    }
+  ]
+}
+
+CRITICAL RULES:
+- Exactly 3 conceptual traps (the most common ones)
+- 1-2 warning beacons per step (where applicable)
+- stepId must match the step numbers (1-indexed, based on the steps listed above)
+- Each beacon's tag must match one of the trap tags
+- NEVER hint at numerical answers or specific solution steps
+- All strings on single lines, escape quotes with \\"
+
+Respond with ONLY valid JSON, no other text.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 2048,
+    messages: [
+      {
+        role: 'user',
+        content: errorAnticipatorPrompt,
+      },
+    ],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  const jsonMatch = responseText.match(/\{[\s\S]+\}/)
+  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  try {
+    const errorData = JSON.parse(jsonStr)
+    return {
+      commonTraps: errorData.commonTraps || [],
+      warningBeacons: errorData.warningBeacons || [],
+    }
+  } catch (error) {
+    console.error('Failed to parse error anticipator JSON:', error)
+    console.error('Raw JSON string (first 500 chars):', jsonStr.substring(0, 500))
+    // Return empty arrays on failure (non-critical feature)
+    return {
+      commonTraps: [],
+      warningBeacons: [],
+    }
   }
 }

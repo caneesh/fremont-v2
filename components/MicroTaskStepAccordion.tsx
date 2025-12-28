@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { MicroTaskStep } from '@/types/microTask'
-import type { Concept } from '@/types/scaffold'
+import type { Concept, WarningBeacon } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
@@ -17,6 +17,7 @@ interface MicroTaskStepAccordionProps {
   concepts: Concept[]
   progress?: MicroTaskStepProgress
   problemStatement?: string
+  warningBeacon?: WarningBeacon  // Optional warning beacon from Error Anticipator
   onTaskComplete: (stepId: number, level: number, explanation: string) => void
   onComplete: (stepId: number) => void
   onActivate: (stepId: number) => void
@@ -31,6 +32,7 @@ export default function MicroTaskStepAccordion({
   concepts,
   progress,
   problemStatement,
+  warningBeacon,
   onTaskComplete,
   onComplete,
   onActivate
@@ -234,6 +236,25 @@ export default function MicroTaskStepAccordion({
       {/* Expanded Content */}
       {isExpanded && !isLocked && (
         <div className="px-4 pb-4 space-y-4">
+          {/* Warning Beacon - Non-spoilery hint about common mistakes */}
+          {warningBeacon && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center">
+                <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+                  {warningBeacon.message}
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5" title={`Common mistake: ${warningBeacon.tag}`}>
+                  Most common mistake here
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Required Concepts */}
           {requiredConcepts.length > 0 && (
             <div className="flex flex-wrap gap-2">

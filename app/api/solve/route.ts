@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateScaffold, generateMicroTaskScaffold } from '@/lib/anthropic'
+import {
+  generateScaffold,
+  generateMicroTaskScaffold,
+  solvePhysicsProblem,
+  scaffoldSolution,
+  anticipateErrors
+} from '@/lib/anthropic'
 import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
@@ -18,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problem, diagramImage, useMicroTasks = false } = body
+    const { problem, diagramImage, useMicroTasks = false, enableErrorAnticipation = false } = body
 
     if (!problem || typeof problem !== 'string') {
       return NextResponse.json(
@@ -43,16 +49,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
-    // Combines solving + scaffolding into one API call
-    // Supports both hint mode (default) and micro-task mode
     const mode = useMicroTasks ? 'micro-task' : 'hint'
-    console.log(`[${authContext.userId}] Generating ${mode} scaffold${diagramImage ? ' with diagram' : ''}...`)
     const startTime = Date.now()
 
-    const scaffoldData = useMicroTasks
-      ? await generateMicroTaskScaffold(problem, diagramImage)
-      : await generateScaffold(problem, diagramImage)
+    let scaffoldData
+
+    if (enableErrorAnticipation) {
+      // 3-PASS ARCHITECTURE WITH ERROR ANTICIPATION
+      // Pass 1: Solve the problem (hidden)
+      // Pass 1.5: Anticipate common errors
+      // Pass 2: Generate scaffold
+      console.log(`[${authContext.userId}] Using 3-pass architecture with Error Anticipator...`)
+
+      // Pass 1: Solve
+      const solverResponse = await solvePhysicsProblem(problem)
+      console.log(`[${authContext.userId}] Pass 1 (Solver) complete`)
+
+      // Pass 2: Generate scaffold (we need step titles for error anticipation)
+      // Note: Currently using single-pass for scaffold, then merging error data
+      scaffoldData = useMicroTasks
+        ? await generateMicroTaskScaffold(problem, diagramImage)
+        : await generateScaffold(problem, diagramImage)
+      console.log(`[${authContext.userId}] Pass 2 (${mode} Scaffolder) complete`)
+
+      // Pass 1.5: Anticipate errors (uses hidden solution + step titles)
+      const stepTitles = scaffoldData.steps.map((s: { title: string }) => s.title)
+      const errorData = await anticipateErrors(problem, solverResponse.solution, stepTitles)
+      console.log(`[${authContext.userId}] Pass 1.5 (Error Anticipator) complete: ${errorData.commonTraps.length} traps, ${errorData.warningBeacons.length} beacons`)
+
+      // Merge error anticipation data into scaffold
+      scaffoldData = {
+        ...scaffoldData,
+        commonTraps: errorData.commonTraps,
+        warningBeacons: errorData.warningBeacons,
+      }
+    } else {
+      // OPTIMIZED SINGLE-PASS ARCHITECTURE (2x faster)
+      // Combines solving + scaffolding into one API call
+      // Supports both hint mode (default) and micro-task mode
+      console.log(`[${authContext.userId}] Generating ${mode} scaffold${diagramImage ? ' with diagram' : ''}...`)
+
+      scaffoldData = useMicroTasks
+        ? await generateMicroTaskScaffold(problem, diagramImage)
+        : await generateScaffold(problem, diagramImage)
+    }
 
     const endTime = Date.now()
     console.log(`[${authContext.userId}] ${mode} scaffold generated in ${(endTime - startTime) / 1000}s`)

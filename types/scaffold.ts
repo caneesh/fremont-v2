@@ -26,6 +26,26 @@ export interface SanityCheck {
   type: 'limit' | 'dimension' | 'symmetry'
 }
 
+/**
+ * Conceptual trap identified by the Error Anticipator (Pass 1.5)
+ * Represents a common mistake students make on this type of problem
+ */
+export interface ConceptualTrap {
+  title: string           // Short name for the trap (e.g., "Sign Convention Error")
+  description: string     // Detailed explanation of the misconception
+  tags: string[]          // Category tags (e.g., ["sign", "vector", "direction"])
+}
+
+/**
+ * Warning beacon attached to a specific step
+ * Provides a non-spoilery hint about common pitfalls
+ */
+export interface WarningBeacon {
+  stepId: number          // Which step this beacon applies to
+  message: string         // Brief warning (e.g., "Watch your signs here")
+  tag: string             // Links to a ConceptualTrap tag
+}
+
 export interface ScaffoldData {
   problem: string
   domain: string
@@ -33,6 +53,9 @@ export interface ScaffoldData {
   concepts: Concept[]
   steps: Step[]
   sanityCheck: SanityCheck
+  // Optional Error Anticipator fields (Pass 1.5)
+  commonTraps?: ConceptualTrap[]     // Top 3 conceptual traps for this problem
+  warningBeacons?: WarningBeacon[]   // Step-specific warning beacons
 }
 
 export interface StepValidation {
