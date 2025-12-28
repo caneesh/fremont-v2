@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { MistakeCard, MistakeNotebookFilters, SRSStatus, MistakeTrigger, DailyDebrief } from '@/types/mistakeNotebook'
 import type { StepType } from '@/types/scaffold'
@@ -12,7 +13,8 @@ import {
   getAllDomains,
   deleteCard,
   suspendCard,
-  unsuspendCard
+  unsuspendCard,
+  getCardsDue
 } from '@/lib/mistakeNotebook'
 import { getTodayDebrief, isDebriefDue } from '@/lib/dailyDebrief'
 import MistakeCardDisplay from '@/components/MistakeCardDisplay'
@@ -22,6 +24,8 @@ import ReviewSession from '@/components/ReviewSession'
 type ViewMode = 'cards' | 'review'
 
 export default function MistakeNotebookPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
   const [cards, setCards] = useState<MistakeCard[]>([])
   const [debrief, setDebrief] = useState<DailyDebrief | null>(null)
@@ -62,7 +66,19 @@ export default function MistakeNotebookPage() {
       setDebrief(todayDebrief)
       setShowDebrief(true)
     }
-  }, [loadData])
+
+    // Check if auto-start review from URL param
+    const reviewParam = searchParams.get('review')
+    if (reviewParam === 'true') {
+      // Only start review if there are cards due
+      const dueCards = getCardsDue()
+      if (dueCards.length > 0) {
+        setViewMode('review')
+      }
+      // Clear the query param
+      router.replace('/mistake-notebook')
+    }
+  }, [loadData, searchParams, router])
 
   // Handle filter changes
   const handleFilterChange = (key: keyof MistakeNotebookFilters, value: unknown) => {

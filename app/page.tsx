@@ -9,11 +9,14 @@ import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import ContinueBanner from '@/components/ContinueBanner'
 import DemoTour from '@/components/DemoTour'
+import DailyDebriefCard from '@/components/DailyDebriefCard'
 import type { ScaffoldData, ScaffoldDensity } from '@/types/scaffold'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
 import type { PrerequisiteResult } from '@/types/prerequisites'
+import type { DailyDebrief } from '@/types/mistakeNotebook'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
+import { getTodayDebrief, isDebriefDue } from '@/lib/dailyDebrief'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
@@ -34,8 +37,22 @@ function HomeContent() {
   const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
   const [isDemoMode, setIsDemoMode] = useState(false)
+  const [dailyDebrief, setDailyDebrief] = useState<DailyDebrief | null>(null)
+  const [showDebrief, setShowDebrief] = useState(false)
   // Active learning mode is the default (Duolingo approach)
   const useMicroTasks = true
+
+  // Load daily debrief on mount
+  useEffect(() => {
+    if (isDebriefDue()) {
+      const debrief = getTodayDebrief()
+      setDailyDebrief(debrief)
+      // Only show if there's some activity or cards due
+      if (debrief.problemsAttempted > 0 || debrief.cardsDueToday > 0 || debrief.cardsOverdue > 0) {
+        setShowDebrief(true)
+      }
+    }
+  }, [])
 
   const handleProblemSubmit = async (problemText: string, diagramImage?: string | null, density?: ScaffoldDensity) => {
     setCurrentProblemText(problemText)
@@ -293,6 +310,16 @@ function HomeContent() {
         {/* Main Content */}
         {!scaffoldData ? (
           <>
+            {/* Daily Debrief */}
+            {showDebrief && dailyDebrief && (
+              <div className="max-w-3xl mx-auto mb-6">
+                <DailyDebriefCard
+                  debrief={dailyDebrief}
+                  onStartReview={() => router.push('/mistake-notebook?review=true')}
+                  onDismiss={() => setShowDebrief(false)}
+                />
+              </div>
+            )}
             {!isLoading && (
               <ContinueBanner onContinue={handleProblemSubmit} />
             )}
