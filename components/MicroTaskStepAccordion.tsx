@@ -154,6 +154,25 @@ export default function MicroTaskStepAccordion({
   }
 
   const handleSwitchToReadingMode = () => {
+    // Track switching to reading mode as a mistake (user gave up on quiz)
+    if (problemId) {
+      const problemContext: ProblemContext = {
+        problemId,
+        problemTitle: problemTitle || 'Untitled Problem',
+        domain: domain || 'physics',
+        subdomain: subdomain || 'general'
+      }
+      const stepContext: StepContext = {
+        stepId: step.id,
+        stepTitle: step.title,
+        stepType: step.stepType || 'physics_concept',
+        requiredConcepts: step.requiredConcepts || []
+      }
+      // Use onTaskIncorrect with current level and attempts (minimum 2 to trigger)
+      const attempts = taskAttempts.get(currentLevel) || 0
+      onTaskIncorrect(problemContext, stepContext, currentLevel, Math.max(attempts, 2))
+    }
+
     setIsReadingMode(true)
     // Expand the first non-completed level
     const firstUncompletedLevel = step.tasks.find(t => t.level >= currentLevel)?.level || 1
