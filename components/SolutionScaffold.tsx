@@ -216,12 +216,16 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   }, [stepAnswers, completedSteps, stepHintLevels, currentStep, sanityCheckAnswer, microTaskProgress])
 
   const getCurrentProgress = useCallback((): ProblemProgress => {
-    const stepProgress: StepProgress[] = data.steps.map((_, index) => ({
-      stepId: index,
-      isCompleted: completedSteps.includes(index),
-      userAnswer: stepAnswers.get(index),
-      currentHintLevel: stepHintLevels.get(index),
-    }))
+    const stepProgress: StepProgress[] = data.steps.map((step, index) => {
+      // For micro-task mode, use step.id; for hint-based mode, use index
+      const stepId = useMicroTasks ? step.id : index
+      return {
+        stepId,
+        isCompleted: completedSteps.includes(stepId),
+        userAnswer: stepAnswers.get(stepId),
+        currentHintLevel: stepHintLevels.get(stepId),
+      }
+    })
 
     const progress: ProblemProgress = {
       problemText: data.problem,
@@ -392,7 +396,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           conceptId: concept.id,
           conceptName: concept.name,
           problemType: `${data.domain} - ${data.subdomain}`,
-          struggledSteps: completedSteps.filter((_, idx) => (stepHintLevels.get(idx) || 0) >= 4),
+          struggledSteps: completedSteps.filter(stepId => (stepHintLevels.get(stepId) || 0) >= 4),
           maxHintLevelUsed: maxHintLevel,
           timeSpent,
           timestamp: new Date().toISOString(),
@@ -427,8 +431,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
         // Process each step to track concept mastery
         data.steps.forEach((step, stepIdx) => {
-          const stepHintLevel = stepHintLevels.get(stepIdx) || 0
-          const stepCompleted = completedSteps.includes(stepIdx)
+          // For micro-task mode, use step.id; for hint-based mode, use index
+          const stepKey = useMicroTasks ? step.id : stepIdx
+          const stepHintLevel = stepHintLevels.get(stepKey) || 0
+          const stepCompleted = completedSteps.includes(stepKey)
 
           // Record mastery for each concept used in this step
           step.requiredConcepts.forEach(aiConceptId => {
@@ -472,7 +478,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setTimeout(() => setSaveMessage(''), 4000)
       setIsSaving(false)
     }
-  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern])
+  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern, useMicroTasks])
 
   // Show post-solve activity popup RANDOMLY after problem is solved
   useEffect(() => {
@@ -704,8 +710,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       step={step as MicroTaskStep}
                       stepNumber={index + 1}
                       isActive={currentStep === index}
-                      isCompleted={completedSteps.includes(index)}
-                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                      isCompleted={completedSteps.includes(step.id)}
+                      isLocked={index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)}
                       concepts={data.concepts}
                       progress={microTaskProgress.get(step.id)}
                       problemStatement={data.problem}
