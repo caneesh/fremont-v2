@@ -1,14 +1,18 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { MicroTaskStep } from '@/types/microTask'
 import type { Concept, WarningBeacon } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
+import type { StepLearningStatus, ValidationOutcome, RevealFlowEventMetadata } from '@/types/revealFlow'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
+import RevealReconstructValidate from './micro-tasks/RevealReconstructValidate'
 import MathRenderer from './MathRenderer'
 import { getStepTypeBadge } from '@/lib/hintEngine'
 import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import { eventLogger } from '@/lib/storage/eventLogger'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -69,6 +73,13 @@ export default function MicroTaskStepAccordion({
   )
   const [isReadingMode, setIsReadingMode] = useState(false)
   const [expandedHintLevel, setExpandedHintLevel] = useState<number | null>(null)
+
+  // Reveal-Reconstruct-Validate flow state
+  const [revealFlowTask, setRevealFlowTask] = useState<typeof step.tasks[0] | null>(null)
+  const [levelLearningStatus, setLevelLearningStatus] = useState<Map<number, StepLearningStatus>>(new Map())
+
+  // Feature flag check
+  const useRevealFlow = FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE
 
   // Sync with active state and track activation time
   useEffect(() => {
@@ -201,6 +212,92 @@ export default function MicroTaskStepAccordion({
       onComplete(step.id)
     }
   }
+
+  // Event logging helper for reveal flow
+  const logRevealFlowEvent = useCallback((eventType: string, metadata: RevealFlowEventMetadata) => {
+    // Use the existing event logger with reveal flow event types
+    eventLogger.log(eventType as Parameters<typeof eventLogger.log>[0], {
+      ...metadata,
+      stepId: step.id,
+      problemId
+    })
+  }, [step.id, problemId])
+
+  // Handle reveal flow completion (from RevealReconstructValidate modal)
+  const handleRevealFlowComplete = useCallback((outcome: ValidationOutcome, explanation: string, level: number) => {
+    const task = step.tasks.find(t => t.level === level)
+    if (!task) return
+
+    // Update learning status based on outcome
+    setLevelLearningStatus(prev => {
+      const newMap = new Map(prev)
+      newMap.set(level, outcome === 'solid' ? 'conceptually_validated' : 'revealed_not_validated')
+      return newMap
+    })
+
+    // Add to collected insights
+    const alreadyCollected = collectedInsights.some(i => i.level === level)
+    if (!alreadyCollected) {
+      setCollectedInsights(prev => [...prev, {
+        level,
+        levelTitle: task.levelTitle,
+        explanation
+      }])
+      onTaskComplete(step.id, level, explanation)
+    }
+
+    // Move to next level if this was the current level
+    if (level === currentLevel && currentLevel < step.tasks.length) {
+      setCurrentLevel(currentLevel + 1)
+    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+      onComplete(step.id)
+    }
+
+    // Close the modal
+    setRevealFlowTask(null)
+  }, [step.tasks, step.id, collectedInsights, currentLevel, onTaskComplete, onComplete])
+
+  // Handle reveal flow skip (user skipped comprehension check)
+  const handleRevealFlowSkip = useCallback((level: number) => {
+    const task = step.tasks.find(t => t.level === level)
+    if (!task) return
+
+    // Mark as revealed but not validated
+    setLevelLearningStatus(prev => {
+      const newMap = new Map(prev)
+      newMap.set(level, 'revealed_not_validated')
+      return newMap
+    })
+
+    // Still add to collected insights (they saw the explanation)
+    const alreadyCollected = collectedInsights.some(i => i.level === level)
+    if (!alreadyCollected) {
+      setCollectedInsights(prev => [...prev, {
+        level,
+        levelTitle: task.levelTitle,
+        explanation: task.explanation
+      }])
+      onTaskComplete(step.id, level, task.explanation)
+    }
+
+    // Move to next level
+    if (level === currentLevel && currentLevel < step.tasks.length) {
+      setCurrentLevel(currentLevel + 1)
+    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+      onComplete(step.id)
+    }
+
+    // Close the modal
+    setRevealFlowTask(null)
+  }, [step.tasks, step.id, collectedInsights, currentLevel, onTaskComplete, onComplete])
+
+  // Handle opening reveal flow for a specific task level
+  const handleOpenRevealFlow = useCallback((taskLevel: number) => {
+    const task = step.tasks.find(t => t.level === taskLevel)
+    if (task) {
+      setRevealFlowTask(task)
+    }
+  }, [step.tasks])
 
   // Get current task
   const currentTask = step.tasks.find(t => t.level === currentLevel)
@@ -379,6 +476,11 @@ export default function MicroTaskStepAccordion({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                   Reading Mode
+                  {useRevealFlow && (
+                    <span className="px-1.5 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded">
+                      Structured
+                    </span>
+                  )}
                 </div>
                 <button
                   onClick={() => setIsReadingMode(false)}
@@ -392,6 +494,7 @@ export default function MicroTaskStepAccordion({
               {step.tasks.map((task) => {
                 const isCollected = collectedInsights.some(i => i.level === task.level)
                 const isExpanded = expandedHintLevel === task.level
+                const learningStatus = levelLearningStatus.get(task.level)
 
                 return (
                   <div
@@ -404,9 +507,15 @@ export default function MicroTaskStepAccordion({
                   >
                     <button
                       onClick={() => {
-                        setExpandedHintLevel(isExpanded ? null : task.level)
-                        if (!isCollected) {
-                          handleHintRead(task.level)
+                        if (useRevealFlow && !isCollected) {
+                          // Open the reveal-reconstruct-validate flow
+                          handleOpenRevealFlow(task.level)
+                        } else {
+                          // Original behavior: expand and mark as read
+                          setExpandedHintLevel(isExpanded ? null : task.level)
+                          if (!isCollected) {
+                            handleHintRead(task.level)
+                          }
                         }
                       }}
                       className="w-full flex items-center justify-between p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
@@ -425,23 +534,44 @@ export default function MicroTaskStepAccordion({
                             task.level
                           )}
                         </div>
-                        <span className={`text-sm font-medium ${
-                          isCollected ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'
-                        }`}>
-                          {task.levelTitle}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-medium ${
+                            isCollected ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'
+                          }`}>
+                            {task.levelTitle}
+                          </span>
+                          {/* Learning status badge */}
+                          {learningStatus === 'revealed_not_validated' && (
+                            <span className="px-1.5 py-0.5 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded">
+                              Explained
+                            </span>
+                          )}
+                          {learningStatus === 'conceptually_validated' && (
+                            <span className="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded">
+                              Validated
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <svg
-                        className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      {/* Show different icon based on mode */}
+                      {useRevealFlow && !isCollected ? (
+                        <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
                     </button>
 
-                    {isExpanded && (
+                    {/* Original inline expansion (only when feature flag is off or already collected) */}
+                    {isExpanded && (!useRevealFlow || isCollected) && (
                       <div className="px-4 pb-4 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <div className="text-sm text-slate-600 dark:text-slate-400">
                           <MathRenderer text={task.explanation} />
@@ -469,6 +599,18 @@ export default function MicroTaskStepAccordion({
             </div>
           )}
         </div>
+      )}
+
+      {/* Reveal-Reconstruct-Validate Modal */}
+      {revealFlowTask && (
+        <RevealReconstructValidate
+          task={revealFlowTask}
+          stepTitle={step.title}
+          onComplete={(outcome, explanation) => handleRevealFlowComplete(outcome, explanation, revealFlowTask.level)}
+          onSkip={() => handleRevealFlowSkip(revealFlowTask.level)}
+          onClose={() => setRevealFlowTask(null)}
+          onLogEvent={logRevealFlowEvent}
+        />
       )}
     </div>
   )

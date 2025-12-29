@@ -27,6 +27,13 @@ export type EventType =
   | 'task_correct'
   | 'task_incorrect'
   | 'reading_mode_activated'
+  // Reveal-Reconstruct-Validate flow events
+  | 'reveal_opened'
+  | 'reveal_explanation_shown'
+  | 'reconstruct_question_answered'
+  | 'reconstruct_completed'
+  | 'reveal_closed'
+  | 'concept_confusion_detected'
   // Sanity check events
   | 'sanity_check_completed'
   // Reflection events
@@ -48,6 +55,12 @@ export interface EventMetadata {
   errorMessage?: string
   preferenceKey?: string
   preferenceValue?: unknown
+  // Reveal-Reconstruct-Validate flow metadata
+  levelId?: number
+  questionId?: string
+  selectedOptionId?: string
+  outcome?: 'solid' | 'partial' | 'mismatch'
+  conceptTag?: string
   [key: string]: unknown // Allow additional metadata
 }
 
@@ -105,6 +118,9 @@ export const STORAGE_KEYS = {
   DAILY_DEBRIEFS: 'physiscaffold_daily_debriefs',
   LAST_DEBRIEF_DATE: 'physiscaffold_last_debrief',
   REVIEW_STREAK: 'physiscaffold_review_streak',
+
+  // Reveal-Reconstruct-Validate flow
+  REVEAL_FLOW_STATUS: 'physiscaffold_reveal_flow_status',
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]

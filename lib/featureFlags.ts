@@ -30,7 +30,20 @@ export const FEATURE_FLAGS = {
    * Error Anticipator - Pass 1.5 analysis
    * When enabled, generates warning beacons for common mistakes.
    */
-  ERROR_ANTICIPATOR: true
+  ERROR_ANTICIPATOR: true,
+
+  /**
+   * Reveal-Reconstruct-Validate Flow
+   * When enabled, reading mode uses a structured 3-stage learning flow:
+   * 1. REVEAL: Structured explanation with scannable sections
+   * 2. RECONSTRUCT: 1-2 comprehension check questions
+   * 3. VALIDATE: Confidence-weighted feedback (solid/partial/mismatch)
+   *
+   * When disabled, falls back to the original one-liner reveal behavior.
+   * Default: ON in development, OFF in production unless configured.
+   */
+  REVEAL_RECONSTRUCT_VALIDATE: process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE !== 'false')
 }
 
 /**
