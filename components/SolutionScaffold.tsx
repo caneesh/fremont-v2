@@ -22,6 +22,7 @@ import ExplainToFriend from './ExplainToFriend'
 import PostSolveActivity from './PostSolveActivity'
 import Celebration from './Celebration'
 import SubmissionCanvas from './SubmissionCanvas'
+import { WhatIfSimulation } from './simulation'
 import type { ReflectionAnswer } from '@/types/history'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
@@ -852,6 +853,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
               studentId={localStorage.getItem('physiscaffold_user') || 'anonymous'}
               maxInsights={3}
             />
+          )}
+
+          {/* What-If Simulation - show after problem is solved */}
+          {isProblemSolved && isReflectionComplete && isHintScaffold(data) && (
+            <WhatIfSimulation scaffoldData={data} />
           )}
 
           {/* Practice Options - show after reflection is complete */}
