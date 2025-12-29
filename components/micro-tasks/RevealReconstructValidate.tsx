@@ -345,9 +345,9 @@ export default function RevealReconstructValidate({
               </div>
 
               <div className="space-y-4">
-                <p className="font-medium text-slate-800 dark:text-slate-200">
+                <div className="font-medium text-slate-800 dark:text-slate-200">
                   <MathRenderer text={reconstructQuestion.prompt} />
-                </p>
+                </div>
 
                 <div className="space-y-2">
                   {reconstructQuestion.options.map((option) => (
@@ -415,11 +415,11 @@ export default function RevealReconstructValidate({
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                     The correct answer was:
                   </p>
-                  <p className="font-medium text-slate-800 dark:text-slate-200">
+                  <div className="font-medium text-slate-800 dark:text-slate-200">
                     <MathRenderer
                       text={reconstructQuestion.options.find(o => o.id === reconstructQuestion.correctOptionId)?.text || ''}
                     />
-                  </p>
+                  </div>
                 </div>
               )}
             </div>
