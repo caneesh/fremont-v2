@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import ProblemInput from '@/components/ProblemInput'
 import SolutionScaffold from '@/components/SolutionScaffold'
+import PhasedScaffoldWrapper from '@/components/PhasedScaffoldWrapper'
 import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
@@ -23,6 +24,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
 import ThemeToggle from '@/components/ThemeToggle'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
 
@@ -39,8 +41,16 @@ function HomeContent() {
   const [isDemoMode, setIsDemoMode] = useState(false)
   const [dailyDebrief, setDailyDebrief] = useState<DailyDebrief | null>(null)
   const [showDebrief, setShowDebrief] = useState(false)
+  // Track problem input for phased loading
+  const [phasedProblemData, setPhasedProblemData] = useState<{
+    problem: string
+    diagramImage?: string
+    density?: number
+  } | null>(null)
   // Active learning mode is the default (Duolingo approach)
   const useMicroTasks = true
+  // Use phased scaffold loading for faster initial response
+  const usePhasedScaffold = FEATURE_FLAGS.PHASED_SCAFFOLD
 
   // Load daily debrief on mount
   useEffect(() => {
@@ -61,11 +71,26 @@ function HomeContent() {
     includeFinalAnswer?: boolean
   ) => {
     setCurrentProblemText(problemText)
-    setIsLoading(true)
     setError(null)
     setScaffoldData(null)
+    setPhasedProblemData(null)
     setShowPrerequisiteCheck(false)
     setPrerequisitesPassed(false)
+
+    // Use phased scaffold loading if enabled
+    if (usePhasedScaffold) {
+      setIsLoading(true) // Show initial loading state briefly
+      setPhasedProblemData({
+        problem: problemText,
+        diagramImage: diagramImage || undefined,
+        density: density || 3,
+      })
+      setIsLoading(false)
+      return
+    }
+
+    // Legacy: Full scaffold loading
+    setIsLoading(true)
 
     try {
       const response = await authenticatedFetch('/api/solve', {
@@ -168,6 +193,7 @@ function HomeContent() {
 
   const handleReset = () => {
     setScaffoldData(null)
+    setPhasedProblemData(null)
     setError(null)
     setCurrentProblemText('')
     setShowPrerequisiteCheck(false)
@@ -323,7 +349,17 @@ function HomeContent() {
         </header>
 
         {/* Main Content */}
-        {!scaffoldData ? (
+        {phasedProblemData ? (
+          /* Phased Scaffold Loading - Fast initial response */
+          <PhasedScaffoldWrapper
+            problem={phasedProblemData.problem}
+            diagramImage={phasedProblemData.diagramImage}
+            density={phasedProblemData.density}
+            onReset={handleReset}
+            onLoadNewProblem={handleProblemSubmit}
+            onError={(err) => setError(err)}
+          />
+        ) : !scaffoldData ? (
           <>
             {/* Daily Debrief */}
             {showDebrief && dailyDebrief && (

@@ -90,7 +90,19 @@ export const FEATURE_FLAGS = {
    * requiring all steps to be completed first. For testing only.
    * Can also be enabled via URL parameter: ?skipSteps=true
    */
-  DEV_SKIP_STEPS: process.env.NODE_ENV === 'development'
+  DEV_SKIP_STEPS: process.env.NODE_ENV === 'development',
+
+  /**
+   * Phased Scaffold Loading
+   * When enabled, uses 3-phase scaffold generation for reduced latency:
+   * - Phase A: Outline (~10-20s) - step list with minimal info
+   * - Phase B: Step Expansion (on-demand) - deep content per step
+   * - Phase C: Final Solve (optional) - only when explicitly requested
+   *
+   * This dramatically reduces initial load time from 5+ minutes to ~15 seconds.
+   */
+  PHASED_SCAFFOLD: process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD !== 'false'),
 }
 
 /**
