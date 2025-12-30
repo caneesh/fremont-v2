@@ -527,5 +527,258 @@
     "display_order": 22,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_ideal_gas_law",
+    "name": "Ideal Gas Law",
+    "description": "PV = nRT or PV = NkT. Relates pressure, volume, temperature, and amount of gas. Use for state changes and gas behavior.",
+    "category": "thermodynamics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Gas in a container mentioned",
+      "Pressure, volume, or temperature changes",
+      "Moles or number of molecules given",
+      "Asked about gas state before/after process"
+    ],
+    "common_pitfalls": [
+      "Forgetting to convert temperature to Kelvin",
+      "Using wrong gas constant (R vs k)",
+      "Not recognizing when ideal gas law doesn't apply",
+      "Confusing n (moles) with N (number of molecules)"
+    ],
+    "related_pattern_ids": ["pattern_thermo_processes", "pattern_kinetic_theory"],
+    "display_order": 23,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_first_law_thermo",
+    "name": "First Law of Thermodynamics",
+    "description": "ΔU = Q - W (or Q = ΔU + W). Energy conservation for thermal systems. Internal energy change equals heat added minus work done by system.",
+    "category": "thermodynamics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Heat added or removed from system",
+      "Work done by or on the gas",
+      "Internal energy change asked",
+      "Thermodynamic process described"
+    ],
+    "common_pitfalls": [
+      "Sign convention confusion (work BY system vs ON system)",
+      "Forgetting ΔU = 0 for isothermal ideal gas processes",
+      "Not recognizing Q = 0 for adiabatic processes",
+      "Confusing heat with temperature"
+    ],
+    "related_pattern_ids": ["pattern_thermo_processes", "pattern_heat_transfer"],
+    "display_order": 24,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_heat_transfer",
+    "name": "Heat Transfer and Specific Heat",
+    "description": "Q = mcΔT for temperature change. Q = mL for phase changes. Heat flows from hot to cold.",
+    "category": "thermodynamics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Temperature change of substance",
+      "Specific heat capacity given",
+      "Phase change (melting, boiling, freezing)",
+      "Heat exchange between objects"
+    ],
+    "common_pitfalls": [
+      "Forgetting temperature stays constant during phase change",
+      "Using wrong specific heat for different phases",
+      "Not accounting for all heat transfers in calorimetry",
+      "Confusing latent heat of fusion vs vaporization"
+    ],
+    "related_pattern_ids": ["pattern_first_law_thermo", "pattern_thermal_equilibrium"],
+    "display_order": 25,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_thermo_processes",
+    "name": "Thermodynamic Processes",
+    "description": "Isothermal (T constant), adiabatic (Q = 0), isobaric (P constant), isochoric (V constant). Each has specific relationships.",
+    "category": "thermodynamics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Process type explicitly named",
+      "Constant quantity specified (P, V, T)",
+      "Insulated container (adiabatic)",
+      "PV diagram analysis"
+    ],
+    "common_pitfalls": [
+      "Confusing isothermal with adiabatic",
+      "Using wrong work formula for each process",
+      "Forgetting W = 0 for isochoric (constant volume)",
+      "Wrong relationship for adiabatic (PV^γ = constant)"
+    ],
+    "related_pattern_ids": ["pattern_ideal_gas_law", "pattern_first_law_thermo", "pattern_pv_diagrams"],
+    "display_order": 26,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_pv_diagrams",
+    "name": "PV Diagrams and Work",
+    "description": "Work = area under curve on PV diagram. Clockwise cycle = positive net work (engine). Counter-clockwise = negative (refrigerator).",
+    "category": "thermodynamics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "PV diagram shown or described",
+      "Cyclic process",
+      "Work done per cycle asked",
+      "Heat engine or refrigerator context"
+    ],
+    "common_pitfalls": [
+      "Forgetting work is area UNDER curve, not inside cycle",
+      "Wrong sign for work in expansion vs compression",
+      "Not recognizing enclosed area = net work per cycle",
+      "Confusing P-V with other diagrams"
+    ],
+    "related_pattern_ids": ["pattern_thermo_processes", "pattern_heat_engines"],
+    "display_order": 27,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_heat_engines",
+    "name": "Heat Engines and Efficiency",
+    "description": "Efficiency η = W/Q_H = 1 - Q_C/Q_H. Carnot efficiency η_max = 1 - T_C/T_H. No engine can exceed Carnot efficiency.",
+    "category": "thermodynamics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Heat engine or power plant mentioned",
+      "Hot and cold reservoirs",
+      "Efficiency calculation asked",
+      "Carnot cycle or ideal engine"
+    ],
+    "common_pitfalls": [
+      "Forgetting to use Kelvin for Carnot efficiency",
+      "Confusing Q_H (input) with Q_C (rejected)",
+      "Not recognizing Carnot as maximum possible efficiency",
+      "Wrong sign conventions for heat flow"
+    ],
+    "related_pattern_ids": ["pattern_second_law_thermo", "pattern_pv_diagrams"],
+    "display_order": 28,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_second_law_thermo",
+    "name": "Second Law and Entropy",
+    "description": "Entropy of isolated system never decreases. ΔS ≥ Q/T. Heat flows spontaneously from hot to cold only.",
+    "category": "thermodynamics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Entropy change asked",
+      "Spontaneous vs non-spontaneous process",
+      "Reversible vs irreversible process",
+      "Direction of natural processes"
+    ],
+    "common_pitfalls": [
+      "Thinking entropy always increases (only for isolated systems)",
+      "Forgetting ΔS = Q/T only for reversible processes",
+      "Not recognizing local entropy can decrease if surroundings increase more",
+      "Confusing entropy with disorder in misleading ways"
+    ],
+    "related_pattern_ids": ["pattern_heat_engines", "pattern_first_law_thermo"],
+    "display_order": 29,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_kinetic_theory",
+    "name": "Kinetic Theory of Gases",
+    "description": "Relates macroscopic properties to molecular motion. KE_avg = (3/2)kT. vrms = √(3kT/m). Pressure from molecular collisions.",
+    "category": "thermodynamics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Molecular speed or kinetic energy asked",
+      "Temperature related to molecular motion",
+      "RMS speed calculation",
+      "Internal energy of ideal gas"
+    ],
+    "common_pitfalls": [
+      "Confusing v_avg, v_rms, and v_most probable",
+      "Forgetting internal energy depends only on T for ideal gas",
+      "Using wrong mass (molecular vs molar)",
+      "Not recognizing KE depends only on temperature, not pressure"
+    ],
+    "related_pattern_ids": ["pattern_ideal_gas_law", "pattern_first_law_thermo"],
+    "display_order": 30,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_thermal_expansion",
+    "name": "Thermal Expansion",
+    "description": "ΔL = αL₀ΔT (linear), ΔV = βV₀ΔT (volume). Materials expand when heated. β ≈ 3α for isotropic solids.",
+    "category": "thermodynamics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Object heated or cooled",
+      "Expansion coefficient given",
+      "Length or volume change asked",
+      "Thermal stress or fit problems"
+    ],
+    "common_pitfalls": [
+      "Forgetting to use original length/volume, not final",
+      "Wrong coefficient (α vs β)",
+      "Not recognizing area expansion (ΔA/A ≈ 2αΔT)",
+      "Ignoring expansion of container in liquid problems"
+    ],
+    "related_pattern_ids": ["pattern_heat_transfer", "pattern_ideal_gas_law"],
+    "display_order": 31,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_thermal_equilibrium",
+    "name": "Thermal Equilibrium and Calorimetry",
+    "description": "Heat lost = heat gained at equilibrium. Final temperature when objects reach thermal equilibrium. Q_hot + Q_cold = 0.",
+    "category": "thermodynamics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Two or more objects at different temperatures",
+      "Final equilibrium temperature asked",
+      "Calorimeter or insulated container",
+      "Mixing hot and cold substances"
+    ],
+    "common_pitfalls": [
+      "Forgetting sign convention (heat lost is negative)",
+      "Not accounting for phase changes if they occur",
+      "Ignoring heat capacity of calorimeter",
+      "Assuming final temperature is average (depends on masses)"
+    ],
+    "related_pattern_ids": ["pattern_heat_transfer", "pattern_first_law_thermo"],
+    "display_order": 32,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_heat_conduction",
+    "name": "Heat Conduction",
+    "description": "Rate of heat flow: P = kA(ΔT)/L. Thermal conductivity k determines how well material conducts heat. Steady state analysis.",
+    "category": "thermodynamics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Heat flow through a material",
+      "Thermal conductivity given",
+      "Temperature difference across material",
+      "Walls, rods, or insulation problems"
+    ],
+    "common_pitfalls": [
+      "Confusing heat (Q) with heat flow rate (P = dQ/dt)",
+      "Wrong area or length in formula",
+      "Not recognizing series vs parallel heat flow",
+      "Forgetting thermal resistance R = L/(kA)"
+    ],
+    "related_pattern_ids": ["pattern_heat_transfer", "pattern_thermal_equilibrium"],
+    "display_order": 33,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]
