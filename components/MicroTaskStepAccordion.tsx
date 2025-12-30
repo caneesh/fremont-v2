@@ -424,7 +424,9 @@ export default function MicroTaskStepAccordion({
 
   // Get current task
   const currentTask = step.tasks.find(t => t.level === currentLevel)
-  const allTasksCompleted = currentLevel > step.tasks.length || isCompleted
+  // Handle empty tasks array - show loading state instead of completed
+  const hasNoTasks = step.tasks.length === 0
+  const allTasksCompleted = !hasNoTasks && (currentLevel > step.tasks.length || isCompleted)
 
   // Get required concepts for this step
   const requiredConcepts = concepts.filter(c =>
@@ -618,8 +620,20 @@ export default function MicroTaskStepAccordion({
             />
           )}
 
+          {/* Loading state when tasks are empty (being fetched) */}
+          {showStepContent && hasNoTasks && (
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  Loading step content...
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Quiz Mode: Current Task Card */}
-          {showStepContent && !isReadingMode && currentTask && !allTasksCompleted && !showConfidencePrompt && (
+          {showStepContent && !isReadingMode && currentTask && !allTasksCompleted && !showConfidencePrompt && !hasNoTasks && (
             <InsightCard
               key={`step-${step.id}-level-${currentLevel}`}
               task={currentTask}

@@ -240,7 +240,8 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
       // Build tasks from expansion if available
       let tasks: MicroTaskStep['tasks'] = []
 
-      if (expansion?.micro_tasks) {
+      // Only use expansion tasks if they exist AND are not empty
+      if (expansion?.micro_tasks && expansion.micro_tasks.length > 0) {
         // Step is expanded - use real tasks
         tasks = expansion.micro_tasks.map((task, taskIndex): MicroTask => {
           const level = (taskIndex + 1) as 1 | 2 | 3 | 4 | 5
