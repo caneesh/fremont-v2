@@ -5,6 +5,8 @@ import MicroTaskStepAccordion from '../MicroTaskStepAccordion'
 import type { MicroTaskStep } from '@/types/microTask'
 import type { Concept } from '@/types/scaffold'
 import { onTaskIncorrect, onStepTimeout } from '@/lib/mistakeTriggers'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import { eventLogger } from '@/lib/storage/eventLogger'
 
 vi.mock('../micro-tasks/InsightCard', () => ({
   default: ({ onCorrectAnswer, onWrongAnswer, onSwitchToReadingMode, attempts }: any) => (
@@ -21,12 +23,13 @@ vi.mock('../micro-tasks/CollectedInsights', () => ({
 }))
 
 vi.mock('../micro-tasks/RevealReconstructValidate', () => ({
-  default: ({ onComplete, onSkip, onClose }: any) => (
+  default: ({ onComplete, onSkip, onClose, onLogEvent }: any) => (
     <div data-testid="reveal-flow-modal">
       <button onClick={() => onComplete('solid', 'explanation')}>complete-solid</button>
       <button onClick={() => onComplete('partial', 'explanation')}>complete-partial</button>
       <button onClick={() => onSkip()}>skip</button>
       <button onClick={() => onClose()}>close</button>
+      <button onClick={() => onLogEvent('reveal_flow_opened', { level: 1 })}>log-event</button>
     </div>
   ),
 }))
@@ -120,6 +123,7 @@ describe('MicroTaskStepAccordion', () => {
     onActivate.mockClear()
     vi.mocked(onTaskIncorrect).mockClear()
     vi.mocked(onStepTimeout).mockClear()
+    FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE = true
   })
 
   it('does not activate when locked', () => {
@@ -530,6 +534,26 @@ describe('MicroTaskStepAccordion', () => {
       // InsightCard buttons should still be there since we toggled
       // The component just toggles isExpanded state
     })
+
+    it('expands and activates when collapsed header is clicked', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={false}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('Test Step'))
+      expect(onActivate).toHaveBeenCalledWith(step.id)
+      expect(screen.getByText('correct')).not.toBeNull()
+    })
   })
 
   describe('wrong answer handling', () => {
@@ -815,6 +839,33 @@ describe('MicroTaskStepAccordion', () => {
       expect(screen.getByText('Next')).not.toBeNull()
       expect(onTaskComplete).toHaveBeenCalledWith(multiTierStep.id, 1, 'explanation')
     })
+
+    it('logs reveal flow events with metadata', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          problemId="problem-123"
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('reading'))
+      fireEvent.click(screen.getByText('Concept'))
+      fireEvent.click(screen.getByText('log-event'))
+
+      expect(vi.mocked(eventLogger.log)).toHaveBeenCalledWith('reveal_flow_opened', {
+        level: 1,
+        stepId: multiTierStep.id,
+        problemId: 'problem-123',
+      })
+    })
   })
 
   describe('collected insights display', () => {
@@ -868,6 +919,33 @@ describe('MicroTaskStepAccordion', () => {
 
       // Should show 1/3 insights based on saved progress
       expect(screen.getByText('1/3 insights')).not.toBeNull()
+    })
+  })
+
+  describe('non-reveal flow behavior', () => {
+    it('expands and reads hints without reveal flow enabled', async () => {
+      FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE = false
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('reading'))
+      fireEvent.click(screen.getByText('Concept'))
+      fireEvent.click(screen.getByText('Concept'))
+
+      expect(await screen.findByText('E1')).not.toBeNull()
+      expect(onTaskComplete).toHaveBeenCalledWith(step.id, 1, 'E1')
     })
   })
 })

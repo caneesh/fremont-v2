@@ -52,20 +52,58 @@ vi.mock('@/lib/conceptMappingService', () => ({
 }))
 
 vi.mock('../StepAccordion', () => ({
-  default: ({ onComplete }: { onComplete: () => void }) => (
+  default: ({
+    onComplete,
+    onAnswerChange,
+    onHintLevelChange,
+    onActivate,
+    isActive,
+  }: {
+    onComplete: () => void
+    onAnswerChange: (answer: string) => void
+    onHintLevelChange: (level: number) => void
+    onActivate: () => void
+    isActive: boolean
+  }) => (
     <div>
-      <div data-testid="step-accordion" />
+      <div data-testid="step-accordion" data-active={isActive ? 'true' : 'false'} />
       <button onClick={onComplete}>complete-step</button>
+      <button onClick={() => onAnswerChange('my answer')}>set-answer</button>
+      <button onClick={() => onHintLevelChange(3)}>set-hint</button>
+      <button onClick={onActivate}>activate-step</button>
     </div>
   ),
 }))
 
 vi.mock('../MicroTaskStepAccordion', () => ({
-  default: () => <div data-testid="microtask-accordion" />,
+  default: ({
+    step,
+    onTaskComplete,
+    onComplete,
+    onActivate,
+    isActive,
+  }: {
+    step: { id: number }
+    onTaskComplete: (stepId: number, level: number, explanation: string) => void
+    onComplete: (stepId: number) => void
+    onActivate: () => void
+    isActive: boolean
+  }) => (
+    <div data-testid="microtask-accordion" data-active={isActive ? 'true' : 'false'}>
+      <button onClick={() => onTaskComplete(step.id, 1, 'Insight')}>complete-micro-task</button>
+      <button onClick={() => onComplete(step.id)}>complete-micro-step</button>
+      <button onClick={onActivate}>activate-micro-step</button>
+    </div>
+  ),
 }))
 
 vi.mock('../diagram/DiagramStep', () => ({
-  default: () => <div data-testid="diagram-step" />,
+  default: ({ onComplete, onActivate }: { onComplete: () => void; onActivate: () => void }) => (
+    <div data-testid="diagram-step">
+      <button onClick={onComplete}>complete-diagram</button>
+      <button onClick={onActivate}>activate-diagram</button>
+    </div>
+  ),
 }))
 
 vi.mock('../ConceptPanel', () => ({
@@ -73,34 +111,72 @@ vi.mock('../ConceptPanel', () => ({
 }))
 
 vi.mock('../SanityCheckStep', () => ({
-  default: () => <div data-testid="sanity-check" />,
+  default: ({
+    onTargetStep,
+    onSolved,
+  }: {
+    onTargetStep: (stepId: number) => void
+    onSolved: () => void
+  }) => (
+    <div data-testid="sanity-check">
+      <button onClick={() => onTargetStep(1)}>target-step</button>
+      <button onClick={onSolved}>solve-sanity</button>
+    </div>
+  ),
 }))
 
 vi.mock('../NextChallenge', () => ({
-  default: () => <div data-testid="next-challenge" />,
+  default: ({ onAcceptChallenge }: { onAcceptChallenge: (problemText: string) => void }) => (
+    <div data-testid="next-challenge">
+      <button onClick={() => onAcceptChallenge('next problem')}>accept-challenge</button>
+    </div>
+  ),
 }))
 
 vi.mock('../ReflectionStep', () => ({
   default: ({
     onReflectionComplete,
+    studentOutcome,
+    hintsUsed,
   }: {
     onReflectionComplete: (answers: Array<{ question: string; answer: string }>) => void
+    studentOutcome: string
+    hintsUsed: number[]
   }) => (
     <div>
-      <div data-testid="reflection-step" />
+      <div
+        data-testid="reflection-step"
+        data-outcome={studentOutcome}
+        data-hints={hintsUsed.join(',')}
+      />
       <button onClick={() => onReflectionComplete([{ question: 'q', answer: 'a' }])}>
         finish-reflection
+      </button>
+      <button
+        onClick={() =>
+          onReflectionComplete([{ question: 'What mistake did you make?', answer: 'I used the wrong sign.' }])
+        }
+      >
+        finish-reflection-with-mistake
       </button>
     </div>
   ),
 }))
 
 vi.mock('../ProblemVariations', () => ({
-  default: () => <div data-testid="problem-variations" />,
+  default: ({ onSelectVariation }: { onSelectVariation: (problemText: string) => void }) => (
+    <div data-testid="problem-variations">
+      <button onClick={() => onSelectVariation('variation problem')}>select-variation</button>
+    </div>
+  ),
 }))
 
 vi.mock('../MistakeWarning', () => ({
-  default: () => <div data-testid="mistake-warning" />,
+  default: ({ onDismiss }: { onDismiss: () => void }) => (
+    <div data-testid="mistake-warning">
+      <button onClick={onDismiss}>dismiss-warning</button>
+    </div>
+  ),
 }))
 
 vi.mock('../ErrorPatternInsights', () => ({
@@ -124,12 +200,18 @@ vi.mock('../ExplainToFriend', () => ({
 }))
 
 vi.mock('../PostSolveActivity', () => ({
-  default: () => <div data-testid="post-solve-activity" />,
+  default: ({ onDismiss }: { onDismiss: () => void }) => (
+    <div data-testid="post-solve-activity">
+      <button onClick={onDismiss}>dismiss-post-solve</button>
+    </div>
+  ),
 }))
 
 vi.mock('../Celebration', () => ({
-  default: ({ show }: { show: boolean }) => (
-    <div data-testid="celebration" data-show={show ? 'true' : 'false'} />
+  default: ({ show, onComplete }: { show: boolean; onComplete: () => void }) => (
+    <div data-testid="celebration" data-show={show ? 'true' : 'false'}>
+      <button onClick={onComplete}>complete-celebration</button>
+    </div>
   ),
 }))
 
@@ -158,6 +240,32 @@ vi.mock('../SubmissionCanvas', () => ({
         }
       >
         grade-success
+      </button>
+      <button
+        onClick={() =>
+          onGradeComplete({
+            status: 'MINOR_SLIP',
+            feedback_markdown: 'Minor slip',
+            highlight_location: 'line 2',
+            next_action: { type: 'FIX_LINE', label: 'Fix line' },
+            confidence: 0.6,
+          })
+        }
+      >
+        grade-minor-slip
+      </button>
+      <button
+        onClick={() =>
+          onGradeComplete({
+            status: 'CONCEPTUAL_GAP',
+            feedback_markdown: 'Review concept',
+            highlight_location: 'line 3',
+            next_action: { type: 'REVIEW_CONCEPT', label: 'Review' },
+            confidence: 0.4,
+          })
+        }
+      >
+        grade-concept-gap
       </button>
     </div>
   ),
@@ -201,6 +309,44 @@ const microTaskData: MicroTaskScaffoldData = {
   },
 }
 
+const microTaskMultiData: MicroTaskScaffoldData = {
+  ...microTaskData,
+  steps: [
+    {
+      id: 1,
+      title: 'Step 1',
+      requiredConcepts: ['c1'],
+      tasks: [
+        {
+          level: 1,
+          levelTitle: 'Concept',
+          question: 'Q1',
+          explanation: 'E1',
+          type: 'MULTIPLE_CHOICE',
+          options: ['A'],
+          correctIndex: 0,
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Step 2',
+      requiredConcepts: ['c1'],
+      tasks: [
+        {
+          level: 1,
+          levelTitle: 'Concept',
+          question: 'Q2',
+          explanation: 'E2',
+          type: 'MULTIPLE_CHOICE',
+          options: ['B'],
+          correctIndex: 0,
+        },
+      ],
+    },
+  ],
+}
+
 const hintData: ScaffoldData = {
   problem: 'Hint problem',
   domain: 'Mechanics',
@@ -225,6 +371,52 @@ const hintData: ScaffoldData = {
     expectedBehavior: 'Ok',
     type: 'dimension',
   },
+}
+
+const multiStepData: ScaffoldData = {
+  ...hintData,
+  steps: [
+    {
+      id: 1,
+      title: 'Step 1',
+      requiredConcepts: ['c1'],
+      hints: [
+        { level: 1, title: 'Concept Identification', content: 'Hint 1' },
+        { level: 2, title: 'Visualization', content: 'Hint 2' },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Step 2',
+      requiredConcepts: ['c1'],
+      hints: [
+        { level: 1, title: 'Concept Identification', content: 'Hint 1' },
+        { level: 2, title: 'Visualization', content: 'Hint 2' },
+      ],
+    },
+  ],
+}
+
+const diagramData: ScaffoldData = {
+  ...hintData,
+  steps: [
+    {
+      id: 1,
+      title: 'Draw the FBD',
+      stepType: 'diagram',
+      requiredConcepts: ['c1'],
+      hints: [
+        { level: 1, title: 'Concept Identification', content: 'Hint 1' },
+      ],
+      diagramData: {
+        scenarioType: 'horizontal',
+        objectShape: 'block',
+        requiredForces: [
+          { type: 'weight', direction: 'down' },
+        ],
+      },
+    },
+  ],
 }
 
 describe('SolutionScaffold', () => {
@@ -397,6 +589,42 @@ describe('SolutionScaffold', () => {
     expect(screen.queryByTestId('post-solve-activity')).not.toBeNull()
   })
 
+  it('dismisses post-solve activity when dismissed', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.spyOn(Math, 'random').mockReturnValue(0.1)
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-reflection'))
+    })
+
+    await act(async () => {
+      vi.runAllTimers()
+    })
+
+    expect(screen.queryByTestId('post-solve-activity')).not.toBeNull()
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('dismiss-post-solve'))
+    })
+
+    expect(screen.queryByTestId('post-solve-activity')).toBeNull()
+  })
+
   it('does not show post-solve activity when random chance fails', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     vi.spyOn(Math, 'random').mockReturnValue(0.9)
@@ -478,6 +706,30 @@ describe('SolutionScaffold', () => {
     expect(celebration.getAttribute('data-show')).toBe('true')
   })
 
+  it('does not celebrate for non-successful grades', async () => {
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-step'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Submit Your Solution'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('grade-minor-slip'))
+    })
+
+    expect(screen.getByText('Status: MINOR SLIP')).not.toBeNull()
+    expect(screen.getByTestId('celebration').getAttribute('data-show')).toBe('false')
+  })
+
   it('saves draft when clicking Save Draft button', async () => {
     const { problemHistoryService } = await import('@/lib/problemHistory')
 
@@ -496,6 +748,51 @@ describe('SolutionScaffold', () => {
     expect(problemHistoryService.saveDraft).toHaveBeenCalled()
   })
 
+  it('saves draft with updated answers and hint levels', async () => {
+    const { problemHistoryService } = await import('@/lib/problemHistory')
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('set-answer'))
+      fireEvent.click(screen.getByText('set-hint'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save Draft'))
+    })
+
+    const calls = vi.mocked(problemHistoryService.saveDraft).mock.calls
+    const savedProgress = calls[calls.length - 1][2]
+    expect(savedProgress.stepProgress[0].userAnswer).toBe('my answer')
+    expect(savedProgress.stepProgress[0].currentHintLevel).toBe(3)
+  })
+
+  it('shows an error message if draft save fails', async () => {
+    const { problemHistoryService } = await import('@/lib/problemHistory')
+    vi.mocked(problemHistoryService.saveDraft).mockImplementationOnce(() => {
+      throw new Error('Disk full')
+    })
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save Draft'))
+    })
+
+    expect(screen.getByText(/Error: Disk full/)).not.toBeNull()
+  })
+
   it('toggles review flag when clicking Mark for Review button', async () => {
     const { problemHistoryService } = await import('@/lib/problemHistory')
 
@@ -512,6 +809,26 @@ describe('SolutionScaffold', () => {
     })
 
     expect(problemHistoryService.toggleReview).toHaveBeenCalled()
+  })
+
+  it('shows an error when review toggle fails', async () => {
+    const { problemHistoryService } = await import('@/lib/problemHistory')
+    vi.mocked(problemHistoryService.toggleReview).mockImplementation(() => {
+      throw new Error('Toggle failed')
+    })
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark for Review'))
+    })
+
+    expect(screen.getByText(/Error: Toggle failed/)).not.toBeNull()
   })
 
   it('calls onReset when clicking New Problem button', async () => {
@@ -611,6 +928,72 @@ describe('SolutionScaffold', () => {
     })
 
     expect(screen.getByTestId('next-challenge')).not.toBeNull()
+  })
+
+  it('invokes onLoadNewProblem from variations and next challenge', async () => {
+    const onReset = vi.fn()
+    const onLoadNewProblem = vi.fn()
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={onReset}
+        onLoadNewProblem={onLoadNewProblem}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-reflection'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('select-variation'))
+      fireEvent.click(screen.getByText('accept-challenge'))
+    })
+
+    expect(onReset).toHaveBeenCalledTimes(2)
+    expect(onLoadNewProblem).toHaveBeenCalledWith('variation problem')
+    expect(onLoadNewProblem).toHaveBeenCalledWith('next problem')
+  })
+
+  it('loads final solution when attempt is solved', async () => {
+    const { problemHistoryService } = await import('@/lib/problemHistory')
+
+    vi.mocked(problemHistoryService.getAttempt).mockReturnValue({
+      problemId: 'test-123',
+      problemTitle: 'Test',
+      status: 'SOLVED',
+      reviewFlag: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+
+    vi.mocked(problemHistoryService.loadFinalSolution).mockReturnValue({
+      problemText: 'Test problem',
+      stepProgress: [
+        { stepId: 0, isCompleted: true }
+      ],
+      currentStep: 0,
+      reflectionAnswers: [{ question: 'q', answer: 'a' }],
+    })
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    expect(problemHistoryService.loadFinalSolution).toHaveBeenCalled()
+    expect(screen.getByTestId('problem-variations')).not.toBeNull()
   })
 
   it('loads saved progress from problemHistoryService on mount', async () => {
@@ -722,6 +1105,217 @@ describe('SolutionScaffold', () => {
     expect(celebration.getAttribute('data-show')).toBe('true')
   })
 
+  it('allows dismissing the celebration', async () => {
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-reflection'))
+    })
+
+    const celebration = screen.getByTestId('celebration')
+    expect(celebration.getAttribute('data-show')).toBe('true')
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-celebration'))
+    })
+
+    expect(screen.getByTestId('celebration').getAttribute('data-show')).toBe('false')
+  })
+
+  it('captures student outcome based on hint usage', async () => {
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('set-hint'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    expect(screen.getByTestId('reflection-step').getAttribute('data-outcome')).toBe('assisted')
+    expect(screen.getByTestId('reflection-step').getAttribute('data-hints')).toBe('3')
+  })
+
+  it('analyzes error patterns for mistake reflections with high confidence', async () => {
+    const { errorPatternService } = await import('@/lib/errorPatternService')
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        patterns: [{ patternId: 'EP001', confidence: 0.7, reasoning: 'Sign error' }],
+        summary: 'Summary',
+        recommendations: ['Review signs'],
+      }),
+    })
+
+    vi.stubGlobal('fetch', fetchSpy)
+    localStorage.setItem('physiscaffold_user', 'test-student')
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('set-hint'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-reflection-with-mistake'))
+    })
+
+    expect(fetchSpy).toHaveBeenCalled()
+    expect(errorPatternService.recordError).toHaveBeenCalledWith(
+      'test-student',
+      'EP001',
+      expect.any(String),
+      'Hint problem',
+      'I used the wrong sign.',
+      '1. Step 1',
+      expect.objectContaining({
+        topic: 'Mechanics - Dynamics',
+        hintsUsed: 3,
+      })
+    )
+  })
+
+  it('records concept mastery and cleanup after solving', async () => {
+    const { conceptMasteryService } = await import('@/lib/conceptMasteryService')
+    const { problemHistoryService } = await import('@/lib/problemHistory')
+
+    vi.mocked(problemHistoryService.getHistory).mockReturnValue({ total: 10 })
+    localStorage.setItem('physiscaffold_user', 'test-student')
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-step'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Mark as Solved'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-explain'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('finish-reflection'))
+    })
+
+    expect(conceptMasteryService.recordAttempt).toHaveBeenCalled()
+    expect(conceptMasteryService.cleanup).toHaveBeenCalledWith('test-student')
+  })
+
+  it('triggers celebration when sanity check is solved', async () => {
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-step'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('solve-sanity'))
+    })
+
+    const celebration = screen.getByTestId('celebration')
+    expect(celebration.getAttribute('data-show')).toBe('true')
+  })
+
+  it('scrolls to a step when sanity check targets one', async () => {
+    const scrollSpy = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollSpy
+
+    render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-step'))
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('target-step'))
+    })
+
+    expect(scrollSpy).toHaveBeenCalled()
+  })
+
+  it('clears highlighted step after the timeout', async () => {
+    vi.useFakeTimers()
+
+    const { container } = render(
+      <SolutionScaffold
+        data={hintData}
+        onReset={vi.fn()}
+      />
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('complete-step'))
+    })
+
+    expect(container.querySelector('.ring-4')).toBeNull()
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('target-step'))
+    })
+
+    expect(container.querySelector('.ring-4')).not.toBeNull()
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(container.querySelector('.ring-4')).toBeNull()
+  })
+
   describe('micro-task mode', () => {
     it('does not show step accordion in micro-task mode', () => {
       render(
@@ -744,6 +1338,70 @@ describe('SolutionScaffold', () => {
 
       expect(screen.getByTestId('microtask-accordion')).not.toBeNull()
     })
+
+    it('records micro-task progress when tasks are completed', async () => {
+      const { problemHistoryService } = await import('@/lib/problemHistory')
+
+      render(
+        <SolutionScaffold
+          data={microTaskData}
+          onReset={vi.fn()}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('complete-micro-task'))
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('Save Draft'))
+      })
+
+      const calls = vi.mocked(problemHistoryService.saveDraft).mock.calls
+      const savedProgress = calls[calls.length - 1][2]
+      expect(savedProgress.useMicroTasks).toBe(true)
+      expect(savedProgress.microTaskProgress).toHaveLength(1)
+    })
+
+    it('advances active micro-task step when a step is completed', async () => {
+      render(
+        <SolutionScaffold
+          data={microTaskMultiData}
+          onReset={vi.fn()}
+        />
+      )
+
+      const stepNodes = screen.getAllByTestId('microtask-accordion')
+      expect(stepNodes[0].getAttribute('data-active')).toBe('true')
+      expect(stepNodes[1].getAttribute('data-active')).toBe('false')
+
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('complete-micro-step')[0])
+      })
+
+      const updatedNodes = screen.getAllByTestId('microtask-accordion')
+      expect(updatedNodes[0].getAttribute('data-active')).toBe('false')
+      expect(updatedNodes[1].getAttribute('data-active')).toBe('true')
+    })
+  })
+
+  describe('diagram steps', () => {
+    it('renders diagram steps and marks them complete', async () => {
+      render(
+        <SolutionScaffold
+          data={diagramData}
+          onReset={vi.fn()}
+        />
+      )
+
+      expect(screen.getByTestId('diagram-step')).not.toBeNull()
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('complete-diagram'))
+      })
+
+      expect(screen.getByTestId('sanity-check')).not.toBeNull()
+    })
   })
 
   describe('warning behaviors', () => {
@@ -761,6 +1419,98 @@ describe('SolutionScaffold', () => {
         hintData.concepts,
         'Mechanics - Dynamics'
       )
+    })
+
+    it('dismisses mistake warnings when requested', async () => {
+      const { mistakeTrackingService } = await import('@/lib/mistakeTracking')
+      vi.mocked(mistakeTrackingService.generateWarnings).mockReturnValue([
+        {
+          type: 'concept',
+          conceptId: 'c1',
+          conceptName: 'Concept 1',
+          message: 'Watch this',
+          severity: 'medium',
+        },
+      ])
+
+      render(
+        <SolutionScaffold
+          data={hintData}
+          onReset={vi.fn()}
+        />
+      )
+
+      expect(screen.queryByTestId('mistake-warning')).not.toBeNull()
+      fireEvent.click(screen.getByText('dismiss-warning'))
+      expect(screen.queryByTestId('mistake-warning')).toBeNull()
+    })
+  })
+
+  describe('step activation and draft state', () => {
+    it('updates active step when activating another step', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      const stepNodes = screen.getAllByTestId('step-accordion')
+      expect(stepNodes[0].getAttribute('data-active')).toBe('true')
+      expect(stepNodes[1].getAttribute('data-active')).toBe('false')
+
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('activate-step')[1])
+      })
+
+      const updatedNodes = screen.getAllByTestId('step-accordion')
+      expect(updatedNodes[0].getAttribute('data-active')).toBe('false')
+      expect(updatedNodes[1].getAttribute('data-active')).toBe('true')
+    })
+
+    it('advances to the next step when a step is completed', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      const stepNodes = screen.getAllByTestId('step-accordion')
+      expect(stepNodes[0].getAttribute('data-active')).toBe('true')
+      expect(stepNodes[1].getAttribute('data-active')).toBe('false')
+
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('complete-step')[0])
+      })
+
+      const updatedNodes = screen.getAllByTestId('step-accordion')
+      expect(updatedNodes[0].getAttribute('data-active')).toBe('false')
+      expect(updatedNodes[1].getAttribute('data-active')).toBe('true')
+    })
+
+    it('saves current step position in drafts', async () => {
+      const { problemHistoryService } = await import('@/lib/problemHistory')
+      vi.mocked(problemHistoryService.saveDraft).mockImplementation(() => undefined)
+
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('activate-step')[1])
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('Save Draft'))
+      })
+
+      const calls = vi.mocked(problemHistoryService.saveDraft).mock.calls
+      const savedProgress = calls[calls.length - 1][2]
+      expect(savedProgress.currentStep).toBe(1)
     })
   })
 })
