@@ -696,6 +696,129 @@ describe('Constraint Collision Engine', () => {
         expect(formatted.followUps).toEqual(dialogue.followUpPrompts)
       })
     })
+
+    describe('error pattern-specific templates', () => {
+      it('uses EP015 spring template for spring kinematics error', () => {
+        const springCollision = {
+          id: 'CC001',
+          problemConstraint: {
+            id: 'SC001',
+            category: 'force' as const,
+            rawText: 'ideal spring',
+            normalizedForm: 'ideal_spring',
+            sourceLocation: { startIndex: 3, endIndex: 15 },
+          },
+          studentAssumption: {
+            id: 'SA001',
+            type: 'implicit' as const,
+            description: 'Using constant acceleration kinematics on spring problem',
+            evidence: 'v² = u² + 2as used',
+            category: 'kinematic' as const,
+          },
+          collisionType: 'OMISSION' as const,
+          severity: 'high' as const,
+          errorPatternId: 'EP015',
+          affectedStepIds: [],
+          explanation: 'Wrong kinematics on spring',
+          confidence: 0.9,
+        }
+
+        const dialogue = generateSocraticDialogue(springCollision)
+
+        // Should use spring-specific template
+        expect(dialogue.question).toContain('v² = u² + 2as')
+        expect(dialogue.problemReferenceHint.toLowerCase()).toContain('spring')
+      })
+
+      it('uses EP016 collision template for inelastic collision error', () => {
+        const collisionCollision = {
+          id: 'CC002',
+          problemConstraint: {
+            id: 'SC002',
+            category: 'conservation' as const,
+            rawText: 'inelastic collision',
+            normalizedForm: 'inelastic_collision',
+            sourceLocation: { startIndex: 10, endIndex: 29 },
+          },
+          studentAssumption: {
+            id: 'SA002',
+            type: 'implicit' as const,
+            description: 'Conserving kinetic energy in inelastic collision',
+            evidence: 'KE conserved applied',
+            category: 'conservation' as const,
+          },
+          collisionType: 'ADDITION' as const,
+          severity: 'high' as const,
+          errorPatternId: 'EP016',
+          affectedStepIds: [],
+          explanation: 'KE not conserved in inelastic',
+          confidence: 0.85,
+        }
+
+        const dialogue = generateSocraticDialogue(collisionCollision)
+
+        // Should use collision-specific template
+        expect(dialogue.question.toLowerCase()).toMatch(/kinetic energy|collision|inelastic/)
+        expect(dialogue.problemReferenceHint.toLowerCase()).toContain('inelastic')
+      })
+
+      it('uses EP017 circular motion template for linear kinematics error', () => {
+        const circularCollision = {
+          id: 'CC003',
+          problemConstraint: {
+            id: 'SC003',
+            category: 'kinematic' as const,
+            rawText: 'vertical circle',
+            normalizedForm: 'circular_path',
+            sourceLocation: { startIndex: 20, endIndex: 35 },
+          },
+          studentAssumption: {
+            id: 'SA003',
+            type: 'implicit' as const,
+            description: 'Using linear kinematics instead of circular motion equations',
+            evidence: 'v = u + at used',
+            category: 'kinematic' as const,
+          },
+          collisionType: 'OMISSION' as const,
+          severity: 'high' as const,
+          errorPatternId: 'EP017',
+          affectedStepIds: [],
+          explanation: 'Linear kinematics in circular motion',
+          confidence: 0.9,
+        }
+
+        const dialogue = generateSocraticDialogue(circularCollision)
+
+        // Should use circular motion-specific template
+        expect(dialogue.question.toLowerCase()).toMatch(/circular|centripetal|v²\/r/)
+        expect(dialogue.problemReferenceHint.toLowerCase()).toContain('centripetal')
+      })
+
+      it('returns spring-related concepts for spring constraints', () => {
+        const springCollision = {
+          id: 'CC001',
+          problemConstraint: {
+            id: 'SC001',
+            category: 'force' as const,
+            rawText: 'spring constant k = 200',
+            normalizedForm: 'spring_constant_given',
+            sourceLocation: { startIndex: 0, endIndex: 23 },
+          },
+          studentAssumption: null,
+          collisionType: 'OMISSION' as const,
+          severity: 'high' as const,
+          errorPatternId: 'EP015',
+          affectedStepIds: [],
+          explanation: 'Spring force not used',
+          confidence: 0.85,
+        }
+
+        const dialogue = generateSocraticDialogue(springCollision)
+
+        expect(dialogue.relatedConceptIds).toContain('spring-force')
+        expect(dialogue.relatedConceptIds).toContain('hookes-law')
+      })
+    })
   })
 
   describe('Integration Tests', () => {

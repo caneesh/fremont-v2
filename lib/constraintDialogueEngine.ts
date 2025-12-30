@@ -22,6 +22,156 @@ interface DialogueTemplate {
 }
 
 /**
+ * Error pattern-specific dialogue templates
+ * These override generic templates when a specific error pattern is detected
+ */
+const ERROR_PATTERN_TEMPLATES: Record<string, DialogueTemplate[]> = {
+  // EP015: Spring kinematics error
+  EP015: [
+    {
+      strategy: 'PHYSICAL_INTUITION',
+      question:
+        "I see you're using v² = u² + 2as. This equation assumes constant acceleration. In a spring system, is the acceleration constant?",
+      followUps: [
+        'What is the force from a spring? How does it depend on position?',
+        'If F = -kx, and F = ma, what happens to acceleration as the object moves?',
+        'When acceleration varies with position, what method should we use instead of kinematics?',
+      ],
+      problemHint:
+        "Springs exert a force F = -kx that varies with position. This means acceleration isn't constant.",
+    },
+    {
+      strategy: 'CONTRAST_PROMPT',
+      question:
+        "You've used a = g for the acceleration. But look at the problem - it gives you a spring constant k. What force does the spring exert?",
+      followUps: [
+        'The spring constant k tells us F = kx. Is gravity the relevant force here?',
+        'What would be the correct way to find velocity when force varies with position?',
+        'Have you considered using energy conservation: ½kx² = ½mv²?',
+      ],
+      problemHint:
+        "When spring constant k is given, the problem expects you to use spring force F = kx, not gravity.",
+    },
+    {
+      strategy: 'FORCE_ENUMERATION',
+      question:
+        "Let's identify the forces acting on the block. The problem mentions a spring with constant k. What force does this spring exert?",
+      followUps: [
+        'Write out F = kx. How does this force change as the block moves?',
+        'Can we use constant acceleration equations when the force keeps changing?',
+        'What physics principle works when force depends on position? (Hint: think energy)',
+      ],
+      problemHint:
+        "The spring constant k is given for a reason - the spring force F = kx is the key force here.",
+    },
+    {
+      strategy: 'REREAD_NUDGE',
+      question:
+        "The problem gives you spring constant k = {springConstant}. Why do you think this information was provided?",
+      followUps: [
+        'What can you calculate using the spring constant?',
+        'Spring potential energy is ½kx². How does this help solve the problem?',
+        'Energy methods are powerful when forces vary with position.',
+      ],
+      problemHint:
+        "The given spring constant k points you toward using energy: PE = ½kx², KE = ½mv².",
+    },
+  ],
+
+  // EP016: Collision conservation error
+  EP016: [
+    {
+      strategy: 'CONTRAST_PROMPT',
+      question:
+        "You're conserving kinetic energy in this collision. But the problem says it's an {collisionType} collision. What does that tell us about energy?",
+      followUps: [
+        'In an inelastic collision, is kinetic energy conserved?',
+        'What IS always conserved in collisions? (Hint: momentum)',
+        'For perfectly inelastic collisions, the objects stick together. What equation can you write?',
+      ],
+      problemHint:
+        "The word 'inelastic' is key - it means kinetic energy is NOT conserved, only momentum is.",
+    },
+    {
+      strategy: 'PHYSICAL_INTUITION',
+      question:
+        'Think about what happens physically when two objects collide and stick together. Where does some of the kinetic energy go?',
+      followUps: [
+        'When objects deform or stick, energy is lost to heat, sound, and deformation.',
+        'What quantity is always conserved regardless of collision type?',
+        'Write the momentum conservation equation: m₁v₁ + m₂v₂ = (m₁+m₂)v_final',
+      ],
+      problemHint:
+        'Inelastic collisions lose KE to deformation. Only momentum is conserved: Σp_before = Σp_after.',
+    },
+    {
+      strategy: 'DIRECT_QUESTION',
+      question:
+        'The problem states this is an {collisionType} collision. Can you tell me what conservation laws apply to this type of collision?',
+      followUps: [
+        'Elastic collision: both momentum AND kinetic energy conserved.',
+        'Inelastic collision: ONLY momentum conserved.',
+        'Which type does the problem specify?',
+      ],
+      problemHint:
+        "Check the problem for words like 'elastic', 'inelastic', 'stick together', or coefficient of restitution.",
+    },
+  ],
+
+  // EP017: Circular motion error
+  EP017: [
+    {
+      strategy: 'PHYSICAL_INTUITION',
+      question:
+        "You're using linear kinematics equations. But the object is moving in a circle. What's different about circular motion?",
+      followUps: [
+        "In circular motion, even at constant speed, there's an acceleration. What is it?",
+        'What direction does centripetal acceleration point?',
+        'The equation is a = v²/r. Have you used this in your analysis?',
+      ],
+      problemHint:
+        'Circular motion requires centripetal acceleration a = v²/r pointing toward the center.',
+    },
+    {
+      strategy: 'FORCE_ENUMERATION',
+      question:
+        "Let's think about forces. For an object moving in a circle, what net force is required to maintain the circular path?",
+      followUps: [
+        'Centripetal force = mv²/r. What provides this force in your problem?',
+        "It could be tension, normal force, gravity, or friction - what's providing it here?",
+        "Write Newton's second law in the radial direction: ΣF_radial = mv²/r",
+      ],
+      problemHint:
+        "Something must provide the centripetal force mv²/r. Identify what force(s) point toward the center.",
+    },
+    {
+      strategy: 'CONTRAST_PROMPT',
+      question:
+        "You've used v = u + at which assumes straight-line motion. But the problem describes motion in a circle. What equations apply to circular motion?",
+      followUps: [
+        'For circular motion: v = ωr, a_centripetal = v²/r = ω²r',
+        'The tangential and radial directions need to be analyzed separately.',
+        'What provides the centripetal acceleration in this problem?',
+      ],
+      problemHint:
+        'Circular motion has centripetal acceleration even at constant speed. Use a = v²/r.',
+    },
+    {
+      strategy: 'DIRECT_QUESTION',
+      question:
+        'For an object moving in a {motionType}, what is the centripetal acceleration? Have you included this in your analysis?',
+      followUps: [
+        'Centripetal acceleration = v²/r toward the center.',
+        'At the top of a vertical circle, how do gravity and centripetal force relate?',
+        "What's the minimum speed needed at the top for the object to complete the circle?",
+      ],
+      problemHint:
+        "Don't forget: circular motion always has centripetal acceleration a = v²/r.",
+    },
+  ],
+}
+
+/**
  * Dialogue templates organized by collision type and severity
  */
 const DIALOGUE_TEMPLATES: Record<CollisionType, Record<CollisionSeverity, DialogueTemplate[]>> = {
@@ -215,6 +365,12 @@ interface DialogueContext {
   studentClaim?: string
   condition?: string
   quantity?: string
+  // Spring-specific
+  springConstant?: string
+  // Collision-specific
+  collisionType?: string
+  // Circular motion-specific
+  motionType?: string
 }
 
 /**
@@ -224,12 +380,21 @@ export function generateSocraticDialogue(
   collision: ConstraintCollision,
   context?: DialogueContext
 ): SocraticDialogue {
-  // Get templates for this collision type and severity
-  const templates = DIALOGUE_TEMPLATES[collision.collisionType][collision.severity]
+  // Check for error pattern-specific templates first
+  const errorPatternTemplates = ERROR_PATTERN_TEMPLATES[collision.errorPatternId]
 
-  // Select template (could be randomized or based on student history)
-  const templateIndex = selectTemplateIndex(collision, templates.length)
-  const template = templates[templateIndex]
+  let template: DialogueTemplate
+
+  if (errorPatternTemplates && errorPatternTemplates.length > 0) {
+    // Use error pattern-specific template
+    const templateIndex = selectTemplateIndex(collision, errorPatternTemplates.length)
+    template = errorPatternTemplates[templateIndex]
+  } else {
+    // Fall back to generic templates based on collision type and severity
+    const templates = DIALOGUE_TEMPLATES[collision.collisionType][collision.severity]
+    const templateIndex = selectTemplateIndex(collision, templates.length)
+    template = templates[templateIndex]
+  }
 
   // Build context from collision if not provided
   const fullContext = buildContext(collision, context)
@@ -308,6 +473,12 @@ function interpolate(text: string, context: DialogueContext & { wrongAssumption?
     .replace(/{studentClaim}/g, context.studentClaim || 'your statement')
     .replace(/{quantity}/g, context.quantity || 'this quantity')
     .replace(/{condition}/g, context.condition || 'this condition')
+    // Spring-specific
+    .replace(/{springConstant}/g, context.springConstant || 'k')
+    // Collision-specific
+    .replace(/{collisionType}/g, context.collisionType || 'inelastic')
+    // Circular motion-specific
+    .replace(/{motionType}/g, context.motionType || 'vertical circle')
 }
 
 /**
@@ -323,6 +494,21 @@ function extractTopic(description: string): string {
   if (lowerDesc.includes('pulley')) return 'the pulley'
   if (lowerDesc.includes('rolling')) return 'the rolling condition'
 
+  // Spring-related
+  if (lowerDesc.includes('spring')) return 'spring force and energy'
+  if (lowerDesc.includes('kinematics') && lowerDesc.includes('constant')) return 'constant vs variable acceleration'
+  if (lowerDesc.includes('gravitational') && lowerDesc.includes('spring')) return 'spring force vs gravity'
+
+  // Collision-related
+  if (lowerDesc.includes('collision')) return 'collision type and conservation laws'
+  if (lowerDesc.includes('kinetic energy') && lowerDesc.includes('inelastic')) return 'energy in inelastic collisions'
+  if (lowerDesc.includes('momentum')) return 'momentum conservation'
+
+  // Circular motion-related
+  if (lowerDesc.includes('circular')) return 'circular motion dynamics'
+  if (lowerDesc.includes('centripetal')) return 'centripetal force and acceleration'
+  if (lowerDesc.includes('linear') && lowerDesc.includes('circular')) return 'linear vs circular motion equations'
+
   return 'this constraint'
 }
 
@@ -331,12 +517,43 @@ function extractTopic(description: string): string {
  */
 function getRelatedConcepts(collision: ConstraintCollision): string[] {
   const conceptMap: Record<string, string[]> = {
+    // Friction-related
     friction_present: ['friction', 'normal-force', 'contact-forces'],
     frictionless: ['friction', 'normal-force'],
+    friction_coefficient: ['friction', 'static-friction', 'kinetic-friction'],
+
+    // String/Pulley-related
     taut_string: ['tension', 'constraint-equations', 'pulley-systems'],
+    massless_string: ['tension', 'uniform-tension'],
     massless_pulley: ['tension', 'rotational-dynamics', 'moment-of-inertia'],
+    inextensible_string: ['constraint-equations', 'velocity-constraints'],
+
+    // Rolling-related
     pure_rolling: ['rolling-motion', 'angular-velocity', 'constraint-equations'],
+
+    // Energy-related
     energy_not_conserved: ['work-energy-theorem', 'conservative-forces', 'mechanical-energy'],
+
+    // Spring-related
+    ideal_spring: ['spring-force', 'hookes-law', 'elastic-potential-energy', 'energy-methods'],
+    spring_constant_given: ['spring-force', 'hookes-law', 'elastic-potential-energy'],
+    spring_deformation_given: ['elastic-potential-energy', 'energy-conservation'],
+
+    // Collision-related
+    elastic_collision: ['momentum-conservation', 'kinetic-energy', 'elastic-collisions'],
+    inelastic_collision: ['momentum-conservation', 'inelastic-collisions', 'energy-loss'],
+    perfectly_inelastic: ['momentum-conservation', 'perfectly-inelastic', 'combined-mass'],
+    restitution_given: ['coefficient-of-restitution', 'relative-velocity', 'collisions'],
+
+    // Circular motion-related
+    circular_motion: ['centripetal-force', 'centripetal-acceleration', 'circular-dynamics'],
+    circular_path: ['centripetal-force', 'centripetal-acceleration', 'vertical-circles'],
+    banked_curve: ['centripetal-force', 'normal-force', 'banking-angle'],
+    conical_pendulum: ['centripetal-force', 'tension', 'horizontal-circles'],
+
+    // Initial conditions
+    initial_velocity_zero: ['initial-conditions', 'kinematics'],
+    dropped_from_height: ['gravitational-potential-energy', 'free-fall'],
   }
 
   // Try to find concepts from the collision's constraint
