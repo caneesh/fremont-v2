@@ -101,6 +101,9 @@ export interface ReviewResult {
   quality: ReviewQuality
   responseTimeMs: number
   reviewedAt: string
+  // Optional confidence data (when CONFIDENCE_WEIGHTED_SRS is enabled)
+  confidence?: 'low' | 'medium' | 'high'
+  isCorrect?: boolean
 }
 
 export interface ReviewSession {

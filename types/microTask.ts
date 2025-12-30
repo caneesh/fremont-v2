@@ -7,6 +7,7 @@
  */
 
 import type { Concept, SanityCheck, SanityCheckMatrix, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
+import type { FeynmanPromptConfig } from './feynman'
 
 // Supported micro-task types
 export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK'
@@ -60,6 +61,7 @@ export interface MicroTaskStep {
   tasks: MicroTask[]  // 5 tasks, one per level (levels 1-3 pre-generated, 4-5 on-demand)
   requiredConcepts: string[]
   question?: string  // Optional additional Socratic question
+  feynmanPrompt?: FeynmanPromptConfig  // Feynman micro-prompt for conceptual check
 }
 
 /**

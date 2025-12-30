@@ -5,14 +5,18 @@ import type { MicroTaskStep } from '@/types/microTask'
 import type { Concept, WarningBeacon } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
 import type { StepLearningStatus, ValidationOutcome, RevealFlowEventMetadata } from '@/types/revealFlow'
+import type { FeynmanValidationResult } from '@/types/feynman'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
 import RevealReconstructValidate from './micro-tasks/RevealReconstructValidate'
+import ConfidencePrompt from './micro-tasks/ConfidencePrompt'
+import FeynmanMicroPrompt from './FeynmanMicroPrompt'
 import MathRenderer from './MathRenderer'
 import { getStepTypeBadge } from '@/lib/hintEngine'
 import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { eventLogger } from '@/lib/storage/eventLogger'
+import type { Confidence } from '@/types/confidence'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -78,8 +82,21 @@ export default function MicroTaskStepAccordion({
   const [revealFlowTask, setRevealFlowTask] = useState<typeof step.tasks[0] | null>(null)
   const [levelLearningStatus, setLevelLearningStatus] = useState<Map<number, StepLearningStatus>>(new Map())
 
-  // Feature flag check
+  // Feynman Micro-Prompt state
+  const [feynmanPassed, setFeynmanPassed] = useState(false)
+  const [feynmanResult, setFeynmanResult] = useState<FeynmanValidationResult | null>(null)
+
+  // Confidence prompt state (for confidence-weighted SRS)
+  const [showConfidencePrompt, setShowConfidencePrompt] = useState(false)
+  const [pendingTaskResult, setPendingTaskResult] = useState<{
+    isCorrect: boolean
+    explanation: string
+    attempts: number
+  } | null>(null)
+
+  // Feature flag checks
   const useRevealFlow = FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE
+  const useConfidenceSRS = FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS
 
   // Sync with active state and track activation time
   useEffect(() => {
@@ -100,44 +117,95 @@ export default function MicroTaskStepAccordion({
     setIsExpanded(!isExpanded)
   }
 
-  const handleTaskCorrect = (explanation: string) => {
-    // Add to collected insights
-    const currentTask = step.tasks.find(t => t.level === currentLevel)
-    if (currentTask) {
-      setCollectedInsights(prev => [...prev, {
+  // Process task completion (called after confidence is rated or directly if disabled)
+  const processTaskCompletion = useCallback((isCorrect: boolean, explanation: string, confidence?: Confidence) => {
+    // Log confidence if provided
+    if (confidence && problemId) {
+      eventLogger.log('task_confidence_rated', {
+        problemId,
+        stepId: step.id,
         level: currentLevel,
-        levelTitle: currentTask.levelTitle,
-        explanation
-      }])
+        isCorrect,
+        confidence
+      })
     }
 
-    // Notify parent
-    onTaskComplete(step.id, currentLevel, explanation)
-
-    // Move to next level
-    if (currentLevel < step.tasks.length) {
-      setCurrentLevel(currentLevel + 1)
-    } else {
-      // All tasks completed - check for timeout
-      if (problemId && stepActivationTimeRef.current) {
-        const durationMs = Date.now() - stepActivationTimeRef.current
-        const problemContext: ProblemContext = {
-          problemId,
-          problemTitle: problemTitle || 'Untitled Problem',
-          domain: domain || 'physics',
-          subdomain: subdomain || 'general'
-        }
-        const stepContext: StepContext = {
-          stepId: step.id,
-          stepTitle: step.title,
-          stepType: step.stepType || 'physics_concept',
-          requiredConcepts: step.requiredConcepts || []
-        }
-        onStepTimeout(problemContext, stepContext, durationMs)
+    if (isCorrect) {
+      // Add to collected insights
+      const currentTask = step.tasks.find(t => t.level === currentLevel)
+      if (currentTask) {
+        setCollectedInsights(prev => [...prev, {
+          level: currentLevel,
+          levelTitle: currentTask.levelTitle,
+          explanation
+        }])
       }
-      onComplete(step.id)
+
+      // Notify parent
+      onTaskComplete(step.id, currentLevel, explanation)
+
+      // Move to next level
+      if (currentLevel < step.tasks.length) {
+        setCurrentLevel(currentLevel + 1)
+      } else {
+        // All tasks completed - check for timeout
+        if (problemId && stepActivationTimeRef.current) {
+          const durationMs = Date.now() - stepActivationTimeRef.current
+          const problemContext: ProblemContext = {
+            problemId,
+            problemTitle: problemTitle || 'Untitled Problem',
+            domain: domain || 'physics',
+            subdomain: subdomain || 'general'
+          }
+          const stepContext: StepContext = {
+            stepId: step.id,
+            stepTitle: step.title,
+            stepType: step.stepType || 'physics_concept',
+            requiredConcepts: step.requiredConcepts || []
+          }
+          onStepTimeout(problemContext, stepContext, durationMs)
+        }
+        onComplete(step.id)
+      }
+    }
+
+    // Clear pending state
+    setPendingTaskResult(null)
+    setShowConfidencePrompt(false)
+  }, [step.id, step.tasks, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, onComplete])
+
+  const handleTaskCorrect = (explanation: string) => {
+    if (useConfidenceSRS) {
+      // Show confidence prompt before proceeding
+      setPendingTaskResult({ isCorrect: true, explanation, attempts: 0 })
+      setShowConfidencePrompt(true)
+    } else {
+      // Original behavior - proceed immediately
+      processTaskCompletion(true, explanation)
     }
   }
+
+  // Handle confidence rating from the prompt
+  const handleConfidenceRated = useCallback((confidence: Confidence) => {
+    if (pendingTaskResult) {
+      processTaskCompletion(
+        pendingTaskResult.isCorrect,
+        pendingTaskResult.explanation,
+        confidence
+      )
+    }
+  }, [pendingTaskResult, processTaskCompletion])
+
+  // Handle skipping confidence prompt (defaults to medium)
+  const handleConfidenceSkipped = useCallback(() => {
+    if (pendingTaskResult) {
+      processTaskCompletion(
+        pendingTaskResult.isCorrect,
+        pendingTaskResult.explanation,
+        'medium'
+      )
+    }
+  }, [pendingTaskResult, processTaskCompletion])
 
   const handleTaskWrong = (attempts: number) => {
     setTaskAttempts(prev => {
@@ -322,6 +390,18 @@ export default function MicroTaskStepAccordion({
     return 'bg-white dark:bg-slate-800'
   }
 
+  // Handler for Feynman validation result
+  const handleFeynmanValidated = (passed: boolean, result: FeynmanValidationResult) => {
+    setFeynmanResult(result)
+    if (passed) {
+      setFeynmanPassed(true)
+    }
+  }
+
+  // Check if this step requires Feynman check
+  const requiresFeynmanCheck = !!step.feynmanPrompt
+  const showStepContent = !requiresFeynmanCheck || feynmanPassed
+
   return (
     <div
       className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${getBorderColor()} ${getBackgroundColor()}`}
@@ -413,8 +493,37 @@ export default function MicroTaskStepAccordion({
       {/* Expanded Content */}
       {isExpanded && !isLocked && (
         <div className="px-4 pb-4 space-y-4">
+          {/* Feynman Micro-Prompt - Show before step content if configured */}
+          {requiresFeynmanCheck && !feynmanPassed && step.feynmanPrompt && (
+            <FeynmanMicroPrompt
+              config={step.feynmanPrompt}
+              problemStatement={problemStatement}
+              onValidated={handleFeynmanValidated}
+              onSkip={() => setFeynmanPassed(true)}
+            />
+          )}
+
+          {/* Feynman Passed Indicator */}
+          {requiresFeynmanCheck && feynmanPassed && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Conceptual understanding verified
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  You explained WHY, now proceed with the tasks
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Warning Beacon - Non-spoilery hint about common mistakes */}
-          {warningBeacon && (
+          {showStepContent && warningBeacon && (
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center">
                 <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,7 +542,7 @@ export default function MicroTaskStepAccordion({
           )}
 
           {/* Required Concepts */}
-          {requiredConcepts.length > 0 && (
+          {showStepContent && requiredConcepts.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {requiredConcepts.map(concept => (
                 <span
@@ -447,7 +556,7 @@ export default function MicroTaskStepAccordion({
           )}
 
           {/* Collected Insights */}
-          {collectedInsights.length > 0 && !isReadingMode && (
+          {showStepContent && collectedInsights.length > 0 && !isReadingMode && (
             <CollectedInsights
               insights={collectedInsights}
               totalLevels={step.tasks.length}
@@ -455,7 +564,7 @@ export default function MicroTaskStepAccordion({
           )}
 
           {/* Quiz Mode: Current Task Card */}
-          {!isReadingMode && currentTask && !allTasksCompleted && (
+          {showStepContent && !isReadingMode && currentTask && !allTasksCompleted && !showConfidencePrompt && (
             <InsightCard
               key={`step-${step.id}-level-${currentLevel}`}
               task={currentTask}
@@ -467,8 +576,31 @@ export default function MicroTaskStepAccordion({
             />
           )}
 
+          {/* Confidence Prompt - shown after correct answer when feature is enabled */}
+          {showStepContent && !isReadingMode && showConfidencePrompt && pendingTaskResult && (
+            <div className="p-4 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-green-700 dark:text-green-300 font-medium">
+                  Correct!
+                </span>
+              </div>
+              <ConfidencePrompt
+                isCorrect={pendingTaskResult.isCorrect}
+                onRate={handleConfidenceRated}
+                onSkip={handleConfidenceSkipped}
+                autoSkipDelayMs={5000}
+                showFeedback={true}
+              />
+            </div>
+          )}
+
           {/* Reading Mode: Hint Ladder */}
-          {isReadingMode && !allTasksCompleted && (
+          {showStepContent && isReadingMode && !allTasksCompleted && (
             <div className="space-y-2">
               <div className="mb-3">
                 <div className="flex items-center justify-between">

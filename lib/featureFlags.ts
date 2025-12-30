@@ -43,7 +43,18 @@ export const FEATURE_FLAGS = {
    * Default: ON in development, OFF in production unless configured.
    */
   REVEAL_RECONSTRUCT_VALIDATE: process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE !== 'false')
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE !== 'false'),
+
+  /**
+   * Confidence-Weighted SRS
+   * When enabled, asks students to rate their confidence after answering.
+   * Uses a correctness × confidence matrix to adjust SRS scheduling:
+   * - Correct + High confidence = accelerated review (mastery)
+   * - Correct + Low confidence = sooner review (lucky guess)
+   * - Wrong + High confidence = aggressive review (dangerous misconception)
+   */
+  CONFIDENCE_WEIGHTED_SRS: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false')
 }
 
 /**

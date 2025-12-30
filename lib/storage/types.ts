@@ -26,6 +26,7 @@ export type EventType =
   | 'task_attempted'
   | 'task_correct'
   | 'task_incorrect'
+  | 'task_confidence_rated'
   | 'reading_mode_activated'
   // Reveal-Reconstruct-Validate flow events
   | 'reveal_opened'
@@ -43,6 +44,12 @@ export type EventType =
   | 'preference_changed'
   // Error events
   | 'error_occurred'
+  // Circuit Breaker events
+  | 'circuit_breaker_warning'
+  | 'circuit_breaker_tripped'
+  | 'drill_started'
+  | 'drill_completed'
+  | 'drill_skipped'
 
 export interface EventMetadata {
   problemId?: string
@@ -61,6 +68,13 @@ export interface EventMetadata {
   selectedOptionId?: string
   outcome?: 'solid' | 'partial' | 'mismatch'
   conceptTag?: string
+  // Circuit Breaker metadata
+  errorTag?: string
+  drillId?: string
+  circuitBreakerState?: string
+  drillSuccess?: boolean
+  // Confidence-weighted SRS metadata
+  confidence?: 'low' | 'medium' | 'high'
   [key: string]: unknown // Allow additional metadata
 }
 
@@ -121,6 +135,9 @@ export const STORAGE_KEYS = {
 
   // Reveal-Reconstruct-Validate flow
   REVEAL_FLOW_STATUS: 'physiscaffold_reveal_flow_status',
+
+  // Circuit Breaker
+  CIRCUIT_BREAKER: 'physiscaffold_circuit_breaker',
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
@@ -184,3 +201,11 @@ export type {
   MicroTaskStep,
   MicroTask
 } from '@/types/microTask'
+
+export type {
+  ErrorTag,
+  CircuitBreakerState,
+  CircuitBreakerSessionState,
+  DrillTask,
+  ThresholdEvaluation
+} from '@/types/circuitBreaker'

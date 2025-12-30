@@ -34,6 +34,10 @@ import type { ErrorAnalysisResponse } from '@/types/errorPatterns'
 import { conceptMasteryService } from '@/lib/conceptMasteryService'
 import { conceptMappingService } from '@/lib/conceptMappingService'
 import { CONCEPT_NETWORK_DATA } from '@/lib/conceptNetworkData'
+import { useCircuitBreaker } from '@/lib/hooks/useCircuitBreaker'
+import DrillModal from './DrillModal'
+import CircuitBreakerWarning from './CircuitBreakerWarning'
+import type { ErrorTag } from '@/types/circuitBreaker'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -73,6 +77,58 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
   const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
+
+  // Generate session ID for circuit breaker (stable across component lifecycle)
+  const sessionId = useRef(`session_${Date.now()}`).current
+
+  // Circuit Breaker integration
+  const {
+    state: circuitBreakerState,
+    isProblemLocked,
+    currentDrill,
+    warningMessage,
+    warningTag,
+    recordError: recordCircuitBreakerError,
+    recordGradingErrors,
+    startDrill,
+    completeDrill,
+    skipDrill,
+    dismissWarning,
+  } = useCircuitBreaker({
+    sessionId,
+    problemId: problemId(),
+  })
+
+  // State for showing drill modal
+  const [showDrillModal, setShowDrillModal] = useState(false)
+
+  // Auto-show drill modal when circuit breaker trips
+  useEffect(() => {
+    if (circuitBreakerState === 'TRIPPED' && currentDrill && !showDrillModal) {
+      // Small delay to let the user see the tripped state
+      const timer = setTimeout(() => {
+        startDrill()
+        setShowDrillModal(true)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [circuitBreakerState, currentDrill, showDrillModal, startDrill])
+
+  // Drill completion handlers
+  const handleDrillComplete = useCallback((success: boolean) => {
+    completeDrill(success)
+    setShowDrillModal(false)
+  }, [completeDrill])
+
+  const handleDrillSkip = useCallback(() => {
+    skipDrill()
+    setShowDrillModal(false)
+  }, [skipDrill])
+
+  // Handler for micro-task incorrect events (passed to MicroTaskStepAccordion)
+  const handleTaskIncorrect = useCallback((stepId: number, errorTag: ErrorTag) => {
+    recordCircuitBreakerError(errorTag, stepId, 'task_incorrect')
+  }, [recordCircuitBreakerError])
 
   // Handlers for micro-task mode
   const handleMicroTaskComplete = useCallback((stepId: number, level: number, explanation: string) => {
