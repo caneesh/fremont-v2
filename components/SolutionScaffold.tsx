@@ -217,9 +217,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       current.collectedInsights.push(explanation)
 
       // Check if all tasks are completed for this step
+      // Guard: only mark complete if step has tasks (prevents false completion for unexpanded steps)
       const microData = data as MicroTaskScaffoldData
       const step = microData.steps.find(s => s.id === stepId)
-      if (step && current.currentLevel > step.tasks.length) {
+      if (step && step.tasks.length > 0 && current.currentLevel > step.tasks.length) {
         current.isCompleted = true
       }
 
@@ -277,12 +278,25 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         const completed: number[] = []
         const hintLevels = new Map<number, number>()
 
+        // Get current steps for validation (if using micro-tasks)
+        const microSteps = useMicroTasks ? (data as MicroTaskScaffoldData).steps : null
+
         progress.stepProgress.forEach((sp: StepProgress) => {
           if (sp.userAnswer) {
             answers.set(sp.stepId, sp.userAnswer)
           }
           if (sp.isCompleted) {
-            completed.push(sp.stepId)
+            // Validate: only restore completion if step has actual tasks loaded
+            // This prevents false completion from stale localStorage when steps haven't been expanded
+            if (microSteps) {
+              const step = microSteps.find(s => s.id === sp.stepId)
+              if (step && step.tasks.length > 0) {
+                completed.push(sp.stepId)
+              }
+              // Skip completion for steps with no tasks (unexpanded phased scaffold steps)
+            } else {
+              completed.push(sp.stepId)
+            }
           }
           if (sp.currentHintLevel) {
             hintLevels.set(sp.stepId, sp.currentHintLevel)

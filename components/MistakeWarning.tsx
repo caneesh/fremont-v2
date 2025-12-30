@@ -17,10 +17,10 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
           key={index}
           className={`border-2 rounded-lg p-4 ${
             warning.severity === 'high'
-              ? 'bg-red-50 border-red-400'
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-700'
               : warning.severity === 'medium'
-              ? 'bg-orange-50 border-orange-400'
-              : 'bg-yellow-50 border-yellow-400'
+              ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 dark:border-orange-700'
+              : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 dark:border-yellow-700'
           }`}
         >
           <div className="flex items-start justify-between">
@@ -43,15 +43,15 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
                   <h4
                     className={`text-sm font-bold ${
                       warning.severity === 'high'
-                        ? 'text-red-900'
+                        ? 'text-red-900 dark:text-red-300'
                         : warning.severity === 'medium'
-                        ? 'text-orange-900'
-                        : 'text-yellow-900'
+                        ? 'text-orange-900 dark:text-orange-300'
+                        : 'text-yellow-900 dark:text-yellow-300'
                     }`}
                   >
                     Pattern Detected
                   </h4>
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <p className="text-xs text-gray-600 dark:text-dark-text-secondary mt-0.5">
                     Based on your previous attempts
                   </p>
                 </div>
@@ -60,10 +60,10 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
               <p
                 className={`text-sm font-medium mb-3 ${
                   warning.severity === 'high'
-                    ? 'text-red-800'
+                    ? 'text-red-800 dark:text-red-300'
                     : warning.severity === 'medium'
-                    ? 'text-orange-800'
-                    : 'text-yellow-800'
+                    ? 'text-orange-800 dark:text-orange-300'
+                    : 'text-yellow-800 dark:text-yellow-300'
                 }`}
               >
                 {warning.message}
@@ -74,10 +74,10 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
                   <p
                     className={`text-xs font-semibold ${
                       warning.severity === 'high'
-                        ? 'text-red-900'
+                        ? 'text-red-900 dark:text-red-300'
                         : warning.severity === 'medium'
-                        ? 'text-orange-900'
-                        : 'text-yellow-900'
+                        ? 'text-orange-900 dark:text-orange-300'
+                        : 'text-yellow-900 dark:text-yellow-300'
                     }`}
                   >
                     Suggestions:
@@ -88,10 +88,10 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
                         key={idx}
                         className={`text-xs flex items-start gap-2 ${
                           warning.severity === 'high'
-                            ? 'text-red-700'
+                            ? 'text-red-700 dark:text-red-400'
                             : warning.severity === 'medium'
-                            ? 'text-orange-700'
-                            : 'text-yellow-700'
+                            ? 'text-orange-700 dark:text-orange-400'
+                            : 'text-yellow-700 dark:text-yellow-400'
                         }`}
                       >
                         <span className="flex-shrink-0 mt-0.5">•</span>
@@ -106,7 +106,7 @@ export default function MistakeWarning({ warnings, onDismiss }: MistakeWarningPr
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                className="ml-3 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                className="ml-3 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary flex-shrink-0"
                 aria-label="Dismiss warning"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

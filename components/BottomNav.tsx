@@ -53,7 +53,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card border-t-2 border-gray-200 dark:border-dark-border shadow-lg dark:shadow-dark-lg z-50">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const active = isActive(item.path)
@@ -63,8 +63,8 @@ export default function BottomNav() {
               onClick={() => router.push(item.path)}
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors active:scale-95 ${
                 active
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                  ? 'text-blue-600 dark:text-accent bg-blue-50 dark:bg-blue-900/20'
+                  : 'text-gray-600 dark:text-dark-text-secondary hover:text-blue-600 dark:hover:text-accent hover:bg-gray-50 dark:hover:bg-dark-card-soft'
               }`}
             >
               <div className={`${active ? 'scale-110' : ''} transition-transform`}>
