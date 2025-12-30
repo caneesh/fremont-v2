@@ -100,9 +100,9 @@ export default function VerbalPlanRenderer({
             <p className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
               Describe your approach in words
             </p>
-            <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
+            <div className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
               <MathRenderer text={prompt} />
-            </p>
+            </div>
           </div>
         </div>
       </div>
