@@ -268,6 +268,7 @@
 }
 
 /* KaTeX dark mode - comprehensive styling */
+/* Using #f1f5f9 (slate-100) for maximum readability */
 .dark .katex,
 .dark .katex-display,
 .dark .katex-html,
@@ -291,26 +292,26 @@
 .dark .katex .nulldelimiter,
 .dark .katex .delimsizing,
 .dark .katex .op-symbol {
-  color: var(--text-primary) !important;
+  color: #f1f5f9 !important;
 }
 
 .dark .katex .frac-line {
-  border-color: var(--text-primary) !important;
-  background-color: var(--text-primary) !important;
+  border-color: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
 }
 
 .dark .katex .sqrt > .sqrt-line {
-  border-color: var(--text-primary) !important;
+  border-color: #f1f5f9 !important;
 }
 
 .dark .katex .overline .overline-line,
 .dark .katex .underline .underline-line {
-  border-color: var(--text-primary) !important;
+  border-color: #f1f5f9 !important;
 }
 
 /* KaTeX colored elements in dark mode */
 .dark .katex .mord.text {
-  color: var(--text-primary) !important;
+  color: #f1f5f9 !important;
 }
 
 /* Dark mode input focus states */

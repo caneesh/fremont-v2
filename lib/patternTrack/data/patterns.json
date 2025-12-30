@@ -228,5 +228,304 @@
     "display_order": 9,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_coulombs_law",
+    "name": "Coulomb's Law",
+    "description": "Calculating electric force between point charges. F = kq₁q₂/r². Force is attractive for opposite charges, repulsive for like charges.",
+    "category": "electromagnetism",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Two or more point charges given",
+      "Distance between charges specified",
+      "Asked about electric force",
+      "Charges given in Coulombs or microcoulombs"
+    ],
+    "common_pitfalls": [
+      "Forgetting force is a vector - need direction",
+      "Using diameter instead of center-to-center distance",
+      "Wrong sign interpretation (force direction vs charge sign)",
+      "Not using correct value of k (9×10⁹ N·m²/C²)"
+    ],
+    "related_pattern_ids": ["pattern_electric_field", "pattern_superposition_e"],
+    "display_order": 10,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_electric_field",
+    "name": "Electric Field",
+    "description": "Electric field E = F/q = kQ/r² for point charges. Field points away from positive charges, toward negative charges.",
+    "category": "electromagnetism",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Asked about electric field strength or direction",
+      "Point charge or charge distribution given",
+      "Test charge mentioned or implied",
+      "Field lines or field vectors discussed"
+    ],
+    "common_pitfalls": [
+      "Confusing field direction with force direction on negative charges",
+      "Forgetting to find vector sum for multiple charges",
+      "Using wrong formula for non-point charge distributions",
+      "Not recognizing when to use Gauss's Law instead"
+    ],
+    "related_pattern_ids": ["pattern_coulombs_law", "pattern_gauss_law", "pattern_superposition_e"],
+    "display_order": 11,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_superposition_e",
+    "name": "Superposition Principle (E&M)",
+    "description": "Net electric field or force is the vector sum of individual contributions. Apply separately then add as vectors.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Multiple charges present",
+      "Asked for net field or force at a point",
+      "Charge distribution (line, ring, disk)",
+      "Need to find where field is zero"
+    ],
+    "common_pitfalls": [
+      "Adding magnitudes instead of vectors",
+      "Forgetting to break into components",
+      "Wrong direction for individual field contributions",
+      "Not recognizing symmetry that cancels components"
+    ],
+    "related_pattern_ids": ["pattern_electric_field", "pattern_coulombs_law"],
+    "display_order": 12,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_gauss_law",
+    "name": "Gauss's Law",
+    "description": "Φ = ∮E·dA = Q_enclosed/ε₀. Use symmetric Gaussian surfaces to find electric fields efficiently.",
+    "category": "electromagnetism",
+    "difficulty": 4,
+    "recognition_cues": [
+      "High symmetry: spherical, cylindrical, or planar",
+      "Uniform charge distributions",
+      "Infinite wire, plane, or sphere",
+      "Asked about field inside/outside conductors"
+    ],
+    "common_pitfalls": [
+      "Choosing wrong Gaussian surface shape",
+      "Including charge outside the Gaussian surface",
+      "Forgetting E is constant on the surface by symmetry",
+      "Not recognizing when Gauss's Law is easier than direct integration"
+    ],
+    "related_pattern_ids": ["pattern_electric_field", "pattern_conductors"],
+    "display_order": 13,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_electric_potential",
+    "name": "Electric Potential and Voltage",
+    "description": "V = kQ/r for point charges. Potential is scalar (no direction). Work W = qΔV. Equipotential surfaces are perpendicular to field lines.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Voltage or potential difference mentioned",
+      "Work done moving a charge",
+      "Equipotential surfaces discussed",
+      "Energy of charge configuration"
+    ],
+    "common_pitfalls": [
+      "Confusing potential (scalar) with field (vector)",
+      "Wrong sign for work done by/against electric force",
+      "Forgetting potential is relative (need reference point)",
+      "Confusing V (potential) with U (potential energy)"
+    ],
+    "related_pattern_ids": ["pattern_electric_field", "pattern_capacitors"],
+    "display_order": 14,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_capacitors",
+    "name": "Capacitors and Capacitance",
+    "description": "C = Q/V. Energy stored U = ½CV² = ½QV = Q²/2C. Series and parallel combinations.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Parallel plates or capacitor mentioned",
+      "Dielectric material inserted",
+      "Capacitors in series or parallel",
+      "Energy stored in electric field"
+    ],
+    "common_pitfalls": [
+      "Confusing series/parallel formulas (opposite of resistors)",
+      "Forgetting what stays constant when dielectric inserted",
+      "Not recognizing isolated vs connected to battery",
+      "Wrong area or separation in parallel plate formula"
+    ],
+    "related_pattern_ids": ["pattern_electric_potential", "pattern_dielectrics"],
+    "display_order": 15,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_ohms_law",
+    "name": "Ohm's Law and Resistance",
+    "description": "V = IR. Resistance R = ρL/A. Power P = IV = I²R = V²/R. Resistors in series and parallel.",
+    "category": "electromagnetism",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Current, voltage, and resistance given",
+      "Resistors in circuit",
+      "Power dissipation asked",
+      "Wire properties (length, area, resistivity)"
+    ],
+    "common_pitfalls": [
+      "Using wrong formula for series vs parallel resistors",
+      "Confusing current through vs voltage across",
+      "Forgetting units (especially for resistivity)",
+      "Not recognizing when Ohm's Law doesn't apply"
+    ],
+    "related_pattern_ids": ["pattern_kirchhoff", "pattern_rc_circuits"],
+    "display_order": 16,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_kirchhoff",
+    "name": "Kirchhoff's Laws",
+    "description": "Junction rule: ΣI_in = ΣI_out. Loop rule: ΣV = 0 around any closed loop. Essential for complex circuits.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Multiple loops in circuit",
+      "Multiple batteries or EMF sources",
+      "Current directions unknown",
+      "Cannot simplify to series/parallel"
+    ],
+    "common_pitfalls": [
+      "Inconsistent sign convention for voltage drops",
+      "Wrong current direction assumption (answer will be negative)",
+      "Missing a loop equation",
+      "Not using enough independent equations"
+    ],
+    "related_pattern_ids": ["pattern_ohms_law", "pattern_rc_circuits"],
+    "display_order": 17,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_magnetic_force_charge",
+    "name": "Magnetic Force on Moving Charges",
+    "description": "F = qv×B. Force is perpendicular to both velocity and field. Use right-hand rule. Causes circular motion.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Charged particle moving in magnetic field",
+      "Magnetic field strength B given",
+      "Velocity and field directions specified",
+      "Circular or helical motion"
+    ],
+    "common_pitfalls": [
+      "Forgetting force is perpendicular to velocity (no work done)",
+      "Wrong hand rule for negative charges",
+      "Confusing magnetic force with electric force",
+      "Not recognizing when particle moves parallel to B (no force)"
+    ],
+    "related_pattern_ids": ["pattern_magnetic_force_wire", "pattern_lorentz_force"],
+    "display_order": 18,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_magnetic_force_wire",
+    "name": "Magnetic Force on Current-Carrying Wires",
+    "description": "F = IL×B. Force on wire segment in magnetic field. Basis for electric motors.",
+    "category": "electromagnetism",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Wire carrying current in magnetic field",
+      "Length of wire in field given",
+      "Force on wire or torque on loop",
+      "Motor or galvanometer context"
+    ],
+    "common_pitfalls": [
+      "Using total wire length instead of length in field",
+      "Wrong direction from right-hand rule",
+      "Forgetting force is zero when wire parallel to B",
+      "Not treating current direction as a vector"
+    ],
+    "related_pattern_ids": ["pattern_magnetic_force_charge", "pattern_biot_savart"],
+    "display_order": 19,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_biot_savart",
+    "name": "Magnetic Field from Currents",
+    "description": "Biot-Savart law for field from current element. B = μ₀I/2πr for infinite wire. B = μ₀I/2R at center of loop.",
+    "category": "electromagnetism",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Current-carrying wire or loop",
+      "Asked for magnetic field strength",
+      "Specific geometries: straight wire, loop, solenoid",
+      "μ₀ (permeability) appears"
+    ],
+    "common_pitfalls": [
+      "Using wrong formula for geometry",
+      "Forgetting field direction from right-hand rule",
+      "Wrong distance in formula",
+      "Not recognizing when to use Ampere's Law instead"
+    ],
+    "related_pattern_ids": ["pattern_magnetic_force_wire", "pattern_amperes_law"],
+    "display_order": 20,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_faraday_law",
+    "name": "Electromagnetic Induction (Faraday's Law)",
+    "description": "EMF = -dΦ/dt. Changing magnetic flux induces voltage. Lenz's law: induced current opposes change.",
+    "category": "electromagnetism",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Changing magnetic field or flux",
+      "Moving conductor in magnetic field",
+      "Coil or loop with changing area",
+      "Induced EMF or current asked"
+    ],
+    "common_pitfalls": [
+      "Forgetting the negative sign (Lenz's law)",
+      "Wrong flux calculation (Φ = BA cos θ)",
+      "Not identifying what's changing (B, A, or θ)",
+      "Confusing motional EMF with transformer EMF"
+    ],
+    "related_pattern_ids": ["pattern_magnetic_force_charge", "pattern_inductance"],
+    "display_order": 21,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_inductance",
+    "name": "Inductors and Inductance",
+    "description": "Self-inductance L, EMF = -L(dI/dt). Energy stored U = ½LI². RL circuit time constant τ = L/R.",
+    "category": "electromagnetism",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Inductor or coil in circuit",
+      "Current changing with time",
+      "Energy stored in magnetic field",
+      "RL circuit transients"
+    ],
+    "common_pitfalls": [
+      "Forgetting inductor opposes current CHANGE, not current",
+      "Wrong time constant formula (τ = L/R, not RC)",
+      "Not recognizing inductor acts like wire at steady state",
+      "Sign errors with induced EMF"
+    ],
+    "related_pattern_ids": ["pattern_faraday_law", "pattern_kirchhoff"],
+    "display_order": 22,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]

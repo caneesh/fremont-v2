@@ -15,8 +15,12 @@ export default function SurfaceRenderer({
   canvasWidth,
   canvasHeight
 }: SurfaceRendererProps) {
-  const centerX = canvasWidth / 2
-  const centerY = canvasHeight / 2
+  // Guard against invalid dimensions
+  const safeWidth = canvasWidth && !isNaN(canvasWidth) ? canvasWidth : 400
+  const safeHeight = canvasHeight && !isNaN(canvasHeight) ? canvasHeight : 300
+
+  const centerX = safeWidth / 2
+  const centerY = safeHeight / 2
 
   if (scenarioType === 'hanging') {
     // Ceiling/support for hanging objects

@@ -10,7 +10,9 @@
 import { useEffect, useCallback, useState } from 'react'
 import { usePhasedScaffold, PhasedLoadingState } from '@/hooks/usePhasedScaffold'
 import SolutionScaffold from './SolutionScaffold'
+import PrerequisiteCheck from './PrerequisiteCheck'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
+import type { PrerequisiteResult } from '@/types/prerequisites'
 
 interface PhasedScaffoldWrapperProps {
   problem: string
@@ -41,11 +43,15 @@ export default function PhasedScaffoldWrapper({
 
   const [adaptedData, setAdaptedData] = useState<MicroTaskScaffoldData | null>(null)
   const [firstStepLoaded, setFirstStepLoaded] = useState(false)
+  const [showPrerequisiteCheck, setShowPrerequisiteCheck] = useState(false)
+  const [prerequisitesPassed, setPrerequisitesPassed] = useState(false)
 
   // Load outline on mount
   useEffect(() => {
     loadOutline(problem, { density, diagramImage })
     setFirstStepLoaded(false) // Reset when problem changes
+    setShowPrerequisiteCheck(false) // Reset prerequisite check
+    setPrerequisitesPassed(false)
   }, [problem, density, diagramImage, loadOutline])
 
   // Auto-load first step expansion when outline is ready
@@ -79,6 +85,34 @@ export default function PhasedScaffoldWrapper({
       }
     }
   }, [state.loadingState, state.expandedSteps, getAdaptedScaffoldData])
+
+  // Show prerequisite check when first step is loaded and data is ready
+  useEffect(() => {
+    if (firstStepLoaded && adaptedData && !prerequisitesPassed && !showPrerequisiteCheck) {
+      setShowPrerequisiteCheck(true)
+    }
+  }, [firstStepLoaded, adaptedData, prerequisitesPassed, showPrerequisiteCheck])
+
+  // Handle prerequisite check completion
+  const handlePrerequisiteComplete = useCallback((result: PrerequisiteResult) => {
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(true)
+
+    if (!result.passed && result.weakConcepts.length > 0) {
+      // Show failure message with weak concepts
+      alert(
+        `You got ${result.correctAnswers}/${result.totalQuestions} correct.\n\n` +
+        `Weak areas: ${result.weakConcepts.join(', ')}\n\n` +
+        `Consider reviewing these concepts before attempting this problem. You can still proceed, but it might be challenging.`
+      )
+    }
+  }, [])
+
+  // Handle prerequisite skip
+  const handlePrerequisiteSkip = useCallback(() => {
+    setShowPrerequisiteCheck(false)
+    setPrerequisitesPassed(true)
+  }, [])
 
   // Notify on error
   useEffect(() => {
@@ -149,6 +183,17 @@ export default function PhasedScaffoldWrapper({
           </div>
         )}
       </div>
+    )
+  }
+
+  // Show prerequisite check before scaffold
+  if (showPrerequisiteCheck && adaptedData.concepts.length > 0) {
+    return (
+      <PrerequisiteCheck
+        concepts={adaptedData.concepts}
+        onComplete={handlePrerequisiteComplete}
+        onSkip={handlePrerequisiteSkip}
+      />
     )
   }
 

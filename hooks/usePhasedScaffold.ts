@@ -304,18 +304,29 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
 
       // Map fbd_data to diagramData for diagram steps
       let diagramData: DiagramStepData | undefined = undefined
-      if (outlineStep.requires_fbd && expansion?.fbd_data) {
-        const fbdData = expansion.fbd_data
-        diagramData = {
-          scenarioType: fbdData.scenario_type || 'horizontal',
-          objectShape: fbdData.object_shape || 'block',
-          surfaceAngle: fbdData.surface_angle,
-          requiredForces: (fbdData.required_forces || []).map(f => ({
-            type: f.type,
-            direction: normalizeForceDirection(f.direction || 'down'),
-            label: f.label,
-          })),
-          hints: expansion.hints?.map(h => h.content),
+      if (outlineStep.requires_fbd) {
+        if (expansion?.fbd_data) {
+          const fbdData = expansion.fbd_data
+          diagramData = {
+            scenarioType: fbdData.scenario_type || 'horizontal',
+            objectShape: fbdData.object_shape || 'block',
+            surfaceAngle: fbdData.surface_angle,
+            requiredForces: (fbdData.required_forces || []).map(f => ({
+              type: f.type,
+              direction: normalizeForceDirection(f.direction || 'down'),
+              label: f.label,
+            })),
+            hints: expansion.hints?.map(h => h.content),
+          }
+        } else {
+          // Provide default diagramData for FBD steps that haven't been expanded yet
+          // This prevents NaN errors in SurfaceRenderer when the step is rendered
+          diagramData = {
+            scenarioType: 'horizontal',
+            objectShape: 'block',
+            requiredForces: [],
+            hints: [],
+          }
         }
       }
 

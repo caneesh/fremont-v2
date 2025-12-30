@@ -153,7 +153,7 @@ export default function MathRenderer({
   }
 
   return (
-    <div className={`text-gray-800 dark:text-gray-100 leading-relaxed ${className}`}>
+    <div className={`text-gray-800 dark:text-slate-100 leading-relaxed ${className}`}>
       {renderText(text)}
     </div>
   )

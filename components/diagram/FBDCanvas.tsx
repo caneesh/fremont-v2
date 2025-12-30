@@ -27,6 +27,14 @@ export default function FBDCanvas({
   const canvasWidth = 400
   const canvasHeight = 300
 
+  // Debug logging
+  console.log('[FBDCanvas] scenario:', {
+    scenarioType: scenario.scenarioType,
+    objectShape: scenario.objectShape,
+    surfaceAngle: scenario.surfaceAngle,
+    requiredForces: scenario.requiredForces?.length
+  })
+
   // Calculate object position based on scenario
   const getObjectPosition = () => {
     const centerX = canvasWidth / 2
@@ -34,11 +42,43 @@ export default function FBDCanvas({
 
     switch (scenario.scenarioType) {
       case 'incline': {
-        // Position on incline surface
-        const angleRad = ((scenario.surfaceAngle ?? 30) * Math.PI) / 180
-        const offsetX = -20 * Math.cos(angleRad)
-        const offsetY = -20 * Math.sin(angleRad) - 30
-        return { x: centerX + offsetX, y: centerY + offsetY }
+        // Position block on the incline surface
+        // Match the surface calculation from SurfaceRenderer
+        const angle = scenario.surfaceAngle ?? 30
+        const angleRad = (angle * Math.PI) / 180
+        const surfaceLength = 200
+        const surfaceBase = surfaceLength * Math.cos(angleRad)
+        const surfaceHeight = surfaceLength * Math.sin(angleRad)
+
+        // Surface hypotenuse goes from (startX, startY) to (endX, endY)
+        const startX = centerX - surfaceBase / 2
+        const startY = centerY + 60
+
+        // Position block at ~40% up the incline from the bottom
+        const t = 0.4
+        const surfaceX = startX + t * surfaceBase
+        const surfaceY = startY - t * surfaceHeight
+
+        // Block is rotated to align with incline (rotation = -angle in SVG)
+        // Need to offset perpendicular to surface so block sits ON TOP of it
+        // Perpendicular direction (up from surface): (-sin(θ), -cos(θ)) in SVG coords
+        const blockHalfSize = 30
+
+        // Offset perpendicular to surface by halfSize so bottom edge touches surface
+        const offsetX = -blockHalfSize * Math.sin(angleRad)
+        const offsetY = -blockHalfSize * Math.cos(angleRad)
+
+        console.log('[FBDCanvas] incline calc:', {
+          angle,
+          surfacePoint: { x: surfaceX, y: surfaceY },
+          offset: { x: offsetX, y: offsetY },
+          blockCenter: { x: surfaceX + offsetX, y: surfaceY + offsetY }
+        })
+
+        return {
+          x: surfaceX + offsetX,
+          y: surfaceY + offsetY
+        }
       }
       case 'hanging':
         return { x: centerX, y: centerY + 20 }
@@ -47,11 +87,13 @@ export default function FBDCanvas({
       case 'rotating':
         return { x: centerX, y: centerY }
       default:
-        return { x: centerX, y: centerY }
+        // Horizontal surface - place block just above the surface
+        return { x: centerX, y: centerY + 60 - 30 }
     }
   }
 
   const objectPos = getObjectPosition()
+  console.log('[FBDCanvas] objectPos:', objectPos)
 
   // Get smart default angle based on force type and scenario
   const getDefaultAngle = useCallback((forceType: ForceType): number => {
@@ -200,12 +242,32 @@ export default function FBDCanvas({
               canvasHeight={canvasHeight}
             />
 
+            {/* Debug: show surface point (green) and block center (red) */}
+            {scenario.scenarioType === 'incline' && (() => {
+              const angle = scenario.surfaceAngle ?? 30
+              const angleRad = (angle * Math.PI) / 180
+              const surfaceLength = 200
+              const surfaceBase = surfaceLength * Math.cos(angleRad)
+              const surfaceHeight = surfaceLength * Math.sin(angleRad)
+              const startX = canvasWidth / 2 - surfaceBase / 2
+              const startY = canvasHeight / 2 + 60
+              const t = 0.4
+              const surfaceX = startX + t * surfaceBase
+              const surfaceY = startY - t * surfaceHeight
+              return (
+                <>
+                  <circle cx={surfaceX} cy={surfaceY} r={4} fill="lime" stroke="black" />
+                  <circle cx={objectPos.x} cy={objectPos.y} r={4} fill="red" stroke="black" />
+                </>
+              )
+            })()}
+
             {/* Object */}
             <ObjectRenderer
               shape={scenario.objectShape || 'block'}
               x={objectPos.x}
               y={objectPos.y}
-              rotation={scenario.scenarioType === 'incline' ? (scenario.surfaceAngle ?? 0) : 0}
+              rotation={scenario.scenarioType === 'incline' ? -(scenario.surfaceAngle ?? 0) : 0}
             />
 
             {/* Placed Forces */}

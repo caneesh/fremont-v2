@@ -53,17 +53,17 @@ export default function ConceptPanel({ concepts }: ConceptPanelProps) {
             </button>
 
             {expandedConcept === concept.id && (
-              <div className="px-4 py-3 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border">
-                <div className="text-sm text-gray-700 dark:text-dark-text-secondary mb-3">
+              <div className="px-4 py-3 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-600">
+                <div className="text-sm text-gray-700 dark:text-slate-200 mb-3">
                   <MathRenderer text={concept.definition} />
                 </div>
 
                 {concept.formula && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-700">
                     <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-2">
                       Formula:
                     </p>
-                    <div className="text-gray-900 dark:text-dark-text-primary">
+                    <div className="text-gray-900 dark:text-slate-100">
                       <MathRenderer text={concept.formula} />
                     </div>
                   </div>

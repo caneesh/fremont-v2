@@ -1,0 +1,426 @@
+[
+  {
+    "id": "q_em_001",
+    "problem_text": "Two point charges of +3 μC and +6 μC are separated by 30 cm. What is the magnitude of the electrostatic force between them? (Use k = 9 × 10⁹ N·m²/C²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_coulombs_law", "relevance": "primary", "application_notes": "Direct application of Coulomb's law" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "What is the formula for the electrostatic force between two point charges?", "pattern_id": "pattern_coulombs_law" },
+      { "order": 2, "text": "Convert all units: μC to C, cm to m." },
+      { "order": 3, "text": "F = kq₁q₂/r²" }
+    ],
+    "answer": { "type": "numeric", "value": 1.8, "unit": "N", "tolerance": 0.1 },
+    "solution_explanation": "Using Coulomb's law: F = kq₁q₂/r² = (9×10⁹)(3×10⁻⁶)(6×10⁻⁶)/(0.3)² = (9×10⁹)(18×10⁻¹²)/0.09 = 162×10⁻³/0.09 = 1.8 N.",
+    "tags": ["coulombs_law", "basic", "point_charges"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_002",
+    "problem_text": "A point charge of +4 nC creates an electric field. What is the magnitude of the electric field at a distance of 2 m from the charge? (Use k = 9 × 10⁹ N·m²/C²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_electric_field", "relevance": "primary", "application_notes": "Electric field from point charge" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "What is the formula for the electric field from a point charge?", "pattern_id": "pattern_electric_field" },
+      { "order": 2, "text": "E = kq/r²" },
+      { "order": 3, "text": "Convert nC to C: 1 nC = 10⁻⁹ C." }
+    ],
+    "answer": { "type": "numeric", "value": 9, "unit": "N/C", "tolerance": 0.5 },
+    "solution_explanation": "Electric field from a point charge: E = kq/r² = (9×10⁹)(4×10⁻⁹)/(2)² = 36/4 = 9 N/C.",
+    "tags": ["electric_field", "point_charge", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_003",
+    "problem_text": "Two charges, +2 μC at x = 0 and -2 μC at x = 4 m, are placed on the x-axis. What is the net electric field at x = 2 m? (Use k = 9 × 10⁹ N·m²/C²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_superposition_e", "relevance": "primary", "application_notes": "Vector addition of electric fields" },
+      { "pattern_id": "pattern_electric_field", "relevance": "secondary", "application_notes": "Calculate field from each charge" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "Calculate the electric field from each charge at x = 2 m.", "pattern_id": "pattern_electric_field" },
+      { "order": 2, "text": "Determine the direction of each field at the point of interest.", "pattern_id": "pattern_superposition_e" },
+      { "order": 3, "text": "Both fields point in the +x direction (away from + charge, toward - charge)." }
+    ],
+    "answer": { "type": "numeric", "value": 18000, "unit": "N/C", "tolerance": 500 },
+    "solution_explanation": "E from +2μC: E₁ = kq/r² = (9×10⁹)(2×10⁻⁶)/(2)² = 4500 N/C in +x direction. E from -2μC: E₂ = kq/r² = (9×10⁹)(2×10⁻⁶)/(2)² = 4500 N/C in +x direction (toward negative charge). Total: E = 4500 + 4500 = 9000 N/C. Wait, let me recalculate... Actually, the point is equidistant from both charges. E₁ points away from + charge (in +x), E₂ points toward - charge (also in +x). E_total = 2 × 9000 = 18000 N/C in +x direction.",
+    "tags": ["superposition", "electric_field", "vector_addition"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_004",
+    "problem_text": "A uniform electric field E = 500 N/C exists between two large parallel plates. What is the electric flux through a rectangular area of 0.02 m² oriented perpendicular to the field?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_gauss_law", "relevance": "primary", "application_notes": "Electric flux calculation" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "What is the formula for electric flux?", "pattern_id": "pattern_gauss_law" },
+      { "order": 2, "text": "Φ = E · A = EA cos θ, where θ is the angle between E and the area normal." },
+      { "order": 3, "text": "For perpendicular orientation, θ = 0°, so cos θ = 1." }
+    ],
+    "answer": { "type": "numeric", "value": 10, "unit": "N·m²/C", "tolerance": 0.5 },
+    "solution_explanation": "Electric flux Φ = EA cos θ = (500)(0.02)(1) = 10 N·m²/C (or 10 V·m).",
+    "tags": ["electric_flux", "gauss_law", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_005",
+    "problem_text": "A charge of +5 μC is moved from a point where the electric potential is 100 V to a point where it is 300 V. What is the change in potential energy of the charge?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_electric_potential", "relevance": "primary", "application_notes": "Potential energy change from potential difference" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "How is potential energy related to electric potential?", "pattern_id": "pattern_electric_potential" },
+      { "order": 2, "text": "ΔU = qΔV" },
+      { "order": 3, "text": "ΔV = V_final - V_initial = 300 - 100 = 200 V" }
+    ],
+    "answer": { "type": "numeric", "value": 0.001, "unit": "J", "tolerance": 0.0001 },
+    "solution_explanation": "Change in potential energy: ΔU = qΔV = (5×10⁻⁶)(300-100) = (5×10⁻⁶)(200) = 1×10⁻³ J = 0.001 J = 1 mJ.",
+    "tags": ["electric_potential", "potential_energy", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_006",
+    "problem_text": "A parallel-plate capacitor has plates of area 0.01 m² separated by 0.001 m. What is its capacitance? (Use ε₀ = 8.85 × 10⁻¹² F/m)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_capacitors", "relevance": "primary", "application_notes": "Parallel-plate capacitor formula" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "capacitors",
+    "hints": [
+      { "order": 1, "text": "What is the formula for parallel-plate capacitance?", "pattern_id": "pattern_capacitors" },
+      { "order": 2, "text": "C = ε₀A/d" },
+      { "order": 3, "text": "Make sure to use consistent units." }
+    ],
+    "answer": { "type": "numeric", "value": 88.5, "unit": "pF", "tolerance": 5 },
+    "solution_explanation": "Capacitance C = ε₀A/d = (8.85×10⁻¹²)(0.01)/(0.001) = 8.85×10⁻¹¹ F = 88.5 pF.",
+    "tags": ["capacitors", "parallel_plate", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_007",
+    "problem_text": "A 12 V battery is connected to a 4 Ω resistor. What current flows through the resistor?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_ohms_law", "relevance": "primary", "application_notes": "Direct application of Ohm's law" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "circuits",
+    "hints": [
+      { "order": 1, "text": "What is Ohm's law?", "pattern_id": "pattern_ohms_law" },
+      { "order": 2, "text": "V = IR, so I = V/R" }
+    ],
+    "answer": { "type": "numeric", "value": 3, "unit": "A", "tolerance": 0.1 },
+    "solution_explanation": "Using Ohm's law: I = V/R = 12/4 = 3 A.",
+    "tags": ["ohms_law", "basic", "circuits"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_008",
+    "problem_text": "In a circuit, three resistors (R₁ = 2Ω, R₂ = 3Ω, R₃ = 6Ω) are connected in parallel. What is the equivalent resistance?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_ohms_law", "relevance": "primary", "application_notes": "Parallel resistance combination" },
+      { "pattern_id": "pattern_kirchhoff", "relevance": "secondary", "application_notes": "Same voltage across parallel elements" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "circuits",
+    "hints": [
+      { "order": 1, "text": "For parallel resistors, what is the formula for equivalent resistance?", "pattern_id": "pattern_ohms_law" },
+      { "order": 2, "text": "1/R_eq = 1/R₁ + 1/R₂ + 1/R₃" },
+      { "order": 3, "text": "Find a common denominator or add the fractions." }
+    ],
+    "answer": { "type": "numeric", "value": 1, "unit": "Ω", "tolerance": 0.05 },
+    "solution_explanation": "For parallel resistors: 1/R_eq = 1/2 + 1/3 + 1/6 = 3/6 + 2/6 + 1/6 = 6/6 = 1. So R_eq = 1 Ω.",
+    "tags": ["parallel_resistors", "equivalent_resistance", "circuits"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_009",
+    "problem_text": "In the circuit shown, a 24 V battery is connected to two resistors: R₁ = 4Ω and R₂ = 8Ω in series. What is the current through the circuit?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_kirchhoff", "relevance": "primary", "application_notes": "Series circuit - same current throughout" },
+      { "pattern_id": "pattern_ohms_law", "relevance": "primary", "application_notes": "Apply to total resistance" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "circuits",
+    "hints": [
+      { "order": 1, "text": "What is the total resistance in a series circuit?", "pattern_id": "pattern_kirchhoff" },
+      { "order": 2, "text": "R_total = R₁ + R₂ for series connection." },
+      { "order": 3, "text": "Then apply Ohm's law: I = V/R_total.", "pattern_id": "pattern_ohms_law" }
+    ],
+    "answer": { "type": "numeric", "value": 2, "unit": "A", "tolerance": 0.1 },
+    "solution_explanation": "Total resistance R_total = R₁ + R₂ = 4 + 8 = 12 Ω. Current I = V/R_total = 24/12 = 2 A.",
+    "tags": ["series_circuit", "kirchhoff", "ohms_law"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_010",
+    "problem_text": "An electron (q = -1.6×10⁻¹⁹ C, m = 9.11×10⁻³¹ kg) enters a uniform magnetic field of 0.5 T perpendicular to its velocity of 2×10⁶ m/s. What is the magnitude of the magnetic force on the electron?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_magnetic_force_charge", "relevance": "primary", "application_notes": "Lorentz force on moving charge" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "magnetism",
+    "hints": [
+      { "order": 1, "text": "What is the formula for magnetic force on a moving charge?", "pattern_id": "pattern_magnetic_force_charge" },
+      { "order": 2, "text": "F = qvB sin θ, where θ is the angle between v and B." },
+      { "order": 3, "text": "Since v is perpendicular to B, sin θ = 1." }
+    ],
+    "answer": { "type": "numeric", "value": 1.6e-13, "unit": "N", "tolerance": 1e-14 },
+    "solution_explanation": "Magnetic force F = |q|vB sin θ = (1.6×10⁻¹⁹)(2×10⁶)(0.5)(1) = 1.6×10⁻¹³ N.",
+    "tags": ["magnetic_force", "moving_charge", "lorentz_force"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_011",
+    "problem_text": "A proton moves in a circular path of radius 0.2 m in a magnetic field of 0.1 T. What is the speed of the proton? (m_p = 1.67×10⁻²⁷ kg, q = 1.6×10⁻¹⁹ C)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_magnetic_force_charge", "relevance": "primary", "application_notes": "Magnetic force provides centripetal force" },
+      { "pattern_id": "pattern_circular_motion", "relevance": "secondary", "application_notes": "Circular motion in magnetic field" }
+    ],
+    "difficulty": 3,
+    "category": "electromagnetism",
+    "subcategory": "magnetism",
+    "hints": [
+      { "order": 1, "text": "What force keeps the proton in circular motion?", "pattern_id": "pattern_magnetic_force_charge" },
+      { "order": 2, "text": "Set magnetic force equal to centripetal force: qvB = mv²/r." },
+      { "order": 3, "text": "Solve for v: v = qBr/m." }
+    ],
+    "answer": { "type": "numeric", "value": 1.92e6, "unit": "m/s", "tolerance": 1e5 },
+    "solution_explanation": "Magnetic force provides centripetal force: qvB = mv²/r. Solving for v: v = qBr/m = (1.6×10⁻¹⁹)(0.1)(0.2)/(1.67×10⁻²⁷) = 3.2×10⁻²¹/1.67×10⁻²⁷ = 1.92×10⁶ m/s.",
+    "tags": ["magnetic_force", "circular_motion", "particle_physics"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_012",
+    "problem_text": "A straight wire carrying a current of 5 A is placed in a uniform magnetic field of 0.3 T. If 0.4 m of the wire is in the field and oriented perpendicular to it, what is the magnitude of the force on the wire?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_magnetic_force_wire", "relevance": "primary", "application_notes": "Force on current-carrying wire" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "magnetism",
+    "hints": [
+      { "order": 1, "text": "What is the formula for force on a current-carrying wire in a magnetic field?", "pattern_id": "pattern_magnetic_force_wire" },
+      { "order": 2, "text": "F = BIL sin θ" },
+      { "order": 3, "text": "Since the wire is perpendicular to B, sin θ = 1." }
+    ],
+    "answer": { "type": "numeric", "value": 0.6, "unit": "N", "tolerance": 0.05 },
+    "solution_explanation": "Force on wire: F = BIL sin θ = (0.3)(5)(0.4)(1) = 0.6 N.",
+    "tags": ["magnetic_force", "current_wire", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_013",
+    "problem_text": "A long straight wire carries a current of 10 A. What is the magnitude of the magnetic field at a distance of 0.05 m from the wire? (Use μ₀ = 4π×10⁻⁷ T·m/A)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_biot_savart", "relevance": "primary", "application_notes": "Magnetic field from long straight wire" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "magnetism",
+    "hints": [
+      { "order": 1, "text": "What is the formula for the magnetic field around a long straight wire?", "pattern_id": "pattern_biot_savart" },
+      { "order": 2, "text": "B = μ₀I/(2πr)" },
+      { "order": 3, "text": "This is a result from applying the Biot-Savart law or Ampere's law." }
+    ],
+    "answer": { "type": "numeric", "value": 4e-5, "unit": "T", "tolerance": 2e-6 },
+    "solution_explanation": "Magnetic field from long wire: B = μ₀I/(2πr) = (4π×10⁻⁷)(10)/(2π×0.05) = (4×10⁻⁶)/(0.1) = 4×10⁻⁵ T = 40 μT.",
+    "tags": ["biot_savart", "magnetic_field", "wire"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_014",
+    "problem_text": "A circular loop of wire has 50 turns and radius 0.1 m. If the magnetic field through the loop changes from 0.2 T to 0.8 T in 0.02 s, what is the magnitude of the induced EMF?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_faraday_law", "relevance": "primary", "application_notes": "Faraday's law of electromagnetic induction" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "induction",
+    "hints": [
+      { "order": 1, "text": "What is Faraday's law of induction?", "pattern_id": "pattern_faraday_law" },
+      { "order": 2, "text": "EMF = -N × dΦ/dt = -N × A × dB/dt" },
+      { "order": 3, "text": "Calculate the area A = πr² first." }
+    ],
+    "answer": { "type": "numeric", "value": 47.1, "unit": "V", "tolerance": 2 },
+    "solution_explanation": "Area A = πr² = π(0.1)² = 0.0314 m². Change in flux: ΔΦ = AΔB = 0.0314 × (0.8-0.2) = 0.0314 × 0.6 = 0.01885 Wb. EMF = N × ΔΦ/Δt = 50 × 0.01885/0.02 = 50 × 0.942 = 47.1 V.",
+    "tags": ["faraday_law", "induction", "coil"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_015",
+    "problem_text": "An inductor with inductance L = 0.5 H carries a current that changes at a rate of 4 A/s. What is the magnitude of the induced EMF across the inductor?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_inductance", "relevance": "primary", "application_notes": "Self-inductance and induced EMF" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "induction",
+    "hints": [
+      { "order": 1, "text": "What is the relationship between inductance and induced EMF?", "pattern_id": "pattern_inductance" },
+      { "order": 2, "text": "EMF = -L × dI/dt" },
+      { "order": 3, "text": "The magnitude is L × |dI/dt|." }
+    ],
+    "answer": { "type": "numeric", "value": 2, "unit": "V", "tolerance": 0.1 },
+    "solution_explanation": "Induced EMF in inductor: |EMF| = L × |dI/dt| = 0.5 × 4 = 2 V.",
+    "tags": ["inductance", "self_induction", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_016",
+    "problem_text": "Two capacitors, C₁ = 3 μF and C₂ = 6 μF, are connected in series to a 12 V battery. What is the charge on each capacitor?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_capacitors", "relevance": "primary", "application_notes": "Series capacitor combination" }
+    ],
+    "difficulty": 2,
+    "category": "electromagnetism",
+    "subcategory": "capacitors",
+    "hints": [
+      { "order": 1, "text": "For capacitors in series, what is the equivalent capacitance?", "pattern_id": "pattern_capacitors" },
+      { "order": 2, "text": "1/C_eq = 1/C₁ + 1/C₂" },
+      { "order": 3, "text": "In series, each capacitor has the same charge: Q = C_eq × V." }
+    ],
+    "answer": { "type": "numeric", "value": 24, "unit": "μC", "tolerance": 1 },
+    "solution_explanation": "Equivalent capacitance: 1/C_eq = 1/3 + 1/6 = 2/6 + 1/6 = 3/6 = 1/2, so C_eq = 2 μF. Charge: Q = C_eq × V = 2 × 12 = 24 μC. In series, both capacitors have the same charge.",
+    "tags": ["capacitors", "series", "charge"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_017",
+    "problem_text": "A junction in a circuit has three wires connected to it. If currents of 3 A and 5 A flow into the junction, what current must flow out?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_kirchhoff", "relevance": "primary", "application_notes": "Kirchhoff's current law (junction rule)" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "circuits",
+    "hints": [
+      { "order": 1, "text": "What does Kirchhoff's current law state?", "pattern_id": "pattern_kirchhoff" },
+      { "order": 2, "text": "Sum of currents into a junction = sum of currents out." },
+      { "order": 3, "text": "Conservation of charge requires I_in = I_out." }
+    ],
+    "answer": { "type": "numeric", "value": 8, "unit": "A", "tolerance": 0.1 },
+    "solution_explanation": "By Kirchhoff's current law: currents in = currents out. 3 A + 5 A = I_out. So I_out = 8 A.",
+    "tags": ["kirchhoff", "current_law", "junction"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_018",
+    "problem_text": "An electron is accelerated from rest through a potential difference of 100 V. What is its final kinetic energy in electron-volts (eV)?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_electric_potential", "relevance": "primary", "application_notes": "Work done by electric field on charge" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "electrostatics",
+    "hints": [
+      { "order": 1, "text": "How much work is done on a charge moving through a potential difference?", "pattern_id": "pattern_electric_potential" },
+      { "order": 2, "text": "W = qΔV, and this work becomes kinetic energy." },
+      { "order": 3, "text": "1 eV is the energy an electron gains through 1 V potential difference." }
+    ],
+    "answer": { "type": "numeric", "value": 100, "unit": "eV", "tolerance": 1 },
+    "solution_explanation": "Work done = qΔV = (1e)(100 V) = 100 eV. This equals the final kinetic energy since the electron started from rest.",
+    "tags": ["electric_potential", "electron_volt", "acceleration"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_019",
+    "problem_text": "A rectangular loop of wire (0.2 m × 0.1 m) is rotated in a uniform magnetic field of 0.5 T. What is the maximum magnetic flux through the loop?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_faraday_law", "relevance": "primary", "application_notes": "Magnetic flux through a loop" }
+    ],
+    "difficulty": 1,
+    "category": "electromagnetism",
+    "subcategory": "induction",
+    "hints": [
+      { "order": 1, "text": "What is the formula for magnetic flux?", "pattern_id": "pattern_faraday_law" },
+      { "order": 2, "text": "Φ = BA cos θ, where θ is the angle between B and the area normal." },
+      { "order": 3, "text": "Maximum flux occurs when the loop is perpendicular to B (θ = 0°)." }
+    ],
+    "answer": { "type": "numeric", "value": 0.01, "unit": "Wb", "tolerance": 0.001 },
+    "solution_explanation": "Area A = 0.2 × 0.1 = 0.02 m². Maximum flux occurs when cos θ = 1: Φ_max = BA = (0.5)(0.02) = 0.01 Wb.",
+    "tags": ["magnetic_flux", "faraday_law", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_em_020",
+    "problem_text": "A solenoid has 1000 turns, length 0.5 m, and radius 0.02 m. What is its inductance? (Use μ₀ = 4π×10⁻⁷ H/m)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_inductance", "relevance": "primary", "application_notes": "Inductance of a solenoid" },
+      { "pattern_id": "pattern_biot_savart", "relevance": "secondary", "application_notes": "Magnetic field inside solenoid" }
+    ],
+    "difficulty": 3,
+    "category": "electromagnetism",
+    "subcategory": "induction",
+    "hints": [
+      { "order": 1, "text": "What is the formula for the inductance of a solenoid?", "pattern_id": "pattern_inductance" },
+      { "order": 2, "text": "L = μ₀n²Al = μ₀N²A/l, where n = N/l is turns per unit length." },
+      { "order": 3, "text": "Calculate cross-sectional area A = πr²." }
+    ],
+    "answer": { "type": "numeric", "value": 3.16e-3, "unit": "H", "tolerance": 2e-4 },
+    "solution_explanation": "Area A = πr² = π(0.02)² = 1.257×10⁻³ m². Inductance L = μ₀N²A/l = (4π×10⁻⁷)(1000)²(1.257×10⁻³)/(0.5) = (1.257×10⁻⁶)(10⁶)(1.257×10⁻³)/(0.5) = 3.16×10⁻³ H = 3.16 mH.",
+    "tags": ["inductance", "solenoid", "advanced"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]
