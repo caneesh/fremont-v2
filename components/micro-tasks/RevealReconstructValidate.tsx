@@ -71,7 +71,8 @@ export default function RevealReconstructValidate({
       )
     } else {
       const fbTask = task as FillBlankTask
-      const allOptions = [fbTask.correctTerm, ...fbTask.distractors].sort()
+      const distractors = Array.isArray(fbTask.distractors) ? fbTask.distractors : []
+      const allOptions = [fbTask.correctTerm, ...distractors].sort()
       return generateReconstructFromTask(
         `${task.level}`,
         'FILL_BLANK',
