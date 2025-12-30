@@ -125,10 +125,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     const currentStepData = data.steps[currentStep] as MicroTaskStep & {
       _needsExpansion?: boolean
       _outlineStepId?: string
+      _isLoading?: boolean
     }
 
     // Check if this step needs expansion (has _needsExpansion flag and _outlineStepId)
-    if (currentStepData?._needsExpansion && currentStepData._outlineStepId) {
+    // Don't trigger if already loading this step
+    if (currentStepData?._needsExpansion &&
+        currentStepData._outlineStepId &&
+        !currentStepData._isLoading &&
+        !phasedScaffoldContext.isLoadingStep) {
       console.log('[SolutionScaffold] Loading step expansion for:', currentStepData._outlineStepId)
       phasedScaffoldContext.loadStepExpansion(currentStepData._outlineStepId)
     }
