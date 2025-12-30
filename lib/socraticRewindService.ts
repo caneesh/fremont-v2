@@ -229,24 +229,33 @@ export function buildContextFromGradeResult(
   let violatedPrincipleName = 'Physics Principle'
   let violatedPrincipleDescription = 'Review the underlying physics concept.'
 
-  if (gradeResult.detailedAnalysis?.errors) {
+  if (gradeResult.detailedAnalysis?.errors && gradeResult.detailedAnalysis.errors.length > 0) {
     const errors = gradeResult.detailedAnalysis.errors
-    if (errors.signErrors && errors.signErrors.length > 0) {
+    // Find first error by priority: sign > algebra > concept > approach
+    const signError = errors.find(e => e.type === 'sign')
+    const algebraError = errors.find(e => e.type === 'algebra')
+    const conceptError = errors.find(e => e.type === 'concept')
+    const approachError = errors.find(e => e.type === 'approach')
+
+    if (signError) {
       errorType = 'sign_convention'
       violatedPrincipleName = 'Sign Convention'
-      violatedPrincipleDescription = errors.signErrors[0]
-    } else if (errors.algebraErrors && errors.algebraErrors.length > 0) {
+      violatedPrincipleDescription = signError.description
+    } else if (algebraError) {
       errorType = 'algebra_error'
       violatedPrincipleName = 'Algebraic Manipulation'
-      violatedPrincipleDescription = errors.algebraErrors[0]
-    } else if (errors.physicsErrors && errors.physicsErrors.length > 0) {
+      violatedPrincipleDescription = algebraError.description
+    } else if (conceptError) {
       errorType = 'conceptual_gap'
       violatedPrincipleName = 'Physics Principle'
-      violatedPrincipleDescription = errors.physicsErrors[0]
-    } else if (errors.conceptualGaps && errors.conceptualGaps.length > 0) {
+      violatedPrincipleDescription = conceptError.description
+    } else if (approachError) {
       errorType = 'conceptual_gap'
       violatedPrincipleName = 'Conceptual Understanding'
-      violatedPrincipleDescription = errors.conceptualGaps[0]
+      violatedPrincipleDescription = approachError.description
+    } else {
+      // Fallback to first error
+      violatedPrincipleDescription = errors[0].description
     }
   }
 
