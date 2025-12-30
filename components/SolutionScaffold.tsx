@@ -86,6 +86,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const problemStatementRef = useRef<HTMLParagraphElement>(null)
 
+  // Pre-Flight Check state
+  const [showPreFlightCheck, setShowPreFlightCheck] = useState(false)
+  const [currentPreFlightCheck, setCurrentPreFlightCheck] = useState<PreFlightCheck | null>(null)
+  const [passedPreFlightChecks, setPassedPreFlightChecks] = useState<Set<string>>(new Set())
+
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
   const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
@@ -717,6 +722,42 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setShowCelebration(true)
   }, [])
 
+  // Pre-Flight Check handlers
+  const handlePreFlightComplete = useCallback((passed: boolean, validation: PreFlightValidation) => {
+    if (passed && currentPreFlightCheck) {
+      setPassedPreFlightChecks(prev => new Set([...prev, currentPreFlightCheck.id]))
+    }
+    setShowPreFlightCheck(false)
+    setCurrentPreFlightCheck(null)
+  }, [currentPreFlightCheck])
+
+  const handlePreFlightSkip = useCallback(() => {
+    setShowPreFlightCheck(false)
+    setCurrentPreFlightCheck(null)
+  }, [])
+
+  // Check for pre-flight requirement when activating a step
+  const checkPreFlightRequirement = useCallback((stepIndex: number): boolean => {
+    // Only check for hint-based scaffolds that have preFlightChecks
+    if (!isHintScaffold(data)) return true
+
+    const scaffoldData = data as ScaffoldData
+    if (!scaffoldData.preFlightChecks?.length) return true
+
+    const step = scaffoldData.steps[stepIndex]
+    const preFlightCheck = scaffoldData.preFlightChecks.find(
+      check => check.targetStepId === step.id && !passedPreFlightChecks.has(check.id)
+    )
+
+    if (preFlightCheck) {
+      setCurrentPreFlightCheck(preFlightCheck)
+      setShowPreFlightCheck(true)
+      return false // Block step activation
+    }
+
+    return true // Allow step activation
+  }, [data, passedPreFlightChecks])
+
   // Handle solution grade complete
   const handleGradeComplete = useCallback((result: GradeSolutionResponse) => {
     setSolutionGradeResult(result)
@@ -939,7 +980,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       subdomain={data.subdomain}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
-                      onActivate={() => setCurrentStep(index)}
+                      onActivate={() => {
+                        if (checkPreFlightRequirement(index)) {
+                          setCurrentStep(index)
+                        }
+                      }}
                       onHintLevelChange={(level) => handleHintLevelChange(index, level)}
                     />
                   )}
@@ -1156,6 +1201,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             </div>
           </div>
         </div>
+      )}
+
+      {/* Pre-Flight Check Modal */}
+      {showPreFlightCheck && currentPreFlightCheck && (
+        <PreFlightCheckModal
+          check={currentPreFlightCheck}
+          problemText={data.problem}
+          onComplete={handlePreFlightComplete}
+          onSkip={handlePreFlightSkip}
+          onClose={() => setShowPreFlightCheck(false)}
+        />
       )}
     </div>
   )

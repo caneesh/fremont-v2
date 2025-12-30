@@ -16,10 +16,22 @@ vi.mock('../MathRenderer', () => ({
 }))
 
 vi.mock('../ConstraintFeedback', () => ({
-  default: ({ collisions, dialogue }: { collisions: ConstraintCollision[], dialogue?: SocraticDialogue }) => (
+  default: ({ collisions, dialogue, onHighlightProblem }: {
+    collisions: ConstraintCollision[],
+    dialogue?: SocraticDialogue,
+    onHighlightProblem?: (start: number, end: number) => void
+  }) => (
     <div data-testid="constraint-feedback">
       <span data-testid="collision-count">{collisions.length} collision(s)</span>
       {dialogue && <span data-testid="dialogue-question">{dialogue.question}</span>}
+      {onHighlightProblem && (
+        <button
+          data-testid="highlight-trigger"
+          onClick={() => onHighlightProblem(25, 38)}
+        >
+          Highlight
+        </button>
+      )}
     </div>
   ),
 }))
@@ -399,6 +411,34 @@ describe('SubmissionCanvas - ConstraintFeedback Integration', () => {
       expect(callArg.constraintCollisions).toHaveLength(1)
       expect(callArg.constraintDialogue).toBeDefined()
       expect(callArg.constraintDialogue.question).toBe('What forces act on the block on the incline?')
+    })
+
+    it('passes onHighlightProblem callback to ConstraintFeedback', async () => {
+      const onHighlightProblem = vi.fn()
+
+      mockAuthenticatedFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockGradeResultWithCollisions),
+      })
+
+      render(<SubmissionCanvas {...defaultProps} onHighlightProblem={onHighlightProblem} />)
+
+      const textarea = screen.getByPlaceholderText(/Enter your solution here/i)
+      fireEvent.change(textarea, { target: { value: 'a = g sin θ' } })
+
+      const submitButton = screen.getByRole('button', { name: /Grade My Solution/i })
+      fireEvent.click(submitButton)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('constraint-feedback')).toBeInTheDocument()
+      })
+
+      // Click the highlight trigger button (from our mock)
+      const highlightButton = screen.getByTestId('highlight-trigger')
+      fireEvent.click(highlightButton)
+
+      // Verify the callback was called with the expected indices
+      expect(onHighlightProblem).toHaveBeenCalledWith(25, 38)
     })
   })
 
