@@ -780,5 +780,281 @@
     "display_order": 33,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_wave_properties",
+    "name": "Wave Properties and Wave Equation",
+    "description": "v = fλ relates wave speed, frequency, and wavelength. Period T = 1/f. Wave carries energy without transporting matter.",
+    "category": "waves_optics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Wavelength, frequency, or period given",
+      "Wave speed asked or given",
+      "Oscillation or periodic motion",
+      "Wave traveling through a medium"
+    ],
+    "common_pitfalls": [
+      "Confusing wave speed with particle speed",
+      "Using wrong units (Hz vs rad/s)",
+      "Forgetting wave speed depends on medium, not frequency",
+      "Confusing transverse and longitudinal waves"
+    ],
+    "related_pattern_ids": ["pattern_standing_waves", "pattern_sound_waves"],
+    "display_order": 34,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_wave_interference",
+    "name": "Wave Interference and Superposition",
+    "description": "Waves add algebraically. Constructive interference when in phase (path difference = nλ). Destructive when out of phase (path difference = (n+½)λ).",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Two or more waves meeting",
+      "Path difference mentioned",
+      "Bright/dark fringes or loud/quiet regions",
+      "Phase difference given"
+    ],
+    "common_pitfalls": [
+      "Forgetting path difference vs phase difference conversion",
+      "Wrong condition for constructive vs destructive",
+      "Not recognizing when waves cancel completely",
+      "Ignoring phase changes on reflection"
+    ],
+    "related_pattern_ids": ["pattern_double_slit", "pattern_standing_waves"],
+    "display_order": 35,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_standing_waves",
+    "name": "Standing Waves and Resonance",
+    "description": "Standing waves form from interference of traveling waves. Nodes (zero amplitude) and antinodes (maximum amplitude). Resonant frequencies depend on boundary conditions.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "String fixed at ends",
+      "Pipe open or closed",
+      "Harmonics or overtones mentioned",
+      "Resonance or natural frequency"
+    ],
+    "common_pitfalls": [
+      "Wrong boundary conditions (node vs antinode at ends)",
+      "Confusing open vs closed pipe formulas",
+      "Forgetting closed pipe has only odd harmonics",
+      "Using wrong formula for string (f_n = nv/2L)"
+    ],
+    "related_pattern_ids": ["pattern_wave_properties", "pattern_sound_waves"],
+    "display_order": 36,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_sound_waves",
+    "name": "Sound Waves and Doppler Effect",
+    "description": "Sound is longitudinal wave. Intensity I = P/A, decibels β = 10 log(I/I₀). Doppler effect: frequency shifts when source or observer moves.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Sound source moving or observer moving",
+      "Frequency heard different from emitted",
+      "Sound intensity or decibel level",
+      "Speed of sound given"
+    ],
+    "common_pitfalls": [
+      "Wrong signs in Doppler formula (toward = higher frequency)",
+      "Confusing intensity with loudness",
+      "Forgetting decibel scale is logarithmic",
+      "Using wrong reference intensity I₀"
+    ],
+    "related_pattern_ids": ["pattern_wave_properties", "pattern_standing_waves"],
+    "display_order": 37,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_reflection_refraction",
+    "name": "Reflection and Refraction (Snell's Law)",
+    "description": "Law of reflection: θ_i = θ_r. Snell's law: n₁sin(θ₁) = n₂sin(θ₂). Light bends toward normal when entering denser medium.",
+    "category": "waves_optics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Light crossing boundary between media",
+      "Index of refraction given",
+      "Angle of incidence or refraction asked",
+      "Light bending at interface"
+    ],
+    "common_pitfalls": [
+      "Measuring angles from surface instead of normal",
+      "Forgetting which way light bends (toward/away from normal)",
+      "Not recognizing when total internal reflection occurs",
+      "Confusing n = c/v relationship"
+    ],
+    "related_pattern_ids": ["pattern_total_internal_reflection", "pattern_lenses"],
+    "display_order": 38,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_total_internal_reflection",
+    "name": "Total Internal Reflection",
+    "description": "Occurs when light goes from denser to less dense medium at angle greater than critical angle. sin(θ_c) = n₂/n₁. Basis for fiber optics.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Light traveling from high to low index medium",
+      "Critical angle mentioned or asked",
+      "Fiber optic or prism context",
+      "No refracted ray"
+    ],
+    "common_pitfalls": [
+      "Trying to apply TIR when going to denser medium",
+      "Wrong ratio in critical angle formula",
+      "Forgetting TIR only occurs above critical angle",
+      "Not checking if angle exceeds critical angle"
+    ],
+    "related_pattern_ids": ["pattern_reflection_refraction"],
+    "display_order": 39,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_mirrors",
+    "name": "Mirrors (Plane, Concave, Convex)",
+    "description": "Mirror equation: 1/f = 1/d_o + 1/d_i. Magnification m = -d_i/d_o = h_i/h_o. Sign conventions for real/virtual images.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Curved mirror (concave or convex)",
+      "Focal length or radius of curvature given",
+      "Object distance and image location",
+      "Magnification or image size asked"
+    ],
+    "common_pitfalls": [
+      "Wrong sign convention (real positive, virtual negative)",
+      "Confusing f and R (f = R/2 for mirrors)",
+      "Forgetting convex mirrors always form virtual images",
+      "Not recognizing image characteristics from sign of m"
+    ],
+    "related_pattern_ids": ["pattern_lenses", "pattern_reflection_refraction"],
+    "display_order": 40,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_lenses",
+    "name": "Thin Lenses",
+    "description": "Thin lens equation: 1/f = 1/d_o + 1/d_i. Converging lens f > 0, diverging lens f < 0. Magnification m = -d_i/d_o.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Converging or diverging lens",
+      "Focal length given or asked",
+      "Object and image distances",
+      "Real vs virtual image formation"
+    ],
+    "common_pitfalls": [
+      "Wrong sign for diverging lens focal length",
+      "Confusing converging with diverging lens behavior",
+      "Not applying sign conventions consistently",
+      "Forgetting lensmaker's equation for lens in medium"
+    ],
+    "related_pattern_ids": ["pattern_mirrors", "pattern_reflection_refraction"],
+    "display_order": 41,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_double_slit",
+    "name": "Double-Slit Interference",
+    "description": "Young's double slit: bright fringes at d sin(θ) = mλ, dark at d sin(θ) = (m+½)λ. Fringe spacing Δy = λL/d.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Two slits or sources",
+      "Interference pattern on screen",
+      "Slit separation d given",
+      "Bright/dark fringe positions asked"
+    ],
+    "common_pitfalls": [
+      "Confusing single-slit and double-slit formulas",
+      "Wrong condition for maxima vs minima",
+      "Forgetting small angle approximation (sin θ ≈ tan θ ≈ y/L)",
+      "Not recognizing central maximum is m = 0"
+    ],
+    "related_pattern_ids": ["pattern_wave_interference", "pattern_single_slit"],
+    "display_order": 42,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_single_slit",
+    "name": "Single-Slit Diffraction",
+    "description": "Single slit minima at a sin(θ) = mλ (m = ±1, ±2, ...). Central maximum is twice as wide as other maxima.",
+    "category": "waves_optics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Single slit width given",
+      "Diffraction pattern",
+      "Dark bands or minima positions",
+      "Central bright fringe width"
+    ],
+    "common_pitfalls": [
+      "Using double-slit formula for single slit",
+      "Forgetting m = 0 is NOT a minimum",
+      "Confusing slit width a with slit separation d",
+      "Not recognizing diffraction envelope in double-slit"
+    ],
+    "related_pattern_ids": ["pattern_double_slit", "pattern_wave_interference"],
+    "display_order": 43,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_polarization",
+    "name": "Polarization of Light",
+    "description": "Malus's law: I = I₀cos²(θ). Brewster's angle: tan(θ_B) = n₂/n₁. Polarizers block one component of unpolarized light.",
+    "category": "waves_optics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Polarizer or polarizing filter",
+      "Intensity after polarizer asked",
+      "Angle between polarizers",
+      "Brewster's angle or reflected polarization"
+    ],
+    "common_pitfalls": [
+      "Forgetting unpolarized light loses half intensity through first polarizer",
+      "Using wrong angle in Malus's law",
+      "Not recognizing crossed polarizers block all light",
+      "Confusing Brewster's angle with critical angle"
+    ],
+    "related_pattern_ids": ["pattern_wave_properties", "pattern_reflection_refraction"],
+    "display_order": 44,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_thin_film",
+    "name": "Thin Film Interference",
+    "description": "Interference from reflections at top and bottom surfaces. Phase change of π (half wavelength) upon reflection from higher n. Path difference = 2nt.",
+    "category": "waves_optics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Thin film or coating",
+      "Oil slick or soap bubble",
+      "Film thickness given",
+      "Constructive/destructive interference colors"
+    ],
+    "common_pitfalls": [
+      "Forgetting phase change on reflection from higher n",
+      "Using wavelength in air instead of in film (λ_film = λ/n)",
+      "Wrong condition when both or neither reflection has phase change",
+      "Not accounting for both phase changes"
+    ],
+    "related_pattern_ids": ["pattern_wave_interference", "pattern_reflection_refraction"],
+    "display_order": 45,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]
