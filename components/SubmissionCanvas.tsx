@@ -24,6 +24,7 @@ interface SubmissionCanvasProps {
   expectedApproach?: string
   keyEquations?: string[]
   onGradeComplete?: (result: GradeSolutionResponse) => void
+  onHighlightProblem?: (startIndex: number, endIndex: number) => void
 }
 
 export default function SubmissionCanvas({
@@ -33,7 +34,8 @@ export default function SubmissionCanvas({
   concepts,
   expectedApproach,
   keyEquations,
-  onGradeComplete
+  onGradeComplete,
+  onHighlightProblem
 }: SubmissionCanvasProps) {
   // Tab state
   const [activeTab, setActiveTab] = useState<SubmissionTab>('text')

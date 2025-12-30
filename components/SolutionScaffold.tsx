@@ -38,7 +38,13 @@ import { CONCEPT_NETWORK_DATA } from '@/lib/conceptNetworkData'
 import { useCircuitBreaker } from '@/lib/hooks/useCircuitBreaker'
 import DrillModal from './DrillModal'
 import CircuitBreakerWarning from './CircuitBreakerWarning'
+import SocraticRewindModal from './SocraticRewindModal'
 import type { ErrorTag } from '@/types/circuitBreaker'
+import type { SocraticRewindContext, RewindTriggerSource } from '@/types/socraticRewind'
+import {
+  buildContextFromGradeResult,
+  buildContextFromSanityCheckFailure,
+} from '@/lib/socraticRewindService'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 interface SolutionScaffoldProps {
