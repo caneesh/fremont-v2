@@ -87,6 +87,38 @@ describe('Constraint Collision Engine', () => {
     it('CONSTRAINT_PATTERNS has motion constraint patterns', () => {
       expect(CONSTRAINT_PATTERNS.motionConstraints.length).toBeGreaterThan(0)
     })
+
+    it('CONSTRAINT_PATTERNS has spring patterns', () => {
+      expect(CONSTRAINT_PATTERNS.springProperties.length).toBeGreaterThan(0)
+      const idealSpring = CONSTRAINT_PATTERNS.springProperties.find(
+        p => p.implies === 'ideal_spring'
+      )
+      expect(idealSpring).toBeDefined()
+    })
+
+    it('CONSTRAINT_PATTERNS has collision patterns', () => {
+      expect(CONSTRAINT_PATTERNS.collisionProperties.length).toBeGreaterThan(0)
+      const elasticCollision = CONSTRAINT_PATTERNS.collisionProperties.find(
+        p => p.implies === 'elastic_collision'
+      )
+      expect(elasticCollision).toBeDefined()
+    })
+
+    it('CONSTRAINT_PATTERNS has circular motion patterns', () => {
+      expect(CONSTRAINT_PATTERNS.circularMotion.length).toBeGreaterThan(0)
+    })
+
+    it('CONSTRAINT_PATTERNS has fluid patterns', () => {
+      expect(CONSTRAINT_PATTERNS.fluidProperties.length).toBeGreaterThan(0)
+    })
+
+    it('CONSTRAINT_PATTERNS has hinge/pivot patterns', () => {
+      expect(CONSTRAINT_PATTERNS.hingeAndPivot.length).toBeGreaterThan(0)
+    })
+
+    it('CONSTRAINT_PATTERNS has initial condition patterns', () => {
+      expect(CONSTRAINT_PATTERNS.initialConditions.length).toBeGreaterThan(0)
+    })
   })
 
   describe('constraintExtractor', () => {
@@ -142,6 +174,77 @@ describe('Constraint Collision Engine', () => {
         expect(constraints[0].sourceLocation.endIndex).toBeGreaterThan(
           constraints[0].sourceLocation.startIndex
         )
+      })
+
+      // New pattern groups tests
+      it('detects ideal spring', () => {
+        const text = 'An ideal spring with constant k is attached to the block.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'ideal_spring')).toBe(true)
+      })
+
+      it('detects spring constant', () => {
+        const text = 'The spring constant k = 200 N/m.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'spring_constant_given')).toBe(true)
+      })
+
+      it('detects elastic collision', () => {
+        const text = 'Two balls undergo a perfectly elastic collision.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'elastic_collision')).toBe(true)
+      })
+
+      it('detects inelastic collision', () => {
+        const text = 'The objects stick together after the inelastic collision.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'inelastic_collision')).toBe(true)
+      })
+
+      it('detects circular motion', () => {
+        const text = 'The ball moves in a vertical circle of radius R.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'circular_path')).toBe(true)
+      })
+
+      it('detects buoyancy', () => {
+        const text = 'A block is immersed in water.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'buoyancy_present')).toBe(true)
+      })
+
+      it('detects hinged body', () => {
+        const text = 'A uniform rod is hinged at one end.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'hinged_body')).toBe(true)
+      })
+
+      it('detects initial velocity zero (from rest)', () => {
+        const text = 'The block is released from rest.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'initial_velocity_zero')).toBe(true)
+      })
+
+      it('detects banked curve', () => {
+        const text = 'A car goes around a banked curve at angle θ.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'banked_curve')).toBe(true)
+      })
+
+      it('detects terminal velocity', () => {
+        const text = 'The object falls and reaches terminal velocity.'
+        const constraints = extractStatedConstraints(text)
+
+        expect(constraints.some(c => c.normalizedForm === 'terminal_velocity')).toBe(true)
       })
     })
 
