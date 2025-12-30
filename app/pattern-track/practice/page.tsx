@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import MobileNav from '@/components/MobileNav'
 import type { Question, Pattern } from '@/lib/patternTrack'
@@ -30,7 +30,11 @@ function PracticeContent() {
 
   const mode = searchParams.get('mode') || 'mixed'
   const count = parseInt(searchParams.get('count') || '10', 10)
-  const focusPatterns = searchParams.get('patterns')?.split(',').filter(Boolean) || []
+  const patternsParam = searchParams.get('patterns')
+  const focusPatterns = useMemo(
+    () => patternsParam?.split(',').filter(Boolean) || [],
+    [patternsParam]
+  )
 
   const loadQuestions = useCallback(async () => {
     try {
