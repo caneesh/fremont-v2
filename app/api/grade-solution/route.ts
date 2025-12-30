@@ -4,6 +4,10 @@ import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from 
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { GradeSolutionRequest, GradeSolutionResponse, GradeStatus } from '@/types/gradeSolution'
+import { extractConstraints } from '@/lib/constraintExtractor'
+import { analyzeStudentWork, detectCollisions } from '@/lib/constraintCollisionEngine'
+import { generateSocraticDialogue, shouldShowDialogue } from '@/lib/constraintDialogueEngine'
+import type { ProblemConstraintData } from '@/types/constraintCollision'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: GradeSolutionRequest = await request.json()
-    const { solution, problemContext, submissionType } = body
+    const { solution, problemContext, submissionType, enableConstraintCheck = true } = body
 
     if (!solution || !problemContext) {
       return NextResponse.json(
@@ -34,6 +38,14 @@ export async function POST(request: NextRequest) {
 
     console.log(`[${authContext.userId}] Grading ${submissionType} solution...`)
     const startTime = Date.now()
+
+    // Extract or use provided constraints
+    let constraintData: ProblemConstraintData | undefined
+    if (enableConstraintCheck) {
+      constraintData = problemContext.constraintData ||
+        extractConstraints(problemContext.problemText, `grade-${Date.now()}`)
+      console.log(`[${authContext.userId}] Extracted ${constraintData.statedConstraints.length} constraints`)
+    }
 
     const systemPrompt = `You are an expert IIT-JEE Physics examiner and diagnostic grader. Your task is to evaluate a student's physics solution with precise, constructive feedback.
 
@@ -154,6 +166,50 @@ Analyze this solution and provide your diagnostic grade in the specified JSON fo
     const validStatuses: GradeStatus[] = ['SUCCESS', 'MINOR_SLIP', 'CONCEPTUAL_GAP']
     if (!validStatuses.includes(gradeResponse.status)) {
       gradeResponse.status = 'CONCEPTUAL_GAP' // Default fallback
+    }
+
+    // Run constraint collision detection if enabled
+    if (enableConstraintCheck && constraintData) {
+      try {
+        const studentAnalysis = analyzeStudentWork(solution, constraintData)
+        const collisions = detectCollisions(constraintData, studentAnalysis)
+
+        if (collisions.length > 0) {
+          console.log(`[${authContext.userId}] Detected ${collisions.length} constraint collision(s)`)
+
+          // Add collision data to response
+          gradeResponse.constraintCollisions = collisions
+          gradeResponse.constraintData = constraintData
+
+          // Generate Socratic dialogue for the most severe collision
+          const highestSeverityCollision = collisions.reduce((prev, curr) => {
+            const severityOrder = { high: 3, medium: 2, low: 1 }
+            return severityOrder[curr.severity] > severityOrder[prev.severity] ? curr : prev
+          })
+
+          if (shouldShowDialogue(highestSeverityCollision)) {
+            gradeResponse.constraintDialogue = generateSocraticDialogue(highestSeverityCollision)
+
+            // If collision is high severity and physics seemed correct, adjust feedback
+            if (highestSeverityCollision.severity === 'high' &&
+                gradeResponse.detailedAnalysis?.physicsCorrect &&
+                highestSeverityCollision.collisionType === 'OMISSION') {
+              // Prepend constraint warning to feedback
+              const constraintWarning = `**Constraint Check:** ${highestSeverityCollision.explanation}\n\n`
+              gradeResponse.feedback_markdown = constraintWarning + gradeResponse.feedback_markdown
+
+              // Update next action to focus on constraint
+              gradeResponse.next_action = {
+                type: 'CHECK_CONSTRAINTS',
+                label: 'Review problem constraints'
+              }
+            }
+          }
+        }
+      } catch (constraintError) {
+        console.error(`[${authContext.userId}] Constraint check error:`, constraintError)
+        // Don't fail the whole request if constraint check fails
+      }
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1)

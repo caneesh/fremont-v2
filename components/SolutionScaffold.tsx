@@ -13,6 +13,7 @@ import MicroTaskStepAccordion from './MicroTaskStepAccordion'
 import DiagramStep from './diagram/DiagramStep'
 import ConceptPanel from './ConceptPanel'
 import SanityCheckStep from './SanityCheckStep'
+import SanityCheckMatrix from './SanityCheckMatrix'
 import NextChallenge from './NextChallenge'
 import ReflectionStep from './ReflectionStep'
 import ProblemVariations from './ProblemVariations'
@@ -813,21 +814,34 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             </div>
           )}
 
-          {/* Sanity Check - only show after all steps completed */}
+          {/* Sanity Check / Verify via Logic - only show after all steps completed */}
           {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
             <div className="demo-step-sanity">
-              <SanityCheckStep
-                sanityCheck={data.sanityCheck}
-                userAnswer={sanityCheckAnswer}
-                onAnswerChange={setSanityCheckAnswer}
-                problemText={data.problem}
-                domain={data.domain}
-                subdomain={data.subdomain}
-                steps={data.steps}
-                concepts={data.concepts}
-                onTargetStep={handleTargetStep}
-                onSolved={handleSanityCheckSolved}
-              />
+              {data.sanityCheckMatrix ? (
+                <SanityCheckMatrix
+                  matrix={data.sanityCheckMatrix}
+                  problemText={data.problem}
+                  domain={data.domain}
+                  subdomain={data.subdomain}
+                  steps={data.steps}
+                  concepts={data.concepts}
+                  onAllChecksComplete={handleSanityCheckSolved}
+                  onTargetStep={handleTargetStep}
+                />
+              ) : (
+                <SanityCheckStep
+                  sanityCheck={data.sanityCheck}
+                  userAnswer={sanityCheckAnswer}
+                  onAnswerChange={setSanityCheckAnswer}
+                  problemText={data.problem}
+                  domain={data.domain}
+                  subdomain={data.subdomain}
+                  steps={data.steps}
+                  concepts={data.concepts}
+                  onTargetStep={handleTargetStep}
+                  onSolved={handleSanityCheckSolved}
+                />
+              )}
             </div>
           )}
 

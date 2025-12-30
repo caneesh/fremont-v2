@@ -1,4 +1,5 @@
 import type { DiagramStepData } from './diagram'
+import type { FeynmanPromptConfig } from './feynman'
 
 /**
  * Scaffold Density Level
@@ -36,6 +37,7 @@ export interface Step {
   question?: string // Optional Socratic question
   validationPrompt?: string // How to validate user's answer
   diagramData?: DiagramStepData // FBD canvas data for diagram steps
+  feynmanPrompt?: FeynmanPromptConfig // Feynman micro-prompt for conceptual check
 }
 
 export interface SanityCheck {

@@ -375,10 +375,10 @@ describe('Constraint Collision Engine', () => {
       })
 
       it('counts high severity collisions', () => {
-        const collisions = [
+        const collisions: import('@/types/constraintCollision').ConstraintCollision[] = [
           {
             id: 'CC001',
-            problemConstraint: { id: 'SC001', category: 'force', rawText: 'rough', normalizedForm: 'friction_present', sourceLocation: { startIndex: 0, endIndex: 5 } },
+            problemConstraint: { id: 'SC001', category: 'force' as const, rawText: 'rough', normalizedForm: 'friction_present', sourceLocation: { startIndex: 0, endIndex: 5 } },
             studentAssumption: null,
             collisionType: 'OMISSION' as const,
             severity: 'high' as const,

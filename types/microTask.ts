@@ -6,7 +6,7 @@
  * and improves retention.
  */
 
-import type { Concept, SanityCheck, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
+import type { Concept, SanityCheck, SanityCheckMatrix, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
 
 // Supported micro-task types
 export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK'
@@ -75,6 +75,8 @@ export interface MicroTaskScaffoldData {
   // Optional Error Anticipator fields (Pass 1.5)
   commonTraps?: ConceptualTrap[]     // Top 3 conceptual traps for this problem
   warningBeacons?: WarningBeacon[]   // Step-specific warning beacons
+  // Optional Sanity Check Matrix (enhanced verification)
+  sanityCheckMatrix?: SanityCheckMatrix  // Three-pronged verification menu
 }
 
 /**

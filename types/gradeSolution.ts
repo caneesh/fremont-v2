@@ -1,8 +1,14 @@
 // Types for the Smart Solution Submission / Grade Solution API
 
+import type {
+  ProblemConstraintData,
+  ConstraintCollision,
+  SocraticDialogue,
+} from './constraintCollision'
+
 export type GradeStatus = 'SUCCESS' | 'MINOR_SLIP' | 'CONCEPTUAL_GAP'
 
-export type NextActionType = 'OPTIMIZE' | 'FIX_LINE' | 'REVIEW_CONCEPT'
+export type NextActionType = 'OPTIMIZE' | 'FIX_LINE' | 'REVIEW_CONCEPT' | 'CHECK_CONSTRAINTS'
 
 export interface NextAction {
   type: NextActionType
@@ -20,8 +26,10 @@ export interface GradeSolutionRequest {
     expectedApproach?: string // Brief description of correct approach
     keyEquations?: string[] // Key equations that should appear
     concepts?: Array<{ id: string; name: string }>
+    constraintData?: ProblemConstraintData // Pre-extracted constraints (optional)
   }
   submissionType: 'text' | 'handwriting'
+  enableConstraintCheck?: boolean // Enable constraint collision detection
 }
 
 export interface GradeSolutionResponse {
@@ -41,6 +49,10 @@ export interface GradeSolutionResponse {
       location?: string
     }>
   }
+  // Constraint collision detection results
+  constraintCollisions?: ConstraintCollision[]
+  constraintDialogue?: SocraticDialogue
+  constraintData?: ProblemConstraintData // Return extracted constraints for caching
 }
 
 // Autocomplete suggestion type
