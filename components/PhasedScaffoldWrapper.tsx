@@ -78,6 +78,7 @@ export default function PhasedScaffoldWrapper({
 
   // Update adapted data when state changes
   useEffect(() => {
+    console.log('[PhasedScaffoldWrapper] Effect triggered: loadingState=', state.loadingState, 'expandedSteps.size=', state.expandedSteps.size)
     if (state.loadingState === 'outline_ready' || state.expandedSteps.size > 0) {
       const data = getAdaptedScaffoldData()
       if (data) {
