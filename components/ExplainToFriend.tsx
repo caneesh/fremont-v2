@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { validateExplanation, countLines, countWords } from '@/types/explainToFriend'
 import type { ExplainToFriendResponse, StudyBuddyResponse } from '@/types/explainToFriend'
 
@@ -67,7 +67,7 @@ export default function ExplainToFriend({
       setAttemptCount(attemptCount + 1)
 
       // If quality is good enough, proceed
-      if (assessment.canProceed) {
+      if (assessment.canProceed && !studyBuddyEnabled) {
         setTimeout(() => {
           onComplete(explanation, assessment.quality)
         }, 2000) // Give time to read feedback
@@ -80,7 +80,7 @@ export default function ExplainToFriend({
     }
   }
 
-  const fetchStudyBuddyQuestions = async () => {
+  const fetchStudyBuddyQuestions = useCallback(async () => {
     if (!studyBuddyEnabled || !explanation.trim()) {
       return
     }
@@ -114,13 +114,13 @@ export default function ExplainToFriend({
     } finally {
       setBuddyLoading(false)
     }
-  }
+  }, [studyBuddyEnabled, explanation, problemText, steps, topic])
 
   useEffect(() => {
     if (studyBuddyEnabled && aiResponse && buddyQuestions.length === 0 && !buddyLoading) {
       void fetchStudyBuddyQuestions()
     }
-  }, [studyBuddyEnabled, aiResponse, buddyQuestions.length, buddyLoading])
+  }, [studyBuddyEnabled, aiResponse, buddyQuestions.length, buddyLoading, fetchStudyBuddyQuestions])
 
   const getQualityColor = (quality: string) => {
     switch (quality) {
@@ -250,7 +250,9 @@ export default function ExplainToFriend({
           {aiResponse.canProceed && (
             <div className="mt-3 pt-3 border-t border-current border-opacity-20">
               <p className="text-xs font-semibold text-green-800">
-                ✓ Great! Proceeding to mark problem as solved...
+                {studyBuddyEnabled
+                  ? '✓ Great! Review the buddy questions, then click Continue.'
+                  : '✓ Great! Proceeding to mark problem as solved...'}
               </p>
             </div>
           )}
@@ -356,6 +358,15 @@ export default function ExplainToFriend({
           )}
         </button>
 
+        {studyBuddyEnabled && aiResponse?.canProceed && (
+          <button
+            onClick={() => onComplete(explanation, aiResponse.quality)}
+            className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
+          >
+            Continue
+          </button>
+        )}
+
         {onSkip && attemptCount < 2 && (
           <button
             onClick={onSkip}
@@ -369,6 +380,12 @@ export default function ExplainToFriend({
       {attemptCount > 0 && !aiResponse?.canProceed && (
         <p className="text-xs text-gray-600 mt-3 text-center">
           Attempt {attemptCount} of 3 • Keep trying! Understanding deepens with each attempt.
+        </p>
+      )}
+
+      {studyBuddyEnabled && aiResponse?.canProceed && (
+        <p className="text-xs text-gray-600 mt-3 text-center">
+          Study Buddy Mode is on — click Continue when you&apos;re ready.
         </p>
       )}
     </div>

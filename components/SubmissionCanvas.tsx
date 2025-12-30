@@ -15,6 +15,7 @@ import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getValidationFeedback, getMathErrorMessage, getPhysicsErrorMessage } from '@/lib/hintEngine'
 import MathRenderer from './MathRenderer'
 import ConstraintFeedback from './ConstraintFeedback'
+import MisconceptionFlag from './MisconceptionFlag'
 
 interface SubmissionCanvasProps {
   problemText: string
@@ -72,6 +73,7 @@ export default function SubmissionCanvas({
   const [isGrading, setIsGrading] = useState(false)
   const [gradeResult, setGradeResult] = useState<GradeSolutionResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showMisconceptions, setShowMisconceptions] = useState(true)
 
   // Handle text input with autocomplete detection
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -382,6 +384,7 @@ export default function SubmissionCanvas({
     setIsGrading(true)
     setError(null)
     setGradeResult(null)
+    setShowMisconceptions(true)
 
     if (activeTab === 'scan') {
       setScanState('grading')
@@ -437,6 +440,7 @@ export default function SubmissionCanvas({
     setScanProgress(0)
     setScanPhase('')
     setGradeResult(null)
+    setShowMisconceptions(true)
     setCurrentProcessingIndex(0)
   }
 
@@ -927,6 +931,16 @@ export default function SubmissionCanvas({
               />
             )}
 
+            {/* Misconception Flags */}
+            {showMisconceptions &&
+              gradeResult.detectedMisconceptions &&
+              gradeResult.detectedMisconceptions.length > 0 && (
+                <MisconceptionFlag
+                  misconceptions={gradeResult.detectedMisconceptions}
+                  onDismiss={() => setShowMisconceptions(false)}
+                />
+              )}
+
             {/* Feedback */}
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
               <h5 className="text-sm font-medium text-slate-400 mb-2">Feedback</h5>
@@ -986,6 +1000,7 @@ export default function SubmissionCanvas({
             <button
               onClick={() => {
                 setGradeResult(null)
+                setShowMisconceptions(true)
                 if (activeTab === 'scan') {
                   setScanState('transcribed')
                 }

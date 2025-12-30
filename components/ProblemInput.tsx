@@ -14,7 +14,12 @@ interface AdaptiveHint {
 }
 
 interface ProblemInputProps {
-  onSubmit: (problem: string, diagramImage?: string | null, density?: ScaffoldDensity) => void
+  onSubmit: (
+    problem: string,
+    diagramImage?: string | null,
+    density?: ScaffoldDensity,
+    includeFinalAnswer?: boolean
+  ) => void
   isLoading: boolean
   error: string | null
   initialProblem?: string
@@ -56,6 +61,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
   const [scaffoldDensity, setScaffoldDensity] = useState<ScaffoldDensity>(initialDensity || 3)
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
   const [adaptiveHint, setAdaptiveHint] = useState<AdaptiveHint>({ show: false, reason: '', confidence: 'low' })
+  const [includeFinalAnswer, setIncludeFinalAnswer] = useState(false)
 
   // Load saved density preference or calculate adaptive density on mount
   useEffect(() => {
@@ -164,7 +170,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (problemText.trim()) {
-      onSubmit(problemText.trim(), diagramImage, scaffoldDensity)
+      onSubmit(problemText.trim(), diagramImage, scaffoldDensity, includeFinalAnswer)
     }
   }
 
@@ -383,6 +389,25 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
                   onChange={handleDensityChange}
                   disabled={isLoading}
                 />
+
+                <div className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-soft p-3">
+                  <input
+                    id="reverse-solve"
+                    type="checkbox"
+                    checked={includeFinalAnswer}
+                    onChange={(e) => setIncludeFinalAnswer(e.target.checked)}
+                    disabled={isLoading}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent/40"
+                  />
+                  <label htmlFor="reverse-solve" className="flex-1 cursor-pointer">
+                    <div className="text-sm font-medium text-gray-800 dark:text-dark-text-primary">
+                      Reverse-Solve (show final answer)
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
+                      Reveal the final numerical answer up front and reconstruct the reasoning steps.
+                    </p>
+                  </label>
+                </div>
               </div>
             )}
           </div>

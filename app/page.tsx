@@ -54,7 +54,12 @@ function HomeContent() {
     }
   }, [])
 
-  const handleProblemSubmit = async (problemText: string, diagramImage?: string | null, density?: ScaffoldDensity) => {
+  const handleProblemSubmit = async (
+    problemText: string,
+    diagramImage?: string | null,
+    density?: ScaffoldDensity,
+    includeFinalAnswer?: boolean
+  ) => {
     setCurrentProblemText(problemText)
     setIsLoading(true)
     setError(null)
@@ -69,7 +74,8 @@ function HomeContent() {
           problem: problemText,
           diagramImage: diagramImage || undefined,
           useMicroTasks,
-          density: density || 3
+          density: density || 3,
+          includeFinalAnswer: Boolean(includeFinalAnswer),
         }),
       })
 

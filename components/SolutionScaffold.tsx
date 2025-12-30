@@ -24,6 +24,7 @@ import ExplainToFriend from './ExplainToFriend'
 import PostSolveActivity from './PostSolveActivity'
 import Celebration from './Celebration'
 import SubmissionCanvas from './SubmissionCanvas'
+import MathRenderer from './MathRenderer'
 import { WhatIfSimulation } from './simulation'
 import BoundaryCaseBuilder from './BoundaryCaseBuilder'
 import type { ReflectionAnswer } from '@/types/history'
@@ -88,6 +89,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const problemStatementRef = useRef<HTMLParagraphElement>(null)
+  const reverseSolveEnabled = Boolean(data.reverseSolve)
+  const finalAnswer = data.finalAnswer?.trim()
 
   // Pre-Flight Check state
   const [showPreFlightCheck, setShowPreFlightCheck] = useState(false)
@@ -1026,6 +1029,32 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {reverseSolveEnabled && (
+          <div className="lg:col-span-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                  Reverse-Solve Mode
+                </div>
+                <p className="text-xs text-amber-700 dark:text-amber-200 mt-1">
+                  Use the steps below to reconstruct the reasoning from the final result.
+                </p>
+              </div>
+              <div className="bg-white/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-700 rounded-md px-3 py-2 text-sm text-amber-900 dark:text-amber-100 min-w-[180px]">
+                <div className="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                  Final Answer
+                </div>
+                {finalAnswer ? (
+                  <MathRenderer text={finalAnswer} />
+                ) : (
+                  <div className="text-xs text-amber-700 dark:text-amber-300">
+                    Not available yet.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Main solving area - Steps */}
         <div className="lg:col-span-3 space-y-4">
           {/* Mistake Warnings */}

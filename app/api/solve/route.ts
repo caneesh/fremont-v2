@@ -5,7 +5,8 @@ import {
   solvePhysicsProblem,
   scaffoldSolution,
   anticipateErrors,
-  ScaffoldDensity
+  ScaffoldDensity,
+  type SolverResponse
 } from '@/lib/anthropic'
 import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
@@ -25,7 +26,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problem, diagramImage, useMicroTasks = false, enableErrorAnticipation = false, density = 3 } = body
+    const {
+      problem,
+      diagramImage,
+      useMicroTasks = false,
+      enableErrorAnticipation = false,
+      density = 3,
+      includeFinalAnswer = false
+    } = body
 
     // Validate density (1-5)
     const validDensity: ScaffoldDensity = Math.min(5, Math.max(1, Math.round(density))) as ScaffoldDensity
@@ -57,6 +65,18 @@ export async function POST(request: NextRequest) {
     const startTime = Date.now()
 
     let scaffoldData
+    let solverResponse: SolverResponse | null = null
+    const needsSolver = enableErrorAnticipation || includeFinalAnswer
+
+    if (needsSolver) {
+      const solverReason = includeFinalAnswer && enableErrorAnticipation
+        ? 'final answer + error anticipation'
+        : includeFinalAnswer
+        ? 'final answer'
+        : 'error anticipation'
+      console.log(`[${authContext.userId}] Running solver pass for ${solverReason}...`)
+      solverResponse = await solvePhysicsProblem(problem)
+    }
 
     if (enableErrorAnticipation) {
       // 3-PASS ARCHITECTURE WITH ERROR ANTICIPATION
@@ -65,8 +85,6 @@ export async function POST(request: NextRequest) {
       // Pass 2: Generate scaffold
       console.log(`[${authContext.userId}] Using 3-pass architecture with Error Anticipator (density=${validDensity})...`)
 
-      // Pass 1: Solve
-      const solverResponse = await solvePhysicsProblem(problem)
       console.log(`[${authContext.userId}] Pass 1 (Solver) complete`)
 
       // Pass 2: Generate scaffold (we need step titles for error anticipation)
@@ -78,7 +96,7 @@ export async function POST(request: NextRequest) {
 
       // Pass 1.5: Anticipate errors (uses hidden solution + step titles)
       const stepTitles = scaffoldData.steps.map((s: { title: string }) => s.title)
-      const errorData = await anticipateErrors(problem, solverResponse.solution, stepTitles)
+      const errorData = await anticipateErrors(problem, solverResponse?.solution || '', stepTitles)
       console.log(`[${authContext.userId}] Pass 1.5 (Error Anticipator) complete: ${errorData.commonTraps.length} traps, ${errorData.warningBeacons.length} beacons`)
 
       // Merge error anticipation data into scaffold
@@ -109,6 +127,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...scaffoldData,
+      finalAnswer: includeFinalAnswer ? solverResponse?.finalAnswer : undefined,
+      reverseSolve: includeFinalAnswer,
       _quota: remaining,
     })
   } catch (error) {
