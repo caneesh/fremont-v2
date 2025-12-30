@@ -16,11 +16,11 @@ export default function ConceptPanel({ concepts }: ConceptPanelProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 sticky top-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md p-6 sticky top-6 border border-transparent dark:border-dark-border">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
         📚 Concept Inventory
       </h3>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
         Click any concept to see its definition and relevant formulas.
       </p>
 
@@ -28,15 +28,15 @@ export default function ConceptPanel({ concepts }: ConceptPanelProps) {
         {concepts.map((concept) => (
           <div
             key={concept.id}
-            className="border border-gray-200 rounded-lg overflow-hidden hover:border-primary-400 transition-colors"
+            className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden hover:border-primary-400 dark:hover:border-accent transition-colors"
           >
             <button
               onClick={() => toggleConcept(concept.id)}
-              className="w-full px-4 py-3 flex items-center justify-between text-left bg-gray-50 hover:bg-gray-100"
+              className="w-full px-4 py-3 flex items-center justify-between text-left bg-gray-50 dark:bg-dark-card-soft hover:bg-gray-100 dark:hover:bg-dark-border"
             >
-              <span className="font-medium text-gray-900">{concept.name}</span>
+              <span className="font-medium text-gray-900 dark:text-dark-text-primary">{concept.name}</span>
               <svg
-                className={`w-5 h-5 text-gray-600 transition-transform ${
+                className={`w-5 h-5 text-gray-600 dark:text-dark-text-muted transition-transform ${
                   expandedConcept === concept.id ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -53,17 +53,19 @@ export default function ConceptPanel({ concepts }: ConceptPanelProps) {
             </button>
 
             {expandedConcept === concept.id && (
-              <div className="px-4 py-3 bg-white border-t border-gray-200">
-                <div className="text-sm text-gray-700 mb-3">
+              <div className="px-4 py-3 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border">
+                <div className="text-sm text-gray-700 dark:text-dark-text-secondary mb-3">
                   <MathRenderer text={concept.definition} />
                 </div>
 
                 {concept.formula && (
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                    <p className="text-xs font-semibold text-blue-900 mb-2">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
+                    <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-2">
                       Formula:
                     </p>
-                    <MathRenderer text={concept.formula} />
+                    <div className="text-gray-900 dark:text-dark-text-primary">
+                      <MathRenderer text={concept.formula} />
+                    </div>
                   </div>
                 )}
               </div>
