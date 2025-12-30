@@ -267,13 +267,50 @@
   border-color: var(--border-default);
 }
 
-/* KaTeX dark mode - improved contrast */
-.dark .katex {
-  color: var(--text-primary);
+/* KaTeX dark mode - comprehensive styling */
+.dark .katex,
+.dark .katex-display,
+.dark .katex-html,
+.dark .katex .base,
+.dark .katex .strut,
+.dark .katex .textord,
+.dark .katex .mathord,
+.dark .katex .mord,
+.dark .katex .mbin,
+.dark .katex .mrel,
+.dark .katex .mopen,
+.dark .katex .mclose,
+.dark .katex .mpunct,
+.dark .katex .minner,
+.dark .katex .mop,
+.dark .katex .mtable,
+.dark .katex .mfrac,
+.dark .katex .msqrt,
+.dark .katex .sqrt,
+.dark .katex .sizing,
+.dark .katex .nulldelimiter,
+.dark .katex .delimsizing,
+.dark .katex .op-symbol {
+  color: var(--text-primary) !important;
 }
 
 .dark .katex .frac-line {
-  border-color: var(--text-primary);
+  border-color: var(--text-primary) !important;
+  background-color: var(--text-primary) !important;
+}
+
+.dark .katex .sqrt > .sqrt-line {
+  border-color: var(--text-primary) !important;
+}
+
+.dark .katex .overline .overline-line,
+.dark .katex .underline .underline-line {
+  border-color: var(--text-primary) !important;
+}
+
+/* KaTeX colored elements in dark mode */
+.dark .katex .mord.text {
+  color: var(--text-primary) !important;
 }
 
 /* Dark mode input focus states */

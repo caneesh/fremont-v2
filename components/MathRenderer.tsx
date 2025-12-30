@@ -44,8 +44,8 @@ export default function MathRenderer({
           className={`relative group ${isDisplay ? 'block my-4' : 'inline-block mx-1'}`}
         >
           <div className={`
-            ${isDisplay ? 'bg-slate-50 rounded-lg p-4 overflow-x-auto' : ''}
-            ${isDisplay ? 'border border-slate-200' : ''}
+            ${isDisplay ? 'bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 overflow-x-auto' : ''}
+            ${isDisplay ? 'border border-slate-200 dark:border-slate-700' : ''}
           `}>
             <Component math={latex} />
           </div>
@@ -54,12 +54,12 @@ export default function MathRenderer({
           {enableCopy && isDisplay && (
             <button
               onClick={() => copyToClipboard(latex, key)}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 bg-white border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50 active:scale-95 shadow-sm"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 active:scale-95 shadow-sm"
               title="Copy LaTeX"
             >
               {isCopied ? (
                 <span className="flex items-center gap-1">
-                  <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Copied!
@@ -83,11 +83,11 @@ export default function MathRenderer({
             key={`math-error-${key}`}
             className={`
               ${isDisplay ? 'block my-4 p-4' : 'inline-block mx-1 px-2 py-1'}
-              bg-red-50 border border-red-200 rounded text-red-700 text-sm
+              bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300 text-sm
             `}
           >
             <span className="font-semibold">LaTeX Error: </span>
-            <code className="bg-red-100 px-1 rounded">{latex}</code>
+            <code className="bg-red-100 dark:bg-red-900/50 px-1 rounded">{latex}</code>
           </span>
         )
       }
@@ -153,7 +153,7 @@ export default function MathRenderer({
   }
 
   return (
-    <div className={`text-gray-800 leading-relaxed ${className}`}>
+    <div className={`text-gray-800 dark:text-gray-100 leading-relaxed ${className}`}>
       {renderText(text)}
     </div>
   )
