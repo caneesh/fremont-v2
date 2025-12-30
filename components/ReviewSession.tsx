@@ -65,10 +65,77 @@ export default function ReviewSession({
 
   // Show answer
   const handleShowAnswer = useCallback(() => {
-    setState('showAnswer')
+    if (useConfidenceSRS) {
+      // Confidence flow: ask if they knew it first
+      setState('askCorrectness')
+    } else {
+      setState('showAnswer')
+    }
+  }, [useConfidenceSRS])
+
+  // Handle correctness selection (confidence flow step 1)
+  const handleCorrectnessSelected = useCallback((correct: boolean) => {
+    setIsCorrect(correct)
+    setState('askConfidence')
   }, [])
 
-  // Record response and move to next
+  // Handle confidence selection (confidence flow step 2)
+  const handleConfidenceSelected = useCallback((confidence: Confidence) => {
+    if (!session || currentIndex >= cards.length || isCorrect === null) return
+
+    setSelectedConfidence(confidence)
+    const responseTimeMs = Date.now() - startTime
+
+    // Calculate quality from correctness + confidence
+    const quality = toReviewQuality(isCorrect, confidence)
+
+    // Record review with confidence data
+    const { session: updatedSession, updatedCard } = recordReview(
+      session,
+      cards[currentIndex].id,
+      quality,
+      responseTimeMs,
+      { isCorrect, confidence }
+    )
+
+    setSession(updatedSession)
+
+    // Update card in local state
+    if (updatedCard) {
+      setCards(prev => prev.map((c, i) =>
+        i === currentIndex ? updatedCard : c
+      ))
+    }
+
+    // Show outcome briefly
+    setState('showOutcome')
+
+    // After showing outcome, move to next card
+    setTimeout(() => {
+      moveToNextCard(updatedSession)
+    }, 1500)
+  }, [session, currentIndex, cards, startTime, isCorrect])
+
+  // Move to next card or complete session
+  const moveToNextCard = useCallback((updatedSession: ReviewSessionType) => {
+    // Reset confidence state
+    setIsCorrect(null)
+    setSelectedConfidence(null)
+
+    if (currentIndex + 1 >= cards.length) {
+      const completedSession = completeReviewSession(updatedSession)
+      setSession(completedSession)
+      setState('complete')
+      onComplete?.(completedSession)
+    } else {
+      setCurrentIndex(prev => prev + 1)
+      setStartTime(Date.now())
+      setShowHint(false)
+      setState('reviewing')
+    }
+  }, [currentIndex, cards.length, onComplete])
+
+  // Record response and move to next (traditional flow)
   const handleResponse = useCallback((quality: ReviewQuality) => {
     if (!session || currentIndex >= cards.length) return
 
