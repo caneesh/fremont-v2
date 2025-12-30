@@ -71,6 +71,29 @@ export interface ScaffolderResponse {
     expectedBehavior: string
     type: 'limit' | 'dimension' | 'symmetry'
   }
+  sanityCheckMatrix?: {
+    limitCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
+    symmetryCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
+    dimensionCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
+  }
 }
 
 // Micro-Task Response Types
@@ -112,6 +135,29 @@ export interface MicroTaskScaffolderResponse {
     question: string
     expectedBehavior: string
     type: 'limit' | 'dimension' | 'symmetry'
+  }
+  sanityCheckMatrix?: {
+    limitCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
+    symmetryCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
+    dimensionCheck: {
+      question: string
+      setupPrompt: string
+      expectedReasoning: string
+      commonMistakes: string[]
+      physicalInsight: string
+    }
   }
 }
 
@@ -263,6 +309,29 @@ Output ONLY valid JSON with this EXACT structure:
     "question": "What happens in a limiting case? Use $\\\\LaTeX$ notation.",
     "expectedBehavior": "The expected physical behavior described clearly.",
     "type": "limit"
+  },
+  "sanityCheckMatrix": {
+    "limitCheck": {
+      "question": "What happens when [parameter] approaches [extreme value]?",
+      "setupPrompt": "Before calculating, predict the physical behavior at this limit.",
+      "expectedReasoning": "Clear physical reasoning for why the system behaves this way at the limit.",
+      "commonMistakes": ["Confusing with equilibrium", "Forgetting constraints"],
+      "physicalInsight": "This limit confirms our formula reduces to [known case] - a powerful check!"
+    },
+    "symmetryCheck": {
+      "question": "What if [symmetric condition, e.g., both masses equal]?",
+      "setupPrompt": "When there's perfect symmetry, what must happen by symmetry arguments alone?",
+      "expectedReasoning": "By symmetry, neither side has an advantage, so [predicted outcome].",
+      "commonMistakes": ["Calculating instead of using symmetry", "Missing the symmetry"],
+      "physicalInsight": "Symmetry arguments let you predict results without calculation!"
+    },
+    "dimensionCheck": {
+      "question": "Does your final expression have the correct dimensions/units?",
+      "setupPrompt": "Check that each term has consistent dimensions.",
+      "expectedReasoning": "The dimensions work out: [dimension analysis showing units match].",
+      "commonMistakes": ["Forgetting g has units", "Not checking each term separately"],
+      "physicalInsight": "Dimensional analysis catches ~50% of physics errors!"
+    }
   }
 }
 
@@ -461,6 +530,29 @@ JSON OUTPUT FORMAT:
     "question": "What happens when ω → 0?",
     "expectedBehavior": "The bead should slide to the bottom.",
     "type": "limit"
+  },
+  "sanityCheckMatrix": {
+    "limitCheck": {
+      "question": "What happens when ω → 0?",
+      "setupPrompt": "If the wire stops rotating, predict what happens to the bead.",
+      "expectedReasoning": "Without rotation, there's no centrifugal effect - the bead slides to the bottom under gravity.",
+      "commonMistakes": ["Thinking it stays in place", "Forgetting gravity acts"],
+      "physicalInsight": "This limit confirms rotation is essential for equilibrium positions!"
+    },
+    "symmetryCheck": {
+      "question": "If the wire is vertical, what positions are symmetric?",
+      "setupPrompt": "Consider the geometry - where might equilibrium occur by symmetry?",
+      "expectedReasoning": "The bottom and any angle θ and -θ are symmetric about the vertical axis.",
+      "commonMistakes": ["Only considering the bottom", "Ignoring angular symmetry"],
+      "physicalInsight": "Symmetry helps identify all possible equilibrium positions!"
+    },
+    "dimensionCheck": {
+      "question": "Does your equilibrium condition have correct dimensions?",
+      "setupPrompt": "Your condition involves ω, g, and geometric terms. Check the dimensions.",
+      "expectedReasoning": "Both sides should have dimensions of acceleration [m/s²].",
+      "commonMistakes": ["Mixing angular and linear quantities", "Forgetting ω² has units 1/s²"],
+      "physicalInsight": "Dimensional consistency is your first line of defense against errors!"
+    }
   }
 }
 
@@ -720,6 +812,29 @@ Output your response as valid JSON with this EXACT structure:
     "question": "What happens in a limiting case? Use $\\LaTeX$ notation.",
     "expectedBehavior": "The expected physical behavior described clearly.",
     "type": "limit"
+  },
+  "sanityCheckMatrix": {
+    "limitCheck": {
+      "question": "What happens when [parameter] approaches [extreme value]?",
+      "setupPrompt": "Before calculating, predict the physical behavior at this limit.",
+      "expectedReasoning": "Clear physical reasoning for why the system behaves this way at the limit.",
+      "commonMistakes": ["Confusing with equilibrium", "Forgetting constraints"],
+      "physicalInsight": "This limit confirms our formula reduces to [known case] - a powerful check!"
+    },
+    "symmetryCheck": {
+      "question": "What if [symmetric condition, e.g., both masses equal]?",
+      "setupPrompt": "When there's perfect symmetry, what must happen by symmetry arguments alone?",
+      "expectedReasoning": "By symmetry, neither side has an advantage, so [predicted outcome].",
+      "commonMistakes": ["Calculating instead of using symmetry", "Missing the symmetry"],
+      "physicalInsight": "Symmetry arguments let you predict results without calculation!"
+    },
+    "dimensionCheck": {
+      "question": "Does your final expression have the correct dimensions/units?",
+      "setupPrompt": "Check that each term has consistent dimensions.",
+      "expectedReasoning": "The dimensions work out: [dimension analysis showing units match].",
+      "commonMistakes": ["Forgetting g has units", "Not checking each term separately"],
+      "physicalInsight": "Dimensional analysis catches ~50% of physics errors!"
+    }
   }
 }
 
