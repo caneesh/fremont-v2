@@ -880,5 +880,96 @@ describe('Constraint Collision Engine', () => {
       // Should NOT flag friction as missing on frictionless surface
       expect(analysis.forcesMissing).not.toContain('friction')
     })
+
+    it('grade-solution API flow: spring problem with wrong kinematics', () => {
+      // Simulates the exact code path in app/api/grade-solution/route.ts
+      const problemText = `A block of mass 5 kg is attached to an ideal spring with spring constant k = 200 N/m.
+        The block is pulled 10 cm from equilibrium and released from rest. Find the maximum speed of the block.`
+
+      const wrongSolution = `Given: m = 5 kg, k = 200 N/m, x = 0.1 m
+        Using v² = u² + 2as where u = 0, a = F/m = kx/m = 200×0.1/5 = 4 m/s²
+        v² = 0 + 2(4)(0.1) = 0.8
+        v = 0.89 m/s`
+
+      // Step 1: Extract constraints (enableConstraintCheck = true)
+      const constraintData = extractConstraints(problemText, 'grade-spring-001')
+      expect(constraintData.statedConstraints.length).toBeGreaterThan(0)
+
+      // Step 2: Analyze student work
+      const studentAnalysis = analyzeStudentWork(wrongSolution, constraintData)
+
+      // Step 3: Detect collisions
+      const collisions = detectCollisions(constraintData, studentAnalysis)
+      expect(collisions.length).toBeGreaterThan(0)
+
+      // Step 4: Find highest severity collision (as done in API)
+      const highestSeverityCollision = collisions.reduce((prev, curr) => {
+        const severityOrder = { high: 3, medium: 2, low: 1 }
+        return severityOrder[curr.severity] > severityOrder[prev.severity] ? curr : prev
+      })
+
+      expect(highestSeverityCollision.severity).toBe('high')
+      expect(highestSeverityCollision.errorPatternId).toBe('EP015')
+
+      // Step 5: Generate Socratic dialogue
+      if (shouldShowDialogue(highestSeverityCollision)) {
+        const dialogue = generateSocraticDialogue(highestSeverityCollision)
+        expect(dialogue.question).toBeTruthy()
+        expect(dialogue.followUpPrompts.length).toBeGreaterThan(0)
+        expect(dialogue.problemReferenceHint).toBeTruthy()
+      }
+    })
+
+    it('grade-solution API flow: collision problem with energy violation', () => {
+      const problemText = `Two balls undergo an inelastic collision. Ball A (2 kg) moves at 5 m/s
+        and collides with stationary ball B (3 kg). After collision, they stick together. Find the final velocity.`
+
+      const wrongSolution = `Using conservation of kinetic energy:
+        ½m₁v₁² + ½m₂v₂² = ½(m₁+m₂)v²
+        ½(2)(5)² + 0 = ½(5)v²
+        25 = 2.5v²
+        v = √10 = 3.16 m/s`
+
+      const constraintData = extractConstraints(problemText, 'grade-collision-001')
+      const studentAnalysis = analyzeStudentWork(wrongSolution, constraintData)
+      const collisions = detectCollisions(constraintData, studentAnalysis)
+
+      expect(collisions.length).toBeGreaterThan(0)
+      const collisionError = collisions.find(c => c.errorPatternId === 'EP016')
+      expect(collisionError).toBeDefined()
+
+      if (collisionError && shouldShowDialogue(collisionError)) {
+        const dialogue = generateSocraticDialogue(collisionError)
+        expect(dialogue.question).toContain('kinetic energy')
+      }
+    })
+
+    it('grade-solution API flow: circular motion with wrong approach', () => {
+      const problemText = `A ball on a string moves in a vertical circle of radius 1 m.
+        Find the minimum speed at the top of the circle for the string to remain taut.`
+
+      const wrongSolution = `At the top, using kinematics:
+        v² = u² + 2as
+        where s = 2r = 2 m (diameter traveled)
+        v² = 0 + 2(10)(2) = 40
+        v = 6.32 m/s`
+
+      const constraintData = extractConstraints(problemText, 'grade-circular-001')
+      const studentAnalysis = analyzeStudentWork(wrongSolution, constraintData)
+      const collisions = detectCollisions(constraintData, studentAnalysis)
+
+      expect(collisions.length).toBeGreaterThan(0)
+
+      const highestSeverityCollision = collisions.reduce((prev, curr) => {
+        const severityOrder = { high: 3, medium: 2, low: 1 }
+        return severityOrder[curr.severity] > severityOrder[prev.severity] ? curr : prev
+      })
+
+      if (shouldShowDialogue(highestSeverityCollision)) {
+        const dialogue = generateSocraticDialogue(highestSeverityCollision)
+        expect(dialogue.question).toBeTruthy()
+        expect(dialogue.strategy).toBeTruthy()
+      }
+    })
   })
 })

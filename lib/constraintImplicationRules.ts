@@ -313,6 +313,154 @@ export const IMPLICATION_RULES: ImplicationRule[] = [
     domain: ['Mechanics', 'Dynamics'],
     priority: 100,
   },
+
+  // ============================================
+  // Spring Rules
+  // ============================================
+  {
+    id: 'IMP016',
+    name: 'Ideal Spring Implies Variable Acceleration',
+    description: 'Ideal spring force varies with displacement, so acceleration is not constant',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['ideal spring', 'massless spring', 'light spring'],
+    },
+    implies: {
+      category: 'kinematic',
+      description: 'Acceleration varies with position (a = -kx/m); use energy methods, not kinematics',
+      physicsRationale: 'F = -kx means a = -kx/m, which is position-dependent',
+      normalizedForm: 'ideal_spring',
+    },
+    domain: ['Mechanics', 'SHM', 'Energy'],
+    priority: 100,
+  },
+  {
+    id: 'IMP017',
+    name: 'Spring Constant Given Implies Energy Method',
+    description: 'When spring constant k is given, use energy conservation or SHM analysis',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['spring constant', 'k =', 'k=', 'stiffness'],
+    },
+    implies: {
+      category: 'force',
+      description: 'Spring force F = kx; use energy (½kx²) or SHM (ω = √(k/m))',
+      physicsRationale: 'Spring constant k is given to use Hooke\'s law and energy methods',
+      normalizedForm: 'spring_constant_given',
+    },
+    domain: ['Mechanics', 'SHM', 'Energy'],
+    priority: 100,
+  },
+
+  // ============================================
+  // Collision Rules
+  // ============================================
+  {
+    id: 'IMP018',
+    name: 'Inelastic Collision Implies KE Loss',
+    description: 'Inelastic collision means kinetic energy is NOT conserved',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['inelastic collision', 'inelastic impact'],
+    },
+    implies: {
+      category: 'conservation',
+      description: 'Kinetic energy is NOT conserved; only momentum is conserved',
+      physicsRationale: 'Energy is lost to deformation, heat, sound in inelastic collisions',
+      normalizedForm: 'inelastic_collision',
+    },
+    domain: ['Mechanics', 'Collisions'],
+    priority: 100,
+  },
+  {
+    id: 'IMP019',
+    name: 'Perfectly Inelastic Collision',
+    description: 'Objects stick together after collision',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['stick together', 'perfectly inelastic', 'coalesce', 'move together after'],
+    },
+    implies: {
+      category: 'conservation',
+      description: 'Objects have same final velocity; maximum KE loss; only momentum conserved',
+      physicsRationale: 'Sticking together means maximum deformation and energy loss',
+      normalizedForm: 'perfectly_inelastic',
+    },
+    domain: ['Mechanics', 'Collisions'],
+    priority: 100,
+  },
+  {
+    id: 'IMP020',
+    name: 'Elastic Collision Implies KE Conserved',
+    description: 'Elastic collision conserves both momentum and kinetic energy',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['elastic collision', 'perfectly elastic'],
+    },
+    implies: {
+      category: 'conservation',
+      description: 'Both momentum and kinetic energy are conserved',
+      physicsRationale: 'No energy lost in perfectly elastic collision',
+      normalizedForm: 'elastic_collision',
+    },
+    domain: ['Mechanics', 'Collisions'],
+    priority: 100,
+  },
+
+  // ============================================
+  // Circular Motion Rules
+  // ============================================
+  {
+    id: 'IMP021',
+    name: 'Vertical Circle Motion',
+    description: 'Motion in vertical circle requires centripetal force analysis',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['vertical circle', 'vertical loop', 'loop the loop'],
+    },
+    implies: {
+      category: 'force',
+      description: 'Centripetal acceleration a = v²/r; forces provide centripetal force',
+      physicsRationale: 'Circular motion requires continuous centripetal acceleration',
+      normalizedForm: 'circular_motion',
+    },
+    domain: ['Mechanics', 'Circular Motion'],
+    priority: 100,
+  },
+  {
+    id: 'IMP022',
+    name: 'Circular Path Motion',
+    description: 'Motion along circular path requires centripetal force',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['circular path', 'circular track', 'moves in a circle', 'circular motion'],
+    },
+    implies: {
+      category: 'force',
+      description: 'Net radial force = mv²/r toward center',
+      physicsRationale: 'Circular motion is accelerated motion requiring centripetal force',
+      normalizedForm: 'circular_path',
+    },
+    domain: ['Mechanics', 'Circular Motion'],
+    priority: 100,
+  },
+  {
+    id: 'IMP023',
+    name: 'Banked Curve Motion',
+    description: 'Banked curve problems require force resolution',
+    condition: {
+      type: 'stated_constraint',
+      rawTextContains: ['banked curve', 'banked road', 'banked track', 'banking angle'],
+    },
+    implies: {
+      category: 'force',
+      description: 'Normal force component provides centripetal force; tan(θ) = v²/rg',
+      physicsRationale: 'Banking provides horizontal component of normal force for centripetal acceleration',
+      normalizedForm: 'banked_curve',
+    },
+    domain: ['Mechanics', 'Circular Motion'],
+    priority: 100,
+  },
 ]
 
 /**
