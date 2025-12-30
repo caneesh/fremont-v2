@@ -71,10 +71,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPostSolveActivity, setShowPostSolveActivity] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [highlightedStepId, setHighlightedStepId] = useState<number | null>(null)
+  const [highlightedProblemRange, setHighlightedProblemRange] = useState<{ start: number; end: number } | null>(null)
   const [showSubmissionCanvas, setShowSubmissionCanvas] = useState(false)
   const [solutionGradeResult, setSolutionGradeResult] = useState<GradeSolutionResponse | null>(null)
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const problemStatementRef = useRef<HTMLParagraphElement>(null)
 
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)

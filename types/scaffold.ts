@@ -1,5 +1,6 @@
 import type { DiagramStepData } from './diagram'
 import type { FeynmanPromptConfig } from './feynman'
+import type { PreFlightCheck } from './preFlightCheck'
 
 /**
  * Scaffold Density Level
@@ -119,6 +120,8 @@ export interface ScaffoldData {
   warningBeacons?: WarningBeacon[]   // Step-specific warning beacons
   // Optional Sanity Check Matrix (enhanced verification)
   sanityCheckMatrix?: SanityCheckMatrix  // Three-pronged verification menu
+  // Optional Pre-Flight Checks (formula condition validation)
+  preFlightChecks?: PreFlightCheck[]     // Verify conditions before formula usage
 }
 
 /**
