@@ -15,6 +15,7 @@ import type {
   OutlineStep,
 } from '@/types/phasedScaffold'
 import type { MicroTaskScaffoldData, MicroTaskStep, MicroTask } from '@/types/microTask'
+import type { DiagramStepData, RequiredForce, ForceDirection } from '@/types/diagram'
 import { authenticatedFetch } from '@/lib/api/apiClient'
 
 export type PhasedLoadingState = 'idle' | 'loading_outline' | 'outline_ready' | 'loading_step' | 'error'
@@ -247,6 +248,10 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
           const level = (taskIndex + 1) as 1 | 2 | 3 | 4 | 5
           const levelTitle = getLevelTitle(taskIndex + 1)
 
+          // Map API task types to frontend task types:
+          // MCQ → MULTIPLE_CHOICE
+          // FILL_BLANK → FILL_BLANK
+          // SHORT_ANSWER → VERBAL_PLAN
           if (task.type === 'FILL_BLANK') {
             return {
               level,
@@ -258,41 +263,60 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
               distractors: task.distractors || [],
               explanation: task.reasoning,
             }
+          } else if (task.type === 'SHORT_ANSWER') {
+            // SHORT_ANSWER maps to VERBAL_PLAN
+            return {
+              level,
+              levelTitle,
+              type: 'VERBAL_PLAN' as const,
+              question: task.question,
+              prompt: task.question, // Use question as prompt
+              minWords: 10,
+              requiredKeywords: task.expected_keywords || [],
+              scaffoldingQuestions: [],
+              explanation: task.reasoning,
+            }
           } else {
+            // MCQ → MULTIPLE_CHOICE
+            // Ensure options array is valid (non-empty)
+            const options = task.options && task.options.length > 0
+              ? task.options
+              : ['Option A', 'Option B', 'Option C', 'Option D'] // Fallback options
+            const correctIndex = typeof task.correct_index === 'number' ? task.correct_index : 0
+
             return {
               level,
               levelTitle,
               type: 'MULTIPLE_CHOICE' as const,
               question: task.question,
-              options: task.options || [],
-              correctIndex: task.correct_index || 0,
+              options,
+              correctIndex: Math.min(correctIndex, options.length - 1), // Ensure valid index
               explanation: task.reasoning,
             }
           }
         })
       } else {
-        // Step not expanded yet - create placeholder task based on outline
-        // This ensures the step shows as "not completed" with something to work on
-        tasks = [{
-          level: 1 as const,
-          levelTitle: 'Concept' as const,
-          type: 'MULTIPLE_CHOICE' as const,
-          question: isLoading
-            ? 'Loading step content...'
-            : outlineStep.minimal_task || `What is the goal of "${outlineStep.title}"?`,
-          options: isLoading
-            ? ['Loading...', 'Please wait...', 'Fetching content...', 'Almost ready...']
-            : [
-                outlineStep.goal || 'Understand the concept',
-                'Skip this step',
-                'I need a hint',
-                'Show me an example',
-              ],
-          correctIndex: 0,
-          explanation: isLoading
-            ? 'Loading detailed explanation...'
-            : `Goal: ${outlineStep.goal}`,
-        }]
+        // Step not expanded yet - use empty tasks array to show loading state
+        // The MicroTaskStepAccordion will display "Loading step content..." when tasks is empty
+        // This prevents fake quiz options from being shown and validated incorrectly
+        tasks = []
+      }
+
+      // Map fbd_data to diagramData for diagram steps
+      let diagramData: DiagramStepData | undefined = undefined
+      if (outlineStep.requires_fbd && expansion?.fbd_data) {
+        const fbdData = expansion.fbd_data
+        diagramData = {
+          scenarioType: fbdData.scenario_type || 'horizontal',
+          objectShape: fbdData.object_shape || 'block',
+          surfaceAngle: fbdData.surface_angle,
+          requiredForces: (fbdData.required_forces || []).map(f => ({
+            type: f.type,
+            direction: (f.direction || 'down') as ForceDirection,
+            label: f.label,
+          })),
+          hints: expansion.hints?.map(h => h.content),
+        }
       }
 
       return {
@@ -303,6 +327,8 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
         tasks,
         requiredConcepts: [],
         feynmanPrompt: expansion?.feynman_prompt,
+        // Diagram step data for FBD canvas
+        diagramData,
         // Include expansion data for components that need it
         _expansion: expansion,
         _isLoading: isLoading,
@@ -313,6 +339,7 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
         _isLoading?: boolean
         _outlineStepId?: string
         _needsExpansion?: boolean
+        diagramData?: DiagramStepData
       }
     })
 
