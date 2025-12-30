@@ -428,14 +428,6 @@ export default function MicroTaskStepAccordion({
   const hasNoTasks = step.tasks.length === 0
   const allTasksCompleted = !hasNoTasks && (currentLevel > step.tasks.length || isCompleted)
 
-  // Debug logging for step tasks
-  useEffect(() => {
-    console.log(`[MicroTaskStepAccordion] Step ${step.id} (${step.title}): ${step.tasks.length} tasks, isActive=${isActive}, isExpanded=${isExpanded}`)
-    if (step.tasks.length > 0) {
-      console.log(`[MicroTaskStepAccordion] Step ${step.id} tasks:`, step.tasks.map(t => ({ level: t.level, type: t.type })))
-    }
-  }, [step.id, step.title, step.tasks, isActive, isExpanded])
-
   // Get required concepts for this step
   const requiredConcepts = concepts.filter(c =>
     step.requiredConcepts.includes(c.id)

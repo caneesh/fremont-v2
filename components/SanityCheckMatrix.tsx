@@ -216,7 +216,7 @@ export default function SanityCheckMatrix({
   const currentConfig = CHECK_CONFIG[activeCheck]
 
   return (
-    <div className="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
+    <div data-testid="sanity-check" className="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-500/30">
         <div className="flex items-center justify-between">

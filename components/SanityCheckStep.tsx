@@ -392,7 +392,7 @@ export default function SanityCheckStep({
 
   // Render initial state (idle or analyzing)
   return (
-    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-indigo-300 dark:border-indigo-700">
+    <div data-testid="sanity-check" className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-indigo-300 dark:border-indigo-700">
       <div className="flex items-center space-x-3 mb-6">
         <span className="text-4xl">{getCheckTypeEmoji(sanityCheck.type)}</span>
         <div>
