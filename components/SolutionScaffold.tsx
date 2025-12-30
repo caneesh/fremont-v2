@@ -673,6 +673,36 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [recordGradingErrors, currentStep])
 
+  // Handle highlighting problem text from constraint feedback
+  const handleHighlightProblem = useCallback((startIndex: number, endIndex: number) => {
+    setHighlightedProblemRange({ start: startIndex, end: endIndex })
+    // Scroll to problem statement
+    problemStatementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // Auto-clear highlight after 5 seconds
+    setTimeout(() => setHighlightedProblemRange(null), 5000)
+  }, [])
+
+  // Helper to render problem text with highlighting
+  const renderProblemText = useCallback(() => {
+    const text = data.problem
+    if (!highlightedProblemRange) {
+      return text
+    }
+    const { start, end } = highlightedProblemRange
+    const before = text.slice(0, start)
+    const highlighted = text.slice(start, end)
+    const after = text.slice(end)
+    return (
+      <>
+        {before}
+        <mark className="bg-yellow-300 dark:bg-yellow-500/40 text-yellow-900 dark:text-yellow-100 px-1 rounded font-medium animate-pulse">
+          {highlighted}
+        </mark>
+        {after}
+      </>
+    )
+  }, [data.problem, highlightedProblemRange])
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header with problem statement and actions */}
