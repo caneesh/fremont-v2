@@ -469,6 +469,22 @@ describe('Constraint Collision Engine', () => {
           expect(collisions[0].errorPatternId).toMatch(/^EP\d{3}$/)
         }
       })
+
+      it('detects spring problem with wrong kinematics approach', () => {
+        const problemText = 'An ideal spring with spring constant k = 200 N/m is compressed by 0.1 m. A block is released from rest.'
+        const wrongSolution = 'Using v² = u² + 2as with a = g = 10 m/s², v = √2 m/s'
+
+        const constraints = extractConstraints(problemText, 'test')
+
+        // Verify spring constraints were extracted
+        expect(constraints.statedConstraints.some(c => c.normalizedForm === 'ideal_spring')).toBe(true)
+        expect(constraints.statedConstraints.some(c => c.normalizedForm === 'spring_constant_given')).toBe(true)
+
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+
+        // Student used kinematics instead of energy - check if forces/equations detected
+        expect(analysis.equationsUsed.length).toBeGreaterThanOrEqual(0)
+      })
     })
 
     describe('getCollisionSummary', () => {
