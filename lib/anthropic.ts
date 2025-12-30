@@ -65,6 +65,13 @@ export interface ScaffolderResponse {
     requiredConcepts: string[]
     question?: string
     validationPrompt?: string
+    feynmanPrompt?: {
+      topic: string
+      question: string
+      context?: string
+      minScore?: number
+      maxAttempts?: number
+    }
   }>
   sanityCheck: {
     question: string
@@ -130,6 +137,13 @@ export interface MicroTaskScaffolderResponse {
       explanation: string
     }>
     requiredConcepts: string[]
+    feynmanPrompt?: {
+      topic: string
+      question: string
+      context?: string
+      minScore?: number
+      maxAttempts?: number
+    }
   }>
   sanityCheck: {
     question: string
@@ -222,9 +236,30 @@ Based on your internal solution, create a Socratic learning scaffold with:
       - "math_manipulation": Algebraic manipulation, calculus, solving equations
       - "sanity_check": Verifying limits, dimensions, physical reasonableness
 
-   b) prerequisites - Array of concept tags this step requires (use concept ids)
+   b) feynmanPrompt (OPTIONAL but RECOMMENDED for physics_concept steps):
+      For steps involving key physics concepts, add a Feynman micro-prompt that asks the student
+      to EXPLAIN WHY the concept works BEFORE they start calculating. This builds deep understanding.
 
-   c) hints - ONLY THE FIRST 3 HINT LEVELS (for faster generation):
+      Include feynmanPrompt when:
+      - The step applies a fundamental physics law (conservation laws, Newton's laws, etc.)
+      - The step requires understanding a non-obvious physical mechanism
+      - Students commonly memorize formulas without understanding the underlying physics
+
+      DO NOT include feynmanPrompt for:
+      - Pure math manipulation steps
+      - Diagram/setup steps (use diagram canvas instead)
+      - Steps that just substitute values
+
+      Format:
+      "feynmanPrompt": {
+        "topic": "conservation-of-momentum" (kebab-case topic identifier),
+        "question": "Why is momentum conserved when these objects collide?",
+        "context": "No external forces act on the system" (optional setup context)
+      }
+
+   c) prerequisites - Array of concept tags this step requires (use concept ids)
+
+   d) hints - ONLY THE FIRST 3 HINT LEVELS (for faster generation):
 
    Level 1 - Concept Identification:
    • Guide student to identify applicable laws/concepts WITHOUT stating them
@@ -284,6 +319,11 @@ Output ONLY valid JSON with this EXACT structure:
       "title": "Step Title",
       "stepType": "physics_concept",
       "prerequisites": ["concept-id-1"],
+      "feynmanPrompt": {
+        "topic": "concept-name-kebab-case",
+        "question": "Why does this physics principle apply here? Explain the mechanism.",
+        "context": "Brief context about the physical situation"
+      },
       "hints": [
         {
           "level": 1,
@@ -477,6 +517,26 @@ LEVEL 3 - Strategy (MULTIPLE_CHOICE):
 
 Each task has an "explanation" field - this is the INSIGHT the student earns after answering correctly. Make it valuable and educational!
 
+FEYNMAN MICRO-PROMPTS (OPTIONAL but RECOMMENDED):
+For steps involving key physics concepts, add a "feynmanPrompt" that asks the student to EXPLAIN WHY the concept works BEFORE they start the micro-tasks. This builds deep understanding.
+
+Include feynmanPrompt when:
+- The step applies a fundamental physics law (conservation laws, Newton's laws, etc.)
+- The step requires understanding a non-obvious physical mechanism
+- Students commonly memorize formulas without understanding the underlying physics
+
+DO NOT include feynmanPrompt for:
+- Pure math manipulation steps
+- Diagram/setup steps
+- Steps that just substitute values
+
+Format:
+"feynmanPrompt": {
+  "topic": "conservation-of-energy" (kebab-case topic identifier),
+  "question": "Why is mechanical energy conserved in this system?",
+  "context": "Only gravity does work on the object" (optional)
+}
+
 JSON OUTPUT FORMAT:
 {
   "domain": "Main physics domain",
@@ -493,6 +553,12 @@ JSON OUTPUT FORMAT:
     {
       "id": 1,
       "title": "Step Title (e.g., Choose Reference Frame)",
+      "stepType": "physics_concept",
+      "feynmanPrompt": {
+        "topic": "physics-concept-name",
+        "question": "Why does this physics principle apply here? Explain the underlying mechanism.",
+        "context": "Brief context about the physical situation"
+      },
       "tasks": [
         {
           "level": 1,
