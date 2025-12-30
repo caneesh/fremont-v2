@@ -312,7 +312,7 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
           surfaceAngle: fbdData.surface_angle,
           requiredForces: (fbdData.required_forces || []).map(f => ({
             type: f.type,
-            direction: (f.direction || 'down') as ForceDirection,
+            direction: normalizeForceDirection(f.direction || 'down'),
             label: f.label,
           })),
           hints: expansion.hints?.map(h => h.content),
@@ -420,4 +420,36 @@ function mapStepType(outlineType: string): 'diagram' | 'physics_concept' | 'math
     check: 'sanity_check',
   }
   return mapping[outlineType]
+}
+
+/**
+ * Normalize force direction from AI format to frontend format
+ * AI may return underscores (perpendicular_to_surface) but frontend uses hyphens (perpendicular-surface)
+ */
+function normalizeForceDirection(direction: string): ForceDirection {
+  // Map common AI variations to standard frontend format
+  const directionMap: Record<string, ForceDirection> = {
+    'perpendicular_to_surface': 'perpendicular-surface',
+    'perpendicular-to-surface': 'perpendicular-surface',
+    'perpendicular_surface': 'perpendicular-surface',
+    'along_surface': 'along-surface',
+    'along-surface': 'along-surface',
+    'up_left': 'up-left',
+    'up_right': 'up-right',
+    'down_left': 'down-left',
+    'down_right': 'down-right',
+    // Standard directions pass through
+    'up': 'up',
+    'down': 'down',
+    'left': 'left',
+    'right': 'right',
+    'up-left': 'up-left',
+    'up-right': 'up-right',
+    'down-left': 'down-left',
+    'down-right': 'down-right',
+    'perpendicular-surface': 'perpendicular-surface',
+  }
+
+  const normalized = direction.toLowerCase().trim()
+  return directionMap[normalized] || 'down'
 }
