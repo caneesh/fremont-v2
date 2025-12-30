@@ -14,7 +14,14 @@ import type {
   ImpliedConstraint,
 } from '@/types/constraintCollision'
 import { IMPLICATION_RULES, CONSTRAINT_DESCRIPTIONS } from './constraintImplicationRules'
-import { problemHasFriction, problemIsFrictionless } from './constraintExtractor'
+import {
+  problemHasFriction,
+  problemIsFrictionless,
+  problemHasSpring,
+  problemHasSpringConstant,
+  problemHasCollision,
+  problemHasCircularMotion,
+} from './constraintExtractor'
 
 /**
  * Analyze student work to extract assumptions
@@ -132,6 +139,117 @@ export function extractStudentAssumptions(
     }
   }
 
+  // ============================================
+  // Spring-specific assumption detection
+  // ============================================
+
+  // Check if student uses constant acceleration kinematics on spring problem
+  if (problemHasSpring(problemConstraints)) {
+    const usesConstantAccelKinematics = /v²\s*=\s*u²\s*\+\s*2as|v\s*=\s*u\s*\+\s*at|s\s*=\s*ut\s*\+\s*½at²/i.test(
+      studentSolution
+    )
+    const usesSpringEnergy = /(?:spring\s+)?(?:PE|potential\s+energy)\s*=\s*½?\s*k\s*x²|½kx²|kx²\/2/i.test(
+      studentSolution
+    )
+
+    if (usesConstantAccelKinematics && !usesSpringEnergy) {
+      assumptions.push({
+        id: `SA${String(assumptionId++).padStart(3, '0')}`,
+        type: 'implicit',
+        description: 'Using constant acceleration kinematics on spring problem',
+        evidence: 'Kinematic equations (v² = u² + 2as) used where acceleration varies with position',
+        category: 'kinematic',
+        affectsEquations: ['kinematics'],
+      })
+    }
+  }
+
+  // Check if student uses gravity instead of spring force
+  if (problemHasSpringConstant(problemConstraints)) {
+    const usesGravityAccel = /a\s*=\s*g\s*=|a\s*=\s*10\s*m\/s²|a\s*=\s*9\.8/i.test(studentSolution)
+    const usesSpringForce = /F\s*=\s*k\s*x|F\s*=\s*-?\s*kx|spring\s+force/i.test(studentSolution)
+
+    if (usesGravityAccel && !usesSpringForce) {
+      assumptions.push({
+        id: `SA${String(assumptionId++).padStart(3, '0')}`,
+        type: 'implicit',
+        description: 'Using gravitational acceleration instead of spring force',
+        evidence: 'a = g used when spring constant k is given',
+        category: 'force',
+        affectsForces: ['spring'],
+        affectsEquations: ['F = ma'],
+      })
+    }
+  }
+
+  // Check if student ignores spring potential energy
+  if (problemHasSpring(problemConstraints)) {
+    const mentionsSpringEnergy = /spring\s+(?:PE|energy)|½\s*k\s*x²|kx²|elastic\s+(?:PE|potential)/i.test(
+      studentSolution
+    )
+    const mentionsKineticEnergy = /KE|kinetic\s+energy|½\s*m\s*v²|mv²/i.test(studentSolution)
+
+    // If they use KE but not spring PE, they might be missing spring energy
+    if (mentionsKineticEnergy && !mentionsSpringEnergy) {
+      assumptions.push({
+        id: `SA${String(assumptionId++).padStart(3, '0')}`,
+        type: 'implicit',
+        description: 'Spring potential energy not considered in energy analysis',
+        evidence: 'Kinetic energy used but spring PE (½kx²) not mentioned',
+        category: 'conservation',
+        affectsEquations: ['energy equation'],
+      })
+    }
+  }
+
+  // ============================================
+  // Collision-specific assumption detection
+  // ============================================
+
+  if (problemHasCollision(problemConstraints)) {
+    // Check if student conserves KE for inelastic collision
+    const hasInelasticCollision =
+      problemConstraints.statedConstraints.some(c =>
+        c.normalizedForm === 'inelastic_collision' ||
+        c.normalizedForm === 'perfectly_inelastic'
+      )
+    const conservesKE = /KE.*conserved|kinetic\s+energy.*conserved|½m₁v₁²\s*\+\s*½m₂v₂²\s*=/i.test(
+      studentSolution
+    )
+
+    if (hasInelasticCollision && conservesKE) {
+      assumptions.push({
+        id: `SA${String(assumptionId++).padStart(3, '0')}`,
+        type: 'implicit',
+        description: 'Conserving kinetic energy in inelastic collision',
+        evidence: 'KE conservation applied to inelastic collision (only momentum is conserved)',
+        category: 'conservation',
+        affectsEquations: ['energy equation'],
+      })
+    }
+  }
+
+  // ============================================
+  // Circular motion-specific assumption detection
+  // ============================================
+
+  if (problemHasCircularMotion(problemConstraints)) {
+    // Check if student forgets centripetal acceleration
+    const mentionsCentripetalAccel = /v²\/r|ω²r|centripetal|a_c|a_r/i.test(studentSolution)
+    const usesLinearKinematics = /v\s*=\s*u\s*\+\s*at|a\s*=.*constant/i.test(studentSolution)
+
+    if (usesLinearKinematics && !mentionsCentripetalAccel) {
+      assumptions.push({
+        id: `SA${String(assumptionId++).padStart(3, '0')}`,
+        type: 'implicit',
+        description: 'Using linear kinematics instead of circular motion equations',
+        evidence: 'Linear acceleration used when centripetal acceleration (v²/r) needed',
+        category: 'kinematic',
+        affectsEquations: ['kinematics'],
+      })
+    }
+  }
+
   return assumptions
 }
 
@@ -146,7 +264,9 @@ export function extractForcesFromSolution(studentSolution: string): string[] {
     { pattern: /friction|f\s*=\s*[μµ]/i, force: 'friction' },
     { pattern: /tension|T(?:\s*=)?/i, force: 'tension' },
     { pattern: /applied\s*(?:force)?|F(?:_?a)?(?:\s*=)?/i, force: 'applied' },
-    { pattern: /spring\s*(?:force)?|k\s*x/i, force: 'spring' },
+    { pattern: /spring\s*(?:force)?|F\s*=\s*-?\s*k\s*x|k\s*x/i, force: 'spring' },
+    { pattern: /centripetal|mv²\/r|mω²r/i, force: 'centripetal' },
+    { pattern: /buoyant|buoyancy|ρVg/i, force: 'buoyant' },
   ]
 
   for (const { pattern, force } of forcePatterns) {
@@ -172,13 +292,22 @@ export function determineForcesMissing(
     missing.push('friction')
   }
 
-  // Add more force checks based on constraints
-  // e.g., if there's a string, tension should be present
+  // Check if spring force should be present
+  if (problemHasSpring(problemConstraints) && !forcesConsidered.includes('spring')) {
+    missing.push('spring')
+  }
+
+  // Check if tension should be present (string/rope in problem)
   const hasString = problemConstraints.physicalObjects.some(
     o => o.type === 'string' || o.type === 'rope'
   )
   if (hasString && !forcesConsidered.includes('tension')) {
     missing.push('tension')
+  }
+
+  // Check if centripetal force should be present
+  if (problemHasCircularMotion(problemConstraints) && !forcesConsidered.includes('centripetal')) {
+    missing.push('centripetal')
   }
 
   return missing
@@ -336,6 +465,36 @@ function findViolatingAssumption(
     )
   }
 
+  // Spring-related violations
+  if (normalizedForm === 'ideal_spring' || normalizedForm === 'spring_constant_given') {
+    return (
+      studentAnalysis.assumptions.find(
+        a =>
+          a.description.toLowerCase().includes('constant acceleration kinematics on spring') ||
+          a.description.toLowerCase().includes('gravitational acceleration instead of spring') ||
+          a.description.toLowerCase().includes('spring potential energy not considered')
+      ) || null
+    )
+  }
+
+  // Collision-related violations
+  if (normalizedForm === 'inelastic_collision' || normalizedForm === 'perfectly_inelastic') {
+    return (
+      studentAnalysis.assumptions.find(a =>
+        a.description.toLowerCase().includes('conserving kinetic energy in inelastic')
+      ) || null
+    )
+  }
+
+  // Circular motion violations
+  if (normalizedForm === 'circular_motion' || normalizedForm === 'circular_path') {
+    return (
+      studentAnalysis.assumptions.find(a =>
+        a.description.toLowerCase().includes('linear kinematics instead of circular')
+      ) || null
+    )
+  }
+
   return null
 }
 
@@ -378,6 +537,30 @@ function determineSeverity(
     return 'high'
   }
 
+  // High severity for spring-related errors (fundamentally wrong approach)
+  if (
+    (normalizedForm === 'ideal_spring' || normalizedForm === 'spring_constant_given') &&
+    (assumption.category === 'kinematic' || assumption.category === 'force')
+  ) {
+    return 'high'
+  }
+
+  // High severity for collision type errors
+  if (
+    (normalizedForm === 'inelastic_collision' || normalizedForm === 'elastic_collision') &&
+    assumption.category === 'conservation'
+  ) {
+    return 'high'
+  }
+
+  // High severity for circular motion errors
+  if (
+    (normalizedForm === 'circular_motion' || normalizedForm === 'circular_path') &&
+    assumption.category === 'kinematic'
+  ) {
+    return 'high'
+  }
+
   // Medium severity for kinematic constraints
   if (assumption.category === 'kinematic') {
     return 'medium'
@@ -391,11 +574,31 @@ function determineSeverity(
  */
 function mapToErrorPattern(normalizedForm: string): string {
   const patternMap: Record<string, string> = {
+    // Friction
     friction_present: 'EP013', // CONSTRAINT_OMISSION
     frictionless: 'EP014', // CONSTRAINT_CONTRADICTION
+
+    // Energy/Conservation
     energy_not_conserved: 'EP002', // CONSERVATION_MISAPPLICATION
+
+    // Rolling/String constraints
     pure_rolling: 'EP010', // BOUNDARY_CONDITIONS
     taut_string: 'EP010', // BOUNDARY_CONDITIONS
+
+    // Spring-related
+    ideal_spring: 'EP015', // SPRING_KINEMATICS_ERROR (new)
+    spring_constant_given: 'EP015', // SPRING_KINEMATICS_ERROR
+    spring_deformation_given: 'EP015', // SPRING_KINEMATICS_ERROR
+
+    // Collision-related
+    elastic_collision: 'EP016', // COLLISION_CONSERVATION_ERROR (new)
+    inelastic_collision: 'EP016', // COLLISION_CONSERVATION_ERROR
+    perfectly_inelastic: 'EP016', // COLLISION_CONSERVATION_ERROR
+
+    // Circular motion
+    circular_motion: 'EP017', // CIRCULAR_MOTION_ERROR (new)
+    circular_path: 'EP017', // CIRCULAR_MOTION_ERROR
+    banked_curve: 'EP017', // CIRCULAR_MOTION_ERROR
   }
 
   return patternMap[normalizedForm] || 'EP013'
@@ -479,6 +682,40 @@ function findConstraintForForce(
         return rule?.implies.normalizedForm === 'friction_present'
       }) || null
     )
+  }
+
+  if (force === 'spring') {
+    // Find spring-related constraint
+    const stated = problemConstraints.statedConstraints.find(
+      c =>
+        c.normalizedForm === 'ideal_spring' ||
+        c.normalizedForm === 'spring_constant_given' ||
+        c.normalizedForm === 'spring_deformation_given'
+    )
+    if (stated) return stated
+  }
+
+  if (force === 'centripetal') {
+    // Find circular motion-related constraint
+    const stated = problemConstraints.statedConstraints.find(
+      c =>
+        c.normalizedForm === 'circular_motion' ||
+        c.normalizedForm === 'circular_path' ||
+        c.normalizedForm === 'banked_curve' ||
+        c.normalizedForm === 'conical_pendulum'
+    )
+    if (stated) return stated
+  }
+
+  if (force === 'tension') {
+    // Find string-related constraint
+    const stated = problemConstraints.statedConstraints.find(
+      c =>
+        c.normalizedForm === 'massless_string' ||
+        c.normalizedForm === 'taut_string' ||
+        c.normalizedForm === 'inextensible_string'
+    )
+    if (stated) return stated
   }
 
   return null

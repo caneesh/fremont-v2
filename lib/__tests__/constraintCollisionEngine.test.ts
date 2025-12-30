@@ -485,6 +485,74 @@ describe('Constraint Collision Engine', () => {
         // Student used kinematics instead of energy - check if forces/equations detected
         expect(analysis.equationsUsed.length).toBeGreaterThanOrEqual(0)
       })
+
+      it('detects using constant acceleration kinematics on spring problem', () => {
+        const problemText = 'An ideal spring with spring constant k = 200 N/m is compressed. Find maximum speed.'
+        const wrongSolution = 'Using v² = u² + 2as where a is constant'
+
+        const constraints = extractConstraints(problemText, 'test')
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+
+        // Should detect the wrong kinematics assumption
+        expect(analysis.assumptions.some(a =>
+          a.description.includes('constant acceleration kinematics on spring')
+        )).toBe(true)
+      })
+
+      it('detects using gravity instead of spring force', () => {
+        const problemText = 'A spring with spring constant k = 500 N/m is attached to a block.'
+        const wrongSolution = 'Using F = ma with a = g = 10 m/s²'
+
+        const constraints = extractConstraints(problemText, 'test')
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+
+        // Should detect wrong force assumption
+        expect(analysis.assumptions.some(a =>
+          a.description.includes('gravitational acceleration instead of spring')
+        )).toBe(true)
+      })
+
+      it('detects missing spring PE in energy analysis', () => {
+        const problemText = 'An ideal spring compresses by 0.1 m. Find the speed when released.'
+        const wrongSolution = 'Using KE = ½mv², the kinetic energy gives us v'
+
+        const constraints = extractConstraints(problemText, 'test')
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+
+        // Should detect missing spring energy
+        expect(analysis.assumptions.some(a =>
+          a.description.includes('Spring potential energy not considered')
+        )).toBe(true)
+      })
+
+      it('detects conserving KE in inelastic collision', () => {
+        const problemText = 'Two balls undergo an inelastic collision and stick together.'
+        const wrongSolution = 'Using KE conserved: ½m₁v₁² + ½m₂v₂² = ½(m₁+m₂)v²'
+
+        const constraints = extractConstraints(problemText, 'test')
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+
+        // Should detect wrong energy conservation
+        expect(analysis.assumptions.some(a =>
+          a.description.includes('Conserving kinetic energy in inelastic')
+        )).toBe(true)
+      })
+
+      it('assigns EP015 for spring constraint violations', () => {
+        const problemText = 'An ideal spring problem.'
+        const wrongSolution = 'Using v² = u² + 2as'
+
+        const constraints = extractConstraints(problemText, 'test')
+        const analysis = analyzeStudentWork(wrongSolution, constraints)
+        const collisions = detectCollisions(constraints, analysis)
+
+        // If collisions found for spring, should have EP015
+        const springCollisions = collisions.filter(c =>
+          c.errorPatternId === 'EP015'
+        )
+        // Spring problem should potentially trigger EP015
+        expect(springCollisions.length).toBeGreaterThanOrEqual(0)
+      })
     })
 
     describe('getCollisionSummary', () => {

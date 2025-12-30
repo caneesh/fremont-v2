@@ -416,3 +416,46 @@ export function problemHasFriction(constraintData: ProblemConstraintData): boole
 export function problemIsFrictionless(constraintData: ProblemConstraintData): boolean {
   return hasConstraint(constraintData, 'frictionless')
 }
+
+/**
+ * Determine if problem involves a spring
+ */
+export function problemHasSpring(constraintData: ProblemConstraintData): boolean {
+  return (
+    hasConstraint(constraintData, 'ideal_spring') ||
+    hasConstraint(constraintData, 'spring_constant_given') ||
+    hasConstraint(constraintData, 'spring_deformation_given') ||
+    constraintData.physicalObjects.some(o => o.type === 'spring')
+  )
+}
+
+/**
+ * Determine if problem has spring constant given
+ */
+export function problemHasSpringConstant(constraintData: ProblemConstraintData): boolean {
+  return hasConstraint(constraintData, 'spring_constant_given')
+}
+
+/**
+ * Determine if problem involves collision
+ */
+export function problemHasCollision(constraintData: ProblemConstraintData): boolean {
+  return (
+    hasConstraint(constraintData, 'elastic_collision') ||
+    hasConstraint(constraintData, 'inelastic_collision') ||
+    hasConstraint(constraintData, 'perfectly_inelastic') ||
+    hasConstraint(constraintData, 'restitution_given')
+  )
+}
+
+/**
+ * Determine if problem involves circular motion
+ */
+export function problemHasCircularMotion(constraintData: ProblemConstraintData): boolean {
+  return (
+    hasConstraint(constraintData, 'circular_motion') ||
+    hasConstraint(constraintData, 'circular_path') ||
+    hasConstraint(constraintData, 'banked_curve') ||
+    hasConstraint(constraintData, 'conical_pendulum')
+  )
+}
