@@ -721,8 +721,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             ← New Problem
           </button>
         </div>
-        <p className="text-gray-800 dark:text-dark-text-secondary leading-relaxed text-base sm:text-lg mb-6">
-          {data.problem}
+        <p
+          ref={problemStatementRef}
+          className="text-gray-800 dark:text-dark-text-secondary leading-relaxed text-base sm:text-lg mb-6"
+        >
+          {renderProblemText()}
         </p>
 
         {/* Action Buttons */}
@@ -944,6 +947,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                     subdomain={data.subdomain}
                     concepts={data.concepts}
                     onGradeComplete={handleGradeComplete}
+                    onHighlightProblem={handleHighlightProblem}
                   />
                 </div>
               )}
