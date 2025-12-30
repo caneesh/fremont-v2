@@ -128,7 +128,10 @@ export async function generateOutlineScaffold(
 
   // Extract JSON from response
   const jsonMatch = responseText.match(/\{[\s\S]+\}/)
-  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+  let jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  // Clean common JSON issues from LLM output
+  jsonStr = cleanJsonString(jsonStr)
 
   try {
     const outlineData = JSON.parse(jsonStr)
@@ -202,7 +205,10 @@ export async function generateStepExpansion(
 
   // Extract JSON from response
   const jsonMatch = responseText.match(/\{[\s\S]+\}/)
-  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+  let jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  // Clean common JSON issues from LLM output
+  jsonStr = cleanJsonString(jsonStr)
 
   try {
     const expansionData = JSON.parse(jsonStr)
@@ -282,7 +288,10 @@ export async function generateFinalSolve(
 
   // Extract JSON from response
   const jsonMatch = responseText.match(/\{[\s\S]+\}/)
-  const jsonStr = jsonMatch ? jsonMatch[0] : responseText
+  let jsonStr = jsonMatch ? jsonMatch[0] : responseText
+
+  // Clean common JSON issues from LLM output
+  jsonStr = cleanJsonString(jsonStr)
 
   try {
     const solveData = JSON.parse(jsonStr)
@@ -309,3 +318,24 @@ export async function generateFinalSolve(
 
 // Re-export cache utilities for external use
 export { generateScaffoldId, SCHEMA_VERSION } from './scaffoldCache'
+
+/**
+ * Helper to clean and repair common JSON issues from LLM output
+ */
+function cleanJsonString(jsonStr: string): string {
+  let cleaned = jsonStr
+    // Remove any markdown code block markers
+    .replace(/```json\s*/g, '')
+    .replace(/```\s*/g, '')
+    // Fix trailing commas before closing brackets
+    .replace(/,(\s*[}\]])/g, '$1')
+    // Fix unescaped newlines in strings (common LLM issue)
+    .replace(/(?<!\\)\\n/g, '\\n')
+    // Remove control characters that break JSON
+    .replace(/[\x00-\x1F\x7F]/g, (char) => {
+      if (char === '\n' || char === '\r' || char === '\t') return char
+      return ''
+    })
+
+  return cleaned
+}

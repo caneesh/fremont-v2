@@ -13,8 +13,10 @@ CRITICAL CONSTRAINTS:
 - Output ONLY valid JSON, no other text
 - Expand ONLY the requested step_id
 - Do NOT modify step title or change step ordering
-- Keep explanation under 250 words
-- Generate 2-4 micro-tasks per step
+- Keep explanation under 150 words (BE CONCISE)
+- Generate 2-3 micro-tasks per step (NOT 4)
+- Keep reasoning fields SHORT (1-2 sentences max)
+- COMPLETE the JSON - do not truncate
 
 OUTPUT FORMAT:
 {
@@ -112,5 +114,6 @@ OUTPUT the JSON for this single step expansion. Do NOT include other steps.`
 /**
  * Max tokens for step expansion
  * Moderate limit for detailed single-step content
+ * Increased to 2500 to prevent truncation of complex responses
  */
-export const STEP_EXPANSION_MAX_TOKENS = 1800
+export const STEP_EXPANSION_MAX_TOKENS = 2500
