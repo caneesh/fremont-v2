@@ -140,27 +140,27 @@ export default function ExplainToFriend({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-blue-400 p-6 animate-fade-in">
+    <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg border-2 border-blue-400 dark:border-blue-600 p-6 animate-fade-in">
       <div className="mb-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="text-4xl">💡</div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Explain to a Friend
             </h2>
-            <p className="text-gray-700 text-base leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
               Before marking this problem as mastered, explain the solution as if you&apos;re teaching a friend.
-              <strong className="text-blue-600"> Use exactly 3 lines.</strong>
+              <strong className="text-blue-600 dark:text-blue-400"> Use exactly 3 lines.</strong>
             </p>
-            <p className="text-sm text-gray-600 mt-2 italic">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 italic">
               &quot;If you can&apos;t explain it simply, you don&apos;t understand it well enough.&quot; — Richard Feynman
             </p>
           </div>
         </div>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-          <p className="text-sm font-semibold text-blue-900 mb-2">What to include:</p>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
+          <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">What to include:</p>
+          <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
             <li>• <strong>Line 1:</strong> What&apos;s the main concept or approach?</li>
             <li>• <strong>Line 2:</strong> What&apos;s the key step or insight?</li>
             <li>• <strong>Line 3:</strong> Why does this method work?</li>
@@ -171,10 +171,10 @@ export default function ExplainToFriend({
       {/* Explanation Input */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
             Your Explanation:
           </label>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             {lineCount} / 3 lines • {wordCount} words
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function ExplainToFriend({
             setBuddyError(null)
           }}
           placeholder="Line 1: The main approach is...&#10;Line 2: The key step is...&#10;Line 3: This works because..."
-          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y"
+          className="w-full px-4 py-3 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           style={{ minHeight: '120px' }}
           disabled={isSubmitting}
         />
@@ -325,7 +325,7 @@ export default function ExplainToFriend({
                       setBuddyAnswers(next)
                     }}
                     placeholder="Your answer..."
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full rounded-md border border-gray-300 dark:border-slate-600 px-3 py-2 text-xs bg-white dark:bg-slate-700 text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={2}
                   />
                 </div>

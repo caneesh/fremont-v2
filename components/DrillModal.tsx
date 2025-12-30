@@ -109,13 +109,13 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
         <div className="p-6">
           {/* Question */}
           <div className="mb-6">
-            <p className="text-gray-900 dark:text-dark-text-primary font-medium mb-2">
+            <div className="text-gray-900 dark:text-dark-text-primary font-medium mb-2">
               <MathRenderer text={task.question} />
-            </p>
+            </div>
             {isFillBlankTask(task) && (
-              <p className="text-gray-700 dark:text-dark-text-secondary mt-2">
+              <div className="text-gray-700 dark:text-dark-text-secondary mt-2">
                 <MathRenderer text={task.sentence} />
-              </p>
+              </div>
             )}
           </div>
 
@@ -220,9 +220,9 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
                     </svg>
                     <span className="font-medium text-amber-800 dark:text-amber-300">Here&apos;s the answer</span>
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-dark-text-secondary mb-2">
+                  <div className="text-sm text-gray-700 dark:text-dark-text-secondary mb-2">
                     <MathRenderer text={task.explanation} />
-                  </p>
+                  </div>
                   <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
                     {drill.conceptReinforcement}
                   </p>
