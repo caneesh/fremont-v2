@@ -110,11 +110,11 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
           {/* Question */}
           <div className="mb-6">
             <p className="text-gray-900 dark:text-dark-text-primary font-medium mb-2">
-              <MathRenderer content={task.question} />
+              <MathRenderer text={task.question} />
             </p>
             {isFillBlankTask(task) && (
               <p className="text-gray-700 dark:text-dark-text-secondary mt-2">
-                <MathRenderer content={task.sentence} />
+                <MathRenderer text={task.sentence} />
               </p>
             )}
           </div>
@@ -156,7 +156,7 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
                           {String.fromCharCode(65 + index)}
                         </span>
                         <span className="text-gray-800 dark:text-dark-text-primary">
-                          <MathRenderer content={option} />
+                          <MathRenderer text={option} />
                         </span>
                       </div>
                     </button>
@@ -184,7 +184,7 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
                             : 'border-gray-200 dark:border-dark-border hover:border-gray-300 dark:hover:border-dark-border-strong'
                         } ${showFeedback ? 'cursor-default' : 'cursor-pointer'}`}
                       >
-                        <MathRenderer content={term} />
+                        <MathRenderer text={term} />
                       </button>
                     ))}
                   </div>
@@ -221,7 +221,7 @@ export default function DrillModal({ drill, onComplete, onSkip }: DrillModalProp
                     <span className="font-medium text-amber-800 dark:text-amber-300">Here&apos;s the answer</span>
                   </div>
                   <p className="text-sm text-gray-700 dark:text-dark-text-secondary mb-2">
-                    <MathRenderer content={task.explanation} />
+                    <MathRenderer text={task.explanation} />
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
                     {drill.conceptReinforcement}
