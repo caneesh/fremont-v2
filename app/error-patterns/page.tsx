@@ -19,8 +19,8 @@ export default function ErrorPatternsPage() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app flex items-center justify-center">
+        <div className="animate-pulse text-gray-500 dark:text-dark-text-muted">Loading...</div>
       </div>
     )
   }
@@ -33,11 +33,11 @@ export default function ErrorPatternsPage() {
         <div className="mb-8">
           <PageHeader />
 
-          <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-l-4 border-blue-500 dark:border-accent">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
               Error Pattern Analytics
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-dark-text-secondary">
               Track HOW you&apos;re making mistakes, not just IF you&apos;re making them.
               Identify recurring patterns and improve systematically.
             </p>
@@ -48,11 +48,11 @@ export default function ErrorPatternsPage() {
         <ErrorPatternAnalytics studentId={studentId} />
 
         {/* Help Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">How It Works</h2>
-          <div className="space-y-3 text-sm text-gray-700">
+        <div className="mt-8 bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-3">How It Works</h2>
+          <div className="space-y-3 text-sm text-gray-700 dark:text-dark-text-secondary">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
                 1
               </div>
               <div>
@@ -61,7 +61,7 @@ export default function ErrorPatternsPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs">
                 2
               </div>
               <div>
@@ -70,7 +70,7 @@ export default function ErrorPatternsPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-xs">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center font-bold text-xs">
                 3
               </div>
               <div>
@@ -79,7 +79,7 @@ export default function ErrorPatternsPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-xs">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold text-xs">
                 4
               </div>
               <div>
@@ -91,40 +91,40 @@ export default function ErrorPatternsPage() {
         </div>
 
         {/* Categories Explained */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">Error Categories</h2>
+        <div className="mt-8 bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-3">Error Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Conceptual Confusion:</strong>
-              <p className="text-gray-600">Mixing up fundamental physics concepts</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Conceptual Confusion:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Mixing up fundamental physics concepts</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Method Selection:</strong>
-              <p className="text-gray-600">Choosing wrong approach or solution method</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Method Selection:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Choosing wrong approach or solution method</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Sign Convention:</strong>
-              <p className="text-gray-600">Getting positive/negative signs wrong</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Sign Convention:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Getting positive/negative signs wrong</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Vector/Scalar Confusion:</strong>
-              <p className="text-gray-600">Treating vectors as scalars or vice versa</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Vector/Scalar Confusion:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Treating vectors as scalars or vice versa</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Conservation Misapplication:</strong>
-              <p className="text-gray-600">Wrongly applying conservation laws</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Conservation Misapplication:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Wrongly applying conservation laws</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Reference Frame Issues:</strong>
-              <p className="text-gray-600">Mixing different reference frames</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Reference Frame Issues:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Mixing different reference frames</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Assumption Violation:</strong>
-              <p className="text-gray-600">Making invalid assumptions</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Assumption Violation:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Making invalid assumptions</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded">
-              <strong className="text-gray-900">Boundary Conditions:</strong>
-              <p className="text-gray-600">Ignoring problem constraints</p>
+            <div className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded">
+              <strong className="text-gray-900 dark:text-dark-text-primary">Boundary Conditions:</strong>
+              <p className="text-gray-600 dark:text-dark-text-secondary">Ignoring problem constraints</p>
             </div>
           </div>
         </div>

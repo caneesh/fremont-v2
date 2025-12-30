@@ -42,7 +42,7 @@ export default function LaTeXDemoPage() {
   const [customLatex, setCustomLatex] = useState('')
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
@@ -52,7 +52,7 @@ export default function LaTeXDemoPage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
             LaTeX Math Rendering Demo
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-dark-text-secondary">
             Test and learn how to use mathematical notation in PhysiScaffold
           </p>
         </header>
@@ -61,8 +61,8 @@ export default function LaTeXDemoPage() {
           {/* Left Column - Examples & Editor */}
           <div className="space-y-6">
             {/* Demo Examples */}
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Example Equations</h2>
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">Example Equations</h2>
 
               {/* Example Selector */}
               <div className="flex flex-wrap gap-2 mb-4">
@@ -72,8 +72,8 @@ export default function LaTeXDemoPage() {
                     onClick={() => setActiveExample(idx)}
                     className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                       activeExample === idx
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-blue-600 dark:bg-accent text-white'
+                        : 'bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'
                     }`}
                   >
                     {idx + 1}
@@ -83,27 +83,27 @@ export default function LaTeXDemoPage() {
 
               {/* Active Example */}
               <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">{DEMO_EXAMPLES[activeExample].title}</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-dark-text-primary">{DEMO_EXAMPLES[activeExample].title}</h3>
 
                 {/* LaTeX Source */}
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                  <div className="text-xs font-semibold text-gray-600 mb-2">LaTeX Source:</div>
-                  <pre className="text-xs font-mono text-gray-800 overflow-x-auto whitespace-pre-wrap break-words">
+                <div className="bg-gray-50 dark:bg-dark-card-soft rounded-lg p-3 border border-gray-200 dark:border-dark-border">
+                  <div className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted mb-2">LaTeX Source:</div>
+                  <pre className="text-xs font-mono text-gray-800 dark:text-dark-text-primary overflow-x-auto whitespace-pre-wrap break-words">
                     {`$$${DEMO_EXAMPLES[activeExample].latex}$$`}
                   </pre>
                 </div>
 
                 {/* Rendered Output */}
-                <div className="bg-white rounded-lg p-4 border border-gray-300">
-                  <div className="text-xs font-semibold text-gray-600 mb-2">Rendered:</div>
+                <div className="bg-white dark:bg-dark-card rounded-lg p-4 border border-gray-300 dark:border-dark-border">
+                  <div className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted mb-2">Rendered:</div>
                   <MathRenderer text={`$$${DEMO_EXAMPLES[activeExample].latex}$$`} />
                 </div>
               </div>
             </div>
 
             {/* Custom Editor */}
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Try It Yourself</h2>
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">Try It Yourself</h2>
               <LaTeXEditor
                 initialValue={customLatex}
                 onChange={setCustomLatex}
@@ -116,37 +116,37 @@ export default function LaTeXDemoPage() {
 
           {/* Right Column - Help */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Quick Reference</h2>
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">Quick Reference</h2>
               <LaTeXHelp />
             </div>
 
             {/* Features */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-blue-200">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">✨ Enhanced Features</h2>
-              <ul className="space-y-2 text-sm text-gray-700">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border-2 border-blue-200 dark:border-blue-700">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-3">✨ Enhanced Features</h2>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Copy Button:</strong> Hover over equations to copy LaTeX source</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Error Handling:</strong> Clear error messages for invalid LaTeX</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Mobile Optimized:</strong> Responsive rendering on all devices</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Templates:</strong> Quick insert for common patterns</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Greek Letters:</strong> One-click insertion of symbols</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
                   <span><strong>Live Preview:</strong> See your equation as you type</span>
                 </li>
               </ul>

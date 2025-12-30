@@ -44,7 +44,8 @@ export default function FBDCanvas({
       case 'incline': {
         // Position block on the incline surface
         // Match the surface calculation from SurfaceRenderer
-        const angle = scenario.surfaceAngle ?? 30
+        const angle = (typeof scenario.surfaceAngle === 'number' && !isNaN(scenario.surfaceAngle))
+          ? scenario.surfaceAngle : 30
         const angleRad = (angle * Math.PI) / 180
         const surfaceLength = 200
         const surfaceBase = surfaceLength * Math.cos(angleRad)
@@ -244,7 +245,8 @@ export default function FBDCanvas({
 
             {/* Debug: show surface point (green) and block center (red) */}
             {scenario.scenarioType === 'incline' && (() => {
-              const angle = scenario.surfaceAngle ?? 30
+              const angle = (typeof scenario.surfaceAngle === 'number' && !isNaN(scenario.surfaceAngle))
+                ? scenario.surfaceAngle : 30
               const angleRad = (angle * Math.PI) / 180
               const surfaceLength = 200
               const surfaceBase = surfaceLength * Math.cos(angleRad)
