@@ -646,7 +646,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (result.status === 'SUCCESS') {
       setShowCelebration(true)
     }
-  }, [])
+
+    // Record errors to circuit breaker for MINOR_SLIP and CONCEPTUAL_GAP
+    if (result.status !== 'SUCCESS' && result.detailedAnalysis?.errors) {
+      recordGradingErrors(result.detailedAnalysis.errors, currentStep)
+    }
+  }, [recordGradingErrors, currentStep])
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -727,6 +732,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             <MistakeWarning
               warnings={mistakeWarnings}
               onDismiss={() => setShowWarnings(false)}
+            />
+          )}
+
+          {/* Circuit Breaker Warning */}
+          {warningMessage && warningTag && (
+            <CircuitBreakerWarning
+              message={warningMessage}
+              errorTag={warningTag}
+              onDismiss={dismissWarning}
             />
           )}
 
@@ -985,6 +999,37 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         show={showCelebration}
         onComplete={() => setShowCelebration(false)}
       />
+
+      {/* Circuit Breaker Drill Modal */}
+      {showDrillModal && currentDrill && (
+        <DrillModal
+          drill={currentDrill}
+          onComplete={handleDrillComplete}
+          onSkip={handleDrillSkip}
+        />
+      )}
+
+      {/* Problem Locked Overlay (when circuit breaker is tripped but drill not yet shown) */}
+      {isProblemLocked && !showDrillModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl p-6 max-w-sm mx-4 text-center">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+              Problem Paused
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
+              A quick practice drill will help reinforce the concept before continuing.
+            </p>
+            <div className="animate-pulse text-sm text-gray-500 dark:text-dark-text-muted">
+              Loading drill...
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
