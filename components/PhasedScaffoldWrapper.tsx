@@ -81,6 +81,8 @@ export default function PhasedScaffoldWrapper({
     if (state.loadingState === 'outline_ready' || state.expandedSteps.size > 0) {
       const data = getAdaptedScaffoldData()
       if (data) {
+        console.log('[PhasedScaffoldWrapper] Updating adaptedData, expanded steps:', state.expandedSteps.size)
+        console.log('[PhasedScaffoldWrapper] Step tasks:', data.steps.map(s => ({ id: s.id, title: s.title, tasks: s.tasks?.length || 0 })))
         setAdaptedData(data)
       }
     }

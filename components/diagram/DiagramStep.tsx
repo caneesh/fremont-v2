@@ -33,7 +33,6 @@ export default function DiagramStep({
   const [showSuccess, setShowSuccess] = useState(false)
 
   const diagramData = step.diagramData as DiagramStepData
-  console.log('[DiagramStep] diagramData:', diagramData)
 
   const handleToggle = () => {
     if (isLocked) return

@@ -27,14 +27,6 @@ export default function FBDCanvas({
   const canvasWidth = 400
   const canvasHeight = 300
 
-  // Debug logging
-  console.log('[FBDCanvas] scenario:', {
-    scenarioType: scenario.scenarioType,
-    objectShape: scenario.objectShape,
-    surfaceAngle: scenario.surfaceAngle,
-    requiredForces: scenario.requiredForces?.length
-  })
-
   // Calculate object position based on scenario
   const getObjectPosition = () => {
     const centerX = canvasWidth / 2
@@ -69,13 +61,6 @@ export default function FBDCanvas({
         const offsetX = -blockHalfSize * Math.sin(angleRad)
         const offsetY = -blockHalfSize * Math.cos(angleRad)
 
-        console.log('[FBDCanvas] incline calc:', {
-          angle,
-          surfacePoint: { x: surfaceX, y: surfaceY },
-          offset: { x: offsetX, y: offsetY },
-          blockCenter: { x: surfaceX + offsetX, y: surfaceY + offsetY }
-        })
-
         return {
           x: surfaceX + offsetX,
           y: surfaceY + offsetY
@@ -94,7 +79,6 @@ export default function FBDCanvas({
   }
 
   const objectPos = getObjectPosition()
-  console.log('[FBDCanvas] objectPos:', objectPos)
 
   // Get smart default angle based on force type and scenario
   const getDefaultAngle = useCallback((forceType: ForceType): number => {
@@ -242,27 +226,6 @@ export default function FBDCanvas({
               canvasWidth={canvasWidth}
               canvasHeight={canvasHeight}
             />
-
-            {/* Debug: show surface point (green) and block center (red) */}
-            {scenario.scenarioType === 'incline' && (() => {
-              const angle = (typeof scenario.surfaceAngle === 'number' && !isNaN(scenario.surfaceAngle))
-                ? scenario.surfaceAngle : 30
-              const angleRad = (angle * Math.PI) / 180
-              const surfaceLength = 200
-              const surfaceBase = surfaceLength * Math.cos(angleRad)
-              const surfaceHeight = surfaceLength * Math.sin(angleRad)
-              const startX = canvasWidth / 2 - surfaceBase / 2
-              const startY = canvasHeight / 2 + 60
-              const t = 0.4
-              const surfaceX = startX + t * surfaceBase
-              const surfaceY = startY - t * surfaceHeight
-              return (
-                <>
-                  <circle cx={surfaceX} cy={surfaceY} r={4} fill="lime" stroke="black" />
-                  <circle cx={objectPos.x} cy={objectPos.y} r={4} fill="red" stroke="black" />
-                </>
-              )
-            })()}
 
             {/* Object */}
             <ObjectRenderer
