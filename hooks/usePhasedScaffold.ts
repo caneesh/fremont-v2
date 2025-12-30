@@ -155,12 +155,10 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
       }
 
       const expansion = data.data as StepExpansionResponse
-      console.log(`[usePhasedScaffold] Step expansion loaded for ${stepId}, micro_tasks:`, expansion.micro_tasks?.length || 0)
 
       setState(prev => {
         const newExpandedSteps = new Map(prev.expandedSteps)
         newExpandedSteps.set(stepId, expansion)
-        console.log(`[usePhasedScaffold] Storing expansion for ${stepId}, new expandedSteps size:`, newExpandedSteps.size)
         return {
           ...prev,
           loadingState: 'outline_ready',
@@ -236,18 +234,15 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
     if (!outline) return null
 
     // Convert outline steps to MicroTaskStep format
-    console.log('[usePhasedScaffold] getAdaptedScaffoldData called, expandedSteps size:', expandedSteps.size, 'keys:', Array.from(expandedSteps.keys()))
     const steps: MicroTaskStep[] = outline.steps.map((outlineStep, index) => {
       const expansion = expandedSteps.get(outlineStep.step_id)
       const isLoading = state.currentLoadingStepId === outlineStep.step_id
-      console.log(`[usePhasedScaffold] Step ${outlineStep.step_id}: expansion=${!!expansion}, isLoading=${isLoading}`)
 
       // Build tasks from expansion if available
       let tasks: MicroTaskStep['tasks'] = []
 
       // Only use expansion tasks if they exist AND are not empty
       if (expansion?.micro_tasks && expansion.micro_tasks.length > 0) {
-        console.log(`[usePhasedScaffold] Step ${outlineStep.step_id} has expansion with ${expansion.micro_tasks.length} micro_tasks`)
         // Step is expanded - use real tasks
         tasks = expansion.micro_tasks.map((task, taskIndex): MicroTask => {
           const level = (taskIndex + 1) as 1 | 2 | 3 | 4 | 5

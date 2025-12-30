@@ -147,6 +147,14 @@ export function validateFBD(
     feedback: ''
   }
 
+  // If there are no required forces, the step data hasn't loaded yet
+  // Don't allow validation to pass with empty requirements
+  if (required.length === 0) {
+    result.isValid = false
+    result.feedback = 'Loading diagram requirements... Please wait.'
+    return result
+  }
+
   // Track which required forces have been matched
   const matchedRequiredTypes = new Set<ForceType>()
 
