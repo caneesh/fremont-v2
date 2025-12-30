@@ -104,7 +104,7 @@ const MISCONCEPTION_FLAGS: MisconceptionFlag[] = [
     triggers: [
       /resolve\s+into\s+components/i,
       /component\s+along/i,
-      /sin\s*\\(|cos\s*\\(/i,
+      /sin\s*\(|cos\s*\(/i,
     ],
   },
 ]

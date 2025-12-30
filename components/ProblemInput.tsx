@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import VoiceInput from './VoiceInput'
 import ScaffoldDensityControl from './ScaffoldDensityControl'
 import { localStorageProvider } from '@/lib/storage'
 import { getAdaptiveDensity } from '@/lib/adaptiveDensity'
+import { authService } from '@/lib/auth/authService'
 import type { ScaffoldDensity } from '@/types/scaffold'
 
 interface AdaptiveHint {
@@ -26,7 +27,9 @@ interface ProblemInputProps {
   initialDensity?: ScaffoldDensity
 }
 
-type InputMode = 'text' | 'voice'
+type InputMode = 'text' | 'voice' | 'scan'
+
+type ScanState = 'idle' | 'uploading' | 'extracting' | 'extracted' | 'error'
 
 const LOADING_STAGES = [
   { message: "Analyzing problem structure...", progress: 20, duration: 3000 },
@@ -62,6 +65,11 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
   const [adaptiveHint, setAdaptiveHint] = useState<AdaptiveHint>({ show: false, reason: '', confidence: 'low' })
   const [includeFinalAnswer, setIncludeFinalAnswer] = useState(false)
+
+  // Scan mode state
+  const [scanState, setScanState] = useState<ScanState>('idle')
+  const [scanImage, setScanImage] = useState<string | null>(null)
+  const [scanError, setScanError] = useState<string | null>(null)
 
   // Load saved density preference or calculate adaptive density on mount
   useEffect(() => {
@@ -167,6 +175,78 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
     setImagePreview(null)
   }
 
+  // Handle scan image upload and extraction
+  const handleScanUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setScanError('Please upload an image file (PNG, JPG, etc.)')
+      return
+    }
+
+    // Check file size (max 10MB for scan)
+    if (file.size > 10 * 1024 * 1024) {
+      setScanError('Image size must be less than 10MB')
+      return
+    }
+
+    setScanError(null)
+    setScanState('uploading')
+
+    // Read file as base64
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      const base64Image = event.target?.result as string
+      setScanImage(base64Image)
+      setScanState('extracting')
+
+      try {
+        // Call extract API
+        const userCode = authService.getUserCode()
+        const response = await fetch('/api/extract-problem', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userCode}`,
+          },
+          body: JSON.stringify({ image: base64Image }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to extract problem')
+        }
+
+        const data = await response.json()
+        setProblemText(data.extractedText)
+        setScanState('extracted')
+      } catch (err) {
+        console.error('Scan extraction error:', err)
+        setScanError(err instanceof Error ? err.message : 'Failed to extract problem from image')
+        setScanState('error')
+      }
+    }
+    reader.onerror = () => {
+      setScanError('Failed to read image file')
+      setScanState('error')
+    }
+    reader.readAsDataURL(file)
+  }, [])
+
+  // Reset scan state
+  const resetScan = useCallback(() => {
+    setScanState('idle')
+    setScanImage(null)
+    setScanError(null)
+  }, [])
+
+  // Switch to text mode to edit extracted text
+  const editExtractedText = useCallback(() => {
+    setInputMode('text')
+  }, [])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (problemText.trim()) {
@@ -204,6 +284,24 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
               Type
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setInputMode('scan'); resetScan(); }}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+              inputMode === 'scan'
+                ? 'bg-accent text-white shadow-md dark:shadow-dark-glow'
+                : 'bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border border border-transparent dark:border-dark-border'
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Scan
             </div>
           </button>
           <button
@@ -253,7 +351,157 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
             />
           )}
 
-          {/* Diagram Upload Section */}
+          {/* Scan Mode - Upload image of problem */}
+          {inputMode === 'scan' && (
+            <div className="demo-step-input">
+              <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                Upload Problem Image
+              </label>
+
+              {/* Idle State - Show upload area */}
+              {scanState === 'idle' && (
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 dark:border-dark-border border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-dark-card-soft hover:bg-gray-100 dark:hover:bg-dark-border hover:border-accent dark:hover:border-accent transition-all">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-12 h-12 mb-3 text-gray-400 dark:text-dark-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-600 dark:text-dark-text-secondary">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                        Take a photo of your physics problem (PNG, JPG - max 10MB)
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleScanUpload}
+                      disabled={isLoading}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {/* Uploading/Extracting State */}
+              {(scanState === 'uploading' || scanState === 'extracting') && (
+                <div className="flex flex-col items-center justify-center py-12 bg-gray-50 dark:bg-dark-card-soft rounded-lg border-2 border-gray-200 dark:border-dark-border">
+                  {scanImage && (
+                    <div className="w-32 h-32 mb-4 rounded-lg overflow-hidden shadow-md">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={scanImage} alt="Uploaded problem" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-accent mb-4"></div>
+                  <p className="text-sm font-medium text-gray-700 dark:text-dark-text-primary">
+                    {scanState === 'uploading' ? 'Uploading image...' : 'Extracting problem text...'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
+                    This may take a few seconds
+                  </p>
+                </div>
+              )}
+
+              {/* Extracted State - Show preview and extracted text */}
+              {scanState === 'extracted' && (
+                <div className="space-y-4">
+                  {/* Success banner */}
+                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                        Problem extracted successfully!
+                      </p>
+                      <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
+                        Review the text below and click &quot;Generate Scaffold&quot; to continue
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Image preview (small) */}
+                  {scanImage && (
+                    <div className="flex items-start gap-4">
+                      <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-dark-border">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={scanImage} alt="Scanned problem" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">
+                          Extracted text:
+                        </p>
+                        <div className="p-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg max-h-40 overflow-y-auto">
+                          <p className="text-sm text-gray-800 dark:text-dark-text-primary whitespace-pre-wrap">
+                            {problemText}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={editExtractedText}
+                      className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-dark-text-secondary bg-gray-100 dark:bg-dark-card-soft border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-200 dark:hover:bg-dark-border transition-colors"
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit Text
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetScan}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text-secondary transition-colors"
+                    >
+                      Scan Again
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {scanState === 'error' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <svg className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                        Failed to extract problem
+                      </p>
+                      <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">
+                        {scanError || 'Please try again with a clearer image'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetScan}
+                    className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-dark-text-secondary bg-gray-100 dark:bg-dark-card-soft border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-200 dark:hover:bg-dark-border transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+
+              {scanError && scanState === 'idle' && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{scanError}</p>
+              )}
+            </div>
+          )}
+
+          {/* Diagram Upload Section - Only show in text/voice mode (not scan mode) */}
+          {inputMode !== 'scan' && (
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
               Problem Diagram (Optional)
@@ -305,6 +553,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
               </div>
             )}
           </div>
+          )}
 
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">

@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SubmissionCanvas from '../SubmissionCanvas'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
 import type { ConstraintCollision, SocraticDialogue } from '@/types/constraintCollision'
+import type { DetectedMisconception } from '@/types/misconception'
 
 // Mock the dependencies
 vi.mock('@/lib/api/apiClient', () => ({
@@ -123,6 +124,18 @@ const mockGradeResultConceptual: GradeSolutionResponse = {
     label: 'Review: Conservation Laws',
   },
   confidence: 0.88,
+}
+
+const mockMisconception: DetectedMisconception = {
+  id: 'misc-1',
+  type: 'force_nature',
+  description: 'Treating centripetal force as a separate force.',
+  evidence: 'centripetal force is added',
+  confidence: 0.91,
+  clarificationQuestion: 'Is centripetal force a separate force or the net inward effect?',
+  correctUnderstanding: 'Centripetal is the net inward force from real forces.',
+  relatedConcept: 'Centripetal Force',
+  severity: 'high',
 }
 
 describe('SubmissionCanvas - ConstraintFeedback Integration', () => {
@@ -494,6 +507,75 @@ describe('SubmissionCanvas - ConstraintFeedback Integration', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Conceptual Issue')).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('misconception flags', () => {
+    it('renders detected misconceptions and allows dismiss', async () => {
+      const resultWithMisconceptions: GradeSolutionResponse = {
+        ...mockGradeResultConceptual,
+        detectedMisconceptions: [mockMisconception],
+      }
+
+      mockAuthenticatedFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(resultWithMisconceptions),
+      })
+
+      render(<SubmissionCanvas {...defaultProps} />)
+
+      const textarea = screen.getByPlaceholderText(/Enter your solution here/i)
+      fireEvent.change(textarea, { target: { value: 'centripetal force is added' } })
+
+      fireEvent.click(screen.getByRole('button', { name: /Grade My Solution/i }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Conceptual Check')).toBeInTheDocument()
+      })
+
+      expect(screen.getByText(mockMisconception.clarificationQuestion)).toBeInTheDocument()
+
+      fireEvent.click(screen.getByLabelText(/Dismiss/i))
+      expect(screen.queryByText(mockMisconception.clarificationQuestion)).not.toBeInTheDocument()
+    })
+
+    it('shows misconceptions again after resubmission', async () => {
+      const resultWithMisconceptions: GradeSolutionResponse = {
+        ...mockGradeResultConceptual,
+        detectedMisconceptions: [mockMisconception],
+      }
+
+      mockAuthenticatedFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(resultWithMisconceptions),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(resultWithMisconceptions),
+        })
+
+      render(<SubmissionCanvas {...defaultProps} />)
+
+      const textarea = screen.getByPlaceholderText(/Enter your solution here/i)
+      fireEvent.change(textarea, { target: { value: 'first attempt' } })
+      fireEvent.click(screen.getByRole('button', { name: /Grade My Solution/i }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Conceptual Check')).toBeInTheDocument()
+      })
+
+      fireEvent.click(screen.getByLabelText(/Dismiss/i))
+      expect(screen.queryByText(mockMisconception.clarificationQuestion)).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Modify and resubmit/i }))
+
+      fireEvent.change(textarea, { target: { value: 'second attempt' } })
+      fireEvent.click(screen.getByRole('button', { name: /Grade My Solution/i }))
+
+      await waitFor(() => {
+        expect(screen.getByText(mockMisconception.clarificationQuestion)).toBeInTheDocument()
       })
     })
   })
