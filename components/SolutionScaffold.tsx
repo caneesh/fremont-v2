@@ -52,6 +52,7 @@ import {
   buildContextFromSanityCheckFailure,
 } from '@/lib/socraticRewindService'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import { usePhasedScaffoldContext } from './PhasedScaffoldWrapper'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -113,6 +114,25 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (!FEATURE_FLAGS.DEV_SKIP_STEPS) return false
     return searchParams.get('skipSteps') === 'true'
   }, [searchParams])
+
+  // Phased scaffold context for on-demand step loading
+  const phasedScaffoldContext = usePhasedScaffoldContext()
+
+  // Trigger step expansion when a step becomes active and needs loading
+  useEffect(() => {
+    if (!phasedScaffoldContext || !useMicroTasks) return
+
+    const currentStepData = data.steps[currentStep] as MicroTaskStep & {
+      _needsExpansion?: boolean
+      _outlineStepId?: string
+    }
+
+    // Check if this step needs expansion (has _needsExpansion flag and _outlineStepId)
+    if (currentStepData?._needsExpansion && currentStepData._outlineStepId) {
+      console.log('[SolutionScaffold] Loading step expansion for:', currentStepData._outlineStepId)
+      phasedScaffoldContext.loadStepExpansion(currentStepData._outlineStepId)
+    }
+  }, [currentStep, data.steps, phasedScaffoldContext, useMicroTasks])
 
   // Determine if all steps are "complete" (real or simulated for testing)
   const allStepsComplete = useMemo(() => {
@@ -1116,9 +1136,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       step={step as import('@/types/scaffold').Step}
                       stepNumber={index + 1}
                       isActive={currentStep === index}
-                      isCompleted={completedSteps.includes(index)}
-                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
-                      onComplete={() => handleStepComplete(index)}
+                      isCompleted={completedSteps.includes(step.id)}
+                      isLocked={index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)}
+                      onComplete={() => handleMicroStepComplete(step.id)}
                       onActivate={() => setCurrentStep(index)}
                     />
                   ) : useMicroTasks ? (

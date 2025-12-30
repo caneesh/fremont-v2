@@ -108,4 +108,94 @@ describe('ConceptContrastModal', () => {
 
     expect(screen.getByText('Look for non-conservative forces.')).toBeInTheDocument()
   })
+
+  it('shows failure feedback and allows retry after a rejected explanation', async () => {
+    const onComplete = vi.fn()
+    const onClose = vi.fn()
+
+    const validation: RejectionValidation = {
+      distractorId: 'energy',
+      isAccepted: false,
+      quality: 'partial',
+      feedback: 'You did not mention the friction condition.',
+      missingInsight: 'Friction breaks energy conservation.',
+      targetCondition: 'Friction is present.',
+    }
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ validation }),
+    })
+
+    render(
+      <ConceptContrastModal
+        challenge={challenge}
+        problemText={challenge.problemContext.problemText}
+        onComplete={onComplete}
+        onClose={onClose}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Explain My Reasoning/i }))
+
+    const textarea = screen.getByPlaceholderText(/Because in this problem/i)
+    fireEvent.change(textarea, { target: { value: 'It does not apply.' } })
+
+    fireEvent.click(screen.getByRole('button', { name: /Submit Explanation/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Keep Thinking...')).toBeInTheDocument()
+    })
+
+    expect(onComplete).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: /Try Again/i }))
+    expect(screen.getByRole('button', { name: /Explain My Reasoning/i })).toBeInTheDocument()
+  })
+
+  it('shows skip after max attempts and calls onSkip', async () => {
+    const onComplete = vi.fn()
+    const onClose = vi.fn()
+    const onSkip = vi.fn()
+
+    const validation: RejectionValidation = {
+      distractorId: 'energy',
+      isAccepted: false,
+      quality: 'incorrect',
+      feedback: 'The reasoning does not cite any conditions.',
+      targetCondition: 'Friction is present.',
+    }
+
+    const maxAttemptChallenge = {
+      ...challenge,
+      maxAttempts: 1,
+    }
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ validation }),
+    })
+
+    render(
+      <ConceptContrastModal
+        challenge={maxAttemptChallenge}
+        problemText={maxAttemptChallenge.problemContext.problemText}
+        onComplete={onComplete}
+        onSkip={onSkip}
+        onClose={onClose}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Explain My Reasoning/i }))
+    const textarea = screen.getByPlaceholderText(/Because in this problem/i)
+    fireEvent.change(textarea, { target: { value: 'Not applicable.' } })
+    fireEvent.click(screen.getByRole('button', { name: /Submit Explanation/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Keep Thinking...')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Skip for Now/i }))
+    expect(onSkip).toHaveBeenCalledTimes(1)
+  })
 })
