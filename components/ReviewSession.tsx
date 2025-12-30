@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { MistakeCard, ReviewQuality, ReviewSession as ReviewSessionType } from '@/types/mistakeNotebook'
-import { getCardsDue, recordReview, startReviewSession, completeReviewSession } from '@/lib/mistakeNotebook'
+import type { Confidence } from '@/types/confidence'
+import { getCardsDue, recordReview, recordConfidenceReview, startReviewSession, completeReviewSession } from '@/lib/mistakeNotebook'
 import { getStatusDisplay, formatInterval } from '@/lib/srsScheduler'
 import { getStepTypeBadge } from '@/lib/hintEngine'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import { toReviewQuality, getConfidenceOutcome } from '@/lib/confidenceWeightedSRS'
+import { getOutcomeDisplay } from '@/types/confidence'
+import ConfidenceRating from './ConfidenceRating'
 
 interface ReviewSessionProps {
   onComplete?: (session: ReviewSessionType) => void
@@ -12,7 +17,16 @@ interface ReviewSessionProps {
   maxCards?: number
 }
 
-type SessionState = 'loading' | 'ready' | 'reviewing' | 'showAnswer' | 'complete'
+// Extended states for confidence-based review flow
+type SessionState =
+  | 'loading'
+  | 'ready'
+  | 'reviewing'
+  | 'showAnswer'
+  | 'askCorrectness'    // Confidence flow: asking if they knew it
+  | 'askConfidence'     // Confidence flow: asking how confident
+  | 'showOutcome'       // Confidence flow: showing the outcome briefly
+  | 'complete'
 
 export default function ReviewSession({
   onComplete,
@@ -25,6 +39,13 @@ export default function ReviewSession({
   const [session, setSession] = useState<ReviewSessionType | null>(null)
   const [startTime, setStartTime] = useState<number>(0)
   const [showHint, setShowHint] = useState(false)
+
+  // Confidence-based review state
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [selectedConfidence, setSelectedConfidence] = useState<Confidence | null>(null)
+
+  // Feature flag
+  const useConfidenceSRS = FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS
 
   // Load due cards on mount
   useEffect(() => {
