@@ -39,7 +39,9 @@ import { useCircuitBreaker } from '@/lib/hooks/useCircuitBreaker'
 import DrillModal from './DrillModal'
 import CircuitBreakerWarning from './CircuitBreakerWarning'
 import SocraticRewindModal from './SocraticRewindModal'
+import PreFlightCheckModal from './PreFlightCheckModal'
 import type { ErrorTag } from '@/types/circuitBreaker'
+import type { PreFlightCheck, PreFlightValidation } from '@/types/preFlightCheck'
 import type { SocraticRewindContext, RewindTriggerSource } from '@/types/socraticRewind'
 import {
   buildContextFromGradeResult,
