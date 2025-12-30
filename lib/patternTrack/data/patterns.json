@@ -1,0 +1,232 @@
+[
+  {
+    "id": "pattern_newton_2",
+    "name": "Newton's Second Law Application",
+    "description": "Applying F = ma to analyze forces and acceleration in a system. Identify all forces, set up coordinate system, and write net force equations.",
+    "category": "mechanics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Object accelerating or decelerating",
+      "Multiple forces acting on an object",
+      "Asked to find acceleration or force",
+      "Mass is given explicitly"
+    ],
+    "common_pitfalls": [
+      "Forgetting to include all forces (especially normal force or friction)",
+      "Wrong sign convention for forces",
+      "Confusing mass with weight",
+      "Not breaking forces into components on inclined planes"
+    ],
+    "related_pattern_ids": ["pattern_free_body_diagram", "pattern_friction", "pattern_inclined_plane"],
+    "display_order": 1,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_free_body_diagram",
+    "name": "Free Body Diagram Construction",
+    "description": "Drawing all forces acting on an isolated body. Essential first step for any force analysis problem.",
+    "category": "mechanics",
+    "difficulty": 1,
+    "recognition_cues": [
+      "Object in contact with surfaces",
+      "Object connected by ropes, springs, or cables",
+      "Gravitational context (near Earth)",
+      "Need to analyze forces on a specific object"
+    ],
+    "common_pitfalls": [
+      "Drawing forces on the wrong object",
+      "Missing the normal force from contact surfaces",
+      "Including internal forces in the FBD",
+      "Forgetting tension in attached strings/ropes"
+    ],
+    "related_pattern_ids": ["pattern_newton_2", "pattern_newton_3"],
+    "display_order": 0,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_newton_3",
+    "name": "Newton's Third Law Pairs",
+    "description": "Identifying action-reaction force pairs that are equal in magnitude but opposite in direction, acting on different bodies.",
+    "category": "mechanics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Two objects interacting",
+      "Asked about force on one object due to another",
+      "Collision or contact between objects",
+      "Push/pull interactions"
+    ],
+    "common_pitfalls": [
+      "Confusing 3rd law pairs with balanced forces on same object",
+      "Thinking 3rd law pairs cancel each other",
+      "Not recognizing that pairs act on DIFFERENT bodies",
+      "Confusing normal force and weight as a 3rd law pair"
+    ],
+    "related_pattern_ids": ["pattern_free_body_diagram", "pattern_newton_2"],
+    "display_order": 2,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_friction",
+    "name": "Friction Force Analysis",
+    "description": "Analyzing static and kinetic friction forces. Understanding μN relationship and when each type applies.",
+    "category": "mechanics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Rough surface mentioned",
+      "Coefficient of friction given (μ)",
+      "Object sliding or about to slide",
+      "Question about minimum force to move object"
+    ],
+    "common_pitfalls": [
+      "Using kinetic friction when object is stationary",
+      "Forgetting that static friction has a maximum value",
+      "Using wrong normal force (especially on inclines)",
+      "Not recognizing that friction opposes relative motion"
+    ],
+    "related_pattern_ids": ["pattern_newton_2", "pattern_inclined_plane"],
+    "display_order": 3,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_inclined_plane",
+    "name": "Inclined Plane Analysis",
+    "description": "Analyzing motion on inclined surfaces. Decomposing weight into parallel and perpendicular components.",
+    "category": "mechanics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Object on a slope or ramp",
+      "Angle of incline given",
+      "Motion parallel to surface",
+      "Asked about acceleration down a ramp"
+    ],
+    "common_pitfalls": [
+      "Using wrong trig function (sin vs cos)",
+      "Not tilting coordinate system with the incline",
+      "Forgetting normal force equals mg·cos(θ), not mg",
+      "Wrong direction for friction force"
+    ],
+    "related_pattern_ids": ["pattern_newton_2", "pattern_friction"],
+    "display_order": 4,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_energy_conservation",
+    "name": "Conservation of Mechanical Energy",
+    "description": "Applying energy conservation when no non-conservative forces do work. KE + PE = constant.",
+    "category": "mechanics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Height changes mentioned",
+      "Speed at different positions asked",
+      "No friction or friction explicitly negligible",
+      "Springs or pendulums involved"
+    ],
+    "common_pitfalls": [
+      "Using energy conservation when friction is present",
+      "Wrong reference point for potential energy",
+      "Forgetting spring potential energy",
+      "Not recognizing when work-energy theorem is better"
+    ],
+    "related_pattern_ids": ["pattern_work_energy", "pattern_spring_potential"],
+    "display_order": 5,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_work_energy",
+    "name": "Work-Energy Theorem",
+    "description": "Net work equals change in kinetic energy. Useful when non-conservative forces are present.",
+    "category": "mechanics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Force applied over a distance",
+      "Friction doing work",
+      "Asked for final speed or distance traveled",
+      "Applied force at an angle"
+    ],
+    "common_pitfalls": [
+      "Not including work by all forces",
+      "Using wrong angle in W = F·d·cos(θ)",
+      "Confusing work done by vs work done on",
+      "Forgetting friction always does negative work on moving object"
+    ],
+    "related_pattern_ids": ["pattern_energy_conservation", "pattern_friction"],
+    "display_order": 6,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_momentum_conservation",
+    "name": "Conservation of Momentum",
+    "description": "Total momentum is conserved in collisions when no external forces act. p_initial = p_final.",
+    "category": "mechanics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Collision between objects",
+      "Explosion or separation",
+      "Objects sticking together",
+      "Before/after velocities asked"
+    ],
+    "common_pitfalls": [
+      "Forgetting momentum is a vector",
+      "Wrong signs for velocity directions",
+      "Confusing elastic vs inelastic collisions",
+      "Not recognizing 2D momentum conservation needs two equations"
+    ],
+    "related_pattern_ids": ["pattern_impulse", "pattern_collision_types"],
+    "display_order": 7,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_circular_motion",
+    "name": "Uniform Circular Motion",
+    "description": "Object moving in a circle at constant speed. Centripetal acceleration = v²/r directed toward center.",
+    "category": "mechanics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Object moving in a circle",
+      "Radius and speed or period given",
+      "Asked about centripetal force or acceleration",
+      "Banked curves, orbits, or spinning objects"
+    ],
+    "common_pitfalls": [
+      "Treating centripetal force as a separate force",
+      "Confusing centripetal and centrifugal",
+      "Using wrong direction for acceleration",
+      "Forgetting to identify what provides the centripetal force"
+    ],
+    "related_pattern_ids": ["pattern_newton_2", "pattern_gravity"],
+    "display_order": 8,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_spring_potential",
+    "name": "Spring Force and Energy",
+    "description": "Hooke's Law (F = -kx) and spring potential energy (U = ½kx²). Analyzing oscillating systems.",
+    "category": "mechanics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Spring constant k given",
+      "Compression or extension mentioned",
+      "Asked about restoring force",
+      "Simple harmonic motion context"
+    ],
+    "common_pitfalls": [
+      "Using wrong sign for restoring force",
+      "Confusing x = 0 with natural length vs equilibrium",
+      "Forgetting to square displacement in PE formula",
+      "Not recognizing spring force is position-dependent"
+    ],
+    "related_pattern_ids": ["pattern_energy_conservation", "pattern_newton_2"],
+    "display_order": 9,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

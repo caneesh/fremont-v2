@@ -236,6 +236,12 @@ export interface ConstraintPatternGroup {
   surfaceProperties: ConstraintPattern[]
   stringProperties: ConstraintPattern[]
   pulleyProperties: ConstraintPattern[]
+  springProperties: ConstraintPattern[]
+  collisionProperties: ConstraintPattern[]
+  circularMotion: ConstraintPattern[]
+  fluidProperties: ConstraintPattern[]
+  hingeAndPivot: ConstraintPattern[]
+  initialConditions: ConstraintPattern[]
   motionConstraints: ConstraintPattern[]
   approximations: ConstraintPattern[]
 }

@@ -40,11 +40,28 @@ export default function PhasedScaffoldWrapper({
   } = usePhasedScaffold()
 
   const [adaptedData, setAdaptedData] = useState<MicroTaskScaffoldData | null>(null)
+  const [firstStepLoaded, setFirstStepLoaded] = useState(false)
 
   // Load outline on mount
   useEffect(() => {
     loadOutline(problem, { density, diagramImage })
+    setFirstStepLoaded(false) // Reset when problem changes
   }, [problem, density, diagramImage, loadOutline])
+
+  // Auto-load first step expansion when outline is ready
+  useEffect(() => {
+    if (state.loadingState === 'outline_ready' && state.outline && !firstStepLoaded) {
+      const firstStepId = state.outline.steps[0]?.step_id
+      if (firstStepId && !state.expandedSteps.has(firstStepId)) {
+        console.log('[Phased Scaffold] Auto-loading first step:', firstStepId)
+        loadStepExpansion(firstStepId).then(() => {
+          setFirstStepLoaded(true)
+        })
+      } else {
+        setFirstStepLoaded(true)
+      }
+    }
+  }, [state.loadingState, state.outline, state.expandedSteps, firstStepLoaded, loadStepExpansion])
 
   // Notify when outline is ready
   useEffect(() => {
@@ -118,10 +135,19 @@ export default function PhasedScaffoldWrapper({
     )
   }
 
-  if (!adaptedData) {
+  // Wait for first step to be loaded before showing scaffold
+  if (!adaptedData || !firstStepLoaded) {
     return (
       <div className="max-w-7xl mx-auto">
         <OutlineLoadingSkeleton />
+        {state.loadingState === 'outline_ready' && !firstStepLoaded && (
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-dark-card shadow-lg rounded-full px-6 py-3 flex items-center gap-3 border border-gray-200 dark:border-dark-border z-50">
+            <div className="w-5 h-5 border-2 border-green-600 dark:border-green-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+              Loading first step...
+            </span>
+          </div>
+        )}
       </div>
     )
   }
@@ -129,12 +155,25 @@ export default function PhasedScaffoldWrapper({
   // Render SolutionScaffold with adapted data
   // Note: We attach a custom data loader to handle on-demand step expansion
   return (
-    <PhasedScaffoldContext.Provider value={{ loadStepExpansion: handleStepPreload, isLoadingStep: state.loadingState === 'loading_step', currentLoadingStepId: state.currentLoadingStepId }}>
+    <PhasedScaffoldContext.Provider value={{
+      loadStepExpansion: handleStepPreload,
+      isLoadingStep: state.loadingState === 'loading_step',
+      currentLoadingStepId: state.currentLoadingStepId
+    }}>
       <SolutionScaffold
         data={adaptedData}
         onReset={handleReset}
         onLoadNewProblem={onLoadNewProblem}
       />
+      {/* Loading indicator when fetching step expansion */}
+      {state.loadingState === 'loading_step' && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-dark-card shadow-lg rounded-full px-6 py-3 flex items-center gap-3 border border-gray-200 dark:border-dark-border z-50">
+          <div className="w-5 h-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+            Loading step content...
+          </span>
+        </div>
+      )}
     </PhasedScaffoldContext.Provider>
   )
 }

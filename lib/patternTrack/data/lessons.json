@@ -1,0 +1,230 @@
+[
+  {
+    "id": "lesson_fbd_basics",
+    "title": "Free Body Diagrams: The Foundation",
+    "description": "Learn to draw and analyze free body diagrams - the essential first step for any force problem.",
+    "pattern_ids": ["pattern_free_body_diagram"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# What is a Free Body Diagram?\n\nA **Free Body Diagram (FBD)** is a visual representation of all forces acting on a single object. It's the foundation for solving almost any mechanics problem involving forces.\n\n## Why FBDs Matter\n\nBefore you can apply Newton's laws, you need to know:\n1. What object you're analyzing\n2. What forces act ON that object\n3. The direction of each force"
+      },
+      {
+        "type": "text",
+        "content": "## The 4-Step FBD Process\n\n1. **Isolate the object** - Draw it as a simple shape (usually a dot or box)\n2. **Identify contact points** - What is touching the object?\n3. **Draw forces from contact** - Each contact produces a force\n4. **Add non-contact forces** - Usually just gravity (weight)"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_free_body_diagram",
+        "problem": "A book sits on a table. Draw its free body diagram.",
+        "solution": "Two forces act on the book:\n- Weight (W = mg) pointing downward\n- Normal force (N) from table pointing upward",
+        "explanation": "The book touches only the table, which provides an upward normal force. Gravity acts on the book even without contact, pulling it downward."
+      },
+      {
+        "type": "text",
+        "content": "## Common Forces to Look For\n\n| Contact Type | Force Name | Direction |\n|-------------|------------|----------|\n| Any surface | Normal force (N) | Perpendicular to surface |\n| Rough surface | Friction (f) | Parallel to surface, opposes motion |\n| String/rope | Tension (T) | Along the string, away from object |\n| Spring | Spring force | Along spring axis |"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_011"]
+      }
+    ],
+    "prerequisite_lesson_ids": [],
+    "estimated_minutes": 15,
+    "display_order": 1,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_newton_2_basic",
+    "title": "Newton's Second Law: F = ma",
+    "description": "Master the fundamental equation connecting force, mass, and acceleration.",
+    "pattern_ids": ["pattern_newton_2"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Newton's Second Law\n\nThe **net force** on an object equals its mass times its acceleration:\n\n$$\\vec{F}_{net} = m\\vec{a}$$\n\n## Key Insights\n\n1. **Net force** - You must add ALL forces as vectors\n2. **Direction matters** - F and a point the same way\n3. **Cause and effect** - Force CAUSES acceleration"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_newton_2",
+        "problem": "A 5 kg block is pushed with a 20 N force on a frictionless surface. Find the acceleration.",
+        "solution": "F = ma → 20 = 5a → a = 4 m/s²",
+        "explanation": "On a frictionless horizontal surface, the only horizontal force is the push. Apply F = ma directly."
+      },
+      {
+        "type": "text",
+        "content": "## The Problem-Solving Recipe\n\n1. Draw a Free Body Diagram\n2. Choose a coordinate system\n3. Write F = ma for each direction\n4. Solve for unknowns"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_001", "q_mech_002"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_fbd_basics"],
+    "estimated_minutes": 20,
+    "display_order": 2,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_friction",
+    "title": "Friction: Static and Kinetic",
+    "description": "Understand how friction forces work and when each type applies.",
+    "pattern_ids": ["pattern_friction"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Understanding Friction\n\n**Friction** is a force that opposes relative motion between surfaces in contact.\n\n## Two Types of Friction\n\n1. **Static friction** (f_s) - Prevents sliding; adjusts up to a maximum\n2. **Kinetic friction** (f_k) - Acts during sliding; has fixed magnitude"
+      },
+      {
+        "type": "text",
+        "content": "## The Friction Equations\n\n**Static friction:**\n$$f_s \\leq \\mu_s N$$\n\n**Kinetic friction:**\n$$f_k = \\mu_k N$$\n\nWhere:\n- μ_s = coefficient of static friction\n- μ_k = coefficient of kinetic friction  \n- N = normal force"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_friction",
+        "problem": "A 10 kg box is pushed with 40 N on a floor with μ_k = 0.2. Find the acceleration. (g = 10 m/s²)",
+        "solution": "N = mg = 100 N\nf_k = μ_k N = 0.2 × 100 = 20 N\nF_net = 40 - 20 = 20 N\na = F_net/m = 20/10 = 2 m/s²",
+        "explanation": "First find the normal force (equals weight on flat ground), then calculate friction, then apply Newton's 2nd law."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_002", "q_mech_015"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_newton_2_basic"],
+    "estimated_minutes": 25,
+    "display_order": 3,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_inclined_planes",
+    "title": "Inclined Plane Analysis",
+    "description": "Learn to decompose forces and analyze motion on slopes.",
+    "pattern_ids": ["pattern_inclined_plane"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Inclined Planes\n\nInclined plane problems require decomposing the weight into components.\n\n## The Key Insight\n\nTilt your coordinate system to align with the incline:\n- **x-axis**: parallel to surface\n- **y-axis**: perpendicular to surface"
+      },
+      {
+        "type": "text",
+        "content": "## Weight Components\n\nFor an incline at angle θ:\n\n- **Along the incline**: $W_\\parallel = mg\\sin\\theta$\n- **Perpendicular**: $W_\\perp = mg\\cos\\theta$\n\n**Memory trick**: \"Sine slides\" - the sine component makes things slide down."
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_inclined_plane",
+        "problem": "A block slides down a frictionless 30° incline. Find its acceleration. (g = 10 m/s²)",
+        "solution": "The only force along the incline is mg sin(30°)\na = g sin(30°) = 10 × 0.5 = 5 m/s²",
+        "explanation": "On a frictionless incline, acceleration depends only on the angle, not the mass!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_003", "q_mech_013"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_friction"],
+    "estimated_minutes": 25,
+    "display_order": 4,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_energy_conservation",
+    "title": "Conservation of Mechanical Energy",
+    "description": "Use energy methods to solve problems involving motion and height changes.",
+    "pattern_ids": ["pattern_energy_conservation", "pattern_spring_potential"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Energy Conservation\n\nWhen only **conservative forces** do work (gravity, springs), mechanical energy is conserved:\n\n$$KE_1 + PE_1 = KE_2 + PE_2$$"
+      },
+      {
+        "type": "text",
+        "content": "## Types of Mechanical Energy\n\n**Kinetic Energy:**\n$$KE = \\frac{1}{2}mv^2$$\n\n**Gravitational PE:**\n$$PE_g = mgh$$\n\n**Spring PE:**\n$$PE_s = \\frac{1}{2}kx^2$$"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_energy_conservation",
+        "problem": "A ball is dropped from 20 m. Find its speed just before hitting the ground. (g = 10 m/s²)",
+        "solution": "mgh = ½mv²\nv = √(2gh) = √(2 × 10 × 20) = 20 m/s",
+        "explanation": "All gravitational PE converts to KE. Notice mass cancels out!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_005", "q_mech_006", "q_mech_016"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_newton_2_basic"],
+    "estimated_minutes": 30,
+    "display_order": 5,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_momentum",
+    "title": "Conservation of Momentum",
+    "description": "Apply momentum conservation to collisions and explosions.",
+    "pattern_ids": ["pattern_momentum_conservation"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Momentum\n\n**Momentum** is mass times velocity:\n$$\\vec{p} = m\\vec{v}$$\n\n## Conservation Law\n\nWhen no external forces act, total momentum is conserved:\n$$\\vec{p}_{before} = \\vec{p}_{after}$$"
+      },
+      {
+        "type": "text",
+        "content": "## Types of Collisions\n\n| Type | Momentum | Kinetic Energy |\n|------|----------|----------------|\n| Elastic | Conserved | Conserved |\n| Inelastic | Conserved | NOT conserved |\n| Perfectly inelastic | Conserved | Objects stick together |"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_momentum_conservation",
+        "problem": "A 2 kg cart at 4 m/s collides with and sticks to a 3 kg cart at rest. Find the final velocity.",
+        "solution": "m₁v₁ + m₂v₂ = (m₁+m₂)v_f\n(2)(4) + (3)(0) = (5)v_f\nv_f = 8/5 = 1.6 m/s",
+        "explanation": "This is a perfectly inelastic collision. Momentum is conserved, but kinetic energy is lost."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_007", "q_mech_010", "q_mech_017"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_newton_2_basic"],
+    "estimated_minutes": 25,
+    "display_order": 6,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_circular_motion",
+    "title": "Uniform Circular Motion",
+    "description": "Understand centripetal acceleration and the forces that cause circular motion.",
+    "pattern_ids": ["pattern_circular_motion"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Circular Motion\n\nAn object moving in a circle at constant speed still accelerates because its direction changes.\n\n## Centripetal Acceleration\n\n$$a_c = \\frac{v^2}{r}$$\n\nDirection: Always toward the center of the circle"
+      },
+      {
+        "type": "text",
+        "content": "## Centripetal Force\n\n**Centripetal force is NOT a new force!** It's the net force toward the center, provided by:\n- Tension (ball on string)\n- Friction (car on curve)\n- Gravity (planets in orbit)\n- Normal force (roller coaster loop)"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_circular_motion",
+        "problem": "A car travels around a circular track (r = 50 m) at 10 m/s. Find the centripetal acceleration.",
+        "solution": "a_c = v²/r = 100/50 = 2 m/s²",
+        "explanation": "The centripetal acceleration depends on both speed and radius. Double the speed, quadruple the acceleration!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_mech_008", "q_mech_012", "q_mech_020"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_newton_2_basic"],
+    "estimated_minutes": 25,
+    "display_order": 7,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

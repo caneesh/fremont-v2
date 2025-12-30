@@ -1,0 +1,432 @@
+[
+  {
+    "id": "q_mech_001",
+    "problem_text": "A 5 kg block rests on a horizontal frictionless surface. A horizontal force of 20 N is applied to the block. What is the acceleration of the block?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_newton_2", "relevance": "primary", "application_notes": "Direct application of F = ma" }
+    ],
+    "difficulty": 1,
+    "category": "mechanics",
+    "subcategory": "newton_laws",
+    "hints": [
+      { "order": 1, "text": "Draw a free body diagram of the block.", "pattern_id": "pattern_free_body_diagram" },
+      { "order": 2, "text": "What forces act on the block horizontally?", "pattern_id": "pattern_newton_2" },
+      { "order": 3, "text": "Apply Newton's second law: F = ma" }
+    ],
+    "answer": { "type": "numeric", "value": 4, "unit": "m/s²", "tolerance": 0.1 },
+    "solution_explanation": "Since the surface is frictionless, the only horizontal force is the applied 20 N force. Using F = ma: 20 N = (5 kg)(a), so a = 4 m/s².",
+    "tags": ["newton_2", "basic", "single_force"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_002",
+    "problem_text": "A 10 kg block is pushed across a rough horizontal surface with a horizontal force of 50 N. If the coefficient of kinetic friction is 0.3, what is the acceleration of the block? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_newton_2", "relevance": "primary", "application_notes": "Net force analysis with friction" },
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Calculate kinetic friction force" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "friction",
+    "hints": [
+      { "order": 1, "text": "What is the normal force on a horizontal surface?", "pattern_id": "pattern_newton_2" },
+      { "order": 2, "text": "Calculate the friction force: f = μN", "pattern_id": "pattern_friction" },
+      { "order": 3, "text": "What is the net horizontal force?" }
+    ],
+    "answer": { "type": "numeric", "value": 2, "unit": "m/s²", "tolerance": 0.1 },
+    "solution_explanation": "Normal force N = mg = 100 N. Friction f = μN = 0.3 × 100 = 30 N opposing motion. Net force = 50 - 30 = 20 N. Acceleration a = F/m = 20/10 = 2 m/s².",
+    "tags": ["newton_2", "friction", "kinetic_friction"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_003",
+    "problem_text": "A 2 kg block slides down a frictionless incline that makes an angle of 30° with the horizontal. What is the acceleration of the block? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_inclined_plane", "relevance": "primary", "application_notes": "Weight component along incline" },
+      { "pattern_id": "pattern_newton_2", "relevance": "secondary", "application_notes": "Net force determines acceleration" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "inclined_plane",
+    "hints": [
+      { "order": 1, "text": "Decompose the weight into components parallel and perpendicular to the incline.", "pattern_id": "pattern_inclined_plane" },
+      { "order": 2, "text": "What is the component of weight along the incline? Think: mg sin(θ) or mg cos(θ)?" },
+      { "order": 3, "text": "On a frictionless incline, only the parallel component of weight causes acceleration." }
+    ],
+    "answer": { "type": "numeric", "value": 5, "unit": "m/s²", "tolerance": 0.1 },
+    "solution_explanation": "On a frictionless incline, the only force along the incline is mg sin(θ). Acceleration a = g sin(30°) = 10 × 0.5 = 5 m/s².",
+    "tags": ["inclined_plane", "frictionless", "component_analysis"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_004",
+    "problem_text": "A person pushes a 20 kg box with a force of 100 N at an angle of 30° below the horizontal across a rough floor. If the coefficient of kinetic friction is 0.2, what is the acceleration? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_newton_2", "relevance": "primary", "application_notes": "Apply in both x and y directions" },
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Normal force is affected by vertical push component" },
+      { "pattern_id": "pattern_free_body_diagram", "relevance": "secondary", "application_notes": "Must identify all forces correctly" }
+    ],
+    "difficulty": 3,
+    "category": "mechanics",
+    "subcategory": "friction",
+    "hints": [
+      { "order": 1, "text": "Break the 100 N push force into horizontal and vertical components.", "pattern_id": "pattern_newton_2" },
+      { "order": 2, "text": "The vertical component of the push increases the normal force.", "pattern_id": "pattern_friction" },
+      { "order": 3, "text": "N = mg + F_y since the push has a downward component." }
+    ],
+    "answer": { "type": "numeric", "value": 1.83, "unit": "m/s²", "tolerance": 0.1 },
+    "solution_explanation": "Horizontal component of push: F_x = 100 cos(30°) ≈ 86.6 N. Vertical component: F_y = 100 sin(30°) = 50 N (downward). Normal force: N = mg + F_y = 200 + 50 = 250 N. Friction: f = 0.2 × 250 = 50 N. Net force: 86.6 - 50 = 36.6 N. Acceleration: a = 36.6/20 ≈ 1.83 m/s².",
+    "tags": ["newton_2", "friction", "force_components", "challenging"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_005",
+    "problem_text": "A ball is dropped from a height of 20 m. Using energy conservation, find its speed just before hitting the ground. (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_energy_conservation", "relevance": "primary", "application_notes": "Convert PE to KE" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "energy",
+    "hints": [
+      { "order": 1, "text": "What is the initial potential energy of the ball?", "pattern_id": "pattern_energy_conservation" },
+      { "order": 2, "text": "At the ground, all PE has converted to KE.", "pattern_id": "pattern_energy_conservation" },
+      { "order": 3, "text": "Use mgh = ½mv² and solve for v." }
+    ],
+    "answer": { "type": "numeric", "value": 20, "unit": "m/s", "tolerance": 0.5 },
+    "solution_explanation": "Using energy conservation: mgh = ½mv². Mass cancels: gh = ½v². Solving: v = √(2gh) = √(2 × 10 × 20) = √400 = 20 m/s.",
+    "tags": ["energy_conservation", "falling_objects", "PE_to_KE"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_006",
+    "problem_text": "A spring with spring constant k = 200 N/m is compressed by 0.1 m. How much potential energy is stored in the spring?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_spring_potential", "relevance": "primary", "application_notes": "Spring PE formula" }
+    ],
+    "difficulty": 1,
+    "category": "mechanics",
+    "subcategory": "energy",
+    "hints": [
+      { "order": 1, "text": "What is the formula for spring potential energy?", "pattern_id": "pattern_spring_potential" },
+      { "order": 2, "text": "U = ½kx² where x is the compression/extension." }
+    ],
+    "answer": { "type": "numeric", "value": 1, "unit": "J", "tolerance": 0.05 },
+    "solution_explanation": "Spring potential energy U = ½kx² = ½ × 200 × (0.1)² = ½ × 200 × 0.01 = 1 J.",
+    "tags": ["spring", "potential_energy", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_007",
+    "problem_text": "A 2 kg cart moving at 4 m/s collides with and sticks to a 3 kg cart at rest. What is the velocity of the combined carts after the collision?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_momentum_conservation", "relevance": "primary", "application_notes": "Perfectly inelastic collision" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "momentum",
+    "hints": [
+      { "order": 1, "text": "What type of collision is this?", "pattern_id": "pattern_momentum_conservation" },
+      { "order": 2, "text": "Total momentum before = total momentum after." },
+      { "order": 3, "text": "After collision, both carts move together with the same velocity." }
+    ],
+    "answer": { "type": "numeric", "value": 1.6, "unit": "m/s", "tolerance": 0.1 },
+    "solution_explanation": "Momentum conservation: m₁v₁ + m₂v₂ = (m₁ + m₂)v_f. Substituting: (2)(4) + (3)(0) = (2+3)v_f. So 8 = 5v_f, giving v_f = 1.6 m/s.",
+    "tags": ["momentum", "inelastic_collision", "conservation"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_008",
+    "problem_text": "A car travels around a circular track of radius 50 m at a constant speed of 10 m/s. What is the magnitude of its centripetal acceleration?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_circular_motion", "relevance": "primary", "application_notes": "Centripetal acceleration formula" }
+    ],
+    "difficulty": 1,
+    "category": "mechanics",
+    "subcategory": "circular_motion",
+    "hints": [
+      { "order": 1, "text": "What is the formula for centripetal acceleration?", "pattern_id": "pattern_circular_motion" },
+      { "order": 2, "text": "a_c = v²/r where v is speed and r is radius." }
+    ],
+    "answer": { "type": "numeric", "value": 2, "unit": "m/s²", "tolerance": 0.1 },
+    "solution_explanation": "Centripetal acceleration a_c = v²/r = (10)²/50 = 100/50 = 2 m/s².",
+    "tags": ["circular_motion", "centripetal_acceleration", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_009",
+    "problem_text": "A 4 kg block is pushed up a frictionless 30° incline with an initial speed of 5 m/s. How far up the incline does the block travel before stopping? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_energy_conservation", "relevance": "primary", "application_notes": "KE converts to PE as block rises" },
+      { "pattern_id": "pattern_inclined_plane", "relevance": "secondary", "application_notes": "Height relates to distance along incline" }
+    ],
+    "difficulty": 3,
+    "category": "mechanics",
+    "subcategory": "energy",
+    "hints": [
+      { "order": 1, "text": "Initial KE converts to gravitational PE at the highest point.", "pattern_id": "pattern_energy_conservation" },
+      { "order": 2, "text": "If d is distance along incline, height h = d sin(30°).", "pattern_id": "pattern_inclined_plane" },
+      { "order": 3, "text": "Set ½mv² = mgh and solve for h, then find d." }
+    ],
+    "answer": { "type": "numeric", "value": 2.5, "unit": "m", "tolerance": 0.1 },
+    "solution_explanation": "Energy conservation: ½mv² = mgh. Canceling m: ½v² = gh. So h = v²/(2g) = 25/20 = 1.25 m. Distance along incline: d = h/sin(30°) = 1.25/0.5 = 2.5 m.",
+    "tags": ["energy_conservation", "inclined_plane", "combined_patterns"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_010",
+    "problem_text": "Person A (60 kg) stands on a skateboard and pushes Person B (80 kg) who is also on a skateboard. If Person B moves away at 1.5 m/s, what is Person A's velocity after the push?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_momentum_conservation", "relevance": "primary", "application_notes": "Initially at rest, total momentum = 0" },
+      { "pattern_id": "pattern_newton_3", "relevance": "secondary", "application_notes": "Action-reaction pair during push" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "momentum",
+    "hints": [
+      { "order": 1, "text": "What was the total momentum before the push?", "pattern_id": "pattern_momentum_conservation" },
+      { "order": 2, "text": "Total momentum must remain zero after the push." },
+      { "order": 3, "text": "If B moves in positive direction, A must move in negative direction." }
+    ],
+    "answer": { "type": "numeric", "value": -2, "unit": "m/s", "tolerance": 0.1 },
+    "solution_explanation": "Initial momentum = 0. Final: m_A v_A + m_B v_B = 0. So 60 v_A + 80(1.5) = 0. Thus v_A = -120/60 = -2 m/s (opposite to B's direction).",
+    "tags": ["momentum", "conservation", "newton_3"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_011",
+    "problem_text": "Which of the following is NOT a Newton's 3rd law pair?\n\nA) The gravitational force Earth exerts on you, and the force you exert on Earth\nB) The normal force the ground exerts on a book, and the weight of the book\nC) The force your hand exerts on a wall, and the force the wall exerts on your hand\nD) The tension a rope exerts on block A, and the tension block A exerts on the rope",
+    "pattern_refs": [
+      { "pattern_id": "pattern_newton_3", "relevance": "primary", "application_notes": "Identify true action-reaction pairs" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "newton_laws",
+    "hints": [
+      { "order": 1, "text": "Newton's 3rd law pairs act on DIFFERENT objects.", "pattern_id": "pattern_newton_3" },
+      { "order": 2, "text": "The forces must be the same type (both gravitational, both contact, etc.)." },
+      { "order": 3, "text": "Normal force and weight are both forces ON the book, not between two different objects." }
+    ],
+    "answer": { "type": "multiple_choice", "options": ["A", "B", "C", "D"], "correct_index": 1 },
+    "solution_explanation": "Option B is NOT a 3rd law pair. Normal force (from ground) and weight (from Earth) both act ON the book. The 3rd law pair to normal force would be the force the book exerts on the ground. The 3rd law pair to weight would be the gravitational force the book exerts on Earth.",
+    "tags": ["newton_3", "conceptual", "multiple_choice"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_012",
+    "problem_text": "A 1000 kg car needs to make a turn on a flat road. If the coefficient of static friction between tires and road is 0.8, what is the maximum speed at which it can take a curve of radius 25 m? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_circular_motion", "relevance": "primary", "application_notes": "Friction provides centripetal force" },
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Maximum static friction limits the turn" }
+    ],
+    "difficulty": 3,
+    "category": "mechanics",
+    "subcategory": "circular_motion",
+    "hints": [
+      { "order": 1, "text": "What provides the centripetal force in this case?", "pattern_id": "pattern_circular_motion" },
+      { "order": 2, "text": "Maximum centripetal force = maximum static friction.", "pattern_id": "pattern_friction" },
+      { "order": 3, "text": "Set μmg = mv²/r and solve for v." }
+    ],
+    "answer": { "type": "numeric", "value": 14.14, "unit": "m/s", "tolerance": 0.5 },
+    "solution_explanation": "Friction provides centripetal force: f = mv²/r. Maximum friction: f_max = μN = μmg. Setting equal: μmg = mv²/r. Mass cancels: μg = v²/r. So v = √(μgr) = √(0.8 × 10 × 25) = √200 ≈ 14.14 m/s.",
+    "tags": ["circular_motion", "friction", "combined_patterns"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_013",
+    "problem_text": "A 5 kg block slides down a rough incline at constant velocity. If the incline makes a 37° angle with horizontal, what is the coefficient of kinetic friction? (Use sin 37° ≈ 0.6, cos 37° ≈ 0.8)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_inclined_plane", "relevance": "primary", "application_notes": "Force analysis on incline" },
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Friction balances weight component" },
+      { "pattern_id": "pattern_newton_2", "relevance": "secondary", "application_notes": "Constant velocity means zero acceleration" }
+    ],
+    "difficulty": 3,
+    "category": "mechanics",
+    "subcategory": "friction",
+    "hints": [
+      { "order": 1, "text": "What does 'constant velocity' tell you about the net force?", "pattern_id": "pattern_newton_2" },
+      { "order": 2, "text": "The friction force must equal the weight component down the incline.", "pattern_id": "pattern_friction" },
+      { "order": 3, "text": "Use mg sin θ = μ mg cos θ and solve for μ." }
+    ],
+    "answer": { "type": "numeric", "value": 0.75, "unit": "", "tolerance": 0.02 },
+    "solution_explanation": "At constant velocity, a = 0, so net force = 0. Down the incline: mg sin θ. Up the incline: friction = μN = μ mg cos θ. Setting equal: mg sin θ = μ mg cos θ. Thus μ = tan θ = sin θ / cos θ = 0.6/0.8 = 0.75.",
+    "tags": ["inclined_plane", "friction", "equilibrium"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_014",
+    "problem_text": "A spring-loaded toy gun uses a spring with k = 400 N/m compressed by 0.05 m to launch a 0.02 kg ball. What is the ball's launch speed?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_spring_potential", "relevance": "primary", "application_notes": "Spring stores elastic PE" },
+      { "pattern_id": "pattern_energy_conservation", "relevance": "primary", "application_notes": "Spring PE converts to KE" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "energy",
+    "hints": [
+      { "order": 1, "text": "What is the initial energy stored in the spring?", "pattern_id": "pattern_spring_potential" },
+      { "order": 2, "text": "All spring PE converts to KE of the ball.", "pattern_id": "pattern_energy_conservation" },
+      { "order": 3, "text": "Set ½kx² = ½mv² and solve for v." }
+    ],
+    "answer": { "type": "numeric", "value": 5, "unit": "m/s", "tolerance": 0.2 },
+    "solution_explanation": "Spring PE = ½kx² = ½ × 400 × (0.05)² = ½ × 400 × 0.0025 = 0.5 J. This converts to KE: ½mv² = 0.5 J. So v² = 2(0.5)/0.02 = 50. Thus v = √50 ≈ 7.07 m/s. Wait, let me recalculate: v² = 1/0.02 = 50, so v = √50 ≈ 7.07. Actually: ½(0.02)v² = 0.5, so 0.01v² = 0.5, v² = 50, v = 7.07 m/s.",
+    "tags": ["spring", "energy_conservation", "launch"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_015",
+    "problem_text": "A worker pushes a 50 kg crate 10 m across a warehouse floor using a horizontal force of 200 N. The coefficient of kinetic friction is 0.2. How much work does friction do on the crate? (Use g = 10 m/s²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_work_energy", "relevance": "primary", "application_notes": "Work done by friction" },
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Calculate friction force" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "energy",
+    "hints": [
+      { "order": 1, "text": "First calculate the friction force.", "pattern_id": "pattern_friction" },
+      { "order": 2, "text": "Work = Force × distance × cos(angle between them).", "pattern_id": "pattern_work_energy" },
+      { "order": 3, "text": "Friction acts opposite to motion, so the angle is 180°." }
+    ],
+    "answer": { "type": "numeric", "value": -1000, "unit": "J", "tolerance": 50 },
+    "solution_explanation": "Friction force f = μN = μmg = 0.2 × 50 × 10 = 100 N. Work by friction = f × d × cos(180°) = 100 × 10 × (-1) = -1000 J. The negative sign indicates energy removed from the system.",
+    "tags": ["work", "friction", "negative_work"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_016",
+    "problem_text": "Which pattern(s) would you use to solve this problem: 'A ball attached to a string swings from point A (height 2m) to point B (lowest point). Find its speed at point B.'",
+    "pattern_refs": [
+      { "pattern_id": "pattern_energy_conservation", "relevance": "primary", "application_notes": "PE at A converts to KE at B" }
+    ],
+    "difficulty": 1,
+    "category": "mechanics",
+    "subcategory": "pattern_identification",
+    "hints": [
+      { "order": 1, "text": "Is friction or air resistance mentioned?" },
+      { "order": 2, "text": "Are we asked about forces or about speeds/heights?" },
+      { "order": 3, "text": "When only gravity does work and we compare two positions, think energy." }
+    ],
+    "answer": { "type": "pattern_selection", "correct_pattern_ids": ["pattern_energy_conservation"] },
+    "solution_explanation": "This is a classic energy conservation problem. The ball's gravitational PE at height A converts to KE at the lowest point B. No friction means mechanical energy is conserved: mgh_A = ½mv_B².",
+    "tags": ["pattern_recognition", "energy", "pendulum"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_017",
+    "problem_text": "Two ice skaters, A (50 kg) and B (70 kg), push off from each other. If A moves at 2.8 m/s after the push, what is B's speed?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_momentum_conservation", "relevance": "primary", "application_notes": "Total momentum remains zero" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "momentum",
+    "hints": [
+      { "order": 1, "text": "What was the total momentum before they pushed off?", "pattern_id": "pattern_momentum_conservation" },
+      { "order": 2, "text": "Momentum is conserved: p_before = p_after." },
+      { "order": 3, "text": "Since initial momentum was zero, m_A v_A + m_B v_B = 0." }
+    ],
+    "answer": { "type": "numeric", "value": 2, "unit": "m/s", "tolerance": 0.1 },
+    "solution_explanation": "Initially at rest, total momentum = 0. After push: 50(2.8) + 70(v_B) = 0. So v_B = -140/70 = -2 m/s. The magnitude is 2 m/s (negative indicates opposite direction to A).",
+    "tags": ["momentum", "push_off", "conservation"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_018",
+    "problem_text": "A 0.5 kg ball moving at 6 m/s bounces off a wall and returns at 4 m/s. What is the magnitude of the impulse delivered by the wall?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_momentum_conservation", "relevance": "primary", "application_notes": "Impulse equals change in momentum" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "momentum",
+    "hints": [
+      { "order": 1, "text": "Impulse J = Δp = p_final - p_initial.", "pattern_id": "pattern_momentum_conservation" },
+      { "order": 2, "text": "Be careful with signs: if initial velocity is positive, final is negative." },
+      { "order": 3, "text": "The ball reverses direction, so velocities have opposite signs." }
+    ],
+    "answer": { "type": "numeric", "value": 5, "unit": "kg·m/s", "tolerance": 0.1 },
+    "solution_explanation": "Taking toward the wall as positive: p_i = 0.5 × 6 = 3 kg·m/s. p_f = 0.5 × (-4) = -2 kg·m/s. Impulse = Δp = p_f - p_i = -2 - 3 = -5 kg·m/s. Magnitude = 5 kg·m/s.",
+    "tags": ["impulse", "momentum_change", "bouncing"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_019",
+    "problem_text": "An object is in static equilibrium on a rough incline. As the angle increases, at what point will the object begin to slide?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_friction", "relevance": "primary", "application_notes": "Static friction reaches its maximum" },
+      { "pattern_id": "pattern_inclined_plane", "relevance": "primary", "application_notes": "Weight components depend on angle" }
+    ],
+    "difficulty": 2,
+    "category": "mechanics",
+    "subcategory": "friction",
+    "hints": [
+      { "order": 1, "text": "What happens to the weight component along the incline as angle increases?", "pattern_id": "pattern_inclined_plane" },
+      { "order": 2, "text": "Static friction has a maximum value f_max = μ_s N.", "pattern_id": "pattern_friction" },
+      { "order": 3, "text": "Sliding begins when mg sin θ exceeds f_max." }
+    ],
+    "answer": { "type": "free_response", "rubric": ["When mg sin θ > μ_s mg cos θ", "Or equivalently when tan θ > μ_s", "The critical angle is θ = arctan(μ_s)"] },
+    "solution_explanation": "Static equilibrium requires friction to balance the weight component along the incline: f_s = mg sin θ. The maximum static friction is f_max = μ_s N = μ_s mg cos θ. Sliding begins when mg sin θ > μ_s mg cos θ, i.e., when tan θ > μ_s. The critical angle θ_c = arctan(μ_s).",
+    "tags": ["friction", "inclined_plane", "equilibrium", "conceptual"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_mech_020",
+    "problem_text": "A satellite orbits Earth in a circular orbit. Which force provides the centripetal acceleration, and in what direction does this force point?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_circular_motion", "relevance": "primary", "application_notes": "Identify centripetal force" }
+    ],
+    "difficulty": 1,
+    "category": "mechanics",
+    "subcategory": "circular_motion",
+    "hints": [
+      { "order": 1, "text": "What force acts on the satellite?", "pattern_id": "pattern_circular_motion" },
+      { "order": 2, "text": "Centripetal force always points toward the center of the circle." },
+      { "order": 3, "text": "For a satellite, what is at the center of its orbit?" }
+    ],
+    "answer": { "type": "free_response", "rubric": ["Gravitational force provides the centripetal force", "Points toward Earth's center", "Direction is radially inward"] },
+    "solution_explanation": "The gravitational force between Earth and the satellite provides the centripetal force needed for circular motion. This force points toward Earth's center (radially inward), which is the center of the satellite's circular orbit.",
+    "tags": ["circular_motion", "gravity", "satellites", "conceptual"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

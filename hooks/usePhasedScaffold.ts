@@ -14,7 +14,7 @@ import type {
   FinalSolveResponse,
   OutlineStep,
 } from '@/types/phasedScaffold'
-import type { MicroTaskScaffoldData, MicroTaskStep } from '@/types/microTask'
+import type { MicroTaskScaffoldData, MicroTaskStep, MicroTask } from '@/types/microTask'
 import { authenticatedFetch } from '@/lib/api/apiClient'
 
 export type PhasedLoadingState = 'idle' | 'loading_outline' | 'outline_ready' | 'loading_step' | 'error'
@@ -235,20 +235,64 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
     // Convert outline steps to MicroTaskStep format
     const steps: MicroTaskStep[] = outline.steps.map((outlineStep, index) => {
       const expansion = expandedSteps.get(outlineStep.step_id)
+      const isLoading = state.currentLoadingStepId === outlineStep.step_id
 
-      // Build tasks from expansion if available, otherwise create placeholder
-      const tasks = expansion?.micro_tasks.map((task, taskIndex) => ({
-        level: (taskIndex + 1) as 1 | 2 | 3 | 4 | 5,
-        levelTitle: getLevelTitle(taskIndex + 1),
-        type: task.type === 'MCQ' ? 'MULTIPLE_CHOICE' : task.type === 'FILL_BLANK' ? 'FILL_BLANK' : 'MULTIPLE_CHOICE' as 'MULTIPLE_CHOICE' | 'FILL_BLANK',
-        question: task.question,
-        options: task.options,
-        correctIndex: task.correct_index,
-        sentence: task.sentence,
-        correctTerm: task.correct_term,
-        distractors: task.distractors,
-        explanation: task.reasoning,
-      })) || []
+      // Build tasks from expansion if available
+      let tasks: MicroTaskStep['tasks'] = []
+
+      if (expansion?.micro_tasks) {
+        // Step is expanded - use real tasks
+        tasks = expansion.micro_tasks.map((task, taskIndex): MicroTask => {
+          const level = (taskIndex + 1) as 1 | 2 | 3 | 4 | 5
+          const levelTitle = getLevelTitle(taskIndex + 1)
+
+          if (task.type === 'FILL_BLANK') {
+            return {
+              level,
+              levelTitle,
+              type: 'FILL_BLANK' as const,
+              question: task.question,
+              sentence: task.sentence || '',
+              correctTerm: task.correct_term || '',
+              distractors: task.distractors || [],
+              explanation: task.reasoning,
+            }
+          } else {
+            return {
+              level,
+              levelTitle,
+              type: 'MULTIPLE_CHOICE' as const,
+              question: task.question,
+              options: task.options || [],
+              correctIndex: task.correct_index || 0,
+              explanation: task.reasoning,
+            }
+          }
+        })
+      } else {
+        // Step not expanded yet - create placeholder task based on outline
+        // This ensures the step shows as "not completed" with something to work on
+        tasks = [{
+          level: 1 as const,
+          levelTitle: 'Concept' as const,
+          type: 'MULTIPLE_CHOICE' as const,
+          question: isLoading
+            ? 'Loading step content...'
+            : outlineStep.minimal_task || `What is the goal of "${outlineStep.title}"?`,
+          options: isLoading
+            ? ['Loading...', 'Please wait...', 'Fetching content...', 'Almost ready...']
+            : [
+                outlineStep.goal || 'Understand the concept',
+                'Skip this step',
+                'I need a hint',
+                'Show me an example',
+              ],
+          correctIndex: 0,
+          explanation: isLoading
+            ? 'Loading detailed explanation...'
+            : `Goal: ${outlineStep.goal}`,
+        }]
+      }
 
       return {
         id: index + 1, // Use 1-based index for compatibility
@@ -260,12 +304,14 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
         feynmanPrompt: expansion?.feynman_prompt,
         // Include expansion data for components that need it
         _expansion: expansion,
-        _isLoading: state.currentLoadingStepId === outlineStep.step_id,
+        _isLoading: isLoading,
         _outlineStepId: outlineStep.step_id,
+        _needsExpansion: !expansion,
       } as MicroTaskStep & {
         _expansion?: StepExpansionResponse
         _isLoading?: boolean
         _outlineStepId?: string
+        _needsExpansion?: boolean
       }
     })
 
