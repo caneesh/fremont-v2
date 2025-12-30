@@ -81,6 +81,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // Generate session ID for circuit breaker (stable across component lifecycle)
   const sessionId = useRef(`session_${Date.now()}`).current
 
+  // Generate problem ID for circuit breaker (needs to be before hook call)
+  const currentProblemId = generateProblemId(data.problem)
+
   // Circuit Breaker integration
   const {
     state: circuitBreakerState,
@@ -96,7 +99,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     dismissWarning,
   } = useCircuitBreaker({
     sessionId,
-    problemId: problemId(),
+    problemId: currentProblemId,
   })
 
   // State for showing drill modal
