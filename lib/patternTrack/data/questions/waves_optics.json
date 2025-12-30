@@ -1,0 +1,424 @@
+[
+  {
+    "id": "q_wave_001",
+    "problem_text": "A wave has a frequency of 500 Hz and a wavelength of 0.68 m. What is the wave speed?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_wave_properties", "relevance": "primary", "application_notes": "Direct application of v = fλ" }
+    ],
+    "difficulty": 1,
+    "category": "waves_optics",
+    "subcategory": "wave_properties",
+    "hints": [
+      { "order": 1, "text": "What is the fundamental wave equation?", "pattern_id": "pattern_wave_properties" },
+      { "order": 2, "text": "v = fλ" },
+      { "order": 3, "text": "Multiply frequency by wavelength." }
+    ],
+    "answer": { "type": "numeric", "value": 340, "unit": "m/s", "tolerance": 1 },
+    "solution_explanation": "Wave speed v = fλ = (500 Hz)(0.68 m) = 340 m/s.",
+    "tags": ["wave_equation", "basic", "wave_speed"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_002",
+    "problem_text": "A guitar string 0.65 m long vibrates in its fundamental mode at 440 Hz. What is the speed of waves on the string?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_standing_waves", "relevance": "primary", "application_notes": "Fundamental mode of string fixed at both ends" },
+      { "pattern_id": "pattern_wave_properties", "relevance": "secondary", "application_notes": "Wave speed calculation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "standing_waves",
+    "hints": [
+      { "order": 1, "text": "For a string fixed at both ends, what is the wavelength of the fundamental?", "pattern_id": "pattern_standing_waves" },
+      { "order": 2, "text": "Fundamental: L = λ/2, so λ = 2L" },
+      { "order": 3, "text": "Then use v = fλ.", "pattern_id": "pattern_wave_properties" }
+    ],
+    "answer": { "type": "numeric", "value": 572, "unit": "m/s", "tolerance": 5 },
+    "solution_explanation": "For fundamental mode: λ = 2L = 2(0.65) = 1.30 m. Wave speed v = fλ = (440)(1.30) = 572 m/s.",
+    "tags": ["standing_waves", "string", "fundamental"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_003",
+    "problem_text": "A closed pipe (closed at one end) is 0.5 m long. What is the frequency of its fundamental mode? (Speed of sound = 340 m/s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_standing_waves", "relevance": "primary", "application_notes": "Closed pipe harmonics" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "standing_waves",
+    "hints": [
+      { "order": 1, "text": "For a closed pipe, what is at the closed end and what is at the open end?", "pattern_id": "pattern_standing_waves" },
+      { "order": 2, "text": "Node at closed end, antinode at open end. Fundamental: L = λ/4." },
+      { "order": 3, "text": "So λ = 4L, then f = v/λ." }
+    ],
+    "answer": { "type": "numeric", "value": 170, "unit": "Hz", "tolerance": 2 },
+    "solution_explanation": "For closed pipe fundamental: L = λ/4, so λ = 4L = 4(0.5) = 2 m. Frequency f = v/λ = 340/2 = 170 Hz.",
+    "tags": ["standing_waves", "closed_pipe", "fundamental"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_004",
+    "problem_text": "An ambulance with a siren at 1000 Hz approaches you at 30 m/s. What frequency do you hear? (Speed of sound = 340 m/s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_sound_waves", "relevance": "primary", "application_notes": "Doppler effect - source approaching" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "doppler",
+    "hints": [
+      { "order": 1, "text": "What is the Doppler effect formula?", "pattern_id": "pattern_sound_waves" },
+      { "order": 2, "text": "f' = f(v ± v_o)/(v ∓ v_s). Source approaching = denominator smaller." },
+      { "order": 3, "text": "f' = f × v/(v - v_s) when source approaches stationary observer." }
+    ],
+    "answer": { "type": "numeric", "value": 1097, "unit": "Hz", "tolerance": 5 },
+    "solution_explanation": "Source approaching: f' = f × v/(v - v_s) = 1000 × 340/(340 - 30) = 1000 × 340/310 = 1097 Hz.",
+    "tags": ["doppler_effect", "sound", "approaching"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_005",
+    "problem_text": "Light travels from air (n = 1.00) into water (n = 1.33) at an angle of incidence of 45°. What is the angle of refraction?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_reflection_refraction", "relevance": "primary", "application_notes": "Snell's law application" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "refraction",
+    "hints": [
+      { "order": 1, "text": "What is Snell's law?", "pattern_id": "pattern_reflection_refraction" },
+      { "order": 2, "text": "n₁sin(θ₁) = n₂sin(θ₂)" },
+      { "order": 3, "text": "Solve for θ₂: sin(θ₂) = n₁sin(θ₁)/n₂" }
+    ],
+    "answer": { "type": "numeric", "value": 32.1, "unit": "°", "tolerance": 0.5 },
+    "solution_explanation": "Snell's law: n₁sin(θ₁) = n₂sin(θ₂). sin(θ₂) = (1.00)(sin 45°)/(1.33) = 0.707/1.33 = 0.532. θ₂ = arcsin(0.532) = 32.1°.",
+    "tags": ["snells_law", "refraction", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_006",
+    "problem_text": "What is the critical angle for light traveling from glass (n = 1.5) to air (n = 1.0)?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_total_internal_reflection", "relevance": "primary", "application_notes": "Critical angle calculation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "total_internal_reflection",
+    "hints": [
+      { "order": 1, "text": "What is the formula for critical angle?", "pattern_id": "pattern_total_internal_reflection" },
+      { "order": 2, "text": "sin(θ_c) = n₂/n₁ where n₁ > n₂" },
+      { "order": 3, "text": "Critical angle exists only when going from higher to lower n." }
+    ],
+    "answer": { "type": "numeric", "value": 41.8, "unit": "°", "tolerance": 0.5 },
+    "solution_explanation": "Critical angle: sin(θ_c) = n₂/n₁ = 1.0/1.5 = 0.667. θ_c = arcsin(0.667) = 41.8°.",
+    "tags": ["critical_angle", "TIR", "glass"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_007",
+    "problem_text": "An object is placed 30 cm in front of a concave mirror with focal length 20 cm. Where is the image located?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_mirrors", "relevance": "primary", "application_notes": "Mirror equation application" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "mirrors",
+    "hints": [
+      { "order": 1, "text": "What is the mirror equation?", "pattern_id": "pattern_mirrors" },
+      { "order": 2, "text": "1/f = 1/d_o + 1/d_i" },
+      { "order": 3, "text": "Solve for d_i: 1/d_i = 1/f - 1/d_o" }
+    ],
+    "answer": { "type": "numeric", "value": 60, "unit": "cm", "tolerance": 1 },
+    "solution_explanation": "Mirror equation: 1/f = 1/d_o + 1/d_i. 1/d_i = 1/20 - 1/30 = 3/60 - 2/60 = 1/60. So d_i = 60 cm (real image).",
+    "tags": ["mirrors", "concave", "image_location"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_008",
+    "problem_text": "A converging lens has a focal length of 15 cm. An object is placed 10 cm from the lens. Where is the image and what is the magnification?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_lenses", "relevance": "primary", "application_notes": "Thin lens equation and magnification" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "lenses",
+    "hints": [
+      { "order": 1, "text": "Use the thin lens equation: 1/f = 1/d_o + 1/d_i", "pattern_id": "pattern_lenses" },
+      { "order": 2, "text": "Solve for d_i, then calculate m = -d_i/d_o" },
+      { "order": 3, "text": "A negative d_i means virtual image on same side as object." }
+    ],
+    "answer": { "type": "numeric", "value": -30, "unit": "cm", "tolerance": 1 },
+    "solution_explanation": "1/d_i = 1/f - 1/d_o = 1/15 - 1/10 = 2/30 - 3/30 = -1/30. So d_i = -30 cm (virtual image). Magnification m = -d_i/d_o = -(-30)/10 = +3 (upright, magnified).",
+    "tags": ["lenses", "converging", "virtual_image"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_009",
+    "problem_text": "In a double-slit experiment, the slits are 0.2 mm apart and the screen is 1.5 m away. If light of wavelength 600 nm is used, what is the distance between adjacent bright fringes?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_double_slit", "relevance": "primary", "application_notes": "Fringe spacing calculation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "interference",
+    "hints": [
+      { "order": 1, "text": "What is the formula for fringe spacing in double-slit interference?", "pattern_id": "pattern_double_slit" },
+      { "order": 2, "text": "Δy = λL/d" },
+      { "order": 3, "text": "Convert units: 600 nm = 600 × 10⁻⁹ m, 0.2 mm = 0.2 × 10⁻³ m" }
+    ],
+    "answer": { "type": "numeric", "value": 4.5, "unit": "mm", "tolerance": 0.1 },
+    "solution_explanation": "Fringe spacing Δy = λL/d = (600 × 10⁻⁹)(1.5)/(0.2 × 10⁻³) = (9 × 10⁻⁷)/(2 × 10⁻⁴) = 4.5 × 10⁻³ m = 4.5 mm.",
+    "tags": ["double_slit", "interference", "fringe_spacing"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_010",
+    "problem_text": "Light of wavelength 500 nm passes through a single slit of width 0.1 mm. At what angle is the first diffraction minimum?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_single_slit", "relevance": "primary", "application_notes": "Single slit diffraction minimum" }
+    ],
+    "difficulty": 3,
+    "category": "waves_optics",
+    "subcategory": "diffraction",
+    "hints": [
+      { "order": 1, "text": "What is the condition for minima in single-slit diffraction?", "pattern_id": "pattern_single_slit" },
+      { "order": 2, "text": "a sin(θ) = mλ for minima (m = 1, 2, 3, ...)" },
+      { "order": 3, "text": "For first minimum, m = 1." }
+    ],
+    "answer": { "type": "numeric", "value": 0.29, "unit": "°", "tolerance": 0.02 },
+    "solution_explanation": "First minimum: a sin(θ) = λ. sin(θ) = λ/a = (500 × 10⁻⁹)/(0.1 × 10⁻³) = 5 × 10⁻³. θ = arcsin(0.005) = 0.29°.",
+    "tags": ["single_slit", "diffraction", "minimum"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_011",
+    "problem_text": "Unpolarized light of intensity I₀ passes through two polarizers. The first is vertical; the second is at 30° to vertical. What is the final intensity?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_polarization", "relevance": "primary", "application_notes": "Malus's law with unpolarized source" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "polarization",
+    "hints": [
+      { "order": 1, "text": "What happens when unpolarized light passes through the first polarizer?", "pattern_id": "pattern_polarization" },
+      { "order": 2, "text": "First polarizer: I₁ = I₀/2" },
+      { "order": 3, "text": "Second polarizer (Malus's law): I₂ = I₁cos²(θ)" }
+    ],
+    "answer": { "type": "free_response", "rubric": ["I = (3/8)I₀", "Or I = 0.375I₀", "First polarizer gives I₀/2, then multiply by cos²(30°) = 3/4"] },
+    "solution_explanation": "After first polarizer: I₁ = I₀/2. After second (Malus's law): I₂ = I₁cos²(30°) = (I₀/2)(√3/2)² = (I₀/2)(3/4) = 3I₀/8 = 0.375I₀.",
+    "tags": ["polarization", "malus_law", "two_polarizers"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_012",
+    "problem_text": "A soap film (n = 1.33) in air appears bright green (λ = 540 nm) when viewed at normal incidence. What is the minimum thickness of the film?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_thin_film", "relevance": "primary", "application_notes": "Thin film constructive interference" }
+    ],
+    "difficulty": 3,
+    "category": "waves_optics",
+    "subcategory": "thin_film",
+    "hints": [
+      { "order": 1, "text": "Consider phase changes on reflection.", "pattern_id": "pattern_thin_film" },
+      { "order": 2, "text": "Top surface (air to film): phase change. Bottom (film to air): no phase change." },
+      { "order": 3, "text": "With one phase change, constructive: 2nt = (m + ½)λ. Minimum t is for m = 0." }
+    ],
+    "answer": { "type": "numeric", "value": 101.5, "unit": "nm", "tolerance": 2 },
+    "solution_explanation": "One phase change (at top surface). Constructive interference: 2nt = (m + ½)λ. For minimum thickness, m = 0: 2nt = λ/2. t = λ/(4n) = 540/(4 × 1.33) = 101.5 nm.",
+    "tags": ["thin_film", "interference", "minimum_thickness"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_013",
+    "problem_text": "Two waves with the same frequency and amplitude travel in opposite directions on a string. At a point where they meet, the amplitudes are both 5 cm. What are the maximum and minimum displacements at that point?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_wave_interference", "relevance": "primary", "application_notes": "Superposition of waves" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "interference",
+    "hints": [
+      { "order": 1, "text": "What is the superposition principle?", "pattern_id": "pattern_wave_interference" },
+      { "order": 2, "text": "Maximum occurs when waves are in phase (constructive)." },
+      { "order": 3, "text": "Minimum occurs when waves are out of phase (destructive)." }
+    ],
+    "answer": { "type": "free_response", "rubric": ["Maximum = 10 cm (constructive)", "Minimum = 0 cm (destructive)", "Max = A₁ + A₂, Min = |A₁ - A₂|"] },
+    "solution_explanation": "Constructive (in phase): A_max = 5 + 5 = 10 cm. Destructive (out of phase): A_min = |5 - 5| = 0 cm.",
+    "tags": ["superposition", "interference", "amplitude"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_014",
+    "problem_text": "A sound has an intensity of 10⁻⁶ W/m². What is its intensity level in decibels? (I₀ = 10⁻¹² W/m²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_sound_waves", "relevance": "primary", "application_notes": "Decibel calculation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "sound",
+    "hints": [
+      { "order": 1, "text": "What is the formula for decibel level?", "pattern_id": "pattern_sound_waves" },
+      { "order": 2, "text": "β = 10 log(I/I₀)" },
+      { "order": 3, "text": "Calculate log(10⁻⁶/10⁻¹²) = log(10⁶) = 6" }
+    ],
+    "answer": { "type": "numeric", "value": 60, "unit": "dB", "tolerance": 0.1 },
+    "solution_explanation": "β = 10 log(I/I₀) = 10 log(10⁻⁶/10⁻¹²) = 10 log(10⁶) = 10 × 6 = 60 dB.",
+    "tags": ["decibels", "sound_intensity", "logarithm"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_015",
+    "problem_text": "What is Brewster's angle for light reflecting from glass (n = 1.5) in air?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_polarization", "relevance": "primary", "application_notes": "Brewster's angle calculation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "polarization",
+    "hints": [
+      { "order": 1, "text": "What is the formula for Brewster's angle?", "pattern_id": "pattern_polarization" },
+      { "order": 2, "text": "tan(θ_B) = n₂/n₁" },
+      { "order": 3, "text": "For light in air hitting glass: tan(θ_B) = n_glass/n_air = 1.5/1" }
+    ],
+    "answer": { "type": "numeric", "value": 56.3, "unit": "°", "tolerance": 0.5 },
+    "solution_explanation": "Brewster's angle: tan(θ_B) = n₂/n₁ = 1.5/1.0 = 1.5. θ_B = arctan(1.5) = 56.3°.",
+    "tags": ["brewster_angle", "polarization", "reflection"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_016",
+    "problem_text": "A convex mirror has a focal length of -20 cm. An object is placed 30 cm from the mirror. Where is the image and is it real or virtual?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_mirrors", "relevance": "primary", "application_notes": "Convex mirror image formation" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "mirrors",
+    "hints": [
+      { "order": 1, "text": "Use the mirror equation with f negative for convex mirror.", "pattern_id": "pattern_mirrors" },
+      { "order": 2, "text": "1/d_i = 1/f - 1/d_o" },
+      { "order": 3, "text": "Negative d_i means virtual image." }
+    ],
+    "answer": { "type": "numeric", "value": -12, "unit": "cm", "tolerance": 0.5 },
+    "solution_explanation": "1/d_i = 1/f - 1/d_o = 1/(-20) - 1/30 = -3/60 - 2/60 = -5/60 = -1/12. So d_i = -12 cm. Virtual image (negative), behind the mirror.",
+    "tags": ["convex_mirror", "virtual_image", "mirror_equation"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_017",
+    "problem_text": "An open pipe is 1.0 m long. What are the frequencies of the first three harmonics? (Speed of sound = 340 m/s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_standing_waves", "relevance": "primary", "application_notes": "Open pipe harmonics" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "standing_waves",
+    "hints": [
+      { "order": 1, "text": "For an open pipe, what are the boundary conditions?", "pattern_id": "pattern_standing_waves" },
+      { "order": 2, "text": "Antinodes at both ends. All harmonics present: f_n = nv/(2L)." },
+      { "order": 3, "text": "n = 1, 2, 3 for first three harmonics." }
+    ],
+    "answer": { "type": "free_response", "rubric": ["f₁ = 170 Hz", "f₂ = 340 Hz", "f₃ = 510 Hz", "f_n = n × 170 Hz"] },
+    "solution_explanation": "Open pipe: f_n = nv/(2L) = n(340)/(2×1) = 170n Hz. f₁ = 170 Hz, f₂ = 340 Hz, f₃ = 510 Hz.",
+    "tags": ["open_pipe", "harmonics", "standing_waves"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_018",
+    "problem_text": "In a double-slit experiment, what happens to the fringe spacing if the wavelength is doubled?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_double_slit", "relevance": "primary", "application_notes": "Effect of wavelength on fringe pattern" }
+    ],
+    "difficulty": 1,
+    "category": "waves_optics",
+    "subcategory": "interference",
+    "hints": [
+      { "order": 1, "text": "What is the formula for fringe spacing?", "pattern_id": "pattern_double_slit" },
+      { "order": 2, "text": "Δy = λL/d" },
+      { "order": 3, "text": "How does Δy depend on λ?" }
+    ],
+    "answer": { "type": "multiple_choice", "options": ["Halved", "Doubled", "Stays the same", "Quadrupled"], "correct_index": 1 },
+    "solution_explanation": "Fringe spacing Δy = λL/d is directly proportional to wavelength. If λ doubles, Δy doubles.",
+    "tags": ["double_slit", "fringe_spacing", "conceptual"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_019",
+    "problem_text": "A diverging lens has a focal length of -10 cm. An object is placed 15 cm from the lens. What is the magnification?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_lenses", "relevance": "primary", "application_notes": "Diverging lens calculations" }
+    ],
+    "difficulty": 2,
+    "category": "waves_optics",
+    "subcategory": "lenses",
+    "hints": [
+      { "order": 1, "text": "First find d_i using the lens equation.", "pattern_id": "pattern_lenses" },
+      { "order": 2, "text": "1/d_i = 1/f - 1/d_o" },
+      { "order": 3, "text": "Then m = -d_i/d_o" }
+    ],
+    "answer": { "type": "numeric", "value": 0.4, "unit": "", "tolerance": 0.02 },
+    "solution_explanation": "1/d_i = 1/(-10) - 1/15 = -3/30 - 2/30 = -5/30 = -1/6. So d_i = -6 cm. Magnification m = -d_i/d_o = -(-6)/15 = 6/15 = 0.4.",
+    "tags": ["diverging_lens", "magnification", "virtual_image"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_wave_020",
+    "problem_text": "Two speakers emit sound waves of frequency 680 Hz in phase. A listener stands at a point where the path difference from the two speakers is 0.75 m. Is the interference constructive or destructive? (Speed of sound = 340 m/s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_wave_interference", "relevance": "primary", "application_notes": "Path difference and interference type" },
+      { "pattern_id": "pattern_sound_waves", "relevance": "secondary", "application_notes": "Sound wave interference" }
+    ],
+    "difficulty": 3,
+    "category": "waves_optics",
+    "subcategory": "interference",
+    "hints": [
+      { "order": 1, "text": "First find the wavelength.", "pattern_id": "pattern_wave_properties" },
+      { "order": 2, "text": "Express path difference in terms of wavelength.", "pattern_id": "pattern_wave_interference" },
+      { "order": 3, "text": "Constructive if path diff = nλ, destructive if path diff = (n+½)λ." }
+    ],
+    "answer": { "type": "multiple_choice", "options": ["Constructive", "Destructive", "Neither (somewhere in between)", "Cannot determine"], "correct_index": 1 },
+    "solution_explanation": "λ = v/f = 340/680 = 0.5 m. Path difference = 0.75 m = 1.5λ = (1 + ½)λ. This is (n + ½)λ with n = 1, so destructive interference.",
+    "tags": ["interference", "path_difference", "sound_waves"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]
