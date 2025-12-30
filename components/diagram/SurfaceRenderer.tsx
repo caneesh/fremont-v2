@@ -146,7 +146,8 @@ export default function SurfaceRenderer({
 
   if (scenarioType === 'incline') {
     // Inclined surface
-    const angleRad = (surfaceAngle * Math.PI) / 180
+    const angle = surfaceAngle ?? 30 // Default to 30 degrees if not specified
+    const angleRad = (angle * Math.PI) / 180
     const surfaceLength = 200
     const surfaceHeight = surfaceLength * Math.sin(angleRad)
     const surfaceBase = surfaceLength * Math.cos(angleRad)

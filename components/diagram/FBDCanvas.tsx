@@ -161,14 +161,16 @@ export default function FBDCanvas({
       )}
 
       {/* Canvas */}
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div
-          className={`relative rounded-xl border-2 transition-colors border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${isCompleted ? 'opacity-75' : ''}`}
+          className={`relative rounded-xl border-2 transition-colors border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 overflow-hidden ${isCompleted ? 'opacity-75' : ''}`}
         >
           <svg
             ref={svgRef}
             viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-            className="w-full aspect-[4/3]"
+            className="w-full h-auto"
+            style={{ aspectRatio: '4/3' }}
+            preserveAspectRatio="xMidYMid meet"
             onClick={handleCanvasClick}
           >
             {/* Grid pattern (subtle) */}
@@ -200,10 +202,10 @@ export default function FBDCanvas({
 
             {/* Object */}
             <ObjectRenderer
-              shape={scenario.objectShape}
+              shape={scenario.objectShape || 'block'}
               x={objectPos.x}
               y={objectPos.y}
-              rotation={scenario.scenarioType === 'incline' ? scenario.surfaceAngle : 0}
+              rotation={scenario.scenarioType === 'incline' ? (scenario.surfaceAngle ?? 0) : 0}
             />
 
             {/* Placed Forces */}
