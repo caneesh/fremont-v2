@@ -517,7 +517,7 @@ export default function MicroTaskStepAccordion({
                       isCollected
                         ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/10'
                         : isTierLocked
-                        ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 opacity-60'
+                        ? 'border-dashed border-slate-300 dark:border-slate-600 bg-slate-100/50 dark:bg-slate-800/30'
                         : isNextAvailable
                         ? 'border-indigo-300 dark:border-indigo-600 bg-indigo-50/30 dark:bg-indigo-900/10'
                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
@@ -540,9 +540,10 @@ export default function MicroTaskStepAccordion({
                         }
                       }}
                       disabled={isTierLocked}
+                      title={isTierLocked ? `Complete Tier ${task.level - 1} first to unlock` : undefined}
                       className={`w-full flex items-center justify-between p-3 text-left transition-colors ${
                         isTierLocked
-                          ? 'cursor-not-allowed'
+                          ? 'cursor-not-allowed opacity-50'
                           : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                       }`}
                     >
@@ -569,18 +570,26 @@ export default function MicroTaskStepAccordion({
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-sm font-medium ${
+                          <span className={`text-sm font-medium flex items-center gap-1.5 ${
                             isCollected
                               ? 'text-green-700 dark:text-green-300'
                               : isTierLocked
-                              ? 'text-slate-400 dark:text-slate-500'
+                              ? 'text-slate-400 dark:text-slate-500 line-through decoration-slate-300 dark:decoration-slate-600'
                               : 'text-slate-700 dark:text-slate-300'
                           }`}>
                             {task.levelTitle}
+                            {isTierLocked && (
+                              <svg className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
                           </span>
                           {/* Tier status indicators */}
                           {isTierLocked && (
-                            <span className="px-1.5 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
+                            <span className="px-1.5 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded flex items-center gap-1">
+                              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                              </svg>
                               Locked
                             </span>
                           )}

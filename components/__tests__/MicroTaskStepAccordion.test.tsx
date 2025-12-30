@@ -360,6 +360,130 @@ describe('MicroTaskStepAccordion', () => {
       expect(screen.getByText('Next')).not.toBeNull()
       expect(onTaskComplete).toHaveBeenCalledWith(multiTierStep.id, 1, 'Explanation 1')
     })
+
+    it('displays locked tiers with dashed border styling', () => {
+      const { container } = render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode
+      fireEvent.click(screen.getByText('reading'))
+
+      // Check that locked tiers have dashed border class
+      const lockedTiers = container.querySelectorAll('.border-dashed')
+      expect(lockedTiers.length).toBe(2) // Method and Setup are locked
+    })
+
+    it('displays locked tier titles with strikethrough styling', () => {
+      const { container } = render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode
+      fireEvent.click(screen.getByText('reading'))
+
+      // Check that locked tier titles have line-through class
+      const strikethroughElements = container.querySelectorAll('.line-through')
+      expect(strikethroughElements.length).toBe(2) // Method and Setup are locked
+    })
+
+    it('displays lock icons next to locked tier titles', () => {
+      const { container } = render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode
+      fireEvent.click(screen.getByText('reading'))
+
+      // Lock icons should be visible (SVG elements with lock path)
+      // We have: circle lock icon + title lock icon + badge lock icon + right-side lock icon = multiple per locked tier
+      const lockSvgs = container.querySelectorAll('svg')
+      const lockPaths = Array.from(lockSvgs).filter(svg =>
+        svg.innerHTML.includes('M5 9V7a5 5 0 0110 0v2') || // Filled lock icon
+        svg.innerHTML.includes('M12 15v2m-6 4h12') // Stroke lock icon
+      )
+      expect(lockPaths.length).toBeGreaterThan(0)
+    })
+
+    it('shows tooltip on locked tier buttons explaining unlock requirement', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode
+      fireEvent.click(screen.getByText('reading'))
+
+      // Get all tier buttons
+      const buttons = screen.getAllByRole('button')
+
+      // Find the button for "Method" (tier 2) which should be locked
+      const methodButton = buttons.find(btn => btn.textContent?.includes('Method'))
+      expect(methodButton).toBeDefined()
+      expect(methodButton?.getAttribute('title')).toBe('Complete Tier 1 first to unlock')
+    })
+
+    it('applies reduced opacity to locked tier buttons', () => {
+      const { container } = render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode
+      fireEvent.click(screen.getByText('reading'))
+
+      // Check that locked tier buttons have opacity-50 class
+      const reducedOpacityButtons = container.querySelectorAll('button.opacity-50')
+      expect(reducedOpacityButtons.length).toBe(2) // Method and Setup buttons
+    })
   })
 
   describe('step activation', () => {
