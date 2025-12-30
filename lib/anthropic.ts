@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { FEATURE_FLAGS } from './featureFlags'
 import type { DiagramStepData, RequiredForce, ScenarioType, ObjectShape } from '@/types/diagram'
+import type { PreFlightCheck, PreCondition, TrapOption, PreFlightCheckItem } from '@/types/preFlightCheck'
 
 // Initialize the Anthropic client
 const anthropic = new Anthropic({
@@ -101,6 +102,8 @@ export interface ScaffolderResponse {
       physicalInsight: string
     }
   }
+  // Pre-Flight Checks for formula condition validation
+  preFlightChecks?: PreFlightCheck[]
 }
 
 // Micro-Task Response Types
@@ -288,6 +291,36 @@ Based on your internal solution, create a Socratic learning scaffold with:
    - Expected physical behavior with reasoning
    - Type: 'limit', 'dimension', or 'symmetry'
 
+4. PRE-FLIGHT CHECKS (OPTIONAL - for steps using major physics laws):
+   When a step applies one of these physics laws, add a preFlightCheck to verify conditions BEFORE formula usage:
+
+   LAWS REQUIRING PRE-FLIGHT CHECKS:
+   - kinematic_equations: Requires constant acceleration
+   - conservation_mechanical_energy: Requires no non-conservative work (no friction)
+   - conservation_momentum: Requires isolated system (no external impulse)
+   - newtons_second_law: Requires inertial reference frame
+   - work_energy_theorem: Requires known path and all forces identified
+
+   For each applicable step, create a preFlightCheck with:
+   - id: Unique identifier (e.g., "preflight-step-2")
+   - targetStepId: The step.id this check gates
+   - law: One of the laws above (e.g., "kinematic_equations")
+   - displayName: Human-readable name (e.g., "Kinematic Equations")
+   - formula: LaTeX formula (e.g., "v = v_0 + at")
+   - checkItems: Array of condition checks (1-3 items), each with:
+     - preCondition: { id, description, checkQuestion, severity ("critical"/"important"), physicsRationale }
+     - options: Array of 3-4 options mixing correct answers and "traps" (misconceptions)
+     - correctOptionIds: Array of correct option IDs
+     - multiSelect: true if multiple correct options
+   - problemContext: { relevantText: excerpt from problem showing conditions }
+   - requiredToPass: Number of checks needed to proceed
+   - maxAttempts: Usually 3
+
+   TRAP OPTIONS: Include common misconceptions students might select:
+   - "Acceleration varies with position" (trap for kinematics)
+   - "Surface is rough but object moves slowly" (trap for energy conservation)
+   - "Analysis from accelerating elevator" (trap for Newton's laws)
+
 CRITICAL RULES:
 - NEVER output final numerical answer in Steps 1-4 hints
 - Focus on REASONING, not calculation
@@ -372,8 +405,41 @@ Output ONLY valid JSON with this EXACT structure:
       "commonMistakes": ["Forgetting g has units", "Not checking each term separately"],
       "physicalInsight": "Dimensional analysis catches ~50% of physics errors!"
     }
-  }
+  },
+  "preFlightChecks": [
+    {
+      "id": "preflight-step-2",
+      "targetStepId": 2,
+      "law": "kinematic_equations",
+      "displayName": "Kinematic Equations",
+      "formula": "v = v_0 + at",
+      "checkItems": [
+        {
+          "preCondition": {
+            "id": "constant_acceleration",
+            "description": "Acceleration must be constant throughout the motion",
+            "checkQuestion": "Is the acceleration constant in this problem?",
+            "severity": "critical",
+            "physicsRationale": "Kinematic equations assume constant a. Variable acceleration requires calculus.",
+            "hints": ["Check if forces are constant"],
+            "problemTextIndicators": ["constant acceleration", "freely falling"]
+          },
+          "options": [
+            { "id": "opt-1", "label": "Yes, only gravity acts (constant g)", "isCorrect": true, "studentReasoningPattern": "Correct identification", "prevalence": "common" },
+            { "id": "opt-2", "label": "No, a spring force acts (a varies with x)", "isCorrect": false, "trapType": "condition_violation", "misconceptionExplanation": "Spring force F=-kx means acceleration varies with position.", "studentReasoningPattern": "Ignores position dependence", "prevalence": "common" }
+          ],
+          "correctOptionIds": ["opt-1"],
+          "multiSelect": false
+        }
+      ],
+      "problemContext": { "relevantText": "Extract relevant problem text here" },
+      "requiredToPass": 1,
+      "maxAttempts": 3
+    }
+  ]
 }
+
+NOTE: Only include preFlightChecks for steps that apply major physics laws where verifying conditions is pedagogically valuable. Usually 0-2 checks per problem.
 
 Respond with ONLY the JSON, no other text.`
 

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import type { MicroTask, MultipleChoiceTask, FillBlankTask } from '@/types/microTask'
+import type { MicroTask, MultipleChoiceTask, FillBlankTask, VerbalPlanTask } from '@/types/microTask'
 import MultipleChoiceRenderer from './MultipleChoiceRenderer'
 import FillBlankRenderer from './FillBlankRenderer'
+import VerbalPlanRenderer from './VerbalPlanRenderer'
 import MathRenderer from '../MathRenderer'
 
 interface InsightCardProps {
@@ -93,6 +94,10 @@ export default function InsightCard({
     handleTaskSubmit(isCorrect)
   }
 
+  const handleVerbalPlanSubmit = (response: string, isValid: boolean) => {
+    handleTaskSubmit(isValid)
+  }
+
   // Render loading state
   if (isGenerating) {
     return (
@@ -162,6 +167,19 @@ export default function InsightCard({
             correctTerm={(task as FillBlankTask).correctTerm}
             distractors={(task as FillBlankTask).distractors}
             onSubmit={handleFillBlankSubmit}
+            disabled={disabled || isCompleted}
+            showResult={isCompleted}
+          />
+        )}
+
+        {task.type === 'VERBAL_PLAN' && (
+          <VerbalPlanRenderer
+            question={task.question}
+            prompt={(task as VerbalPlanTask).prompt}
+            minWords={(task as VerbalPlanTask).minWords}
+            requiredKeywords={(task as VerbalPlanTask).requiredKeywords}
+            scaffoldingQuestions={(task as VerbalPlanTask).scaffoldingQuestions}
+            onSubmit={handleVerbalPlanSubmit}
             disabled={disabled || isCompleted}
             showResult={isCompleted}
           />

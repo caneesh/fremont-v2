@@ -57,6 +57,34 @@ export const FEATURE_FLAGS = {
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false'),
 
   /**
+   * Boundary-Case Builder
+   * When enabled, shows an interactive tool for students to "stress test"
+   * their equations by examining limiting cases (e.g., θ → 0°, m → ∞).
+   * Teaches physical intuition and validates mathematical understanding.
+   */
+  BOUNDARY_CASE_BUILDER: process.env.NEXT_PUBLIC_FEATURE_BOUNDARY_CASE === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_BOUNDARY_CASE !== 'false'),
+
+  /**
+   * Equationless Path
+   * When enabled, certain steps (typically Strategy level) require a verbal
+   * plan before algebra entry is allowed. Forces students to articulate
+   * their approach in words before jumping to equations.
+   */
+  EQUATIONLESS_PATH: process.env.NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH !== 'false'),
+
+  /**
+   * Concept Contrast Challenge
+   * When enabled, challenges students to explain why they rejected "neighboring"
+   * concepts before applying their chosen principle. Forces deep understanding
+   * by requiring students to articulate why similar-but-inapplicable laws don't work.
+   * Triggers on steps with key physics concepts like Conservation of Momentum, etc.
+   */
+  CONCEPT_CONTRAST: process.env.NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST !== 'false'),
+
+  /**
    * Dev: Skip Steps Mode
    * When enabled, shows sanity check and other post-completion UI without
    * requiring all steps to be completed first. For testing only.

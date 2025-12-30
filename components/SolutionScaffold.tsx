@@ -25,6 +25,7 @@ import PostSolveActivity from './PostSolveActivity'
 import Celebration from './Celebration'
 import SubmissionCanvas from './SubmissionCanvas'
 import { WhatIfSimulation } from './simulation'
+import BoundaryCaseBuilder from './BoundaryCaseBuilder'
 import type { ReflectionAnswer } from '@/types/history'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
 import type { MistakeWarning as MistakeWarningType } from '@/types/mistakes'
@@ -40,9 +41,11 @@ import DrillModal from './DrillModal'
 import CircuitBreakerWarning from './CircuitBreakerWarning'
 import SocraticRewindModal from './SocraticRewindModal'
 import PreFlightCheckModal from './PreFlightCheckModal'
+import ConceptContrastModal from './ConceptContrastModal'
 import type { ErrorTag } from '@/types/circuitBreaker'
 import type { PreFlightCheck, PreFlightValidation } from '@/types/preFlightCheck'
 import type { SocraticRewindContext, RewindTriggerSource } from '@/types/socraticRewind'
+import type { ConceptContrastChallenge, ConceptContrastValidation } from '@/types/conceptContrast'
 import {
   buildContextFromGradeResult,
   buildContextFromSanityCheckFailure,
@@ -90,6 +93,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPreFlightCheck, setShowPreFlightCheck] = useState(false)
   const [currentPreFlightCheck, setCurrentPreFlightCheck] = useState<PreFlightCheck | null>(null)
   const [passedPreFlightChecks, setPassedPreFlightChecks] = useState<Set<string>>(new Set())
+
+  // Concept Contrast state
+  const [showConceptContrast, setShowConceptContrast] = useState(false)
+  const [currentConceptContrastChallenge, setCurrentConceptContrastChallenge] = useState<ConceptContrastChallenge | null>(null)
+  const [passedConceptContrastSteps, setPassedConceptContrastSteps] = useState<Set<number>>(new Set())
+  const [isLoadingConceptContrast, setIsLoadingConceptContrast] = useState(false)
 
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
@@ -736,6 +745,82 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setCurrentPreFlightCheck(null)
   }, [])
 
+  // Concept Contrast handlers
+  const triggerConceptContrast = useCallback(async (stepIndex: number) => {
+    // Only trigger for steps with required concepts that haven't been passed
+    if (passedConceptContrastSteps.has(stepIndex)) return
+
+    const step = data.steps[stepIndex]
+    if (!step.requiredConcepts?.length) return
+
+    // Get the primary concept for this step
+    const primaryConceptId = step.requiredConcepts[0]
+    const primaryConcept = data.concepts.find(c => c.id === primaryConceptId)
+    if (!primaryConcept) return
+
+    setIsLoadingConceptContrast(true)
+
+    try {
+      const response = await fetch('/api/concept-contrast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate',
+          selectedConcept: {
+            id: primaryConcept.id,
+            name: primaryConcept.name,
+            formula: primaryConcept.formula,
+          },
+          problemContext: {
+            problemText: data.problem,
+            domain: data.domain,
+            subdomain: data.subdomain,
+            keyConditions: [],
+          },
+          numDistractors: 2,
+          targetStepId: stepIndex,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate concept contrast challenge')
+      }
+
+      const result = await response.json()
+      if (result.success && result.challenge) {
+        setCurrentConceptContrastChallenge(result.challenge)
+        setShowConceptContrast(true)
+      }
+    } catch (error) {
+      console.error('Error generating concept contrast challenge:', error)
+      // If generation fails, allow the student to proceed
+      setPassedConceptContrastSteps(prev => new Set([...prev, stepIndex]))
+    } finally {
+      setIsLoadingConceptContrast(false)
+    }
+  }, [data, passedConceptContrastSteps])
+
+  const handleConceptContrastComplete = useCallback((passed: boolean, validation: ConceptContrastValidation) => {
+    if (currentConceptContrastChallenge?.targetStepId !== undefined) {
+      setPassedConceptContrastSteps(prev => new Set([...prev, currentConceptContrastChallenge.targetStepId!]))
+    }
+    setShowConceptContrast(false)
+    setCurrentConceptContrastChallenge(null)
+  }, [currentConceptContrastChallenge])
+
+  const handleConceptContrastSkip = useCallback(() => {
+    if (currentConceptContrastChallenge?.targetStepId !== undefined) {
+      setPassedConceptContrastSteps(prev => new Set([...prev, currentConceptContrastChallenge.targetStepId!]))
+    }
+    setShowConceptContrast(false)
+    setCurrentConceptContrastChallenge(null)
+  }, [currentConceptContrastChallenge])
+
+  const handleConceptContrastClose = useCallback(() => {
+    setShowConceptContrast(false)
+    setCurrentConceptContrastChallenge(null)
+  }, [])
+
   // Check for pre-flight requirement when activating a step
   const checkPreFlightRequirement = useCallback((stepIndex: number): boolean => {
     // Only check for hint-based scaffolds that have preFlightChecks
@@ -758,6 +843,52 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     return true // Allow step activation
   }, [data, passedPreFlightChecks])
 
+  // Check if concept contrast should trigger for this step
+  const shouldTriggerConceptContrast = useCallback((stepIndex: number): boolean => {
+    if (!FEATURE_FLAGS.CONCEPT_CONTRAST) return false
+    if (passedConceptContrastSteps.has(stepIndex)) return false
+
+    const step = data.steps[stepIndex]
+    if (!step.requiredConcepts?.length) return false
+
+    // Key concept patterns that warrant a concept contrast challenge
+    const keyConceptPatterns = [
+      /conservation/i,
+      /momentum/i,
+      /energy/i,
+      /newton/i,
+      /equilibrium/i,
+      /work-energy/i,
+    ]
+
+    // Check if any required concept matches key patterns
+    const hasKeyConcept = step.requiredConcepts.some(conceptId => {
+      const concept = data.concepts.find(c => c.id === conceptId)
+      if (!concept) return false
+      return keyConceptPatterns.some(pattern => pattern.test(concept.name))
+    })
+
+    return hasKeyConcept
+  }, [data, passedConceptContrastSteps])
+
+  // Combined step activation handler with concept contrast trigger
+  const handleStepActivation = useCallback((stepIndex: number) => {
+    // First check pre-flight requirement
+    if (!checkPreFlightRequirement(stepIndex)) {
+      return // Pre-flight check is blocking
+    }
+
+    // Set the step as active
+    setCurrentStep(stepIndex)
+
+    // Then check if concept contrast should trigger (async, doesn't block)
+    if (shouldTriggerConceptContrast(stepIndex)) {
+      setTimeout(() => {
+        triggerConceptContrast(stepIndex)
+      }, 500)
+    }
+  }, [checkPreFlightRequirement, shouldTriggerConceptContrast, triggerConceptContrast])
+
   // Handle solution grade complete
   const handleGradeComplete = useCallback((result: GradeSolutionResponse) => {
     setSolutionGradeResult(result)
@@ -769,7 +900,26 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (result.status !== 'SUCCESS' && result.detailedAnalysis?.errors) {
       recordGradingErrors(result.detailedAnalysis.errors, currentStep)
     }
-  }, [recordGradingErrors, currentStep])
+
+    // Trigger Socratic Rewind for CONCEPTUAL_GAP
+    if (result.status === 'CONCEPTUAL_GAP') {
+      const rewindContext = buildContextFromGradeResult(
+        result,
+        data.steps,
+        stepAnswers,
+        completedSteps,
+        data.problem,
+        data.domain,
+        data.subdomain
+      )
+
+      if (rewindContext) {
+        setSocraticRewindContext(rewindContext)
+        setSocraticRewindTrigger('grade_conceptual_gap')
+        setShowSocraticRewind(true)
+      }
+    }
+  }, [recordGradingErrors, currentStep, data, stepAnswers, completedSteps])
 
   // Handle highlighting problem text from constraint feedback
   const handleHighlightProblem = useCallback((startIndex: number, endIndex: number) => {
@@ -980,11 +1130,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       subdomain={data.subdomain}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
-                      onActivate={() => {
-                        if (checkPreFlightRequirement(index)) {
-                          setCurrentStep(index)
-                        }
-                      }}
+                      onActivate={() => handleStepActivation(index)}
                       onHintLevelChange={(level) => handleHintLevelChange(index, level)}
                     />
                   )}
@@ -1117,6 +1263,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
+          {/* Boundary-Case Builder - stress test equations with limiting cases */}
+          {isProblemSolved && isReflectionComplete && FEATURE_FLAGS.BOUNDARY_CASE_BUILDER && (
+            <BoundaryCaseBuilder scaffoldData={data} />
+          )}
+
           {/* What-If Simulation - show after problem is solved */}
           {isProblemSolved && isReflectionComplete && isHintScaffold(data) && (
             <WhatIfSimulation scaffoldData={data} />
@@ -1181,6 +1332,19 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         />
       )}
 
+      {/* Socratic Rewind Modal */}
+      {showSocraticRewind && socraticRewindContext && (
+        <SocraticRewindModal
+          isOpen={showSocraticRewind}
+          context={socraticRewindContext}
+          triggerSource={socraticRewindTrigger}
+          problemId={currentProblemId}
+          onClose={handleSocraticRewindClose}
+          onReturnToStep={handleSocraticRewindReturnToStep}
+          onProceed={handleSocraticRewindProceed}
+        />
+      )}
+
       {/* Problem Locked Overlay (when circuit breaker is tripped but drill not yet shown) */}
       {isProblemLocked && !showDrillModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
@@ -1212,6 +1376,34 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           onSkip={handlePreFlightSkip}
           onClose={() => setShowPreFlightCheck(false)}
         />
+      )}
+
+      {/* Concept Contrast Modal */}
+      {showConceptContrast && currentConceptContrastChallenge && (
+        <ConceptContrastModal
+          challenge={currentConceptContrastChallenge}
+          problemText={data.problem}
+          onComplete={handleConceptContrastComplete}
+          onSkip={handleConceptContrastSkip}
+          onClose={handleConceptContrastClose}
+        />
+      )}
+
+      {/* Concept Contrast Loading Overlay */}
+      {isLoadingConceptContrast && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-40">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl p-6 max-w-sm mx-4 text-center">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-600 dark:border-amber-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+              Preparing Challenge
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+              Analyzing related concepts...
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -19,11 +19,18 @@ import type {
   SocraticRewindContext,
   SocraticRewindResponse,
   SocraticRewindEvent,
-  RewindTriggerSource,
 } from '@/types/socraticRewind'
-import type { Step } from '@/types/scaffold'
-import type { MicroTaskStep } from '@/types/microTask'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
+
+/**
+ * Minimal step interface for rewind context building
+ * Works with both Step (hint-based) and MicroTaskStep
+ */
+interface MinimalStep {
+  id: number
+  title: string
+  question?: string
+}
 
 /**
  * Templates for the "Stop" message based on error type
@@ -203,7 +210,7 @@ export function generateQuickRewindResponse(
  */
 export function buildContextFromGradeResult(
   gradeResult: GradeSolutionResponse,
-  steps: Step[],
+  steps: MinimalStep[],
   stepAnswers: Map<number, string>,
   completedSteps: number[],
   problemText: string,

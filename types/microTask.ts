@@ -10,7 +10,7 @@ import type { Concept, SanityCheck, SanityCheckMatrix, ConceptualTrap, WarningBe
 import type { FeynmanPromptConfig } from './feynman'
 
 // Supported micro-task types
-export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK'
+export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'VERBAL_PLAN'
 
 // Level titles matching the 5-level hint ladder
 export type LevelTitle = 'Concept' | 'Visual' | 'Strategy' | 'Equation' | 'Solution'
@@ -46,8 +46,21 @@ export interface FillBlankTask extends BaseMicroTask {
   caseSensitive?: boolean
 }
 
+/**
+ * Verbal Plan Task (Equationless Path)
+ * User must describe their approach in words before proceeding to algebra.
+ * Requires a minimum response length and is validated for relevance.
+ */
+export interface VerbalPlanTask extends BaseMicroTask {
+  type: 'VERBAL_PLAN'
+  prompt: string  // The guiding prompt for the verbal plan
+  minWords?: number  // Minimum word count (default: 20)
+  requiredKeywords?: string[]  // Keywords that should appear in the response (optional hints)
+  scaffoldingQuestions?: string[]  // Optional sub-questions to guide the response
+}
+
 // Union type for all micro-tasks
-export type MicroTask = MultipleChoiceTask | FillBlankTask
+export type MicroTask = MultipleChoiceTask | FillBlankTask | VerbalPlanTask
 
 /**
  * Step with micro-tasks instead of hints
@@ -121,6 +134,10 @@ export function isMultipleChoiceTask(task: MicroTask): task is MultipleChoiceTas
 
 export function isFillBlankTask(task: MicroTask): task is FillBlankTask {
   return task.type === 'FILL_BLANK'
+}
+
+export function isVerbalPlanTask(task: MicroTask): task is VerbalPlanTask {
+  return task.type === 'VERBAL_PLAN'
 }
 
 /**
