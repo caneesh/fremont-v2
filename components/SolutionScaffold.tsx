@@ -764,6 +764,21 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
+          {/* Dev Mode: Skip Steps Banner */}
+          {skipStepsMode && (
+            <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span className="font-medium">Dev Mode: Skip Steps Enabled</span>
+                <span className="text-sm text-amber-600 dark:text-amber-400 ml-2">
+                  Sanity Check visible without completing steps. Remove <code className="bg-amber-200 dark:bg-amber-800 px-1 rounded">?skipSteps=true</code> to disable.
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="demo-step-steps bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
             <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
               Solution Roadmap
