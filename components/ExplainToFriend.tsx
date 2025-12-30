@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { validateExplanation, countLines, countWords } from '@/types/explainToFriend'
 import type { ExplainToFriendResponse, StudyBuddyResponse } from '@/types/explainToFriend'
+import { authenticatedFetch } from '@/lib/api/apiClient'
 
 interface ExplainToFriendProps {
   problemText: string
@@ -47,9 +48,8 @@ export default function ExplainToFriend({
 
     try {
       // Get AI assessment
-      const response = await fetch('/api/explain-to-friend', {
+      const response = await authenticatedFetch('/api/explain-to-friend', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problemText,
           explanation,
@@ -89,9 +89,8 @@ export default function ExplainToFriend({
     setBuddyLoading(true)
 
     try {
-      const response = await fetch('/api/study-buddy', {
+      const response = await authenticatedFetch('/api/study-buddy', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problemText,
           explanation,
