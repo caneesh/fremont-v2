@@ -128,6 +128,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // State for showing drill modal
   const [showDrillModal, setShowDrillModal] = useState(false)
 
+  // State for Socratic Rewind
+  const [showSocraticRewind, setShowSocraticRewind] = useState(false)
+  const [socraticRewindContext, setSocraticRewindContext] = useState<SocraticRewindContext | null>(null)
+  const [socraticRewindTrigger, setSocraticRewindTrigger] = useState<RewindTriggerSource>('sanity_check_failed')
+
   // Auto-show drill modal when circuit breaker trips
   useEffect(() => {
     if (circuitBreakerState === 'TRIPPED' && currentDrill && !showDrillModal) {
@@ -659,6 +664,50 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setHighlightedStepId(null)
     }, 5000)
   }, [data.steps.length])
+
+  // Trigger Socratic Rewind for sanity check failures
+  const triggerSocraticRewindFromSanityCheck = useCallback((
+    checkType: 'limit' | 'symmetry' | 'dimension',
+    feedback: string,
+    targetStepId?: number
+  ) => {
+    const rewindContext = buildContextFromSanityCheckFailure(
+      checkType,
+      feedback,
+      data.steps,
+      stepAnswers,
+      completedSteps,
+      data.problem,
+      data.domain,
+      data.subdomain
+    )
+
+    if (rewindContext) {
+      setSocraticRewindContext(rewindContext)
+      setSocraticRewindTrigger('sanity_check_failed')
+      setShowSocraticRewind(true)
+    } else if (targetStepId !== undefined) {
+      // Fallback to simple highlighting if context can't be built
+      handleTargetStep(targetStepId)
+    }
+  }, [data, stepAnswers, completedSteps, handleTargetStep])
+
+  // Handle Socratic Rewind close
+  const handleSocraticRewindClose = useCallback(() => {
+    setShowSocraticRewind(false)
+    setSocraticRewindContext(null)
+  }, [])
+
+  // Handle return to step from Socratic Rewind
+  const handleSocraticRewindReturnToStep = useCallback((stepId: number) => {
+    handleTargetStep(stepId + 1) // Convert 0-based to 1-based
+    setCurrentStep(stepId)
+  }, [handleTargetStep])
+
+  // Handle proceed from Socratic Rewind (student chooses to continue anyway)
+  const handleSocraticRewindProceed = useCallback(() => {
+    // Just close the modal, student continues with current work
+  }, [])
 
   // Handle sanity check solved
   const handleSanityCheckSolved = useCallback(() => {

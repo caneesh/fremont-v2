@@ -923,6 +923,7 @@ export default function SubmissionCanvas({
               <ConstraintFeedback
                 collisions={gradeResult.constraintCollisions}
                 dialogue={gradeResult.constraintDialogue}
+                onHighlightProblem={onHighlightProblem}
               />
             )}
 

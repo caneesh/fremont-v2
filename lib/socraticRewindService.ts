@@ -280,9 +280,9 @@ export function buildContextFromGradeResult(
       userAnswer: stepAnswers.get(lastCompletedStepId),
     },
     currentError: {
-      description: gradeResult.feedback,
+      description: gradeResult.feedback_markdown,
       errorType,
-      studentInput: gradeResult.detailedAnalysis?.overallAssessment,
+      studentInput: gradeResult.highlight_location || undefined,
     },
     violatedPrinciple: {
       name: violatedPrincipleName,
