@@ -255,6 +255,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     return generateProblemTitle(data.problem)
   }, [data.problem])
 
+  // Track if we've done the initial load to prevent re-running on data updates
+  const hasLoadedProgressRef = useRef(false)
+
   // Load saved progress and generate mistake warnings on mount
   useEffect(() => {
     // Generate warnings based on past patterns
@@ -263,6 +266,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       `${data.domain} - ${data.subdomain}`
     )
     setMistakeWarnings(warnings)
+
+    // Only load saved progress on initial mount, not on data updates
+    // This prevents resetting completedSteps when adaptedData updates
+    if (hasLoadedProgressRef.current) {
+      return
+    }
+    hasLoadedProgressRef.current = true
 
     const attempt = problemHistoryService.getAttempt(problemId())
     if (attempt) {

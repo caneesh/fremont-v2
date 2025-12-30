@@ -74,7 +74,12 @@ export default function ExplainToFriend({
       }
     } catch (error) {
       console.error('Error assessing explanation:', error)
-      setValidationErrors(['Failed to assess explanation. Please try again.'])
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      if (errorMessage === 'Not authenticated') {
+        setValidationErrors(['Please sign in to submit your explanation.'])
+      } else {
+        setValidationErrors([`Failed to assess explanation: ${errorMessage}`])
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -123,10 +128,10 @@ export default function ExplainToFriend({
 
   const getQualityColor = (quality: string) => {
     switch (quality) {
-      case 'excellent': return 'text-green-700 bg-green-50 border-green-300'
-      case 'good': return 'text-blue-700 bg-blue-50 border-blue-300'
-      case 'needs_work': return 'text-yellow-700 bg-yellow-50 border-yellow-300'
-      default: return 'text-gray-700 bg-gray-50 border-gray-300'
+      case 'excellent': return 'text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700'
+      case 'good': return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+      case 'needs_work': return 'text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
+      default: return 'text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-700'
     }
   }
 
@@ -198,15 +203,15 @@ export default function ExplainToFriend({
         {/* Live character count feedback */}
         <div className="flex items-center justify-between mt-2 text-xs">
           <div className={`${
-            lineCount === 3 ? 'text-green-600 font-semibold' :
-            lineCount > 3 ? 'text-red-600 font-semibold' :
-            'text-gray-500'
+            lineCount === 3 ? 'text-green-600 dark:text-green-400 font-semibold' :
+            lineCount > 3 ? 'text-red-600 dark:text-red-400 font-semibold' :
+            'text-gray-500 dark:text-gray-400'
           }`}>
             {lineCount === 3 ? '✓ Perfect line count' :
              lineCount > 3 ? '⚠ Too many lines' :
              `${3 - lineCount} more line${3 - lineCount !== 1 ? 's' : ''} needed`}
           </div>
-          <div className={wordCount > 100 ? 'text-red-600 font-semibold' : 'text-gray-500'}>
+          <div className={wordCount > 100 ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-gray-500 dark:text-gray-400'}>
             {wordCount > 100 && '⚠ '} Max 100 words
           </div>
         </div>
@@ -214,9 +219,9 @@ export default function ExplainToFriend({
 
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-4">
-          <div className="text-sm font-semibold text-red-900 mb-1">Please fix these issues:</div>
-          <ul className="text-sm text-red-700 space-y-1">
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 rounded mb-4">
+          <div className="text-sm font-semibold text-red-900 dark:text-red-200 mb-1">Please fix these issues:</div>
+          <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
             {validationErrors.map((error, idx) => (
               <li key={idx}>• {error}</li>
             ))}
@@ -248,7 +253,7 @@ export default function ExplainToFriend({
 
           {aiResponse.canProceed && (
             <div className="mt-3 pt-3 border-t border-current border-opacity-20">
-              <p className="text-xs font-semibold text-green-800">
+              <p className="text-xs font-semibold text-green-800 dark:text-green-300">
                 {studyBuddyEnabled
                   ? '✓ Great! Review the buddy questions, then click Continue.'
                   : '✓ Great! Proceeding to mark problem as solved...'}
@@ -259,15 +264,15 @@ export default function ExplainToFriend({
       )}
 
       {/* Study Buddy Mode */}
-      <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+      <div className="mb-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-blue-900">Study Buddy Mode</p>
-            <p className="text-xs text-blue-800">
+            <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">Study Buddy Mode</p>
+            <p className="text-xs text-blue-800 dark:text-blue-300">
               A simulated peer will ask naive questions to help you clarify your explanation.
             </p>
           </div>
-          <label className="flex items-center gap-2 text-sm font-medium text-blue-900">
+          <label className="flex items-center gap-2 text-sm font-medium text-blue-900 dark:text-blue-200">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
@@ -286,11 +291,11 @@ export default function ExplainToFriend({
       </div>
 
       {studyBuddyEnabled && aiResponse && (
-        <div className="mb-4 rounded-lg border-2 border-blue-200 bg-white p-4">
+        <div className="mb-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div>
-              <p className="text-sm font-semibold text-gray-900">Your Study Buddy asks:</p>
-              <p className="text-xs text-gray-600">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Your Study Buddy asks:</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Answer each question to sharpen your explanation.
               </p>
             </div>
@@ -298,14 +303,14 @@ export default function ExplainToFriend({
               type="button"
               onClick={fetchStudyBuddyQuestions}
               disabled={buddyLoading}
-              className="px-3 py-2 text-xs font-semibold rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:text-blue-300 disabled:border-blue-200"
+              className="px-3 py-2 text-xs font-semibold rounded-md border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:text-blue-300 dark:disabled:text-blue-600 disabled:border-blue-200"
             >
               {buddyLoading ? 'Thinking...' : (buddyQuestions.length > 0 ? 'Regenerate' : 'Ask Buddy')}
             </button>
           </div>
 
           {buddyError && (
-            <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            <div className="mb-3 rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-3 py-2 text-xs text-red-700 dark:text-red-300">
               {buddyError}
             </div>
           )}
@@ -313,8 +318,8 @@ export default function ExplainToFriend({
           {buddyQuestions.length > 0 && (
             <div className="space-y-3">
               {buddyQuestions.map((question, idx) => (
-                <div key={`${question}-${idx}`} className="rounded-md border border-gray-200 p-3">
-                  <p className="text-sm font-medium text-gray-800 mb-2">
+                <div key={`${question}-${idx}`} className="rounded-md border border-gray-200 dark:border-slate-600 p-3">
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                     {idx + 1}. {question}
                   </p>
                   <textarea
@@ -369,7 +374,7 @@ export default function ExplainToFriend({
         {onSkip && attemptCount < 2 && (
           <button
             onClick={onSkip}
-            className="px-4 py-3 text-gray-600 hover:text-gray-900 border-2 border-gray-300 rounded-lg hover:border-gray-400 font-medium transition-colors"
+            className="px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-2 border-gray-300 dark:border-slate-600 rounded-lg hover:border-gray-400 dark:hover:border-slate-500 font-medium transition-colors"
           >
             Skip for now
           </button>
@@ -377,13 +382,13 @@ export default function ExplainToFriend({
       </div>
 
       {attemptCount > 0 && !aiResponse?.canProceed && (
-        <p className="text-xs text-gray-600 mt-3 text-center">
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-3 text-center">
           Attempt {attemptCount} of 3 • Keep trying! Understanding deepens with each attempt.
         </p>
       )}
 
       {studyBuddyEnabled && aiResponse?.canProceed && (
-        <p className="text-xs text-gray-600 mt-3 text-center">
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-3 text-center">
           Study Buddy Mode is on — click Continue when you&apos;re ready.
         </p>
       )}
