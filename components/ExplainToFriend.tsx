@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { validateExplanation, countLines, countWords } from '@/types/explainToFriend'
-import type { ExplainToFriendResponse } from '@/types/explainToFriend'
+import type { ExplainToFriendResponse, StudyBuddyResponse } from '@/types/explainToFriend'
 
 interface ExplainToFriendProps {
   problemText: string
@@ -24,6 +24,11 @@ export default function ExplainToFriend({
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [aiResponse, setAiResponse] = useState<ExplainToFriendResponse | null>(null)
   const [attemptCount, setAttemptCount] = useState(0)
+  const [studyBuddyEnabled, setStudyBuddyEnabled] = useState(false)
+  const [buddyQuestions, setBuddyQuestions] = useState<string[]>([])
+  const [buddyAnswers, setBuddyAnswers] = useState<string[]>([])
+  const [buddyLoading, setBuddyLoading] = useState(false)
+  const [buddyError, setBuddyError] = useState<string | null>(null)
 
   const lineCount = countLines(explanation)
   const wordCount = countWords(explanation)
@@ -74,6 +79,48 @@ export default function ExplainToFriend({
       setIsSubmitting(false)
     }
   }
+
+  const fetchStudyBuddyQuestions = async () => {
+    if (!studyBuddyEnabled || !explanation.trim()) {
+      return
+    }
+
+    setBuddyError(null)
+    setBuddyLoading(true)
+
+    try {
+      const response = await fetch('/api/study-buddy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          problemText,
+          explanation,
+          steps,
+          topic,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate study buddy questions')
+      }
+
+      const buddyResponse: StudyBuddyResponse = await response.json()
+      const questions = buddyResponse.questions ?? []
+      setBuddyQuestions(questions)
+      setBuddyAnswers(Array.from({ length: questions.length }, () => ''))
+    } catch (error) {
+      console.error('Error generating study buddy questions:', error)
+      setBuddyError('Failed to generate questions. Please try again.')
+    } finally {
+      setBuddyLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (studyBuddyEnabled && aiResponse && buddyQuestions.length === 0 && !buddyLoading) {
+      void fetchStudyBuddyQuestions()
+    }
+  }, [studyBuddyEnabled, aiResponse, buddyQuestions.length, buddyLoading])
 
   const getQualityColor = (quality: string) => {
     switch (quality) {
@@ -139,6 +186,9 @@ export default function ExplainToFriend({
             setExplanation(e.target.value)
             setValidationErrors([])
             setAiResponse(null)
+            setBuddyQuestions([])
+            setBuddyAnswers([])
+            setBuddyError(null)
           }}
           placeholder="Line 1: The main approach is...&#10;Line 2: The key step is...&#10;Line 3: This works because..."
           className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y"
@@ -202,6 +252,83 @@ export default function ExplainToFriend({
               <p className="text-xs font-semibold text-green-800">
                 ✓ Great! Proceeding to mark problem as solved...
               </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Study Buddy Mode */}
+      <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-blue-900">Study Buddy Mode</p>
+            <p className="text-xs text-blue-800">
+              A simulated peer will ask naive questions to help you clarify your explanation.
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-blue-900">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+              checked={studyBuddyEnabled}
+              onChange={(e) => {
+                setStudyBuddyEnabled(e.target.checked)
+                setBuddyQuestions([])
+                setBuddyAnswers([])
+                setBuddyError(null)
+              }}
+              disabled={isSubmitting}
+            />
+            Enable
+          </label>
+        </div>
+      </div>
+
+      {studyBuddyEnabled && aiResponse && (
+        <div className="mb-4 rounded-lg border-2 border-blue-200 bg-white p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Your Study Buddy asks:</p>
+              <p className="text-xs text-gray-600">
+                Answer each question to sharpen your explanation.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchStudyBuddyQuestions}
+              disabled={buddyLoading}
+              className="px-3 py-2 text-xs font-semibold rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:text-blue-300 disabled:border-blue-200"
+            >
+              {buddyLoading ? 'Thinking...' : (buddyQuestions.length > 0 ? 'Regenerate' : 'Ask Buddy')}
+            </button>
+          </div>
+
+          {buddyError && (
+            <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {buddyError}
+            </div>
+          )}
+
+          {buddyQuestions.length > 0 && (
+            <div className="space-y-3">
+              {buddyQuestions.map((question, idx) => (
+                <div key={`${question}-${idx}`} className="rounded-md border border-gray-200 p-3">
+                  <p className="text-sm font-medium text-gray-800 mb-2">
+                    {idx + 1}. {question}
+                  </p>
+                  <textarea
+                    value={buddyAnswers[idx] ?? ''}
+                    onChange={(e) => {
+                      const next = [...buddyAnswers]
+                      next[idx] = e.target.value
+                      setBuddyAnswers(next)
+                    }}
+                    placeholder="Your answer..."
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={2}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>

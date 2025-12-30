@@ -26,6 +26,17 @@ export interface ExplainToFriendResponse {
   canProceed: boolean // true if quality is good enough
 }
 
+export interface StudyBuddyRequest {
+  problemText: string
+  explanation: string
+  steps: string[]
+  topic: string
+}
+
+export interface StudyBuddyResponse {
+  questions: string[]
+}
+
 export interface ExplainToFriendStatistics {
   totalExplanations: number
   excellentCount: number

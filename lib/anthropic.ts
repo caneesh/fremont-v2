@@ -12,6 +12,7 @@ export interface SolverResponse {
   solution: string
   domain: string
   subdomain: string
+  finalAnswer?: string
 }
 
 /**
@@ -784,7 +785,10 @@ VERIFICATION:
 [Check limits, dimensions, or special cases]
 
 COMMON PITFALLS:
-[Mention any common mistakes students make on such problems]`
+[Mention any common mistakes students make on such problems]
+
+FINAL ANSWER:
+[Single line with the final numerical answer and units]`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-5-20250929',
@@ -803,11 +807,13 @@ COMMON PITFALLS:
   const domainMatch = responseText.match(/DOMAIN:\s*(.+?)(?:\n|$)/i)
   const subdomainMatch = responseText.match(/SUBDOMAIN:\s*(.+?)(?:\n|$)/i)
   const solutionMatch = responseText.match(/SOLUTION:([\s\S]+?)(?:VERIFICATION:|$)/i)
+  const finalAnswerMatch = responseText.match(/FINAL ANSWER:\s*(.+?)(?:\n|$)/i)
 
   return {
     solution: solutionMatch?.[1]?.trim() || responseText,
     domain: domainMatch?.[1]?.trim() || 'Physics',
     subdomain: subdomainMatch?.[1]?.trim() || 'Problem Solving',
+    finalAnswer: finalAnswerMatch?.[1]?.trim(),
   }
 }
 

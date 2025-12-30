@@ -87,6 +87,8 @@ export interface MicroTaskScaffoldData {
   concepts: Concept[]
   steps: MicroTaskStep[]
   sanityCheck: SanityCheck
+  finalAnswer?: string
+  reverseSolve?: boolean
   // Optional Error Anticipator fields (Pass 1.5)
   commonTraps?: ConceptualTrap[]     // Top 3 conceptual traps for this problem
   warningBeacons?: WarningBeacon[]   // Step-specific warning beacons

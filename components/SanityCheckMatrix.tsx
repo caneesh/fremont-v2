@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { SanityCheckMatrix as SanityCheckMatrixType, SanityCheckVariant, CheckStatus, Concept } from '@/types/scaffold'
 import { authenticatedFetch } from '@/lib/api/apiClient'
 import MathRenderer from './MathRenderer'
@@ -26,6 +26,9 @@ interface SanityCheckMatrixProps {
 }
 
 type CheckType = 'limit' | 'symmetry' | 'dimension'
+
+const SELF_CHECK_TOKEN_KEY = 'physiscaffold_self_check_tokens'
+const DEFAULT_SELF_CHECK_TOKENS = 5
 
 const CHECK_CONFIG: Record<CheckType, { icon: string; label: string; color: string; bgColor: string; borderColor: string }> = {
   limit: {
@@ -68,6 +71,24 @@ export default function SanityCheckMatrix({
     dimension: { status: 'available', prediction: '', reasoning: '', feedback: null, feedbackType: null, attempts: 0 },
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [tokensRemaining, setTokensRemaining] = useState<number | null>(null)
+  const [tokenMessage, setTokenMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = sessionStorage.getItem(SELF_CHECK_TOKEN_KEY)
+    const parsed = stored ? Number(stored) : Number.NaN
+    const initial = Number.isFinite(parsed) ? parsed : DEFAULT_SELF_CHECK_TOKENS
+    sessionStorage.setItem(SELF_CHECK_TOKEN_KEY, String(initial))
+    setTokensRemaining(initial)
+  }, [])
+
+  const updateTokens = (nextValue: number) => {
+    setTokensRemaining(nextValue)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SELF_CHECK_TOKEN_KEY, String(nextValue))
+    }
+  }
 
   const getVariant = (type: CheckType): SanityCheckVariant => {
     switch (type) {
@@ -87,14 +108,24 @@ export default function SanityCheckMatrix({
   }
 
   const handleSubmit = async () => {
+    if (tokensRemaining === null) return
     const state = checkStates[activeCheck]
     if (!state.prediction.trim() || !state.reasoning.trim()) return
+    if (tokensRemaining !== null && tokensRemaining <= 0) {
+      setTokenMessage('You have used all verify tokens for this session. Refresh to reset.')
+      return
+    }
 
     setIsSubmitting(true)
+    setTokenMessage(null)
     setCheckStates(prev => ({
       ...prev,
       [activeCheck]: { ...prev[activeCheck], status: 'in_progress' },
     }))
+    const nextTokenCount = tokensRemaining !== null ? Math.max(tokensRemaining - 1, 0) : null
+    if (nextTokenCount !== null) {
+      updateTokens(nextTokenCount)
+    }
 
     try {
       const variant = getVariant(activeCheck)
@@ -151,6 +182,9 @@ export default function SanityCheckMatrix({
       }
     } catch (error) {
       console.error('Error verifying reasoning:', error)
+      if (tokensRemaining !== null) {
+        updateTokens(tokensRemaining)
+      }
       setCheckStates(prev => ({
         ...prev,
         [activeCheck]: {
@@ -174,6 +208,7 @@ export default function SanityCheckMatrix({
         feedbackType: null,
       },
     }))
+    setTokenMessage(null)
   }
 
   const currentState = checkStates[activeCheck]
@@ -195,6 +230,11 @@ export default function SanityCheckMatrix({
             <span className="text-sm text-gray-600 dark:text-dark-text-muted">
               {completedCount}/3 checks complete
             </span>
+            {tokensRemaining !== null && (
+              <span className="text-xs text-gray-500 dark:text-dark-text-muted">
+                Tokens left: {tokensRemaining}
+              </span>
+            )}
             <div className="flex gap-1">
               {(['limit', 'symmetry', 'dimension'] as CheckType[]).map(type => (
                 <div
@@ -325,6 +365,12 @@ export default function SanityCheckMatrix({
               </div>
             )}
 
+            {tokenMessage && (
+              <div className="rounded-lg border border-yellow-200 dark:border-yellow-500/30 bg-yellow-50 dark:bg-yellow-900/20 p-3 mb-4 text-sm text-yellow-800 dark:text-yellow-300">
+                {tokenMessage}
+              </div>
+            )}
+
             {/* Prediction Input */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
@@ -364,9 +410,15 @@ export default function SanityCheckMatrix({
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || !currentState.prediction.trim() || !currentState.reasoning.trim()}
+              disabled={
+                isSubmitting
+                || !currentState.prediction.trim()
+                || !currentState.reasoning.trim()
+                || tokensRemaining === 0
+                || tokensRemaining === null
+              }
               className={`w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                isSubmitting || !currentState.prediction.trim() || !currentState.reasoning.trim()
+                isSubmitting || !currentState.prediction.trim() || !currentState.reasoning.trim() || tokensRemaining === 0 || tokensRemaining === null
                   ? 'bg-gray-300 dark:bg-dark-card-soft text-gray-500 dark:text-dark-text-muted cursor-not-allowed'
                   : `${currentConfig.bgColor} ${currentConfig.color} border ${currentConfig.borderColor} hover:opacity-80`
               }`}

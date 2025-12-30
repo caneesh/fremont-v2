@@ -311,7 +311,7 @@ export function buildContextFromGradeResult(
 export function buildContextFromSanityCheckFailure(
   checkType: 'limit' | 'symmetry' | 'dimension',
   feedback: string,
-  steps: Step[] | MicroTaskStep[],
+  steps: MinimalStep[],
   stepAnswers: Map<number, string>,
   completedSteps: number[],
   problemText: string,

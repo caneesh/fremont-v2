@@ -7,6 +7,7 @@ import type { GradeSolutionRequest, GradeSolutionResponse, GradeStatus } from '@
 import { extractConstraints } from '@/lib/constraintExtractor'
 import { analyzeStudentWork, detectCollisions } from '@/lib/constraintCollisionEngine'
 import { generateSocraticDialogue, shouldShowDialogue } from '@/lib/constraintDialogueEngine'
+import { detectMisconceptions, shouldShowMisconception } from '@/lib/misconceptionDetectionService'
 import type { ProblemConstraintData } from '@/types/constraintCollision'
 
 const anthropic = new Anthropic({
@@ -210,6 +211,26 @@ Analyze this solution and provide your diagnostic grade in the specified JSON fo
         console.error(`[${authContext.userId}] Constraint check error:`, constraintError)
         // Don't fail the whole request if constraint check fails
       }
+    }
+
+    // Run misconception detection
+    try {
+      const misconceptionResult = detectMisconceptions(solution, {
+        problemText: problemContext.problemText,
+        domain: problemContext.domain,
+        subdomain: problemContext.subdomain,
+      })
+
+      // Filter to only show misconceptions that meet the threshold
+      const showableMisconceptions = misconceptionResult.detected.filter(shouldShowMisconception)
+
+      if (showableMisconceptions.length > 0) {
+        console.log(`[${authContext.userId}] Detected ${showableMisconceptions.length} misconception(s)`)
+        gradeResponse.detectedMisconceptions = showableMisconceptions
+      }
+    } catch (misconceptionError) {
+      console.error(`[${authContext.userId}] Misconception detection error:`, misconceptionError)
+      // Don't fail the whole request if misconception detection fails
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1)

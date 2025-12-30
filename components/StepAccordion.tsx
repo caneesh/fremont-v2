@@ -9,6 +9,7 @@ import FeynmanMicroPrompt from './FeynmanMicroPrompt'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
 import { onHintRequested, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
+import { detectMisconceptionFlag, type MisconceptionFlag } from '@/lib/misconceptionFlags'
 
 interface StepAccordionProps {
   step: Step
@@ -58,6 +59,8 @@ export default function StepAccordion({
   const [audioError, setAudioError] = useState<string | null>(null)
   const [generatedHints, setGeneratedHints] = useState<Map<number, { level: number; title: string; content: string }>>(new Map())
   const [isGeneratingHint, setIsGeneratingHint] = useState<number | null>(null)
+  const [misconceptionFlag, setMisconceptionFlag] = useState<MisconceptionFlag | null>(null)
+  const [dismissedMisconceptions, setDismissedMisconceptions] = useState<Set<string>>(new Set())
 
   // Feynman Micro-Prompt state
   const [feynmanPassed, setFeynmanPassed] = useState(false)
@@ -224,9 +227,27 @@ export default function StepAccordion({
     }
   }
 
+  const handleDismissMisconception = (id: string) => {
+    setDismissedMisconceptions(prev => {
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+    setMisconceptionFlag(null)
+  }
+
   // Check if this step requires Feynman check
   const requiresFeynmanCheck = !!step.feynmanPrompt
   const showStepContent = !requiresFeynmanCheck || feynmanPassed
+
+  useEffect(() => {
+    const detected = detectMisconceptionFlag({ answer: userAnswer, warningBeacon })
+    if (detected && dismissedMisconceptions.has(detected.id)) {
+      setMisconceptionFlag(null)
+      return
+    }
+    setMisconceptionFlag(detected)
+  }, [userAnswer, warningBeacon, dismissedMisconceptions])
 
   return (
     <div
@@ -346,6 +367,32 @@ export default function StepAccordion({
                   <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5" title={`Common mistake: ${warningBeacon.tag}`}>
                     Most common mistake here
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Misconception Flag - Clarification question when likely misconception detected */}
+            {showStepContent && misconceptionFlag && (
+              <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-300 dark:border-indigo-700 rounded-lg p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs uppercase tracking-wide text-indigo-600 dark:text-indigo-300 font-semibold">
+                      Clarification Check
+                    </p>
+                    <p className="text-sm text-indigo-900 dark:text-indigo-100 font-medium mt-1">
+                      {misconceptionFlag.title}
+                    </p>
+                    <p className="text-sm text-indigo-800 dark:text-indigo-200 mt-1">
+                      {misconceptionFlag.question}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissMisconception(misconceptionFlag.id)}
+                    className="text-xs text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-100"
+                  >
+                    Dismiss
+                  </button>
                 </div>
               </div>
             )}

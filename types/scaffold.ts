@@ -113,6 +113,8 @@ export interface ScaffoldData {
   concepts: Concept[]
   steps: Step[]
   sanityCheck: SanityCheck
+  finalAnswer?: string
+  reverseSolve?: boolean
   // Scaffold density (optional for backwards compat)
   density?: ScaffoldDensity          // 1=micro-steps, 5=macro-milestones
   // Optional Error Anticipator fields (Pass 1.5)

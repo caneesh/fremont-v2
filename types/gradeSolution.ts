@@ -5,6 +5,7 @@ import type {
   ConstraintCollision,
   SocraticDialogue,
 } from './constraintCollision'
+import type { DetectedMisconception } from './misconception'
 
 export type GradeStatus = 'SUCCESS' | 'MINOR_SLIP' | 'CONCEPTUAL_GAP'
 
@@ -53,6 +54,8 @@ export interface GradeSolutionResponse {
   constraintCollisions?: ConstraintCollision[]
   constraintDialogue?: SocraticDialogue
   constraintData?: ProblemConstraintData // Return extracted constraints for caching
+  // Misconception detection results
+  detectedMisconceptions?: DetectedMisconception[]
 }
 
 // Autocomplete suggestion type
