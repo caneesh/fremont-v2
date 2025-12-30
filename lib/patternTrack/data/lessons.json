@@ -226,5 +226,465 @@
     "display_order": 7,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_ideal_gas",
+    "title": "The Ideal Gas Law",
+    "description": "Understand the relationship between pressure, volume, temperature, and amount of gas.",
+    "pattern_ids": ["pattern_ideal_gas_law"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# The Ideal Gas Law\n\nThe ideal gas law relates four properties of a gas:\n\n$$PV = nRT$$\n\nWhere:\n- P = pressure (Pa)\n- V = volume (m³)\n- n = number of moles\n- R = 8.314 J/(mol·K)\n- T = temperature (Kelvin!)"
+      },
+      {
+        "type": "text",
+        "content": "## Special Cases\n\nWhen one variable is held constant:\n\n| Constant | Law | Relationship |\n|----------|-----|-------------|\n| T | Boyle's | P₁V₁ = P₂V₂ |\n| P | Charles's | V₁/T₁ = V₂/T₂ |\n| V | Gay-Lussac's | P₁/T₁ = P₂/T₂ |"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_ideal_gas_law",
+        "problem": "A gas at 300 K occupies 2 L at 1 atm. What's its volume at 600 K and 1 atm?",
+        "solution": "Constant P: V₁/T₁ = V₂/T₂\nV₂ = V₁(T₂/T₁) = 2(600/300) = 4 L",
+        "explanation": "At constant pressure, volume is directly proportional to temperature (Charles's Law)."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_thermo_001", "q_thermo_011"]
+      }
+    ],
+    "prerequisite_lesson_ids": [],
+    "estimated_minutes": 20,
+    "display_order": 8,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_first_law",
+    "title": "First Law of Thermodynamics",
+    "description": "Master energy conservation in thermal systems: heat, work, and internal energy.",
+    "pattern_ids": ["pattern_first_law_thermo", "pattern_heat_transfer"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# The First Law\n\nEnergy is conserved in thermodynamic processes:\n\n$$\\Delta U = Q - W$$\n\n- ΔU = change in internal energy\n- Q = heat added TO the system\n- W = work done BY the system"
+      },
+      {
+        "type": "text",
+        "content": "## Sign Conventions\n\n| Quantity | Positive | Negative |\n|----------|----------|----------|\n| Q | Heat IN | Heat OUT |\n| W | Work BY system (expansion) | Work ON system (compression) |\n| ΔU | Temperature increases | Temperature decreases |"
+      },
+      {
+        "type": "text",
+        "content": "## Heat Transfer\n\n**Temperature change:**\n$$Q = mc\\Delta T$$\n\n**Phase change (constant T):**\n$$Q = mL$$\n\nWhere L is latent heat of fusion or vaporization."
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_first_law_thermo",
+        "problem": "A gas undergoes isothermal expansion, absorbing 500 J of heat. How much work does it do?",
+        "solution": "Isothermal: ΔU = 0 (constant T for ideal gas)\nΔU = Q - W → 0 = 500 - W\nW = 500 J",
+        "explanation": "In an isothermal process, all heat added becomes work done by the gas."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_thermo_003", "q_thermo_012", "q_thermo_018"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_ideal_gas"],
+    "estimated_minutes": 25,
+    "display_order": 9,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_thermo_processes",
+    "title": "Thermodynamic Processes",
+    "description": "Learn to analyze isothermal, adiabatic, isobaric, and isochoric processes.",
+    "pattern_ids": ["pattern_thermo_processes", "pattern_pv_diagrams"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Four Key Processes\n\n| Process | Constant | Key Fact |\n|---------|----------|----------|\n| Isothermal | T | ΔU = 0, Q = W |\n| Adiabatic | Q = 0 | ΔU = -W |\n| Isobaric | P | W = PΔV |\n| Isochoric | V | W = 0, ΔU = Q |"
+      },
+      {
+        "type": "text",
+        "content": "## PV Diagrams\n\n**Work = Area under the curve** on a PV diagram\n\n- Expansion (V increases): Positive work\n- Compression (V decreases): Negative work\n- Cycle: Net work = enclosed area"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_thermo_processes",
+        "problem": "An ideal gas expands adiabatically. If 300 J of work is done BY the gas, what is ΔU?",
+        "solution": "Adiabatic: Q = 0\nΔU = Q - W = 0 - 300 = -300 J",
+        "explanation": "In adiabatic expansion, the gas does work using its internal energy, so it cools down."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_thermo_006", "q_thermo_009", "q_thermo_016"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_first_law"],
+    "estimated_minutes": 25,
+    "display_order": 10,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_heat_engines",
+    "title": "Heat Engines and Efficiency",
+    "description": "Understand how heat engines work and the limits on their efficiency.",
+    "pattern_ids": ["pattern_heat_engines", "pattern_second_law_thermo"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Heat Engines\n\nA heat engine converts heat into work by operating between hot and cold reservoirs.\n\n$$\\eta = \\frac{W}{Q_H} = 1 - \\frac{Q_C}{Q_H}$$"
+      },
+      {
+        "type": "text",
+        "content": "## The Carnot Limit\n\nNo engine can be more efficient than a Carnot engine:\n\n$$\\eta_{max} = 1 - \\frac{T_C}{T_H}$$\n\n**Important:** Temperatures MUST be in Kelvin!"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_heat_engines",
+        "problem": "A heat engine operates between 500 K and 300 K. What is the maximum possible efficiency?",
+        "solution": "η_max = 1 - T_C/T_H = 1 - 300/500 = 0.4 = 40%",
+        "explanation": "The Carnot efficiency sets the upper limit. Real engines are always less efficient due to irreversibilities."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_thermo_004", "q_thermo_005", "q_thermo_013"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_thermo_processes"],
+    "estimated_minutes": 25,
+    "display_order": 11,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_wave_basics",
+    "title": "Wave Properties and Motion",
+    "description": "Learn the fundamental properties of waves: wavelength, frequency, and speed.",
+    "pattern_ids": ["pattern_wave_properties"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# What is a Wave?\n\nA wave is a disturbance that transfers energy without transferring matter.\n\n## Key Properties\n\n- **Wavelength (λ)**: Distance between consecutive peaks\n- **Frequency (f)**: Number of cycles per second (Hz)\n- **Period (T)**: Time for one complete cycle (T = 1/f)\n- **Amplitude (A)**: Maximum displacement"
+      },
+      {
+        "type": "text",
+        "content": "## The Wave Equation\n\n$$v = f\\lambda$$\n\n**Key insight:** Wave speed depends on the medium, NOT the frequency. When a wave enters a new medium, frequency stays constant but wavelength changes."
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_wave_properties",
+        "problem": "A wave has frequency 500 Hz and wavelength 0.68 m. What is its speed?",
+        "solution": "v = fλ = (500)(0.68) = 340 m/s",
+        "explanation": "This is the speed of sound in air at room temperature!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_wave_001"]
+      }
+    ],
+    "prerequisite_lesson_ids": [],
+    "estimated_minutes": 15,
+    "display_order": 12,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_standing_waves",
+    "title": "Standing Waves and Resonance",
+    "description": "Understand how standing waves form in strings and pipes.",
+    "pattern_ids": ["pattern_standing_waves", "pattern_sound_waves"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Standing Waves\n\nStanding waves form when waves reflect and interfere with themselves.\n\n## Key Concepts\n\n- **Node**: Point of zero displacement\n- **Antinode**: Point of maximum displacement\n- **Harmonic**: Resonant frequency mode"
+      },
+      {
+        "type": "text",
+        "content": "## Boundary Conditions\n\n| System | Ends | Formula |\n|--------|------|----------|\n| String (both fixed) | Nodes | f_n = nv/(2L) |\n| Open pipe | Antinodes | f_n = nv/(2L) |\n| Closed pipe | Node + Antinode | f_n = nv/(4L), n odd only |"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_standing_waves",
+        "problem": "A closed pipe is 0.5 m long. Find the fundamental frequency. (v = 340 m/s)",
+        "solution": "Closed pipe: L = λ/4, so λ = 4L = 2 m\nf = v/λ = 340/2 = 170 Hz",
+        "explanation": "A closed pipe has a node at the closed end and an antinode at the open end."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_wave_002", "q_wave_003", "q_wave_017"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_wave_basics"],
+    "estimated_minutes": 25,
+    "display_order": 13,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_refraction",
+    "title": "Reflection and Refraction",
+    "description": "Learn how light bends when passing between different media.",
+    "pattern_ids": ["pattern_reflection_refraction", "pattern_total_internal_reflection"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Snell's Law\n\nWhen light crosses a boundary between media:\n\n$$n_1 \\sin\\theta_1 = n_2 \\sin\\theta_2$$\n\n**Index of refraction:** n = c/v (always ≥ 1)"
+      },
+      {
+        "type": "text",
+        "content": "## Key Rules\n\n1. Light bends **toward** normal when entering denser medium (higher n)\n2. Light bends **away** from normal when entering less dense medium\n3. Angles measured from **normal**, not surface"
+      },
+      {
+        "type": "text",
+        "content": "## Total Internal Reflection\n\nOccurs when light goes from high to low n medium:\n\n$$\\sin\\theta_c = \\frac{n_2}{n_1}$$\n\nAbove the critical angle, all light reflects—no refraction!"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_total_internal_reflection",
+        "problem": "Find the critical angle for light going from glass (n=1.5) to air.",
+        "solution": "sin θ_c = n_air/n_glass = 1.0/1.5 = 0.667\nθ_c = 41.8°",
+        "explanation": "This is why fiber optics work—light stays trapped inside the glass fiber."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_wave_005", "q_wave_006"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_wave_basics"],
+    "estimated_minutes": 25,
+    "display_order": 14,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_mirrors_lenses",
+    "title": "Mirrors and Lenses",
+    "description": "Master image formation using the mirror and lens equations.",
+    "pattern_ids": ["pattern_mirrors", "pattern_lenses"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# The Mirror/Lens Equation\n\nBoth mirrors and thin lenses use:\n\n$$\\frac{1}{f} = \\frac{1}{d_o} + \\frac{1}{d_i}$$\n\n**Magnification:**\n$$m = -\\frac{d_i}{d_o} = \\frac{h_i}{h_o}$$"
+      },
+      {
+        "type": "text",
+        "content": "## Sign Conventions\n\n| Quantity | Positive | Negative |\n|----------|----------|----------|\n| f (mirror) | Concave | Convex |\n| f (lens) | Converging | Diverging |\n| d_i | Real (opposite side) | Virtual (same side) |\n| m | Upright | Inverted |"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_lenses",
+        "problem": "A converging lens (f = 15 cm) has an object at 10 cm. Find the image location.",
+        "solution": "1/d_i = 1/f - 1/d_o = 1/15 - 1/10 = -1/30\nd_i = -30 cm (virtual, same side as object)",
+        "explanation": "Object inside focal length creates a virtual, magnified, upright image—like a magnifying glass!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_wave_007", "q_wave_008", "q_wave_016"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_refraction"],
+    "estimated_minutes": 30,
+    "display_order": 15,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_interference",
+    "title": "Wave Interference and Diffraction",
+    "description": "Understand how waves combine to create interference patterns.",
+    "pattern_ids": ["pattern_wave_interference", "pattern_double_slit", "pattern_single_slit"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Wave Interference\n\nWhen waves meet, they add algebraically (superposition).\n\n- **Constructive**: In phase, amplitudes add\n- **Destructive**: Out of phase, amplitudes cancel"
+      },
+      {
+        "type": "text",
+        "content": "## Double-Slit Interference\n\n**Bright fringes (maxima):**\n$$d\\sin\\theta = m\\lambda \\quad (m = 0, 1, 2, ...)$$\n\n**Dark fringes (minima):**\n$$d\\sin\\theta = (m + \\frac{1}{2})\\lambda$$\n\n**Fringe spacing:** Δy = λL/d"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_double_slit",
+        "problem": "Double slits 0.2 mm apart, screen 1.5 m away, λ = 600 nm. Find fringe spacing.",
+        "solution": "Δy = λL/d = (600×10⁻⁹)(1.5)/(0.2×10⁻³)\nΔy = 4.5 mm",
+        "explanation": "Smaller slit separation or larger wavelength = wider fringe spacing."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_wave_009", "q_wave_010", "q_wave_018"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_wave_basics"],
+    "estimated_minutes": 30,
+    "display_order": 16,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_photoelectric",
+    "title": "The Photoelectric Effect",
+    "description": "Discover how light behaves as particles (photons) in the photoelectric effect.",
+    "pattern_ids": ["pattern_photoelectric", "pattern_photon_energy"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Light as Particles\n\nLight comes in discrete packets called **photons**.\n\n**Photon energy:**\n$$E = hf = \\frac{hc}{\\lambda}$$\n\nWhere h = 6.63 × 10⁻³⁴ J·s (Planck's constant)"
+      },
+      {
+        "type": "text",
+        "content": "## The Photoelectric Effect\n\nWhen light hits a metal, it can eject electrons:\n\n$$E_{photon} = \\phi + KE_{max}$$\n\n- φ = work function (minimum energy to free electron)\n- Below threshold frequency f₀ = φ/h: NO emission regardless of intensity!"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_photoelectric",
+        "problem": "Light (λ = 400 nm) hits metal with φ = 2.0 eV. Find max KE of electrons. (hc = 1240 eV·nm)",
+        "solution": "E_photon = hc/λ = 1240/400 = 3.1 eV\nKE_max = E - φ = 3.1 - 2.0 = 1.1 eV",
+        "explanation": "This experiment proved light has particle properties—Einstein won the Nobel Prize for it!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_modern_001", "q_modern_008", "q_modern_012"]
+      }
+    ],
+    "prerequisite_lesson_ids": [],
+    "estimated_minutes": 25,
+    "display_order": 17,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_de_broglie",
+    "title": "Matter Waves and Wave-Particle Duality",
+    "description": "Explore how particles like electrons also behave as waves.",
+    "pattern_ids": ["pattern_de_broglie", "pattern_wave_particle", "pattern_uncertainty"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# de Broglie's Hypothesis\n\nIf light can be a particle, can particles be waves?\n\n**de Broglie wavelength:**\n$$\\lambda = \\frac{h}{p} = \\frac{h}{mv}$$\n\nAll matter has wave properties, but only noticeable for very small masses."
+      },
+      {
+        "type": "text",
+        "content": "## Uncertainty Principle\n\nYou cannot simultaneously know exact position AND momentum:\n\n$$\\Delta x \\cdot \\Delta p \\geq \\frac{\\hbar}{2}$$\n\nThis is NOT a measurement limitation—it's fundamental to nature!"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_de_broglie",
+        "problem": "Find the de Broglie wavelength of an electron moving at 2×10⁶ m/s. (m_e = 9.11×10⁻³¹ kg)",
+        "solution": "λ = h/(mv) = (6.63×10⁻³⁴)/[(9.11×10⁻³¹)(2×10⁶)]\nλ = 3.6×10⁻¹⁰ m = 0.36 nm",
+        "explanation": "This is comparable to atomic spacing—that's why electron microscopes work!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_modern_002", "q_modern_010", "q_modern_014"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_photoelectric"],
+    "estimated_minutes": 25,
+    "display_order": 18,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_bohr_model",
+    "title": "The Bohr Model and Atomic Spectra",
+    "description": "Understand quantized energy levels in atoms and emission spectra.",
+    "pattern_ids": ["pattern_bohr_model", "pattern_emission_spectra"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Bohr's Model of Hydrogen\n\nElectrons orbit in quantized energy levels:\n\n$$E_n = -\\frac{13.6 \\text{ eV}}{n^2}$$\n\n- n = 1: Ground state (-13.6 eV)\n- n = 2: First excited state (-3.4 eV)\n- n = ∞: Ionized (0 eV)"
+      },
+      {
+        "type": "text",
+        "content": "## Spectral Lines\n\nWhen electrons jump between levels, photons are emitted/absorbed:\n\n$$E_{photon} = |E_{final} - E_{initial}|$$\n\n**Series:**\n- Lyman: transitions to n = 1 (UV)\n- Balmer: transitions to n = 2 (visible)\n- Paschen: transitions to n = 3 (IR)"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_bohr_model",
+        "problem": "Find the wavelength emitted when hydrogen transitions from n=3 to n=2. (hc = 1240 eV·nm)",
+        "solution": "E₃ = -13.6/9 = -1.51 eV\nE₂ = -13.6/4 = -3.4 eV\nΔE = 1.89 eV\nλ = hc/ΔE = 1240/1.89 = 656 nm (red)",
+        "explanation": "This is the famous H-alpha line, part of the Balmer series!"
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_modern_003", "q_modern_015", "q_modern_019"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_photoelectric"],
+    "estimated_minutes": 25,
+    "display_order": 19,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_nuclear",
+    "title": "Nuclear Physics and Radioactivity",
+    "description": "Explore nuclear structure, binding energy, and radioactive decay.",
+    "pattern_ids": ["pattern_nuclear_binding", "pattern_radioactive_decay", "pattern_nuclear_reactions"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Nuclear Structure\n\n- **Mass number (A)** = protons + neutrons\n- **Atomic number (Z)** = protons\n- **Binding energy** = energy to separate nucleus into individual nucleons"
+      },
+      {
+        "type": "text",
+        "content": "## Radioactive Decay\n\n$$N = N_0 e^{-\\lambda t} = N_0 \\left(\\frac{1}{2}\\right)^{t/t_{1/2}}$$\n\n**Types of decay:**\n- α: emits ⁴₂He (A-4, Z-2)\n- β⁻: n → p + e⁻ (Z+1)\n- γ: energy only (no change in A or Z)"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_radioactive_decay",
+        "problem": "A sample has half-life of 5 days. What fraction remains after 15 days?",
+        "solution": "Number of half-lives = 15/5 = 3\nFraction = (1/2)³ = 1/8 = 0.125",
+        "explanation": "After each half-life, exactly half of the remaining sample decays."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_modern_004", "q_modern_011", "q_modern_016"]
+      }
+    ],
+    "prerequisite_lesson_ids": ["lesson_relativity_intro"],
+    "estimated_minutes": 30,
+    "display_order": 20,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "lesson_relativity_intro",
+    "title": "Special Relativity: Time and Space",
+    "description": "Discover how time and space behave differently at high speeds.",
+    "pattern_ids": ["pattern_time_dilation", "pattern_length_contraction", "pattern_mass_energy"],
+    "content": [
+      {
+        "type": "text",
+        "content": "# Einstein's Postulates\n\n1. Laws of physics are the same in all inertial frames\n2. Speed of light c is constant for all observers\n\n**Lorentz factor:**\n$$\\gamma = \\frac{1}{\\sqrt{1 - v^2/c^2}}$$"
+      },
+      {
+        "type": "text",
+        "content": "## Time Dilation\n\nMoving clocks run slow:\n$$\\Delta t = \\gamma \\Delta t_0$$\n\n**Proper time** (Δt₀) is measured by clock at rest relative to events.\n\n## Length Contraction\n\nMoving objects contract:\n$$L = \\frac{L_0}{\\gamma}$$\n\n**Proper length** (L₀) is measured in object's rest frame."
+      },
+      {
+        "type": "text",
+        "content": "## Mass-Energy Equivalence\n\n$$E = mc^2$$\n\nMass and energy are equivalent. A small mass contains enormous energy!"
+      },
+      {
+        "type": "example",
+        "pattern_id": "pattern_time_dilation",
+        "problem": "A spaceship travels at 0.8c. If 10 years pass on the ship, how much time passes on Earth?",
+        "solution": "γ = 1/√(1-0.64) = 1/0.6 = 5/3\nΔt_Earth = γΔt₀ = (5/3)(10) = 16.67 years",
+        "explanation": "The spaceship clock measures proper time because both events (start and end) happen at the same location in the ship."
+      },
+      {
+        "type": "checkpoint",
+        "question_ids": ["q_modern_005", "q_modern_006", "q_modern_007", "q_modern_020"]
+      }
+    ],
+    "prerequisite_lesson_ids": [],
+    "estimated_minutes": 35,
+    "display_order": 21,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]
