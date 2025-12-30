@@ -394,14 +394,35 @@ export const CONSTRAINT_PATTERNS: ConstraintPatternGroup = {
       category: 'force',
     },
     {
+      pattern: /ideal\s+pulley/i,
+      implies: 'massless_pulley',
+      category: 'force',
+    },
+    {
       pattern: /pulley\s+(?:of|with)\s+mass\s+([\d.]+)\s*(?:kg)?/i,
       implies: 'massive_pulley',
       category: 'force',
       extractValue: true,
     },
     {
+      pattern: /pulley\s+(?:has|having)\s+(?:a\s+)?mass/i,
+      implies: 'massive_pulley',
+      category: 'force',
+    },
+    {
       pattern: /smooth\s+pulley/i,
       implies: 'frictionless_pulley',
+      category: 'force',
+    },
+    {
+      pattern: /pulley\s+(?:of|with)\s+radius\s+([\d.]+)\s*(?:m|cm)?/i,
+      implies: 'pulley_radius_given',
+      category: 'kinematic',
+      extractValue: true,
+    },
+    {
+      pattern: /pulley\s+(?:of|with)\s+moment\s+of\s+inertia/i,
+      implies: 'pulley_inertia_given',
       category: 'force',
     },
   ],
@@ -461,6 +482,210 @@ export const CONSTRAINT_PATTERNS: ConstraintPatternGroup = {
       implies: 'ideal_system',
       category: 'approximation',
     },
+    {
+      pattern: /(?:ignore|neglect(?:ing)?)\s+(?:the\s+)?(?:mass\s+of\s+)?(?:string|rope|pulley)/i,
+      implies: 'massless_components',
+      category: 'approximation',
+    },
+  ],
+
+  springProperties: [
+    {
+      pattern: /(?:ideal|massless|light)\s+spring/i,
+      implies: 'ideal_spring',
+      category: 'force',
+    },
+    {
+      pattern: /spring\s+(?:constant|stiffness)\s*(?:=|is|:)?\s*k?\s*=?\s*([\d.]+)\s*(?:N\/m)?/i,
+      implies: 'spring_constant_given',
+      category: 'force',
+      extractValue: true,
+    },
+    {
+      pattern: /spring\s+(?:of|with)\s+(?:spring\s+)?constant\s+([\d.]+)/i,
+      implies: 'spring_constant_given',
+      category: 'force',
+      extractValue: true,
+    },
+    {
+      pattern: /natural\s+length\s*(?:=|is|:)?\s*([\d.]+)\s*(?:m|cm)?/i,
+      implies: 'natural_length_given',
+      category: 'force',
+      extractValue: true,
+    },
+    {
+      pattern: /(?:compressed|stretched)\s+by\s+([\d.]+)\s*(?:m|cm)?/i,
+      implies: 'spring_deformation_given',
+      category: 'force',
+      extractValue: true,
+    },
+    {
+      pattern: /spring\s+is\s+(?:initially\s+)?(?:un)?stretched/i,
+      implies: 'spring_initial_state',
+      category: 'boundary',
+    },
+  ],
+
+  collisionProperties: [
+    {
+      pattern: /(?:perfectly\s+)?elastic\s+collision/i,
+      implies: 'elastic_collision',
+      category: 'conservation',
+    },
+    {
+      pattern: /(?:perfectly\s+)?inelastic\s+collision/i,
+      implies: 'inelastic_collision',
+      category: 'conservation',
+    },
+    {
+      pattern: /coefficient\s+of\s+restitution\s*(?:=|is|:)?\s*e?\s*=?\s*([\d.]+)/i,
+      implies: 'restitution_given',
+      category: 'conservation',
+      extractValue: true,
+    },
+    {
+      pattern: /\be\s*=\s*([\d.]+)/i,
+      implies: 'restitution_given',
+      category: 'conservation',
+      extractValue: true,
+    },
+    {
+      pattern: /objects?\s+(?:stick|combine|move)\s+together\s+after/i,
+      implies: 'perfectly_inelastic',
+      category: 'conservation',
+    },
+    {
+      pattern: /head[\s-]?on\s+collision/i,
+      implies: 'head_on_collision',
+      category: 'kinematic',
+    },
+    {
+      pattern: /oblique\s+collision/i,
+      implies: 'oblique_collision',
+      category: 'kinematic',
+    },
+  ],
+
+  circularMotion: [
+    {
+      pattern: /(?:uniform\s+)?circular\s+motion/i,
+      implies: 'circular_motion',
+      category: 'kinematic',
+    },
+    {
+      pattern: /(?:moves?\s+)?in\s+(?:a\s+)?(?:vertical\s+)?circle/i,
+      implies: 'circular_path',
+      category: 'kinematic',
+    },
+    {
+      pattern: /(?:minimum|critical)\s+(?:speed|velocity)\s+at\s+(?:the\s+)?(?:top|highest\s+point)/i,
+      implies: 'critical_speed',
+      category: 'force',
+    },
+    {
+      pattern: /conical\s+pendulum/i,
+      implies: 'conical_pendulum',
+      category: 'kinematic',
+    },
+    {
+      pattern: /banked\s+(?:road|track|curve)/i,
+      implies: 'banked_curve',
+      category: 'force',
+    },
+    {
+      pattern: /(?:angular\s+)?(?:speed|velocity)\s*(?:=|is|:)?\s*[ωw]?\s*=?\s*([\d.]+)\s*(?:rad\/s|rpm)?/i,
+      implies: 'angular_velocity_given',
+      category: 'kinematic',
+      extractValue: true,
+    },
+  ],
+
+  fluidProperties: [
+    {
+      pattern: /(?:immersed|submerged)\s+in\s+(?:a\s+)?(?:liquid|fluid|water)/i,
+      implies: 'buoyancy_present',
+      category: 'force',
+    },
+    {
+      pattern: /(?:floating|floats)\s+(?:on|in)\s+(?:water|liquid)/i,
+      implies: 'floating_body',
+      category: 'force',
+    },
+    {
+      pattern: /density\s+(?:of\s+)?(?:liquid|fluid|water)\s*(?:=|is|:)?\s*([\d.]+)/i,
+      implies: 'fluid_density_given',
+      category: 'force',
+      extractValue: true,
+    },
+    {
+      pattern: /viscous\s+(?:drag|force|resistance)/i,
+      implies: 'viscous_drag',
+      category: 'force',
+    },
+    {
+      pattern: /terminal\s+(?:velocity|speed)/i,
+      implies: 'terminal_velocity',
+      category: 'kinematic',
+    },
+  ],
+
+  hingeAndPivot: [
+    {
+      pattern: /(?:hinged|pivoted)\s+at\s+(?:one\s+)?(?:end|point)/i,
+      implies: 'hinged_body',
+      category: 'boundary',
+    },
+    {
+      pattern: /(?:free\s+to\s+)?rotate\s+about\s+(?:a\s+)?(?:fixed\s+)?(?:axis|pivot|hinge)/i,
+      implies: 'fixed_axis_rotation',
+      category: 'kinematic',
+    },
+    {
+      pattern: /smooth\s+(?:hinge|pivot)/i,
+      implies: 'frictionless_hinge',
+      category: 'force',
+    },
+    {
+      pattern: /(?:uniform\s+)?rod\s+of\s+(?:length|mass)/i,
+      implies: 'uniform_rod',
+      category: 'force',
+    },
+  ],
+
+  initialConditions: [
+    {
+      pattern: /(?:starts?\s+)?from\s+rest/i,
+      implies: 'initial_velocity_zero',
+      category: 'boundary',
+    },
+    {
+      pattern: /initial(?:ly)?\s+(?:at\s+rest|stationary)/i,
+      implies: 'initial_velocity_zero',
+      category: 'boundary',
+    },
+    {
+      pattern: /(?:released|dropped)\s+from\s+(?:a\s+)?height\s*(?:=|of|:)?\s*([\d.]+)/i,
+      implies: 'dropped_from_height',
+      category: 'boundary',
+      extractValue: true,
+    },
+    {
+      pattern: /initial\s+(?:speed|velocity)\s*(?:=|is|:)?\s*[uv]?\s*=?\s*([\d.]+)\s*(?:m\/s)?/i,
+      implies: 'initial_velocity_given',
+      category: 'boundary',
+      extractValue: true,
+    },
+    {
+      pattern: /projected\s+(?:with\s+)?(?:a\s+)?(?:speed|velocity)\s+(?:of\s+)?([\d.]+)/i,
+      implies: 'initial_velocity_given',
+      category: 'boundary',
+      extractValue: true,
+    },
+    {
+      pattern: /thrown\s+(?:vertically\s+)?(?:up|down)(?:ward)?/i,
+      implies: 'vertical_projection',
+      category: 'kinematic',
+    },
   ],
 }
 
@@ -474,6 +699,12 @@ export function getAllPatterns(): ConstraintPattern[] {
     ...CONSTRAINT_PATTERNS.pulleyProperties,
     ...CONSTRAINT_PATTERNS.motionConstraints,
     ...CONSTRAINT_PATTERNS.approximations,
+    ...CONSTRAINT_PATTERNS.springProperties,
+    ...CONSTRAINT_PATTERNS.collisionProperties,
+    ...CONSTRAINT_PATTERNS.circularMotion,
+    ...CONSTRAINT_PATTERNS.fluidProperties,
+    ...CONSTRAINT_PATTERNS.hingeAndPivot,
+    ...CONSTRAINT_PATTERNS.initialConditions,
   ]
 }
 
@@ -502,19 +733,81 @@ export function getRulesByDomain(domain: string): ImplicationRule[] {
  * Constraint implication descriptions for user-facing messages
  */
 export const CONSTRAINT_DESCRIPTIONS: Record<string, string> = {
+  // Surface properties
   friction_present: 'Friction force must be included in the analysis',
   frictionless: 'Surface is frictionless; no friction force',
   friction_coefficient: 'Friction coefficient is given; use f = μN',
+
+  // String properties
   massless_string: 'String is massless; tension is uniform throughout',
   taut_string: 'String remains taut; constraint equation applies',
   inextensible_string: 'String length is constant; use constraint equations',
+  no_string_slip: 'String does not slip on pulley; use v = ωR',
+
+  // Pulley properties
   massless_pulley: 'Pulley is massless; tensions are equal on both sides',
   massive_pulley: 'Pulley has mass; tensions differ, causing rotation',
+  frictionless_pulley: 'Pulley is frictionless; no energy loss',
+  pulley_radius_given: 'Pulley radius is given; may need rotational analysis',
+  pulley_inertia_given: 'Pulley moment of inertia is given; use Iα = τ',
+
+  // Motion constraints
   pure_rolling: 'Rolling without slipping; v = ωR, a = αR',
   no_slip: 'Objects move together; same acceleration',
+  move_together: 'Objects move together with same acceleration',
   fixed_incline: 'Incline/wedge is fixed; does not move',
   movable_incline: 'Incline/wedge can move; system analysis required',
+
+  // Approximations
   small_angle: 'Small angle approximation applies; sin θ ≈ θ',
+  gravity_value: 'Specific value of g given; use exact value',
+  no_air_resistance: 'Air resistance can be neglected',
+  ideal_system: 'System is ideal; neglect dissipative forces',
+  massless_components: 'Neglect mass of strings/pulleys',
+
+  // Conservation laws
   energy_not_conserved: 'Mechanical energy NOT conserved due to friction',
   energy_may_be_conserved: 'Mechanical energy may be conserved',
+
+  // Spring properties
+  ideal_spring: 'Spring is ideal; obeys Hooke\'s law F = -kx',
+  spring_constant_given: 'Spring constant k is given; use F = kx',
+  natural_length_given: 'Natural length given; measure extension from this',
+  spring_deformation_given: 'Initial compression/extension is specified',
+  spring_initial_state: 'Spring initial condition (stretched/unstretched) given',
+
+  // Collision properties
+  elastic_collision: 'Elastic collision; both momentum and KE conserved',
+  inelastic_collision: 'Inelastic collision; only momentum conserved',
+  perfectly_inelastic: 'Perfectly inelastic; objects stick together after collision',
+  restitution_given: 'Coefficient of restitution given; use e = v₂-v₁/u₁-u₂',
+  head_on_collision: 'Head-on collision; motion along line of impact',
+  oblique_collision: 'Oblique collision; resolve velocities along impact line',
+
+  // Circular motion
+  circular_motion: 'Circular motion; centripetal acceleration = v²/R',
+  circular_path: 'Object moves in circular path',
+  critical_speed: 'Critical/minimum speed condition at highest point',
+  conical_pendulum: 'Conical pendulum; horizontal circular motion',
+  banked_curve: 'Banked curve; analyze normal force components',
+  angular_velocity_given: 'Angular velocity is specified',
+
+  // Fluid properties
+  buoyancy_present: 'Object in fluid; include buoyant force',
+  floating_body: 'Floating body; buoyant force equals weight',
+  fluid_density_given: 'Fluid density given; use ρ for buoyancy',
+  viscous_drag: 'Viscous drag present; F = -bv or F = -cv²',
+  terminal_velocity: 'Terminal velocity; drag equals weight',
+
+  // Hinge and pivot
+  hinged_body: 'Body is hinged; analyze torques about hinge',
+  fixed_axis_rotation: 'Rotation about fixed axis; use Iα = τ',
+  frictionless_hinge: 'Hinge is frictionless; no torque from hinge',
+  uniform_rod: 'Uniform rod; I = ML²/12 about center, ML²/3 about end',
+
+  // Initial conditions
+  initial_velocity_zero: 'Starts from rest; v₀ = 0',
+  dropped_from_height: 'Dropped from height; use energy or kinematics',
+  initial_velocity_given: 'Initial velocity is specified',
+  vertical_projection: 'Vertical projection; 1D motion analysis',
 }
