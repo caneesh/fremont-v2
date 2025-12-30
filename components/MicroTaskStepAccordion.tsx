@@ -470,31 +470,45 @@ export default function MicroTaskStepAccordion({
           {/* Reading Mode: Hint Ladder */}
           {isReadingMode && !allTasksCompleted && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  Reading Mode
-                  {useRevealFlow && (
-                    <span className="px-1.5 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded">
-                      Structured
-                    </span>
-                  )}
+              <div className="mb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <span className="font-medium">Socratic Ladder</span>
+                    {useRevealFlow && (
+                      <span className="px-1.5 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded">
+                        Structured
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setIsReadingMode(false)}
+                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  >
+                    Back to Quiz Mode
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsReadingMode(false)}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                  Back to Quiz Mode
-                </button>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Progress through each tier in order: concept → method → setup → check
+                </p>
               </div>
 
-              {/* Hint Ladder */}
+              {/* Socratic Ladder - Hint tiers with enforcement */}
               {step.tasks.map((task) => {
                 const isCollected = collectedInsights.some(i => i.level === task.level)
                 const isExpanded = expandedHintLevel === task.level
                 const learningStatus = levelLearningStatus.get(task.level)
+
+                // Tier enforcement: A tier is locked if any earlier tier hasn't been read
+                // Tier N is unlocked only if all tiers 1 to N-1 are collected
+                const isTierLocked = step.tasks
+                  .filter(t => t.level < task.level)
+                  .some(t => !collectedInsights.some(i => i.level === t.level))
+
+                // Determine the next available tier (first uncollected, unlocked tier)
+                const isNextAvailable = !isCollected && !isTierLocked
 
                 return (
                   <div
@@ -502,11 +516,18 @@ export default function MicroTaskStepAccordion({
                     className={`rounded-lg border overflow-hidden transition-all ${
                       isCollected
                         ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/10'
+                        : isTierLocked
+                        ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 opacity-60'
+                        : isNextAvailable
+                        ? 'border-indigo-300 dark:border-indigo-600 bg-indigo-50/30 dark:bg-indigo-900/10'
                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
                     }`}
                   >
                     <button
                       onClick={() => {
+                        // Enforce tier order: cannot click locked tiers
+                        if (isTierLocked) return
+
                         if (useRevealFlow && !isCollected) {
                           // Open the reveal-reconstruct-validate flow
                           handleOpenRevealFlow(task.level)
@@ -518,17 +539,30 @@ export default function MicroTaskStepAccordion({
                           }
                         }
                       }}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                      disabled={isTierLocked}
+                      className={`w-full flex items-center justify-between p-3 text-left transition-colors ${
+                        isTierLocked
+                          ? 'cursor-not-allowed'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                           isCollected
                             ? 'bg-green-500 text-white'
+                            : isTierLocked
+                            ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400'
+                            : isNextAvailable
+                            ? 'bg-indigo-500 text-white animate-pulse'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                         }`}>
                           {isCollected ? (
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : isTierLocked ? (
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           ) : (
                             task.level
@@ -536,10 +570,25 @@ export default function MicroTaskStepAccordion({
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-medium ${
-                            isCollected ? 'text-green-700 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'
+                            isCollected
+                              ? 'text-green-700 dark:text-green-300'
+                              : isTierLocked
+                              ? 'text-slate-400 dark:text-slate-500'
+                              : 'text-slate-700 dark:text-slate-300'
                           }`}>
                             {task.levelTitle}
                           </span>
+                          {/* Tier status indicators */}
+                          {isTierLocked && (
+                            <span className="px-1.5 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
+                              Locked
+                            </span>
+                          )}
+                          {isNextAvailable && (
+                            <span className="px-1.5 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded">
+                              Next
+                            </span>
+                          )}
                           {/* Learning status badge */}
                           {learningStatus === 'revealed_not_validated' && (
                             <span className="px-1.5 py-0.5 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded">
@@ -553,8 +602,12 @@ export default function MicroTaskStepAccordion({
                           )}
                         </div>
                       </div>
-                      {/* Show different icon based on mode */}
-                      {useRevealFlow && !isCollected ? (
+                      {/* Show different icon based on state */}
+                      {isTierLocked ? (
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      ) : useRevealFlow && !isCollected ? (
                         <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
@@ -571,7 +624,7 @@ export default function MicroTaskStepAccordion({
                     </button>
 
                     {/* Original inline expansion (only when feature flag is off or already collected) */}
-                    {isExpanded && (!useRevealFlow || isCollected) && (
+                    {isExpanded && (!useRevealFlow || isCollected) && !isTierLocked && (
                       <div className="px-4 pb-4 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <div className="text-sm text-slate-600 dark:text-slate-400">
                           <MathRenderer text={task.explanation} />
