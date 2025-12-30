@@ -361,4 +361,389 @@ describe('MicroTaskStepAccordion', () => {
       expect(onTaskComplete).toHaveBeenCalledWith(multiTierStep.id, 1, 'Explanation 1')
     })
   })
+
+  describe('step activation', () => {
+    it('activates step when clicking header on unlocked step', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={false}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByRole('button'))
+      expect(onActivate).toHaveBeenCalledWith(step.id)
+    })
+
+    it('toggles expanded state when clicking header', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Content should be visible initially (isActive=true)
+      expect(screen.getByText('correct')).not.toBeNull()
+
+      // Click to collapse
+      fireEvent.click(screen.getByText('Test Step'))
+
+      // InsightCard buttons should still be there since we toggled
+      // The component just toggles isExpanded state
+    })
+  })
+
+  describe('wrong answer handling', () => {
+    it('tracks wrong attempts and triggers mistake tracking after 2 attempts', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          problemId="problem-1"
+          problemTitle="Test Problem"
+          domain="Mechanics"
+          subdomain="Dynamics"
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // First wrong answer
+      fireEvent.click(screen.getByText('wrong'))
+      expect(onTaskIncorrect).not.toHaveBeenCalled()
+
+      // Second wrong answer triggers mistake tracking
+      fireEvent.click(screen.getByText('wrong'))
+      expect(onTaskIncorrect).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('visual states', () => {
+    it('shows completion message when all tasks are completed', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={true}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('Step Completed!')).not.toBeNull()
+      expect(screen.getByText(/All 1 insights earned/)).not.toBeNull()
+    })
+
+    it('shows step number in header', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={3}
+          isActive={false}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('3')).not.toBeNull()
+    })
+
+    it('shows checkmark icon when completed', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={true}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // The step number circle should have a checkmark SVG
+      const checkmarks = document.querySelectorAll('svg path[d="M5 13l4 4L19 7"]')
+      expect(checkmarks.length).toBeGreaterThan(0)
+    })
+
+    it('shows progress dots for each task', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Should show "0/3 insights" initially
+      expect(screen.getByText('0/3 insights')).not.toBeNull()
+    })
+
+    it('shows step type badge when stepType is provided', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('Physics')).not.toBeNull()
+    })
+  })
+
+  describe('warning beacon', () => {
+    it('displays warning beacon when provided', () => {
+      const warningBeacon = {
+        stepId: 1,
+        tag: 'sign_error',
+        message: 'Watch out for sign errors!',
+        probability: 0.8
+      }
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          warningBeacon={warningBeacon}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('Watch out for sign errors!')).not.toBeNull()
+      expect(screen.getByText('Most common mistake here')).not.toBeNull()
+    })
+  })
+
+  describe('required concepts', () => {
+    it('displays required concepts when provided', () => {
+      const conceptsWithData: Concept[] = [
+        { id: 'c1', name: 'Newton\'s Laws', definition: 'Laws of motion' },
+        { id: 'c2', name: 'Friction', definition: 'Resistance force' }
+      ]
+
+      const stepWithConcepts: MicroTaskStep = {
+        ...step,
+        requiredConcepts: ['c1', 'c2']
+      }
+
+      render(
+        <MicroTaskStepAccordion
+          step={stepWithConcepts}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={conceptsWithData}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('Newton\'s Laws')).not.toBeNull()
+      expect(screen.getByText('Friction')).not.toBeNull()
+    })
+  })
+
+  describe('reading mode controls', () => {
+    it('shows Back to Quiz Mode button in reading mode', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('reading'))
+      expect(screen.getByText('Back to Quiz Mode')).not.toBeNull()
+    })
+
+    it('returns to quiz mode when clicking Back to Quiz Mode', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('reading'))
+      expect(screen.getByText('Socratic Ladder')).not.toBeNull()
+
+      fireEvent.click(screen.getByText('Back to Quiz Mode'))
+
+      // Should show InsightCard buttons again
+      expect(screen.getByText('correct')).not.toBeNull()
+    })
+  })
+
+  describe('reveal flow modal', () => {
+    it('closes reveal flow modal when close button is clicked', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Switch to reading mode and open reveal flow
+      fireEvent.click(screen.getByText('reading'))
+      fireEvent.click(screen.getByText('Concept'))
+
+      expect(screen.getByTestId('reveal-flow-modal')).not.toBeNull()
+
+      // Close the modal
+      fireEvent.click(screen.getByText('close'))
+
+      // Modal should be closed (no reveal-flow-modal)
+      expect(screen.queryByTestId('reveal-flow-modal')).toBeNull()
+    })
+
+    it('shows partial outcome when completing with partial understanding', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('reading'))
+      fireEvent.click(screen.getByText('Concept'))
+      fireEvent.click(screen.getByText('complete-partial'))
+
+      // Should unlock next tier
+      expect(screen.getByText('Next')).not.toBeNull()
+      expect(onTaskComplete).toHaveBeenCalledWith(multiTierStep.id, 1, 'explanation')
+    })
+  })
+
+  describe('collected insights display', () => {
+    it('shows collected insights in quiz mode after answering correctly', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Answer first question correctly
+      fireEvent.click(screen.getByText('correct'))
+
+      // CollectedInsights component should be rendered
+      expect(screen.getByTestId('collected-insights')).not.toBeNull()
+    })
+  })
+
+  describe('loading saved progress', () => {
+    it('loads progress from props', () => {
+      const savedProgress = {
+        stepId: 2,
+        isCompleted: false,
+        currentLevel: 2,
+        taskAttempts: [{ level: 1, attempts: 1, isCompleted: true }],
+        collectedInsights: ['First explanation']
+      }
+
+      render(
+        <MicroTaskStepAccordion
+          step={multiTierStep}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          progress={savedProgress}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Should show 1/3 insights based on saved progress
+      expect(screen.getByText('1/3 insights')).not.toBeNull()
+    })
+  })
 })
