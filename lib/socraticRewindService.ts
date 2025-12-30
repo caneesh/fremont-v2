@@ -22,6 +22,7 @@ import type {
   RewindTriggerSource,
 } from '@/types/socraticRewind'
 import type { Step } from '@/types/scaffold'
+import type { MicroTaskStep } from '@/types/microTask'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
 
 /**
@@ -303,7 +304,7 @@ export function buildContextFromGradeResult(
 export function buildContextFromSanityCheckFailure(
   checkType: 'limit' | 'symmetry' | 'dimension',
   feedback: string,
-  steps: Step[],
+  steps: Step[] | MicroTaskStep[],
   stepAnswers: Map<number, string>,
   completedSteps: number[],
   problemText: string,
