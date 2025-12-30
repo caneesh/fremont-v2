@@ -35,6 +35,23 @@ export default function ConfidencePrompt({
   const [selectedConfidence, setSelectedConfidence] = useState<Confidence | null>(null)
   const [timeRemaining, setTimeRemaining] = useState(autoSkipDelayMs)
 
+  // Define handleSelect first so it can be used in useEffects
+  const handleSelect = useCallback((confidence: Confidence) => {
+    setSelectedConfidence(confidence)
+
+    if (showFeedback) {
+      setState('feedback')
+      // Show feedback briefly
+      setTimeout(() => {
+        setState('done')
+        onRate(confidence)
+      }, 1200)
+    } else {
+      setState('done')
+      onRate(confidence)
+    }
+  }, [showFeedback, onRate])
+
   // Countdown timer for auto-skip
   useEffect(() => {
     if (state !== 'asking' || autoSkipDelayMs <= 0) return
@@ -51,7 +68,7 @@ export default function ConfidencePrompt({
     }, 100)
 
     return () => clearInterval(interval)
-  }, [state, autoSkipDelayMs])
+  }, [state, autoSkipDelayMs, handleSelect])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -74,23 +91,7 @@ export default function ConfidencePrompt({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [state, onSkip])
-
-  const handleSelect = useCallback((confidence: Confidence) => {
-    setSelectedConfidence(confidence)
-
-    if (showFeedback) {
-      setState('feedback')
-      // Show feedback briefly
-      setTimeout(() => {
-        setState('done')
-        onRate(confidence)
-      }, 1200)
-    } else {
-      setState('done')
-      onRate(confidence)
-    }
-  }, [showFeedback, onRate])
+  }, [state, onSkip, handleSelect])
 
   const handleSkip = useCallback(() => {
     if (onSkip) {

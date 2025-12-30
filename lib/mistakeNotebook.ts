@@ -413,7 +413,8 @@ export function recordReview(
   session: ReviewSession,
   cardId: string,
   quality: ReviewQuality,
-  responseTimeMs: number
+  responseTimeMs: number,
+  confidenceData?: { isCorrect: boolean; confidence: 'low' | 'medium' | 'high' }
 ): { session: ReviewSession; updatedCard: MistakeCard | null } {
   const card = getCardById(cardId)
   if (!card) {
@@ -431,18 +432,25 @@ export function recordReview(
     saveCards(cards)
   }
 
-  // Update session
+  // Update session with optional confidence data
   const result: ReviewResult = {
     cardId,
     quality,
     responseTimeMs,
-    reviewedAt: new Date().toISOString()
+    reviewedAt: new Date().toISOString(),
+    ...(confidenceData && {
+      isCorrect: confidenceData.isCorrect,
+      confidence: confidenceData.confidence
+    })
   }
+
+  // For confidence-based reviews, use the explicit isCorrect value
+  const isCorrectAnswer = confidenceData ? confidenceData.isCorrect : quality >= 3
 
   const updatedSession: ReviewSession = {
     ...session,
     cardsReviewed: session.cardsReviewed + 1,
-    cardsCorrect: session.cardsCorrect + (quality >= 3 ? 1 : 0),
+    cardsCorrect: session.cardsCorrect + (isCorrectAnswer ? 1 : 0),
     results: [...session.results, result]
   }
 

@@ -54,7 +54,15 @@ export const FEATURE_FLAGS = {
    * - Wrong + High confidence = aggressive review (dangerous misconception)
    */
   CONFIDENCE_WEIGHTED_SRS: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false')
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false'),
+
+  /**
+   * Dev: Skip Steps Mode
+   * When enabled, shows sanity check and other post-completion UI without
+   * requiring all steps to be completed first. For testing only.
+   * Can also be enabled via URL parameter: ?skipSteps=true
+   */
+  DEV_SKIP_STEPS: process.env.NODE_ENV === 'development'
 }
 
 /**

@@ -23,6 +23,21 @@ export default function ConfidenceRating({
   const [selectedConfidence, setSelectedConfidence] = useState<Confidence | null>(null)
   const [showingOutcome, setShowingOutcome] = useState(false)
 
+  // Define handleSelect first so it can be used in useEffect
+  const handleSelect = useCallback((confidence: Confidence) => {
+    setSelectedConfidence(confidence)
+
+    if (showOutcome) {
+      setShowingOutcome(true)
+      // Show outcome briefly, then call onRate
+      setTimeout(() => {
+        onRate(confidence)
+      }, 1500)
+    } else {
+      onRate(confidence)
+    }
+  }, [showOutcome, onRate])
+
   // Auto-skip timer
   useEffect(() => {
     if (autoSkipDelay <= 0 || selectedConfidence) return
@@ -52,21 +67,7 @@ export default function ConfidenceRating({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedConfidence, onSkip])
-
-  const handleSelect = useCallback((confidence: Confidence) => {
-    setSelectedConfidence(confidence)
-
-    if (showOutcome) {
-      setShowingOutcome(true)
-      // Show outcome briefly, then call onRate
-      setTimeout(() => {
-        onRate(confidence)
-      }, 1500)
-    } else {
-      onRate(confidence)
-    }
-  }, [showOutcome, onRate])
+  }, [selectedConfidence, onSkip, handleSelect])
 
   // Show outcome screen
   if (showingOutcome && selectedConfidence) {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MistakeCard, ReviewQuality, ReviewSession as ReviewSessionType } from '@/types/mistakeNotebook'
 import type { Confidence } from '@/types/confidence'
-import { getCardsDue, recordReview, recordConfidenceReview, startReviewSession, completeReviewSession } from '@/lib/mistakeNotebook'
+import { getCardsDue, recordReview, startReviewSession, completeReviewSession } from '@/lib/mistakeNotebook'
 import { getStatusDisplay, formatInterval } from '@/lib/srsScheduler'
 import { getStepTypeBadge } from '@/lib/hintEngine'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
@@ -79,6 +79,25 @@ export default function ReviewSession({
     setState('askConfidence')
   }, [])
 
+  // Move to next card or complete session
+  const moveToNextCard = useCallback((updatedSession: ReviewSessionType) => {
+    // Reset confidence state
+    setIsCorrect(null)
+    setSelectedConfidence(null)
+
+    if (currentIndex + 1 >= cards.length) {
+      const completedSession = completeReviewSession(updatedSession)
+      setSession(completedSession)
+      setState('complete')
+      onComplete?.(completedSession)
+    } else {
+      setCurrentIndex(prev => prev + 1)
+      setStartTime(Date.now())
+      setShowHint(false)
+      setState('reviewing')
+    }
+  }, [currentIndex, cards.length, onComplete])
+
   // Handle confidence selection (confidence flow step 2)
   const handleConfidenceSelected = useCallback((confidence: Confidence) => {
     if (!session || currentIndex >= cards.length || isCorrect === null) return
@@ -114,26 +133,7 @@ export default function ReviewSession({
     setTimeout(() => {
       moveToNextCard(updatedSession)
     }, 1500)
-  }, [session, currentIndex, cards, startTime, isCorrect])
-
-  // Move to next card or complete session
-  const moveToNextCard = useCallback((updatedSession: ReviewSessionType) => {
-    // Reset confidence state
-    setIsCorrect(null)
-    setSelectedConfidence(null)
-
-    if (currentIndex + 1 >= cards.length) {
-      const completedSession = completeReviewSession(updatedSession)
-      setSession(completedSession)
-      setState('complete')
-      onComplete?.(completedSession)
-    } else {
-      setCurrentIndex(prev => prev + 1)
-      setStartTime(Date.now())
-      setShowHint(false)
-      setState('reviewing')
-    }
-  }, [currentIndex, cards.length, onComplete])
+  }, [session, currentIndex, cards, startTime, isCorrect, moveToNextCard])
 
   // Record response and move to next (traditional flow)
   const handleResponse = useCallback((quality: ReviewQuality) => {
@@ -179,17 +179,33 @@ export default function ReviewSession({
           handleShowAnswer()
         }
       } else if (state === 'showAnswer') {
+        // Traditional flow keyboard shortcuts
         if (e.key === '1') handleResponse(0)
         if (e.key === '2') handleResponse(1)
         if (e.key === '3') handleResponse(3)
         if (e.key === '4') handleResponse(4)
         if (e.key === '5') handleResponse(5)
+      } else if (state === 'askCorrectness') {
+        // Confidence flow: Y/N for correctness
+        if (e.key === 'y' || e.key === 'Y' || e.key === '1') {
+          e.preventDefault()
+          handleCorrectnessSelected(true)
+        }
+        if (e.key === 'n' || e.key === 'N' || e.key === '2') {
+          e.preventDefault()
+          handleCorrectnessSelected(false)
+        }
+      } else if (state === 'askConfidence') {
+        // Confidence flow: 1/2/3 for confidence level
+        if (e.key === '1') handleConfidenceSelected('low')
+        if (e.key === '2') handleConfidenceSelected('medium')
+        if (e.key === '3') handleConfidenceSelected('high')
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [state, handleShowAnswer, handleResponse])
+  }, [state, handleShowAnswer, handleResponse, handleCorrectnessSelected, handleConfidenceSelected])
 
   const currentCard = cards[currentIndex]
   const progress = cards.length > 0 ? ((currentIndex) / cards.length) * 100 : 0
@@ -399,7 +415,7 @@ export default function ReviewSession({
               Press Space or Enter
             </p>
           </div>
-        ) : (
+        ) : state === 'askCorrectness' ? (
           <>
             {/* Answer reveal */}
             <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-dark-border">
@@ -411,7 +427,125 @@ export default function ReviewSession({
               </p>
             </div>
 
-            {/* Rating buttons */}
+            {/* Correctness question */}
+            <div className="p-6 bg-gray-50 dark:bg-dark-card-soft border-t border-gray-200 dark:border-dark-border">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4 text-center">
+                Did you know this?
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleCorrectnessSelected(true)}
+                  className="py-4 px-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors font-medium flex flex-col items-center gap-1"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Yes</span>
+                  <span className="text-xs opacity-70">Y or 1</span>
+                </button>
+                <button
+                  onClick={() => handleCorrectnessSelected(false)}
+                  className="py-4 px-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium flex flex-col items-center gap-1"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>No</span>
+                  <span className="text-xs opacity-70">N or 2</span>
+                </button>
+              </div>
+            </div>
+          </>
+        ) : state === 'askConfidence' ? (
+          <>
+            {/* Answer reveal */}
+            <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-dark-border">
+              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+                Review Note:
+              </h4>
+              <p className="text-blue-700 dark:text-blue-200">
+                {currentCard.misconceptionNote}
+              </p>
+            </div>
+
+            {/* Correctness indicator + Confidence question */}
+            <div className="p-6 bg-gray-50 dark:bg-dark-card-soft border-t border-gray-200 dark:border-dark-border">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                  isCorrect ? 'bg-green-500' : 'bg-red-500'
+                }`}>
+                  {isCorrect ? (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </div>
+                <span className={`text-sm font-medium ${
+                  isCorrect ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                }`}>
+                  {isCorrect ? 'You knew it' : "You didn't know it"}
+                </span>
+              </div>
+
+              <ConfidenceRating
+                isCorrect={isCorrect ?? false}
+                onRate={handleConfidenceSelected}
+                autoSkipDelay={0}
+                showOutcome={false}
+              />
+            </div>
+          </>
+        ) : state === 'showOutcome' && isCorrect !== null && selectedConfidence ? (
+          <>
+            {/* Answer reveal */}
+            <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-dark-border">
+              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+                Review Note:
+              </h4>
+              <p className="text-blue-700 dark:text-blue-200">
+                {currentCard.misconceptionNote}
+              </p>
+            </div>
+
+            {/* Outcome display */}
+            <div className="p-6 bg-gray-50 dark:bg-dark-card-soft border-t border-gray-200 dark:border-dark-border">
+              {(() => {
+                const outcome = getConfidenceOutcome(isCorrect, selectedConfidence)
+                const display = getOutcomeDisplay(outcome)
+                return (
+                  <div className={`p-4 rounded-lg ${display.bgClass} animate-in fade-in duration-200`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{display.icon}</span>
+                      <div>
+                        <p className={`font-medium ${display.color}`}>{display.label}</p>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                          {display.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          </>
+        ) : state === 'showAnswer' ? (
+          <>
+            {/* Answer reveal */}
+            <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-dark-border">
+              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+                Review Note:
+              </h4>
+              <p className="text-blue-700 dark:text-blue-200">
+                {currentCard.misconceptionNote}
+              </p>
+            </div>
+
+            {/* Traditional rating buttons */}
             <div className="p-6 bg-gray-50 dark:bg-dark-card-soft border-t border-gray-200 dark:border-dark-border">
               <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4 text-center">
                 How well did you recall this?
@@ -453,7 +587,7 @@ export default function ReviewSession({
               </p>
             </div>
           </>
-        )}
+        ) : null}
       </div>
 
       {/* Cancel button */}

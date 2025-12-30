@@ -17,6 +17,7 @@ import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext }
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { eventLogger } from '@/lib/storage/eventLogger'
 import type { Confidence } from '@/types/confidence'
+import type { ErrorTag } from '@/types/circuitBreaker'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -36,6 +37,8 @@ interface MicroTaskStepAccordionProps {
   onTaskComplete: (stepId: number, level: number, explanation: string) => void
   onComplete: (stepId: number) => void
   onActivate: (stepId: number) => void
+  // Circuit breaker callback for error pattern tracking
+  onCircuitBreakerError?: (stepId: number, errorTag: ErrorTag) => void
 }
 
 export default function MicroTaskStepAccordion({
@@ -54,7 +57,8 @@ export default function MicroTaskStepAccordion({
   subdomain,
   onTaskComplete,
   onComplete,
-  onActivate
+  onActivate,
+  onCircuitBreakerError
 }: MicroTaskStepAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(isActive)
 
@@ -207,6 +211,45 @@ export default function MicroTaskStepAccordion({
     }
   }, [pendingTaskResult, processTaskCompletion])
 
+  // Infer ErrorTag from step type and task content
+  const inferErrorTag = useCallback((): ErrorTag => {
+    const stepType = step.stepType || 'physics_concept'
+    const title = step.title.toLowerCase()
+    const task = step.tasks[currentLevel - 1]
+    const question = task?.question?.toLowerCase() || ''
+
+    // Check for specific patterns in question/title
+    if (question.includes('component') || question.includes('resolve') || title.includes('vector')) {
+      return 'vector_component'
+    }
+    if (question.includes('sign') || question.includes('positive') || question.includes('negative') || question.includes('direction')) {
+      return 'sign_convention'
+    }
+    if (question.includes('sin') || question.includes('cos') || question.includes('tan') || question.includes('trig')) {
+      return 'trig_identity'
+    }
+    if (question.includes('unit') || question.includes('convert') || question.includes('m/s') || question.includes('km/h')) {
+      return 'unit_conversion'
+    }
+    if (question.includes('conservation') || question.includes('momentum') || question.includes('energy')) {
+      return 'conservation_scope'
+    }
+    if (question.includes('frame') || question.includes('relative') || question.includes('observer')) {
+      return 'reference_frame'
+    }
+    if (question.includes('force') || question.includes('fbd') || question.includes('free body')) {
+      return 'force_enumeration'
+    }
+
+    // Fall back to step type mapping
+    if (stepType === 'math_manipulation') {
+      return 'algebra_manipulation'
+    }
+
+    // Default based on common physics errors
+    return 'algebra_manipulation'
+  }, [step, currentLevel])
+
   const handleTaskWrong = (attempts: number) => {
     setTaskAttempts(prev => {
       const newMap = new Map(prev)
@@ -229,6 +272,12 @@ export default function MicroTaskStepAccordion({
         requiredConcepts: step.requiredConcepts || []
       }
       onTaskIncorrect(problemContext, stepContext, currentLevel, attempts)
+
+      // Notify circuit breaker of the error
+      if (onCircuitBreakerError) {
+        const errorTag = inferErrorTag()
+        onCircuitBreakerError(step.id, errorTag)
+      }
     }
   }
 
@@ -250,6 +299,12 @@ export default function MicroTaskStepAccordion({
       // Use onTaskIncorrect with current level and attempts (minimum 2 to trigger)
       const attempts = taskAttempts.get(currentLevel) || 0
       onTaskIncorrect(problemContext, stepContext, currentLevel, Math.max(attempts, 2))
+
+      // Notify circuit breaker of the error (switching to reading mode = giving up)
+      if (onCircuitBreakerError) {
+        const errorTag = inferErrorTag()
+        onCircuitBreakerError(step.id, errorTag)
+      }
     }
 
     setIsReadingMode(true)

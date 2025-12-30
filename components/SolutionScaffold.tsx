@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import type { ScaffoldData } from '@/types/scaffold'
 import { isHintScaffold } from '@/types/scaffold'
 import type { MicroTaskScaffoldData, MicroTaskStep } from '@/types/microTask'
@@ -38,6 +39,7 @@ import { useCircuitBreaker } from '@/lib/hooks/useCircuitBreaker'
 import DrillModal from './DrillModal'
 import CircuitBreakerWarning from './CircuitBreakerWarning'
 import type { ErrorTag } from '@/types/circuitBreaker'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -77,6 +79,19 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
   const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
+
+  // Dev: Skip steps mode for testing sanity check UI
+  const searchParams = useSearchParams()
+  const skipStepsMode = useMemo(() => {
+    if (!FEATURE_FLAGS.DEV_SKIP_STEPS) return false
+    return searchParams.get('skipSteps') === 'true'
+  }, [searchParams])
+
+  // Determine if all steps are "complete" (real or simulated for testing)
+  const allStepsComplete = useMemo(() => {
+    if (skipStepsMode) return true
+    return completedSteps.length === data.steps.length
+  }, [skipStepsMode, completedSteps.length, data.steps.length])
 
   // Generate session ID for circuit breaker (stable across component lifecycle)
   const sessionId = useRef(`session_${Date.now()}`).current
@@ -796,6 +811,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       subdomain={data.subdomain}
                       onTaskComplete={handleMicroTaskComplete}
                       onComplete={handleMicroStepComplete}
+                      onCircuitBreakerError={handleTaskIncorrect}
                       onActivate={() => setCurrentStep(index)}
                     />
                   ) : (
@@ -887,8 +903,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             </div>
           )}
 
-          {/* Sanity Check / Verify via Logic - only show after all steps completed */}
-          {completedSteps.length === data.steps.length && !showExplainToFriend && !showReflection && (
+          {/* Sanity Check / Verify via Logic - only show after all steps completed (or in skip mode) */}
+          {allStepsComplete && !showExplainToFriend && !showReflection && (
             <div className="demo-step-sanity">
               {data.sanityCheckMatrix ? (
                 <SanityCheckMatrix
