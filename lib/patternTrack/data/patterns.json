@@ -1056,5 +1056,350 @@
     "display_order": 45,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_photoelectric",
+    "name": "Photoelectric Effect",
+    "description": "Light ejects electrons from metal surface. E_photon = hf = φ + KE_max. Threshold frequency f₀ = φ/h. No electrons if f < f₀ regardless of intensity.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Light incident on metal surface",
+      "Work function φ given",
+      "Kinetic energy of ejected electrons asked",
+      "Threshold or cutoff frequency mentioned"
+    ],
+    "common_pitfalls": [
+      "Thinking higher intensity always ejects more energetic electrons",
+      "Forgetting no emission below threshold frequency",
+      "Using wrong units for h (J·s vs eV·s)",
+      "Confusing work function with kinetic energy"
+    ],
+    "related_pattern_ids": ["pattern_photon_energy", "pattern_wave_particle"],
+    "display_order": 46,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_photon_energy",
+    "name": "Photon Energy and Momentum",
+    "description": "Photon energy E = hf = hc/λ. Photon momentum p = h/λ = E/c. Light behaves as particles (photons) in certain experiments.",
+    "category": "modern_physics",
+    "difficulty": 2,
+    "recognition_cues": [
+      "Light wavelength or frequency given",
+      "Energy of light asked",
+      "Photon momentum calculation",
+      "Number of photons in a beam"
+    ],
+    "common_pitfalls": [
+      "Using wrong value of h or confusing units",
+      "Forgetting to convert nm to m for wavelength",
+      "Confusing photon energy with intensity",
+      "Not recognizing E = pc for massless photons"
+    ],
+    "related_pattern_ids": ["pattern_photoelectric", "pattern_compton"],
+    "display_order": 47,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_de_broglie",
+    "name": "de Broglie Wavelength",
+    "description": "Matter has wave properties. λ = h/p = h/(mv). All particles have associated wavelength, but only significant for very small masses.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Wavelength of particle asked",
+      "Electron or particle accelerated through voltage",
+      "Matter wave or de Broglie mentioned",
+      "Diffraction of electrons"
+    ],
+    "common_pitfalls": [
+      "Using relativistic momentum when not needed (or vice versa)",
+      "Forgetting kinetic energy relation: KE = p²/(2m)",
+      "Wrong mass (kg vs atomic mass units)",
+      "Not connecting accelerating voltage to kinetic energy"
+    ],
+    "related_pattern_ids": ["pattern_wave_particle", "pattern_uncertainty"],
+    "display_order": 48,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_bohr_model",
+    "name": "Bohr Model of the Atom",
+    "description": "Quantized orbits: E_n = -13.6 eV/n² for hydrogen. Photon emitted/absorbed when electron jumps: ΔE = hf. Radius r_n = n²a₀.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Hydrogen atom energy levels",
+      "Electron transitions between orbits",
+      "Emission or absorption spectrum",
+      "Principal quantum number n"
+    ],
+    "common_pitfalls": [
+      "Wrong sign for energy (bound states are negative)",
+      "Confusing n for initial vs final state in transitions",
+      "Using Bohr model for multi-electron atoms",
+      "Forgetting ground state is n = 1, not n = 0"
+    ],
+    "related_pattern_ids": ["pattern_photon_energy", "pattern_emission_spectra"],
+    "display_order": 49,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_emission_spectra",
+    "name": "Atomic Spectra and Transitions",
+    "description": "Discrete spectral lines from electron transitions. E_photon = |E_final - E_initial|. Series: Lyman (to n=1), Balmer (to n=2), etc.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Spectral lines or wavelengths",
+      "Electron jumping between levels",
+      "Emission vs absorption spectrum",
+      "Series name (Lyman, Balmer, Paschen)"
+    ],
+    "common_pitfalls": [
+      "Confusing emission with absorption",
+      "Wrong direction for energy change",
+      "Using wrong series formula",
+      "Forgetting to use absolute value for photon energy"
+    ],
+    "related_pattern_ids": ["pattern_bohr_model", "pattern_photon_energy"],
+    "display_order": 50,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_mass_energy",
+    "name": "Mass-Energy Equivalence",
+    "description": "E = mc². Mass and energy are equivalent. Rest energy E₀ = m₀c². Nuclear reactions: Δm converted to energy.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Mass converted to energy",
+      "Nuclear fusion or fission",
+      "Mass defect mentioned",
+      "Rest mass energy calculation"
+    ],
+    "common_pitfalls": [
+      "Using wrong mass (kg vs u vs MeV/c²)",
+      "Confusing mass defect with binding energy sign",
+      "Not recognizing c² factor magnitude",
+      "Forgetting to convert atomic mass units"
+    ],
+    "related_pattern_ids": ["pattern_nuclear_binding", "pattern_relativity_energy"],
+    "display_order": 51,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_nuclear_binding",
+    "name": "Nuclear Binding Energy",
+    "description": "Binding energy = Δmc². Mass defect Δm = (Zm_p + Nm_n) - M_nucleus. Binding energy per nucleon indicates stability.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Nuclear mass given",
+      "Binding energy asked",
+      "Stability of nucleus discussed",
+      "Mass of protons and neutrons given"
+    ],
+    "common_pitfalls": [
+      "Wrong number of protons or neutrons",
+      "Using atomic mass instead of nuclear mass",
+      "Sign errors in mass defect calculation",
+      "Confusing total binding energy with per-nucleon"
+    ],
+    "related_pattern_ids": ["pattern_mass_energy", "pattern_radioactive_decay"],
+    "display_order": 52,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_radioactive_decay",
+    "name": "Radioactive Decay",
+    "description": "N = N₀e^(-λt) = N₀(1/2)^(t/t_half). Activity A = λN. Half-life t_half = ln(2)/λ. Types: α, β, γ decay.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Half-life given",
+      "Amount remaining after time t",
+      "Decay constant λ mentioned",
+      "Activity or decay rate asked"
+    ],
+    "common_pitfalls": [
+      "Confusing half-life with decay constant",
+      "Wrong formula for number of half-lives",
+      "Not recognizing exponential vs half-life form",
+      "Confusing activity with number of nuclei"
+    ],
+    "related_pattern_ids": ["pattern_nuclear_binding", "pattern_nuclear_reactions"],
+    "display_order": 53,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_nuclear_reactions",
+    "name": "Nuclear Reactions",
+    "description": "Conservation of mass number A and atomic number Z. Alpha decay: loses ⁴₂He. Beta decay: n→p+e⁻ or p→n+e⁺. Q-value = energy released.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Nuclear equation to balance",
+      "Type of decay identified",
+      "Parent and daughter nuclei",
+      "Energy released in reaction"
+    ],
+    "common_pitfalls": [
+      "Not conserving both A and Z",
+      "Wrong particle emitted in decay type",
+      "Forgetting neutrino in beta decay",
+      "Confusing fusion with fission"
+    ],
+    "related_pattern_ids": ["pattern_radioactive_decay", "pattern_mass_energy"],
+    "display_order": 54,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_time_dilation",
+    "name": "Time Dilation",
+    "description": "Moving clocks run slow: Δt = γΔt₀ where γ = 1/√(1-v²/c²). Proper time Δt₀ measured in rest frame of clock.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Object moving at relativistic speed",
+      "Time interval measured by different observers",
+      "Proper time vs dilated time",
+      "Speed as fraction of c given"
+    ],
+    "common_pitfalls": [
+      "Confusing which frame measures proper time",
+      "Using wrong formula direction (multiply vs divide by γ)",
+      "Forgetting γ is always ≥ 1",
+      "Applying time dilation when not needed (low speeds)"
+    ],
+    "related_pattern_ids": ["pattern_length_contraction", "pattern_relativity_energy"],
+    "display_order": 55,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_length_contraction",
+    "name": "Length Contraction",
+    "description": "Moving objects contract: L = L₀/γ. Proper length L₀ measured in rest frame of object. Only along direction of motion.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Length of moving object",
+      "Proper length vs contracted length",
+      "Relativistic speeds",
+      "Observer in different reference frame"
+    ],
+    "common_pitfalls": [
+      "Confusing which frame measures proper length",
+      "Applying contraction perpendicular to motion",
+      "Wrong formula direction (divide vs multiply by γ)",
+      "Forgetting contraction only in direction of motion"
+    ],
+    "related_pattern_ids": ["pattern_time_dilation", "pattern_relativity_energy"],
+    "display_order": 56,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_relativity_energy",
+    "name": "Relativistic Energy and Momentum",
+    "description": "Total energy E = γmc². Relativistic momentum p = γmv. Energy-momentum: E² = (pc)² + (mc²)². KE = (γ-1)mc².",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Particle moving at relativistic speed",
+      "Total energy or relativistic KE asked",
+      "Momentum at high speeds",
+      "Energy-momentum relationship"
+    ],
+    "common_pitfalls": [
+      "Using classical KE = ½mv² at high speeds",
+      "Forgetting rest mass energy in total energy",
+      "Wrong γ factor calculation",
+      "Confusing relativistic and classical momentum"
+    ],
+    "related_pattern_ids": ["pattern_time_dilation", "pattern_mass_energy"],
+    "display_order": 57,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_compton",
+    "name": "Compton Scattering",
+    "description": "Photon scatters off electron, losing energy. Δλ = (h/m_e c)(1 - cos θ). Wavelength shift depends on scattering angle.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "X-ray or photon hitting electron",
+      "Wavelength shift after scattering",
+      "Scattering angle given",
+      "Compton wavelength mentioned"
+    ],
+    "common_pitfalls": [
+      "Forgetting Compton wavelength h/(m_e c) = 2.43 pm",
+      "Wrong angle in formula (scattering angle, not incidence)",
+      "Confusing wavelength shift with final wavelength",
+      "Not recognizing maximum shift at θ = 180°"
+    ],
+    "related_pattern_ids": ["pattern_photon_energy", "pattern_wave_particle"],
+    "display_order": 58,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_wave_particle",
+    "name": "Wave-Particle Duality",
+    "description": "All matter and light exhibit both wave and particle properties. Which behavior observed depends on experiment. Double-slit shows interference even for single particles.",
+    "category": "modern_physics",
+    "difficulty": 3,
+    "recognition_cues": [
+      "Particle showing wave behavior",
+      "Light showing particle behavior",
+      "Electron diffraction",
+      "Single-particle interference"
+    ],
+    "common_pitfalls": [
+      "Thinking particle 'chooses' wave or particle behavior",
+      "Confusing de Broglie wavelength with photon wavelength",
+      "Not recognizing complementarity principle",
+      "Applying classical intuition to quantum systems"
+    ],
+    "related_pattern_ids": ["pattern_de_broglie", "pattern_photoelectric", "pattern_uncertainty"],
+    "display_order": 59,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "pattern_uncertainty",
+    "name": "Heisenberg Uncertainty Principle",
+    "description": "ΔxΔp ≥ ℏ/2. Cannot simultaneously know exact position and momentum. Also ΔEΔt ≥ ℏ/2. Fundamental limit, not measurement error.",
+    "category": "modern_physics",
+    "difficulty": 4,
+    "recognition_cues": [
+      "Uncertainty in position or momentum",
+      "Minimum uncertainty asked",
+      "Particle confined to region",
+      "Energy-time uncertainty"
+    ],
+    "common_pitfalls": [
+      "Thinking uncertainty is due to measurement limitations",
+      "Using wrong form of uncertainty relation (h vs ℏ/2)",
+      "Confusing uncertainty with standard deviation",
+      "Not recognizing when classical physics applies"
+    ],
+    "related_pattern_ids": ["pattern_de_broglie", "pattern_wave_particle"],
+    "display_order": 60,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]

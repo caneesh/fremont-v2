@@ -1,0 +1,426 @@
+[
+  {
+    "id": "q_modern_001",
+    "problem_text": "Light of wavelength 400 nm strikes a metal surface with work function 2.0 eV. What is the maximum kinetic energy of the ejected electrons? (h = 4.14 × 10⁻¹⁵ eV·s, c = 3 × 10⁸ m/s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_photoelectric", "relevance": "primary", "application_notes": "Photoelectric effect equation" },
+      { "pattern_id": "pattern_photon_energy", "relevance": "secondary", "application_notes": "Calculate photon energy first" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "photoelectric",
+    "hints": [
+      { "order": 1, "text": "First calculate the photon energy using E = hf = hc/λ.", "pattern_id": "pattern_photon_energy" },
+      { "order": 2, "text": "Then apply: KE_max = E_photon - φ", "pattern_id": "pattern_photoelectric" },
+      { "order": 3, "text": "Convert wavelength: 400 nm = 400 × 10⁻⁹ m" }
+    ],
+    "answer": { "type": "numeric", "value": 1.1, "unit": "eV", "tolerance": 0.05 },
+    "solution_explanation": "E_photon = hc/λ = (4.14 × 10⁻¹⁵)(3 × 10⁸)/(400 × 10⁻⁹) = 3.1 eV. KE_max = E_photon - φ = 3.1 - 2.0 = 1.1 eV.",
+    "tags": ["photoelectric", "kinetic_energy", "work_function"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_002",
+    "problem_text": "What is the de Broglie wavelength of an electron (m = 9.11 × 10⁻³¹ kg) moving at 2 × 10⁶ m/s? (h = 6.63 × 10⁻³⁴ J·s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_de_broglie", "relevance": "primary", "application_notes": "de Broglie wavelength calculation" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "matter_waves",
+    "hints": [
+      { "order": 1, "text": "What is the de Broglie wavelength formula?", "pattern_id": "pattern_de_broglie" },
+      { "order": 2, "text": "λ = h/p = h/(mv)" },
+      { "order": 3, "text": "Check if relativistic correction is needed (v << c here)." }
+    ],
+    "answer": { "type": "numeric", "value": 3.64e-10, "unit": "m", "tolerance": 1e-11 },
+    "solution_explanation": "λ = h/(mv) = (6.63 × 10⁻³⁴)/[(9.11 × 10⁻³¹)(2 × 10⁶)] = 6.63 × 10⁻³⁴/(1.82 × 10⁻²⁴) = 3.64 × 10⁻¹⁰ m = 0.364 nm.",
+    "tags": ["de_broglie", "wavelength", "electron"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_003",
+    "problem_text": "A hydrogen atom transitions from n = 3 to n = 2. What is the wavelength of the emitted photon? (Use E_n = -13.6/n² eV, hc = 1240 eV·nm)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_bohr_model", "relevance": "primary", "application_notes": "Energy level calculation" },
+      { "pattern_id": "pattern_emission_spectra", "relevance": "primary", "application_notes": "Emission wavelength from energy difference" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "atomic_spectra",
+    "hints": [
+      { "order": 1, "text": "Calculate energy at each level using E_n = -13.6/n².", "pattern_id": "pattern_bohr_model" },
+      { "order": 2, "text": "ΔE = |E_final - E_initial| = E_photon", "pattern_id": "pattern_emission_spectra" },
+      { "order": 3, "text": "Use λ = hc/E to find wavelength." }
+    ],
+    "answer": { "type": "numeric", "value": 656, "unit": "nm", "tolerance": 5 },
+    "solution_explanation": "E₃ = -13.6/9 = -1.51 eV. E₂ = -13.6/4 = -3.4 eV. ΔE = |-3.4 - (-1.51)| = 1.89 eV. λ = hc/E = 1240/1.89 = 656 nm (Balmer series, H-alpha line).",
+    "tags": ["bohr_model", "hydrogen", "balmer_series"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_004",
+    "problem_text": "A radioactive sample has a half-life of 5 days. What fraction of the original sample remains after 15 days?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_radioactive_decay", "relevance": "primary", "application_notes": "Half-life calculation" }
+    ],
+    "difficulty": 1,
+    "category": "modern_physics",
+    "subcategory": "nuclear",
+    "hints": [
+      { "order": 1, "text": "How many half-lives have passed?", "pattern_id": "pattern_radioactive_decay" },
+      { "order": 2, "text": "After n half-lives, fraction remaining = (1/2)ⁿ" },
+      { "order": 3, "text": "15 days / 5 days = 3 half-lives" }
+    ],
+    "answer": { "type": "numeric", "value": 0.125, "unit": "", "tolerance": 0.005 },
+    "solution_explanation": "Number of half-lives = 15/5 = 3. Fraction remaining = (1/2)³ = 1/8 = 0.125.",
+    "tags": ["half_life", "radioactive_decay", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_005",
+    "problem_text": "What is the rest mass energy of an electron in MeV? (m_e = 9.11 × 10⁻³¹ kg, c = 3 × 10⁸ m/s, 1 MeV = 1.6 × 10⁻¹³ J)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_mass_energy", "relevance": "primary", "application_notes": "E = mc² calculation" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "What is the mass-energy equivalence formula?", "pattern_id": "pattern_mass_energy" },
+      { "order": 2, "text": "E = mc²" },
+      { "order": 3, "text": "Calculate in Joules, then convert to MeV." }
+    ],
+    "answer": { "type": "numeric", "value": 0.511, "unit": "MeV", "tolerance": 0.01 },
+    "solution_explanation": "E = mc² = (9.11 × 10⁻³¹)(3 × 10⁸)² = 8.2 × 10⁻¹⁴ J = 8.2 × 10⁻¹⁴/(1.6 × 10⁻¹³) MeV = 0.511 MeV.",
+    "tags": ["mass_energy", "electron", "rest_mass"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_006",
+    "problem_text": "A spaceship travels at 0.8c relative to Earth. If 10 years pass on the spaceship's clock, how much time passes on Earth?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_time_dilation", "relevance": "primary", "application_notes": "Time dilation calculation" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "Which observer measures proper time?", "pattern_id": "pattern_time_dilation" },
+      { "order": 2, "text": "Proper time is measured by the clock at rest (spaceship). Earth measures dilated time." },
+      { "order": 3, "text": "Δt = γΔt₀ where γ = 1/√(1 - v²/c²)" }
+    ],
+    "answer": { "type": "numeric", "value": 16.67, "unit": "years", "tolerance": 0.2 },
+    "solution_explanation": "γ = 1/√(1 - 0.64) = 1/√0.36 = 1/0.6 = 5/3. Δt_Earth = γΔt₀ = (5/3)(10) = 16.67 years.",
+    "tags": ["time_dilation", "special_relativity", "gamma_factor"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_007",
+    "problem_text": "A rod has a proper length of 10 m. How long does it appear to an observer moving at 0.6c relative to the rod (parallel to its length)?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_length_contraction", "relevance": "primary", "application_notes": "Length contraction formula" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "What is the length contraction formula?", "pattern_id": "pattern_length_contraction" },
+      { "order": 2, "text": "L = L₀/γ where L₀ is proper length" },
+      { "order": 3, "text": "Calculate γ = 1/√(1 - v²/c²) first." }
+    ],
+    "answer": { "type": "numeric", "value": 8, "unit": "m", "tolerance": 0.1 },
+    "solution_explanation": "γ = 1/√(1 - 0.36) = 1/√0.64 = 1/0.8 = 1.25. L = L₀/γ = 10/1.25 = 8 m.",
+    "tags": ["length_contraction", "special_relativity", "proper_length"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_008",
+    "problem_text": "What is the energy of a photon with wavelength 500 nm in electron-volts? (hc = 1240 eV·nm)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_photon_energy", "relevance": "primary", "application_notes": "Photon energy from wavelength" }
+    ],
+    "difficulty": 1,
+    "category": "modern_physics",
+    "subcategory": "quantum",
+    "hints": [
+      { "order": 1, "text": "What is the formula for photon energy?", "pattern_id": "pattern_photon_energy" },
+      { "order": 2, "text": "E = hf = hc/λ" },
+      { "order": 3, "text": "Using hc = 1240 eV·nm makes the calculation easy." }
+    ],
+    "answer": { "type": "numeric", "value": 2.48, "unit": "eV", "tolerance": 0.02 },
+    "solution_explanation": "E = hc/λ = 1240 eV·nm / 500 nm = 2.48 eV.",
+    "tags": ["photon_energy", "wavelength", "basic"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_009",
+    "problem_text": "In Compton scattering, an X-ray photon scatters off an electron at 90°. If the incident wavelength is 0.01 nm, what is the scattered wavelength? (Compton wavelength = 0.00243 nm)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_compton", "relevance": "primary", "application_notes": "Compton scattering formula" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "quantum",
+    "hints": [
+      { "order": 1, "text": "What is the Compton scattering formula?", "pattern_id": "pattern_compton" },
+      { "order": 2, "text": "Δλ = λ_c(1 - cos θ) where λ_c = h/(m_e c)" },
+      { "order": 3, "text": "At θ = 90°, cos(90°) = 0, so Δλ = λ_c." }
+    ],
+    "answer": { "type": "numeric", "value": 0.01243, "unit": "nm", "tolerance": 0.0001 },
+    "solution_explanation": "Δλ = λ_c(1 - cos 90°) = 0.00243(1 - 0) = 0.00243 nm. λ' = λ + Δλ = 0.01 + 0.00243 = 0.01243 nm.",
+    "tags": ["compton_scattering", "wavelength_shift", "x_ray"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_010",
+    "problem_text": "An electron is confined to a region of width 1 nm. What is the minimum uncertainty in its momentum? (ℏ = 1.055 × 10⁻³⁴ J·s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_uncertainty", "relevance": "primary", "application_notes": "Heisenberg uncertainty principle" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "quantum",
+    "hints": [
+      { "order": 1, "text": "What is the uncertainty principle?", "pattern_id": "pattern_uncertainty" },
+      { "order": 2, "text": "ΔxΔp ≥ ℏ/2" },
+      { "order": 3, "text": "Minimum Δp occurs when ΔxΔp = ℏ/2, so Δp = ℏ/(2Δx)." }
+    ],
+    "answer": { "type": "numeric", "value": 5.28e-26, "unit": "kg·m/s", "tolerance": 1e-27 },
+    "solution_explanation": "Δp_min = ℏ/(2Δx) = (1.055 × 10⁻³⁴)/(2 × 10⁻⁹) = 5.28 × 10⁻²⁶ kg·m/s.",
+    "tags": ["uncertainty_principle", "momentum", "confinement"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_011",
+    "problem_text": "Uranium-238 undergoes alpha decay. What is the daughter nucleus? (Alpha particle: ⁴₂He)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_nuclear_reactions", "relevance": "primary", "application_notes": "Alpha decay conservation laws" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "nuclear",
+    "hints": [
+      { "order": 1, "text": "What is conserved in nuclear reactions?", "pattern_id": "pattern_nuclear_reactions" },
+      { "order": 2, "text": "Both mass number A and atomic number Z must be conserved." },
+      { "order": 3, "text": "²³⁸U → ?X + ⁴He. Find A and Z for X." }
+    ],
+    "answer": { "type": "free_response", "rubric": ["Thorium-234", "²³⁴Th", "A = 234, Z = 90"] },
+    "solution_explanation": "²³⁸₉₂U → ²³⁴₉₀Th + ⁴₂He. Mass number: 238 = 234 + 4 ✓. Atomic number: 92 = 90 + 2 ✓. The daughter is Thorium-234.",
+    "tags": ["alpha_decay", "nuclear_reaction", "conservation"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_012",
+    "problem_text": "What is the threshold frequency for photoemission from a metal with work function 4.5 eV? (h = 4.14 × 10⁻¹⁵ eV·s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_photoelectric", "relevance": "primary", "application_notes": "Threshold frequency calculation" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "photoelectric",
+    "hints": [
+      { "order": 1, "text": "At threshold, all photon energy goes to overcoming work function.", "pattern_id": "pattern_photoelectric" },
+      { "order": 2, "text": "hf₀ = φ, so f₀ = φ/h" },
+      { "order": 3, "text": "Below this frequency, no electrons are emitted regardless of intensity." }
+    ],
+    "answer": { "type": "numeric", "value": 1.09e15, "unit": "Hz", "tolerance": 1e13 },
+    "solution_explanation": "f₀ = φ/h = 4.5 eV / (4.14 × 10⁻¹⁵ eV·s) = 1.09 × 10¹⁵ Hz.",
+    "tags": ["photoelectric", "threshold_frequency", "work_function"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_013",
+    "problem_text": "A particle moves at 0.9c. What is its Lorentz factor γ?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_time_dilation", "relevance": "primary", "application_notes": "Lorentz factor calculation" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "What is the formula for the Lorentz factor?", "pattern_id": "pattern_time_dilation" },
+      { "order": 2, "text": "γ = 1/√(1 - v²/c²)" },
+      { "order": 3, "text": "With v = 0.9c: v²/c² = 0.81" }
+    ],
+    "answer": { "type": "numeric", "value": 2.29, "unit": "", "tolerance": 0.05 },
+    "solution_explanation": "γ = 1/√(1 - 0.81) = 1/√0.19 = 1/0.436 = 2.29.",
+    "tags": ["lorentz_factor", "relativity", "gamma"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_014",
+    "problem_text": "An electron is accelerated through a potential difference of 100 V. What is its de Broglie wavelength? (m_e = 9.11 × 10⁻³¹ kg, e = 1.6 × 10⁻¹⁹ C, h = 6.63 × 10⁻³⁴ J·s)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_de_broglie", "relevance": "primary", "application_notes": "de Broglie wavelength from accelerating voltage" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "matter_waves",
+    "hints": [
+      { "order": 1, "text": "Find KE from the accelerating voltage: KE = eV.", "pattern_id": "pattern_de_broglie" },
+      { "order": 2, "text": "Use KE = p²/(2m) to find momentum p." },
+      { "order": 3, "text": "Then λ = h/p." }
+    ],
+    "answer": { "type": "numeric", "value": 0.123, "unit": "nm", "tolerance": 0.005 },
+    "solution_explanation": "KE = eV = (1.6 × 10⁻¹⁹)(100) = 1.6 × 10⁻¹⁷ J. p = √(2mKE) = √(2 × 9.11 × 10⁻³¹ × 1.6 × 10⁻¹⁷) = 5.4 × 10⁻²⁴ kg·m/s. λ = h/p = 6.63 × 10⁻³⁴/5.4 × 10⁻²⁴ = 1.23 × 10⁻¹⁰ m = 0.123 nm.",
+    "tags": ["de_broglie", "accelerating_voltage", "electron"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_015",
+    "problem_text": "What is the ionization energy of hydrogen (energy to remove electron from n=1)?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_bohr_model", "relevance": "primary", "application_notes": "Ground state energy of hydrogen" }
+    ],
+    "difficulty": 1,
+    "category": "modern_physics",
+    "subcategory": "atomic_spectra",
+    "hints": [
+      { "order": 1, "text": "What is the energy of the ground state (n=1)?", "pattern_id": "pattern_bohr_model" },
+      { "order": 2, "text": "E₁ = -13.6 eV for hydrogen." },
+      { "order": 3, "text": "Ionization means going from E₁ to E = 0 (unbound)." }
+    ],
+    "answer": { "type": "numeric", "value": 13.6, "unit": "eV", "tolerance": 0.1 },
+    "solution_explanation": "E₁ = -13.6 eV. Ionization energy = 0 - (-13.6) = 13.6 eV. This is the energy needed to completely remove the electron.",
+    "tags": ["bohr_model", "ionization_energy", "hydrogen"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_016",
+    "problem_text": "A radioactive isotope has a decay constant λ = 0.1 per day. What is its half-life?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_radioactive_decay", "relevance": "primary", "application_notes": "Relationship between decay constant and half-life" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "nuclear",
+    "hints": [
+      { "order": 1, "text": "What is the relationship between λ and half-life?", "pattern_id": "pattern_radioactive_decay" },
+      { "order": 2, "text": "t_half = ln(2)/λ" },
+      { "order": 3, "text": "ln(2) ≈ 0.693" }
+    ],
+    "answer": { "type": "numeric", "value": 6.93, "unit": "days", "tolerance": 0.1 },
+    "solution_explanation": "t_half = ln(2)/λ = 0.693/0.1 = 6.93 days.",
+    "tags": ["decay_constant", "half_life", "radioactive"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_017",
+    "problem_text": "In nuclear fusion, 4 protons combine to form a helium-4 nucleus. If the mass defect is 0.029 u, how much energy is released? (1 u = 931.5 MeV/c²)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_mass_energy", "relevance": "primary", "application_notes": "Mass defect to energy conversion" },
+      { "pattern_id": "pattern_nuclear_binding", "relevance": "secondary", "application_notes": "Binding energy from mass defect" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "nuclear",
+    "hints": [
+      { "order": 1, "text": "Use E = Δmc².", "pattern_id": "pattern_mass_energy" },
+      { "order": 2, "text": "1 u of mass is equivalent to 931.5 MeV of energy." },
+      { "order": 3, "text": "E = (0.029 u)(931.5 MeV/u)" }
+    ],
+    "answer": { "type": "numeric", "value": 27.0, "unit": "MeV", "tolerance": 0.5 },
+    "solution_explanation": "E = Δmc² = (0.029 u)(931.5 MeV/u) = 27.0 MeV.",
+    "tags": ["fusion", "mass_defect", "binding_energy"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_018",
+    "problem_text": "A proton (m = 1.67 × 10⁻²⁷ kg) is accelerated to 0.5c. What is its relativistic kinetic energy in MeV? (c = 3 × 10⁸ m/s, 1 MeV = 1.6 × 10⁻¹³ J)",
+    "pattern_refs": [
+      { "pattern_id": "pattern_relativity_energy", "relevance": "primary", "application_notes": "Relativistic kinetic energy" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "What is the formula for relativistic KE?", "pattern_id": "pattern_relativity_energy" },
+      { "order": 2, "text": "KE = (γ - 1)mc²" },
+      { "order": 3, "text": "First calculate γ = 1/√(1 - 0.25)." }
+    ],
+    "answer": { "type": "numeric", "value": 145, "unit": "MeV", "tolerance": 5 },
+    "solution_explanation": "γ = 1/√(1 - 0.25) = 1/√0.75 = 1.155. m_p c² = (1.67 × 10⁻²⁷)(9 × 10¹⁶)/(1.6 × 10⁻¹³) = 938 MeV. KE = (γ - 1)m_p c² = (0.155)(938) = 145 MeV.",
+    "tags": ["relativistic_KE", "proton", "gamma_factor"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_019",
+    "problem_text": "Which transition in hydrogen produces a photon with the longest wavelength in the Balmer series?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_emission_spectra", "relevance": "primary", "application_notes": "Balmer series transitions" },
+      { "pattern_id": "pattern_bohr_model", "relevance": "secondary", "application_notes": "Energy level differences" }
+    ],
+    "difficulty": 2,
+    "category": "modern_physics",
+    "subcategory": "atomic_spectra",
+    "hints": [
+      { "order": 1, "text": "Balmer series: transitions to n = 2.", "pattern_id": "pattern_emission_spectra" },
+      { "order": 2, "text": "Longest wavelength means smallest energy photon." },
+      { "order": 3, "text": "Smallest energy difference is between closest levels." }
+    ],
+    "answer": { "type": "multiple_choice", "options": ["n = 3 → n = 2", "n = 4 → n = 2", "n = 5 → n = 2", "n = ∞ → n = 2"], "correct_index": 0 },
+    "solution_explanation": "Balmer series ends at n = 2. Longest wavelength (smallest energy) comes from the smallest energy jump: n = 3 → n = 2 (H-alpha line, 656 nm).",
+    "tags": ["balmer_series", "wavelength", "transitions"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "q_modern_020",
+    "problem_text": "Two events occur at the same location in a rocket's reference frame, separated by 4 seconds. An observer on Earth sees the rocket moving at 0.6c. What time interval does the Earth observer measure between the events?",
+    "pattern_refs": [
+      { "pattern_id": "pattern_time_dilation", "relevance": "primary", "application_notes": "Proper time in rocket frame" }
+    ],
+    "difficulty": 3,
+    "category": "modern_physics",
+    "subcategory": "relativity",
+    "hints": [
+      { "order": 1, "text": "Which frame measures proper time?", "pattern_id": "pattern_time_dilation" },
+      { "order": 2, "text": "Events at same location → rocket measures proper time." },
+      { "order": 3, "text": "Earth measures dilated time: Δt = γΔt₀." }
+    ],
+    "answer": { "type": "numeric", "value": 5, "unit": "s", "tolerance": 0.1 },
+    "solution_explanation": "Proper time Δt₀ = 4 s (same location in rocket). γ = 1/√(1 - 0.36) = 1/0.8 = 1.25. Earth time Δt = γΔt₀ = 1.25 × 4 = 5 s.",
+    "tags": ["time_dilation", "proper_time", "reference_frames"],
+    "source": "introductory_physics",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]
