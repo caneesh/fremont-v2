@@ -55,6 +55,7 @@ import {
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { usePhasedScaffoldContext } from './PhasedScaffoldWrapper'
 import ConfidenceRating from './ConfidenceRating'
+import StepHeatmap from './StepHeatmap'
 import type { Confidence } from '@/types/confidence'
 import { getConfidenceOutcome } from '@/lib/confidenceWeightedSRS'
 import {
@@ -1163,6 +1164,50 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     // Just close the modal, student continues with current work
   }, [])
 
+  // Handle manual "Recover from stuck" trigger
+  const handleRecoverFromStuck = useCallback(() => {
+    // Build context from current step
+    const currentStepData = data.steps[currentStep]
+    if (!currentStepData) return
+
+    // Find last completed step as the anchor (or use step 0 if none completed)
+    const lastCompletedStepId = completedSteps.length > 0
+      ? Math.max(...completedSteps)
+      : Math.max(0, currentStep - 1)
+
+    const previousStep = data.steps[lastCompletedStepId]
+    if (!previousStep) return
+
+    const rewindContext: SocraticRewindContext = {
+      previousValidStep: {
+        stepId: lastCompletedStepId,
+        stepTitle: previousStep.title,
+        stepContent: previousStep.question || previousStep.title,
+        userAnswer: stepAnswers.get(lastCompletedStepId),
+      },
+      currentError: {
+        stepId: currentStep,
+        description: 'Student requested help - feeling stuck on this step',
+        errorType: 'conceptual_gap',
+        studentInput: stepAnswers.get(currentStep),
+      },
+      violatedPrinciple: {
+        name: 'Step Progress',
+        description: 'Review your approach and ensure you understand the connection between steps.',
+        category: 'dynamics',
+      },
+      problemContext: {
+        problemText: data.problem,
+        domain: data.domain,
+        subdomain: data.subdomain,
+      },
+    }
+
+    setSocraticRewindContext(rewindContext)
+    setSocraticRewindTrigger('manual')
+    setShowSocraticRewind(true)
+  }, [currentStep, completedSteps, data, stepAnswers])
+
   // Handle sanity check solved
   const handleSanityCheckSolved = useCallback(() => {
     // Trigger celebration and allow proceeding to Mark as Solved
@@ -1717,9 +1762,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           )}
 
           <div className="demo-step-steps bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-              Solution Roadmap
-            </h3>
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary">
+                Solution Roadmap
+              </h3>
+              {/* Recover from stuck button */}
+              <button
+                onClick={handleRecoverFromStuck}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-700/50 rounded-lg transition-colors"
+                title="Get help if you're stuck on the current step"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                </svg>
+                <span className="hidden sm:inline">Stuck?</span>
+              </button>
+            </div>
             <p className="text-sm text-gray-600 dark:text-dark-text-muted mb-6">
               Work through each step. Click to expand and see hints. The framework guides you - you provide the reasoning.
             </p>
