@@ -174,6 +174,24 @@ export const FEATURE_FLAGS = {
    */
   ADAPTIVE_PREFLIGHT: process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT !== 'false'),
+
+  /**
+   * Why This Step Explainer
+   * When enabled, shows a "Why?" button on each step that generates an
+   * on-demand explanation of why that step is important in the solution process.
+   * Uses Claude to explain the pedagogical purpose of the step.
+   */
+  WHY_THIS_STEP: process.env.NEXT_PUBLIC_FEATURE_WHY_THIS_STEP === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_WHY_THIS_STEP !== 'false'),
+
+  /**
+   * Step Confidence Heatmap
+   * When enabled, displays a visual heatmap of confidence ratings across steps.
+   * Shows at-a-glance understanding of where the student is confident vs uncertain.
+   * Works in conjunction with CONFIDENCE_WEIGHTED_SRS for rating collection.
+   */
+  STEP_HEATMAP: process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP !== 'false'),
 }
 
 /**

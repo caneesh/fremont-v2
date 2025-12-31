@@ -1778,9 +1778,30 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                 <span className="hidden sm:inline">Stuck?</span>
               </button>
             </div>
-            <p className="text-sm text-gray-600 dark:text-dark-text-muted mb-6">
+            <p className="text-sm text-gray-600 dark:text-dark-text-muted mb-4">
               Work through each step. Click to expand and see hints. The framework guides you - you provide the reasoning.
             </p>
+
+            {/* Step Confidence Heatmap - show when heatmap feature is enabled and has data */}
+            {FEATURE_FLAGS.STEP_HEATMAP && FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS && stepConfidenceRatings.size > 0 && (
+              <div className="mb-4">
+                <StepHeatmap
+                  stepConfidenceRatings={stepConfidenceRatings}
+                  stepTitles={data.steps.map(s => s.title)}
+                  completedSteps={completedSteps}
+                  currentStep={currentStep}
+                  onStepClick={(stepIndex) => {
+                    // Scroll to and highlight the step
+                    const stepRef = stepRefs.current.get(stepIndex)
+                    if (stepRef) {
+                      stepRef.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                      setHighlightedStepId(stepIndex)
+                      setTimeout(() => setHighlightedStepId(null), 2000)
+                    }
+                  }}
+                />
+              </div>
+            )}
 
             <div className="space-y-3">
               {data.steps.map((step, index) => (
@@ -1825,6 +1846,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       onComplete={handleMicroStepComplete}
                       onCircuitBreakerError={handleTaskIncorrect}
                       onActivate={() => setCurrentStep(index)}
+                      onRecordAttempt={phasedScaffoldContext?.recordAttempt}
+                      getStepDifficulty={phasedScaffoldContext?.getStepDifficulty}
                     />
                   ) : (
                     <StepAccordion
