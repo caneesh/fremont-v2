@@ -38,6 +38,8 @@ export default function PhasedScaffoldWrapper({
     loadOutline,
     loadStepExpansion,
     getAdaptedScaffoldData,
+    recordAttempt,
+    getStepDifficulty,
     reset,
   } = usePhasedScaffold()
 
@@ -203,7 +205,9 @@ export default function PhasedScaffoldWrapper({
     <PhasedScaffoldContext.Provider value={{
       loadStepExpansion: handleStepPreload,
       isLoadingStep: state.loadingState === 'loading_step',
-      currentLoadingStepId: state.currentLoadingStepId
+      currentLoadingStepId: state.currentLoadingStepId,
+      recordAttempt,
+      getStepDifficulty,
     }}>
       <SolutionScaffold
         data={adaptedData}
@@ -230,6 +234,10 @@ interface PhasedScaffoldContextType {
   loadStepExpansion: (stepId: string) => Promise<void>
   isLoadingStep: boolean
   currentLoadingStepId: string | null
+  /** Record a task attempt for difficulty tuning */
+  recordAttempt: (stepId: string, taskLevel: number, isCorrect: boolean, attemptNumber: number) => void
+  /** Get current tuned difficulty for a step */
+  getStepDifficulty: (stepId: string) => 'easy' | 'medium' | 'hard'
 }
 
 export const PhasedScaffoldContext = createContext<PhasedScaffoldContextType | null>(null)

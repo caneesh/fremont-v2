@@ -18,6 +18,7 @@ import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { eventLogger } from '@/lib/storage/eventLogger'
 import type { Confidence } from '@/types/confidence'
 import type { ErrorTag } from '@/types/circuitBreaker'
+import type { TaskDifficulty } from '@/types/microTask'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -41,6 +42,8 @@ interface MicroTaskStepAccordionProps {
   onCircuitBreakerError?: (stepId: number, errorTag: ErrorTag) => void
   // Difficulty tuning callback for recording attempts
   onRecordAttempt?: (stepId: string, taskLevel: number, isCorrect: boolean, attemptNumber: number) => void
+  // Get current tuned difficulty for this step
+  getStepDifficulty?: (stepId: string) => TaskDifficulty
 }
 
 export default function MicroTaskStepAccordion({
@@ -61,10 +64,14 @@ export default function MicroTaskStepAccordion({
   onComplete,
   onActivate,
   onCircuitBreakerError,
-  onRecordAttempt
+  onRecordAttempt,
+  getStepDifficulty
 }: MicroTaskStepAccordionProps) {
   // Get the outline step ID for difficulty tuning (from phased scaffold adapter)
   const outlineStepId = (step as MicroTaskStep & { _outlineStepId?: string })._outlineStepId || `s${step.id}`
+
+  // Get current difficulty for this step
+  const currentDifficulty = getStepDifficulty?.(outlineStepId) || 'medium'
   const [isExpanded, setIsExpanded] = useState(isActive)
 
   // Track step activation time for timeout detection
@@ -559,6 +566,10 @@ export default function MicroTaskStepAccordion({
                 {getStepTypeBadge(step.stepType).label}
               </span>
             )}
+            {/* Difficulty Badge */}
+            {getStepDifficulty && (
+              <DifficultyBadge difficulty={currentDifficulty} />
+            )}
             {/* Why this step? button */}
             {!isLocked && FEATURE_FLAGS.WHY_THIS_STEP && (
               <button
@@ -993,5 +1004,43 @@ export default function MicroTaskStepAccordion({
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Difficulty badge component showing current adaptive difficulty level
+ */
+function DifficultyBadge({ difficulty }: { difficulty: TaskDifficulty }) {
+  const config: Record<TaskDifficulty, { label: string; icon: string; bgClass: string; textClass: string }> = {
+    easy: {
+      label: 'Easy',
+      icon: '○',
+      bgClass: 'bg-green-100 dark:bg-green-900/30',
+      textClass: 'text-green-700 dark:text-green-400',
+    },
+    medium: {
+      label: 'Medium',
+      icon: '◐',
+      bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+      textClass: 'text-amber-700 dark:text-amber-400',
+    },
+    hard: {
+      label: 'Hard',
+      icon: '●',
+      bgClass: 'bg-red-100 dark:bg-red-900/30',
+      textClass: 'text-red-700 dark:text-red-400',
+    },
+  }
+
+  const { label, icon, bgClass, textClass } = config[difficulty]
+
+  return (
+    <span
+      className={`px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center gap-1 ${bgClass} ${textClass}`}
+      title={`Difficulty: ${label} (adapts based on your performance)`}
+    >
+      <span className="text-[10px]">{icon}</span>
+      {label}
+    </span>
   )
 }
