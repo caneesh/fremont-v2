@@ -39,6 +39,8 @@ interface MicroTaskStepAccordionProps {
   onActivate: (stepId: number) => void
   // Circuit breaker callback for error pattern tracking
   onCircuitBreakerError?: (stepId: number, errorTag: ErrorTag) => void
+  // Difficulty tuning callback for recording attempts
+  onRecordAttempt?: (stepId: string, taskLevel: number, isCorrect: boolean, attemptNumber: number) => void
 }
 
 export default function MicroTaskStepAccordion({
@@ -58,8 +60,11 @@ export default function MicroTaskStepAccordion({
   onTaskComplete,
   onComplete,
   onActivate,
-  onCircuitBreakerError
+  onCircuitBreakerError,
+  onRecordAttempt
 }: MicroTaskStepAccordionProps) {
+  // Get the outline step ID for difficulty tuning (from phased scaffold adapter)
+  const outlineStepId = (step as MicroTaskStep & { _outlineStepId?: string })._outlineStepId || `s${step.id}`
   const [isExpanded, setIsExpanded] = useState(isActive)
 
   // Track step activation time for timeout detection
@@ -97,6 +102,11 @@ export default function MicroTaskStepAccordion({
     explanation: string
     attempts: number
   } | null>(null)
+
+  // "Why this step?" explainer state
+  const [whyStepExplanation, setWhyStepExplanation] = useState<string | null>(null)
+  const [isLoadingWhyStep, setIsLoadingWhyStep] = useState(false)
+  const [showWhyStep, setShowWhyStep] = useState(false)
 
   // Feature flag checks
   const useRevealFlow = FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE
@@ -179,9 +189,13 @@ export default function MicroTaskStepAccordion({
   }, [step.id, step.tasks, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, onComplete])
 
   const handleTaskCorrect = (explanation: string) => {
+    // Record attempt for difficulty tuning (correct answer)
+    const attemptCount = (taskAttempts.get(currentLevel) || 0) + 1
+    onRecordAttempt?.(outlineStepId, currentLevel, true, attemptCount)
+
     if (useConfidenceSRS) {
       // Show confidence prompt before proceeding
-      setPendingTaskResult({ isCorrect: true, explanation, attempts: 0 })
+      setPendingTaskResult({ isCorrect: true, explanation, attempts: attemptCount })
       setShowConfidencePrompt(true)
     } else {
       // Original behavior - proceed immediately
@@ -256,6 +270,9 @@ export default function MicroTaskStepAccordion({
       newMap.set(currentLevel, attempts)
       return newMap
     })
+
+    // Record attempt for difficulty tuning (incorrect answer)
+    onRecordAttempt?.(outlineStepId, currentLevel, false, attempts)
 
     // Track mistake when 2+ wrong attempts on a task
     if (problemId && attempts >= 2) {
@@ -459,6 +476,44 @@ export default function MicroTaskStepAccordion({
   const requiresFeynmanCheck = !!step.feynmanPrompt
   const showStepContent = !requiresFeynmanCheck || feynmanPassed
 
+  // "Why this step?" handler
+  const handleWhyStepClick = useCallback(async () => {
+    if (whyStepExplanation) {
+      // Already loaded, just toggle visibility
+      setShowWhyStep(!showWhyStep)
+      return
+    }
+
+    setIsLoadingWhyStep(true)
+    setShowWhyStep(true)
+
+    try {
+      const response = await fetch('/api/scaffold/step/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stepTitle: step.title,
+          stepType: step.stepType,
+          problemText: problemStatement || '',
+          stepPosition: stepNumber,
+          totalSteps: step.tasks.length > 0 ? step.tasks.length : 5, // Estimate if not loaded
+          requiredConcepts: step.requiredConcepts,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.explanation) {
+          setWhyStepExplanation(data.explanation)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch step explanation:', error)
+    } finally {
+      setIsLoadingWhyStep(false)
+    }
+  }, [whyStepExplanation, showWhyStep, step.title, step.stepType, step.requiredConcepts, step.tasks.length, problemStatement, stepNumber])
+
   return (
     <div
       className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${getBorderColor()} ${getBackgroundColor()}`}
@@ -504,6 +559,29 @@ export default function MicroTaskStepAccordion({
                 {getStepTypeBadge(step.stepType).label}
               </span>
             )}
+            {/* Why this step? button */}
+            {!isLocked && FEATURE_FLAGS.WHY_THIS_STEP && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleWhyStepClick()
+                }}
+                className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors flex items-center gap-1"
+                title="Learn why this step matters"
+              >
+                {isLoadingWhyStep ? (
+                  <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                Why?
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
             {/* Progress dots */}
@@ -546,6 +624,45 @@ export default function MicroTaskStepAccordion({
           </svg>
         )}
       </button>
+
+      {/* Why this step? explanation panel - shown when requested */}
+      {showWhyStep && (
+        <div className="mx-4 mb-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs font-semibold uppercase tracking-wide">Why this step?</span>
+            </div>
+            <button
+              onClick={() => setShowWhyStep(false)}
+              className="text-purple-400 hover:text-purple-600 dark:text-purple-500 dark:hover:text-purple-300"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {isLoadingWhyStep ? (
+            <div className="mt-2 flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Generating explanation...
+            </div>
+          ) : whyStepExplanation ? (
+            <p className="mt-2 text-sm text-purple-800 dark:text-purple-200">
+              {whyStepExplanation}
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-purple-600 dark:text-purple-400 italic">
+              Could not load explanation.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Expanded Content */}
       {isExpanded && !isLocked && (
