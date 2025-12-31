@@ -1,0 +1,74 @@
+{
+  "metaSkills": [
+    {
+      "id": "ms-sign-direction",
+      "name": "Sign & Direction Discipline",
+      "description": "Consistently define and maintain coordinate systems and sign conventions throughout problem solving.",
+      "habits": [
+        "Always draw coordinate axes before starting",
+        "Label positive directions explicitly",
+        "Check signs at every substitution",
+        "Verify final answer sign makes physical sense"
+      ],
+      "relatedPatternIds": ["pat-force-decomposition", "pat-kinematics-setup", "pat-vector-addition"],
+      "learnContentKey": "metaskill-sign-direction",
+      "order": 1
+    },
+    {
+      "id": "ms-dimensional-analysis",
+      "name": "Dimensional Analysis",
+      "description": "Use units and dimensions to check equations, derive formulas, and catch errors.",
+      "habits": [
+        "Write units with every quantity",
+        "Check dimensional consistency of equations",
+        "Use dimensional analysis to guess formula structure",
+        "Verify final answer has correct units"
+      ],
+      "relatedPatternIds": ["pat-sanity-check", "pat-estimation"],
+      "learnContentKey": "metaskill-dimensional",
+      "order": 2
+    },
+    {
+      "id": "ms-boundary-cases",
+      "name": "Boundary Case Thinking",
+      "description": "Test solutions at extreme values to validate correctness and build intuition.",
+      "habits": [
+        "Ask 'what if x → 0?' and 'what if x → ∞?'",
+        "Check limiting cases match known physics",
+        "Use special cases to verify general solutions",
+        "Spot-check with easy numbers"
+      ],
+      "relatedPatternIds": ["pat-sanity-check", "pat-constraint-analysis"],
+      "learnContentKey": "metaskill-boundary",
+      "order": 3
+    },
+    {
+      "id": "ms-problem-decomposition",
+      "name": "Problem Decomposition",
+      "description": "Break complex problems into manageable sub-problems and phases.",
+      "habits": [
+        "Identify distinct phases in a problem",
+        "Draw separate diagrams for each phase",
+        "Write what's conserved vs. what changes between phases",
+        "Connect phases through shared quantities"
+      ],
+      "relatedPatternIds": ["pat-phase-analysis", "pat-conservation-check", "pat-constraint-analysis"],
+      "learnContentKey": "metaskill-decomposition",
+      "order": 4
+    },
+    {
+      "id": "ms-strategic-selection",
+      "name": "Strategic Method Selection",
+      "description": "Choose the most efficient approach (forces vs. energy vs. momentum) based on what's asked.",
+      "habits": [
+        "Read what's asked before choosing method",
+        "Check if problem asks for instantaneous or cumulative quantities",
+        "Look for conservation opportunities",
+        "Consider if direct or indirect approach is simpler"
+      ],
+      "relatedPatternIds": ["pat-method-selection", "pat-conservation-check", "pat-work-energy-path"],
+      "learnContentKey": "metaskill-strategic",
+      "order": 5
+    }
+  ]
+}

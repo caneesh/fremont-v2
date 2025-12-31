@@ -1,0 +1,124 @@
+{
+  "patterns": [
+    {
+      "id": "pat-force-decomposition",
+      "name": "Force Decomposition & Projection",
+      "description": "Systematically break forces into components along chosen axes, especially on inclines and curved surfaces.",
+      "learnContent": "Force decomposition is the foundation of solving most mechanics problems. When forces act at angles, we project them onto perpendicular axes (usually parallel and perpendicular to motion or surface).\n\n**Key Steps:**\n1. Draw a clear Free Body Diagram (FBD)\n2. Choose coordinate axes aligned with motion or constraints\n3. Decompose each force: F_x = F cos(θ), F_y = F sin(θ)\n4. Apply Newton's laws along each axis independently\n\n**Common on inclines:** Weight W decomposes to W sin(θ) along incline and W cos(θ) perpendicular to it.",
+      "summary": "Break forces into components along smart axes",
+      "metaSkillIds": ["ms-sign-direction"],
+      "commonTraps": ["Mixing up sin/cos for incline angle", "Forgetting to include all forces", "Wrong sign for friction direction"],
+      "difficulty": 2,
+      "topicIds": ["mechanics"],
+      "keywords": ["decomposition", "components", "incline", "projection", "FBD"]
+    },
+    {
+      "id": "pat-constraint-analysis",
+      "name": "Constraint Analysis",
+      "description": "Identify and apply problem constraints to derive additional equations relating unknown quantities.",
+      "learnContent": "Constraints are conditions the system must satisfy. They provide extra equations beyond Newton's laws.\n\n**Common Constraint Types:**\n1. **Geometric:** String length constant, bodies in contact\n2. **Kinematic:** Rolling without slipping (v = ωR, a = αR)\n3. **Physical:** Normal force ≥ 0 (contact maintained)\n\n**How to use:**\n- Write constraint mathematically\n- Differentiate geometric constraints to get velocity/acceleration relations\n- Combine with Newton's laws to solve",
+      "summary": "Extract equations from problem constraints",
+      "metaSkillIds": ["ms-problem-decomposition"],
+      "commonTraps": ["Ignoring that string is inextensible", "Missing hidden constraints", "Not differentiating geometric constraints"],
+      "difficulty": 3,
+      "topicIds": ["mechanics"],
+      "keywords": ["constraint", "string", "pulley", "contact", "rolling"]
+    },
+    {
+      "id": "pat-frame-selection",
+      "name": "Reference Frame Selection",
+      "description": "Choose the optimal reference frame (ground, moving object, rotating) to simplify the problem.",
+      "learnContent": "The right reference frame can turn a complex problem into a simple one.\n\n**When to use non-inertial frames:**\n1. When analyzing motion relative to a moving object\n2. When the system has a natural moving frame (e.g., center of mass)\n3. In rotating systems (add pseudo-forces)\n\n**Pseudo-forces in accelerating frames:**\n- F_pseudo = -ma_frame (opposite to frame's acceleration)\n- In rotating frames: Centrifugal = mω²r (outward), Coriolis = 2m(ω × v)",
+      "summary": "Pick the frame that makes physics simplest",
+      "metaSkillIds": ["ms-strategic-selection"],
+      "commonTraps": ["Mixing quantities from different frames", "Forgetting pseudo-forces", "Using non-inertial frame for conservation laws"],
+      "difficulty": 4,
+      "topicIds": ["mechanics"],
+      "keywords": ["frame", "reference", "pseudo-force", "relative", "centrifugal"]
+    },
+    {
+      "id": "pat-conservation-check",
+      "name": "Conservation Law Check",
+      "description": "Systematically verify if energy, momentum, or angular momentum is conserved before applying conservation principles.",
+      "learnContent": "Conservation laws are powerful shortcuts—but only when they apply!\n\n**Checklist before using:**\n1. **Energy:** Is work by non-conservative forces zero? (No friction, no external work)\n2. **Linear Momentum:** Is net external force zero? (Isolated system)\n3. **Angular Momentum:** Is net external torque zero about chosen axis?\n\n**Key insight:** Conservation laws relate initial and final states without needing to track the process in between.",
+      "summary": "Verify conditions before applying conservation",
+      "metaSkillIds": ["ms-strategic-selection", "ms-problem-decomposition"],
+      "commonTraps": ["Using energy conservation with friction", "Ignoring external impulse", "Wrong axis for angular momentum"],
+      "difficulty": 3,
+      "topicIds": ["mechanics"],
+      "keywords": ["conservation", "energy", "momentum", "angular momentum", "isolated"]
+    },
+    {
+      "id": "pat-phase-analysis",
+      "name": "Multi-Phase Problem Analysis",
+      "description": "Split problems with distinct phases (e.g., before/after collision, launch/flight/landing) and apply appropriate principles to each.",
+      "learnContent": "Many physics problems have distinct phases where different principles apply.\n\n**How to identify phases:**\n- Look for events: collisions, releases, surface changes\n- Each phase may have different forces, constraints, or conservation conditions\n\n**Connecting phases:**\n- Final state of Phase N = Initial state of Phase N+1\n- Some quantities carry over (position, velocity)\n- Others may change (forces, accelerations)\n\n**Example:** Ball thrown up (Phase 1: launch with friction), falls down (Phase 2: return), hits ground (Phase 3: impulse).",
+      "summary": "Divide problem into phases with different physics",
+      "metaSkillIds": ["ms-problem-decomposition"],
+      "commonTraps": ["Missing a phase", "Applying wrong principle to a phase", "Not matching boundary conditions between phases"],
+      "difficulty": 3,
+      "topicIds": ["mechanics", "thermodynamics"],
+      "keywords": ["phase", "before", "after", "collision", "stages"]
+    },
+    {
+      "id": "pat-work-energy-path",
+      "name": "Work-Energy Pathway",
+      "description": "Use the work-energy theorem to relate forces, displacements, and velocity changes, especially when force varies.",
+      "learnContent": "Work-energy theorem: Net work = Change in kinetic energy.\n\n**When to use:**\n- Force varies with position (can't use kinematics directly)\n- Need to find final velocity from force and displacement\n- Energy is asked but conservation doesn't apply (non-conservative forces present)\n\n**Key equation:** W_net = ∫F·ds = ½mv² - ½mv₀²\n\n**For conservative + non-conservative forces:**\nW_nc = ΔKE + ΔPE",
+      "summary": "Connect force, displacement, and velocity via work",
+      "metaSkillIds": ["ms-strategic-selection"],
+      "commonTraps": ["Forgetting to include all forces' work", "Sign errors in potential energy", "Confusing work with energy"],
+      "difficulty": 2,
+      "topicIds": ["mechanics"],
+      "keywords": ["work", "energy", "kinetic", "potential", "theorem"]
+    },
+    {
+      "id": "pat-kinematics-setup",
+      "name": "Kinematics Problem Setup",
+      "description": "Systematically identify knowns, unknowns, and select appropriate kinematic equations for motion problems.",
+      "learnContent": "Kinematics problems follow a structured approach.\n\n**Step-by-step:**\n1. List given quantities (v₀, v, a, t, s)\n2. Identify what's asked\n3. Count knowns (need 3 of 5 variables)\n4. Pick equation that has your unknown and your knowns\n\n**The Big Three Equations:**\n- v = v₀ + at\n- s = v₀t + ½at²\n- v² = v₀² + 2as\n\n**Pro tip:** Draw motion diagram with directions marked.",
+      "summary": "Structured approach to selecting kinematic equations",
+      "metaSkillIds": ["ms-sign-direction"],
+      "commonTraps": ["Mixing signs for directions", "Using equation with too many unknowns", "Forgetting acceleration can be negative"],
+      "difficulty": 1,
+      "topicIds": ["mechanics"],
+      "keywords": ["kinematics", "motion", "velocity", "acceleration", "displacement"]
+    },
+    {
+      "id": "pat-sanity-check",
+      "name": "Sanity Check Matrix",
+      "description": "Validate answers using dimensional analysis, limiting cases, and physical reasonableness.",
+      "learnContent": "Every answer should pass three sanity checks.\n\n**1. Dimensional Check:**\n- Verify units match what's asked\n- Check each term in equation has same dimensions\n\n**2. Limiting Cases:**\n- What happens when m → 0, ∞?\n- What if θ → 0°, 90°?\n- Does it reduce to known results?\n\n**3. Physical Reasonableness:**\n- Is magnitude sensible? (Can't have v > c for classical mechanics)\n- Does sign make sense? (Forces in expected directions)\n- Order of magnitude check",
+      "summary": "Triple-check answers with units, limits, and physics",
+      "metaSkillIds": ["ms-dimensional-analysis", "ms-boundary-cases"],
+      "commonTraps": ["Skipping sanity checks under time pressure", "Only checking one type", "Accepting unreasonable values"],
+      "difficulty": 2,
+      "topicIds": ["mechanics", "thermodynamics", "electromagnetism", "optics", "modern-physics"],
+      "keywords": ["sanity", "check", "verify", "units", "limits"]
+    },
+    {
+      "id": "pat-vector-addition",
+      "name": "Vector Addition & Resolution",
+      "description": "Add vectors correctly using component method or graphical/geometric methods as appropriate.",
+      "learnContent": "Vectors require direction-aware addition.\n\n**Component Method (most reliable):**\n1. Resolve each vector into x and y components\n2. Add components: R_x = ΣA_x, R_y = ΣA_y\n3. Find magnitude: |R| = √(R_x² + R_y²)\n4. Find direction: θ = tan⁻¹(R_y/R_x)\n\n**Special cases:**\n- Perpendicular vectors: |R| = √(A² + B²)\n- Parallel vectors: |R| = A + B or |A - B|\n- Same magnitude at angle θ: |R| = 2A cos(θ/2)",
+      "summary": "Add vectors correctly using components",
+      "metaSkillIds": ["ms-sign-direction"],
+      "commonTraps": ["Adding magnitudes directly", "Wrong angle for components", "Ignoring direction of resultant"],
+      "difficulty": 2,
+      "topicIds": ["mechanics", "electromagnetism"],
+      "keywords": ["vector", "addition", "components", "resultant", "resolution"]
+    },
+    {
+      "id": "pat-method-selection",
+      "name": "Force vs Energy vs Momentum Decision",
+      "description": "Strategically choose between Newton's laws, energy methods, and momentum methods based on what's asked and given.",
+      "learnContent": "Each method has its sweet spot.\n\n**Use Newton's Laws (Force) when:**\n- Asked for acceleration or force\n- Need instantaneous quantities\n- Force is constant and simple\n\n**Use Energy when:**\n- Asked for speed (not velocity direction)\n- Force varies with position\n- Path doesn't matter, only endpoints\n\n**Use Momentum when:**\n- Collisions or explosions\n- Forces are internal (system isolated)\n- Asked about impulse or momentum transfer\n\n**Decision tree:** What's asked? → What's conserved? → What's simplest?",
+      "summary": "Match problem type to solution method",
+      "metaSkillIds": ["ms-strategic-selection"],
+      "commonTraps": ["Using energy when asked for force", "Using momentum when external forces exist", "Overcomplicating with wrong method"],
+      "difficulty": 3,
+      "topicIds": ["mechanics"],
+      "keywords": ["method", "selection", "force", "energy", "momentum", "approach"]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "mistakeTypes": [
+    {
+      "id": "mt-sign-direction-error",
+      "name": "Sign/Direction Confusion",
+      "description": "Errors related to incorrect sign conventions or direction assignments in vectors and components.",
+      "category": "SIGN_DIRECTION",
+      "relatedPatternId": "pat-force-decomposition",
+      "relatedMetaSkillId": "ms-sign-direction",
+      "remediation": "Practice: Always draw axes first, label positive directions, and check sign at every step.",
+      "matchKeywords": ["sign", "negative", "positive", "direction", "wrong sign", "opposite"]
+    },
+    {
+      "id": "mt-sin-cos-swap",
+      "name": "Sin/Cos Component Swap",
+      "description": "Mixing up sine and cosine when decomposing forces on inclines or at angles.",
+      "category": "FORCE_DECOMPOSITION",
+      "relatedPatternId": "pat-force-decomposition",
+      "relatedMetaSkillId": "ms-sign-direction",
+      "remediation": "Remember: Component along the angle uses cos, component perpendicular uses sin. Or use the 'adjacent = cos' rule.",
+      "matchKeywords": ["sin", "cos", "sine", "cosine", "component", "incline", "angle"]
+    },
+    {
+      "id": "mt-frame-mixing",
+      "name": "Reference Frame Mixing",
+      "description": "Using quantities from different reference frames in the same equation without proper transformation.",
+      "category": "FRAME_SELECTION",
+      "relatedPatternId": "pat-frame-selection",
+      "remediation": "Commit to ONE frame at the start. If switching, explicitly transform all quantities.",
+      "matchKeywords": ["frame", "reference", "relative", "observer", "ground", "moving"]
+    },
+    {
+      "id": "mt-constraint-missed",
+      "name": "Missed Constraint",
+      "description": "Failing to use a stated constraint (e.g., string is inextensible, rolling without slipping).",
+      "category": "CONSTRAINT_MISSED",
+      "relatedPatternId": "pat-constraint-analysis",
+      "relatedMetaSkillId": "ms-problem-decomposition",
+      "remediation": "Underline all constraint keywords in the problem. Each constraint gives you an equation.",
+      "matchKeywords": ["constraint", "string", "inextensible", "rolling", "contact", "taut"]
+    },
+    {
+      "id": "mt-conservation-invalid",
+      "name": "Invalid Conservation Application",
+      "description": "Applying conservation laws when the required conditions are not met (e.g., energy with friction).",
+      "category": "CONSERVATION_MISUSE",
+      "relatedPatternId": "pat-conservation-check",
+      "relatedMetaSkillId": "ms-strategic-selection",
+      "remediation": "Before applying conservation, explicitly verify: Is the system isolated? Is work by non-conservative forces zero?",
+      "matchKeywords": ["conservation", "friction", "external force", "not conserved", "work done"]
+    },
+    {
+      "id": "mt-reveal-skip",
+      "name": "Revealed Without Trying",
+      "description": "User revealed the answer or entered read-only mode without making a genuine attempt.",
+      "category": "LOW_CONFIDENCE",
+      "relatedPatternId": "pat-method-selection",
+      "remediation": "Try writing ANY approach before revealing. Even wrong attempts build understanding.",
+      "matchKeywords": ["reveal", "skip", "read-only", "give up", "show answer"]
+    },
+    {
+      "id": "mt-hint-dependent",
+      "name": "Hint-Dependent Solution",
+      "description": "Needed multiple hints to arrive at the answer, indicating fragile understanding.",
+      "category": "FRAGILE_UNDERSTANDING",
+      "relatedPatternId": "pat-sanity-check",
+      "remediation": "After solving with hints, close them and try to reconstruct the approach from memory.",
+      "matchKeywords": ["hint", "help", "stuck", "multiple attempts", "guided"]
+    },
+    {
+      "id": "mt-algebra-error",
+      "name": "Algebraic Manipulation Error",
+      "description": "Errors in mathematical manipulation: wrong expansion, incorrect simplification, etc.",
+      "category": "ALGEBRA_ERROR",
+      "relatedPatternId": "pat-sanity-check",
+      "remediation": "Check algebra step-by-step. Use dimensional analysis to catch errors.",
+      "matchKeywords": ["algebra", "calculate", "simplify", "expansion", "equation"]
+    },
+    {
+      "id": "mt-unit-error",
+      "name": "Unit Inconsistency",
+      "description": "Mixing units or forgetting to convert before calculation.",
+      "category": "UNIT_ERROR",
+      "relatedPatternId": "pat-sanity-check",
+      "relatedMetaSkillId": "ms-dimensional-analysis",
+      "remediation": "Convert ALL quantities to SI units BEFORE calculating. Write units with every number.",
+      "matchKeywords": ["unit", "conversion", "cm", "mm", "kg", "gram"]
+    },
+    {
+      "id": "mt-concept-confusion",
+      "name": "Conceptual Confusion",
+      "description": "Mixing up related but distinct concepts (e.g., displacement vs distance, normal force vs weight).",
+      "category": "CONCEPTUAL_CONFUSION",
+      "relatedPatternId": "pat-method-selection",
+      "remediation": "Review the definitions carefully. Create a comparison table for commonly confused concepts.",
+      "matchKeywords": ["confused", "mixed up", "thought it was", "difference between"]
+    }
+  ]
+}

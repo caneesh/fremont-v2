@@ -1,0 +1,48 @@
+{
+  "patternTracks": [
+    {
+      "id": "track-mechanics-fundamentals",
+      "name": "Mechanics Fundamentals",
+      "description": "Master the core patterns for solving any mechanics problem: setup, decomposition, and method selection.",
+      "patternIds": [
+        "pat-kinematics-setup",
+        "pat-force-decomposition",
+        "pat-vector-addition",
+        "pat-constraint-analysis"
+      ],
+      "prerequisiteTrackIds": [],
+      "estimatedDays": 14,
+      "targetTopicIds": ["mechanics"],
+      "order": 1
+    },
+    {
+      "id": "track-conservation-mastery",
+      "name": "Conservation Law Mastery",
+      "description": "Learn when and how to apply conservation laws for energy, momentum, and angular momentum.",
+      "patternIds": [
+        "pat-conservation-check",
+        "pat-work-energy-path",
+        "pat-method-selection",
+        "pat-phase-analysis"
+      ],
+      "prerequisiteTrackIds": ["track-mechanics-fundamentals"],
+      "estimatedDays": 10,
+      "targetTopicIds": ["mechanics"],
+      "order": 2
+    },
+    {
+      "id": "track-advanced-techniques",
+      "name": "Advanced Problem Solving",
+      "description": "Advanced techniques for complex problems: frame selection, sanity checking, and multi-phase analysis.",
+      "patternIds": [
+        "pat-frame-selection",
+        "pat-phase-analysis",
+        "pat-sanity-check"
+      ],
+      "prerequisiteTrackIds": ["track-conservation-mastery"],
+      "estimatedDays": 7,
+      "targetTopicIds": ["mechanics", "thermodynamics"],
+      "order": 3
+    }
+  ]
+}

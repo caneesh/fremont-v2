@@ -9,12 +9,15 @@ import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import PageHeader from '@/components/PageHeader'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import StudyPlanV2Dashboard from '@/components/StudyPlanV2Dashboard'
 
 export default function StudyPathPage() {
   const router = useRouter()
   const [topics, setTopics] = useState<Topic[]>([])
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [recommendedQuestions, setRecommendedQuestions] = useState<Question[]>([])
+  const [showV2, setShowV2] = useState(FEATURE_FLAGS.STUDY_PLAN_V2)
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,6 +105,20 @@ export default function StudyPathPage() {
     },
   })
 
+  // Show v2 dashboard if enabled
+  if (showV2) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
+        <MobileNav />
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <PageHeader />
+          <StudyPlanV2Dashboard onSwitchToV1={() => setShowV2(false)} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
@@ -110,13 +127,27 @@ export default function StudyPathPage() {
         {/* Header */}
         <div className="mb-6 md:mb-8">
           <PageHeader />
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
-              IIT-JEE Physics Study Path
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-dark-text-secondary">
-              Systematic preparation for IIT-JEE Advanced
-            </p>
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
+                IIT-JEE Physics Study Path
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-dark-text-secondary">
+                Systematic preparation for IIT-JEE Advanced
+              </p>
+            </div>
+            {/* V2 Toggle */}
+            {FEATURE_FLAGS.STUDY_PLAN_V2 && (
+              <button
+                onClick={() => setShowV2(true)}
+                className="px-4 py-2 text-sm bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Try Pattern-First (v2)
+              </button>
+            )}
           </div>
           {/* Desktop Navigation */}
           <div className="hidden md:flex gap-3 justify-end">
