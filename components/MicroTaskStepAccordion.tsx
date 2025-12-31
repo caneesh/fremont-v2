@@ -525,12 +525,20 @@ export default function MicroTaskStepAccordion({
     <div
       className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${getBorderColor()} ${getBackgroundColor()}`}
     >
-      {/* Header */}
-      <button
-        onClick={handleToggle}
-        disabled={isLocked}
+      {/* Header - using div with role="button" to allow nested "Why?" button */}
+      <div
+        role="button"
+        tabIndex={isLocked ? -1 : 0}
+        onClick={isLocked ? undefined : handleToggle}
+        onKeyDown={(e) => {
+          if (!isLocked && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault()
+            handleToggle()
+          }
+        }}
+        aria-disabled={isLocked}
         className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${
-          isLocked ? 'cursor-not-allowed opacity-60' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+          isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50'
         }`}
       >
         {/* Step Number Circle */}
@@ -634,7 +642,7 @@ export default function MicroTaskStepAccordion({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         )}
-      </button>
+      </div>
 
       {/* Why this step? explanation panel - shown when requested */}
       {showWhyStep && (
