@@ -4,7 +4,12 @@ import { validateAuthHeader, unauthorizedResponse } from '@/lib/auth/apiAuth'
 import { v4 as uuidv4 } from 'uuid'
 import type { ExtractTextRequest, ExtractTextResponse } from '@/types/paperSolution'
 
-const anthropic = new Anthropic()
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 // OCR extraction prompt - optimized for handwritten physics/math
 const EXTRACTION_SYSTEM_PROMPT = `You are an expert OCR system specialized in extracting handwritten physics and mathematics solutions. Your task is to accurately transcribe handwritten content from student work.
@@ -103,7 +108,7 @@ export async function POST(request: NextRequest) {
       const [, mediaType, base64Data] = match
 
       try {
-        const response = await anthropic.messages.create({
+        const response = await getAnthropicClient().messages.create({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
           messages: [

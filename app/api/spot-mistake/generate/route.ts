@@ -6,9 +6,12 @@ import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { GenerateMistakeSolutionRequest, StudentSolution } from '@/types/spotTheMistake'
 import { storeMistakeLocation } from '@/lib/spotMistakeStorage'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export async function GET() {
   return NextResponse.json(
@@ -109,7 +112,7 @@ CRITICAL: Make the solution look authentic - a capable student who made ONE conc
 
 Respond with ONLY the JSON, no other text.`
 
-    const message = await anthropic.messages.create({
+    const message = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       messages: [

@@ -5,9 +5,12 @@ import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { StudyBuddyRequest, StudyBuddyResponse } from '@/types/explainToFriend'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +59,7 @@ Rules:
 - Make sure questions are concrete, not generic
 - Respond with ONLY valid JSON.`
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       temperature: 0.4,

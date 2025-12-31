@@ -5,9 +5,12 @@ import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { DebugConceptRequest, DebugConceptResponse, ChatMessage } from '@/types/debugConcept'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 function buildChatHistory(history: ChatMessage[]): Array<{ role: 'user' | 'assistant', content: string }> {
   return history.map(msg => ({
@@ -111,7 +114,7 @@ Remember: Your goal is to help them discover the truth themselves, not to tell t
         : userInput
     })
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       temperature: 0.7, // Some creativity for varied Socratic questions

@@ -5,9 +5,12 @@ import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { SanityCheckVariant } from '@/types/scaffold'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 interface VerifyReasoningRequest {
   checkType: 'limit' | 'symmetry' | 'dimension'
@@ -121,7 +124,7 @@ Student's Reasoning: "${studentReasoning}"
 
 Is their physical reasoning sound?`
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       system: systemPrompt,

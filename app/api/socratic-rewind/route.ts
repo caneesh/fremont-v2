@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import type { SocraticRewindContext, SocraticRewindResponse } from '@/types/socraticRewind'
 
-// Initialize the Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 /**
  * Socratic Rewind API
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Build the prompt for Claude
     const prompt = buildSocraticRewindPrompt(context)
 
-    const message = await anthropic.messages.create({
+    const message = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       messages: [

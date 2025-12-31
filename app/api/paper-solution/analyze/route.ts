@@ -5,7 +5,12 @@ import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { v4 as uuidv4 } from 'uuid'
 import type { AnalyzeSolutionRequest, AnalyzeSolutionResponse, AnalysisStatus } from '@/types/paperSolution'
 
-const anthropic = new Anthropic()
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 // Daily analysis limit (shares with reflections quota)
 const DAILY_ANALYSIS_LIMIT = 30
@@ -150,7 +155,7 @@ export async function POST(request: NextRequest) {
     const userPrompt = buildAnalysisPrompt(body)
 
     // Call Claude for analysis
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
       messages: [

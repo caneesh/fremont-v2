@@ -11,10 +11,12 @@ import type {
   RejectionQuality,
 } from '@/types/conceptContrast'
 
-// Initialize the Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 /**
  * Concept Contrast API
@@ -82,7 +84,7 @@ async function handleGenerate(body: { action: string } & GenerateConceptContrast
 
   const prompt = buildGeneratePrompt(selectedConcept, problemContext, numDistractors)
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 2048,
     messages: [
@@ -166,7 +168,7 @@ async function handleValidate(body: { action: string } & ValidateRejectionReques
 
   const prompt = buildValidatePrompt(distractorId, explanation, problemContext)
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
     messages: [

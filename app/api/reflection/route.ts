@@ -4,9 +4,12 @@ import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from 
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -112,7 +115,7 @@ Output your response as valid JSON with this EXACT structure:
 
 Respond with ONLY the JSON, no other text.`
 
-    const message = await anthropic.messages.create({
+    const message = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       messages: [

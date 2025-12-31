@@ -10,9 +10,12 @@ import { generateSocraticDialogue, shouldShowDialogue } from '@/lib/constraintDi
 import { detectMisconceptions, shouldShowMisconception } from '@/lib/misconceptionDetectionService'
 import type { ProblemConstraintData } from '@/types/constraintCollision'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -137,7 +140,7 @@ ${solution}
 ---
 Analyze this solution and provide your diagnostic grade in the specified JSON format.`
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
       temperature: 0.3, // Lower temperature for consistent grading

@@ -6,9 +6,12 @@ import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 import type { ErrorAnalysisRequest, ErrorAnalysisResponse } from '@/types/errorPatterns'
 import { COMMON_ERROR_PATTERNS } from '@/types/errorPatterns'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,7 +79,7 @@ ${patternDescriptions}
 
 Analyze the student's error and respond with ONLY valid JSON.`
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
       temperature: 0.3, // Lower temperature for more consistent classification
