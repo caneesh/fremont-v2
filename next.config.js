@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Disable output file tracing to work around Next.js 15 build issues
-  outputFileTracingExcludes: {
-    '*': ['**/*'],
+  // Use standalone output mode for better compatibility
+  output: 'standalone',
+  // Increase build worker memory and reduce parallelism to avoid race conditions
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
   },
 }
 
