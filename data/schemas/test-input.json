@@ -1,0 +1,323 @@
+{
+  "schemaVersion": "question.v1",
+  "questionId": "jee-relative-velocity-ship-wind-1",
+
+  "metadata": {
+    "title": "Relative Velocity: Ship and Wind",
+    "difficulty": 3,
+    "estimatedTimeSec": 300,
+    "language": "en",
+    "source": {
+      "kind": "book",
+      "reference": "I.E. Irodov - Problems in General Physics",
+      "year": null
+    },
+    "version": 1,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+
+  "classification": {
+    "topicTags": ["relative-velocity", "vectors", "kinematics", "2d-motion"],
+    "patternTags": ["relative-motion", "vector-addition", "angle-calculation", "velocity-transformation"],
+    "metaSkillTags": ["vector-diagram", "coordinate-setup", "trigonometry"],
+    "trapTags": ["reference-frame-confusion", "sign-convention", "angle-interpretation"],
+    "learningObjectives": [
+      "Apply relative velocity formula v' = v - v₀",
+      "Resolve vectors into components",
+      "Calculate magnitude and direction of resultant vector",
+      "Transform between different reference frames"
+    ]
+  },
+
+  "prompt": {
+    "text": "A ship moves along the equator to the east with velocity v₀ = 30 km/hour. The southeastern wind blows at an angle φ = 60° to the equator with velocity v = 15 km/hour. Find the wind velocity v' relative to the ship and the angle φ' between the equator and the wind direction in the reference frame fixed to the ship.",
+    "context": "Assume: East is +x direction, North is +y direction. Southeastern wind means it's coming from the southeast, blowing toward northwest. Angle φ is measured from the equator (east direction).",
+    "diagram": {
+      "type": "static",
+      "assetId": "ship-wind-vector-diagram",
+      "annotations": ["ship-velocity", "wind-velocity", "relative-velocity", "angles"]
+    },
+    "given": [
+      {
+        "label": "v₀",
+        "value": "30",
+        "unit": "km/h"
+      },
+      {
+        "label": "v",
+        "value": "15",
+        "unit": "km/h"
+      },
+      {
+        "label": "φ",
+        "value": "60",
+        "unit": "degrees"
+      }
+    ],
+    "asked": [
+      {
+        "label": "v'",
+        "expectedForm": "numeric with unit"
+      },
+      {
+        "label": "φ'",
+        "expectedForm": "numeric angle in degrees"
+      }
+    ]
+  },
+
+  "assets": [
+    {
+      "assetId": "ship-wind-vector-diagram",
+      "kind": "svg",
+      "uri": "assets/diagrams/ship-wind.svg",
+      "alt": "Vector diagram showing ship velocity eastward, wind velocity at 60° from east, and relative velocity"
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "step1",
+      "type": "INFO",
+      "prompt": "Understand the relative velocity formula: v'(wind relative to ship) = v(wind relative to ground) - v₀(ship relative to ground). We need to subtract vectors.",
+      "difficulty": 1,
+      "requiredConcepts": ["relative-velocity-formula"],
+      "explanations": {
+        "conceptual": "When finding velocity of A relative to B, we subtract B's velocity from A's velocity. Here, wind is A and ship is B."
+      }
+    },
+    {
+      "stepId": "step2",
+      "type": "INFO",
+      "prompt": "Set up coordinate system: East = +x axis, North = +y axis. Southeastern wind at 60° to equator means it makes 60° with east direction, but since it's southeastern, it has components in both -x and +y directions? Wait, 'southeastern wind blows at angle 60° to equator' means wind direction is 60° south of east or 60° north of east? Typically southeastern wind comes FROM southeast, so direction is toward northwest. So actual wind velocity vector points northwest.",
+      "difficulty": 3,
+      "topic": "vector-interpretation"
+    },
+    {
+      "stepId": "step3-direction-clarification",
+      "type": "MCQ_SINGLE",
+      "prompt": "Which diagram correctly represents the wind direction? (Southeastern wind at 60° to equator)",
+      "difficulty": 2,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Vector at 60° north of east (in first quadrant)",
+          "isDistractor": false
+        },
+        {
+          "key": "B",
+          "text": "Vector at 60° south of east (in fourth quadrant)",
+          "isDistractor": true
+        },
+        {
+          "key": "C",
+          "text": "Vector at 60° from east, pointing northwest (in second quadrant, 120° from east)",
+          "isDistractor": true
+        },
+        {
+          "key": "D",
+          "text": "Vector at 60° from east, pointing southeast (300° from east)",
+          "isDistractor": true
+        }
+      ],
+      "correct": "A",
+      "explanations": {
+        "micro": "The problem says 'southeastern wind blows at an angle φ = 60° to the equator'. This means the wind makes 60° with the equator (east direction). Since it's southeastern, it should have both south and east components, so 60° south of east.",
+        "conceptual": "Wind direction names indicate where wind is coming FROM. Southeastern wind comes from southeast, so it blows toward northwest. But angle measured 'to the equator' means from east direction toward the wind direction. So 60° south of east."
+      }
+    },
+    {
+      "stepId": "step4-vector-components",
+      "type": "FILL_BLANK",
+      "prompt": "Express v (wind velocity relative to ground) in component form. v = 15 km/h at 60° south of east. v_x = ?",
+      "difficulty": 2,
+      "correct": ["7.5", "15*cos(60°)", "15*cos(60)", "15×0.5"],
+      "validation": {
+        "numericTolerance": 0.01,
+        "units": "km/h"
+      },
+      "explanations": {
+        "hint": "v_x = v * cos(θ) where θ is angle from east direction."
+      }
+    },
+    {
+      "stepId": "step5-vector-components-y",
+      "type": "FILL_BLANK",
+      "prompt": "What is v_y component? (Remember: south direction)",
+      "difficulty": 2,
+      "correct": ["-12.99", "-13", "-15*sin(60°)", "-15*sin(60)", "-15×0.866"],
+      "validation": {
+        "numericTolerance": 0.01,
+        "units": "km/h"
+      },
+      "explanations": {
+        "hint": "v_y = v * sin(θ), negative since south direction (assuming north is +y)."
+      }
+    },
+    {
+      "stepId": "step6-relative-velocity-components",
+      "type": "INFO",
+      "prompt": "Now calculate v' = v - v₀. v₀ = (30, 0) km/h (east). So v'ₓ = vₓ - v₀ₓ, v'_y = v_y - v₀_y.",
+      "difficulty": 2,
+      "explanations": {
+        "conceptual": "Vector subtraction is done component-wise. Subtract each component of v₀ from the corresponding component of v."
+      }
+    },
+    {
+      "stepId": "step7-calculate-vx-prime",
+      "type": "FILL_BLANK",
+      "prompt": "Calculate v'ₓ = vₓ - v₀ₓ = ?",
+      "difficulty": 2,
+      "correct": ["-22.5", "7.5 - 30", "7.5-30"],
+      "validation": {
+        "numericTolerance": 0.01,
+        "units": "km/h"
+      }
+    },
+    {
+      "stepId": "step8-calculate-vy-prime",
+      "type": "FILL_BLANK",
+      "prompt": "Calculate v'_y = v_y - v₀_y = ?",
+      "difficulty": 1,
+      "correct": ["-12.99", "-13", "-12.99 - 0"],
+      "validation": {
+        "numericTolerance": 0.01,
+        "units": "km/h"
+      }
+    },
+    {
+      "stepId": "step9-magnitude",
+      "type": "FILL_BLANK",
+      "prompt": "Calculate magnitude: v' = √(v'ₓ² + v'_y²) = ?",
+      "difficulty": 2,
+      "correct": "25.98",
+      "validation": {
+        "numericTolerance": 0.01,
+        "units": "km/h"
+      },
+      "explanations": {
+        "hint": "v' = √[(-22.5)² + (-12.99)²]"
+      }
+    },
+    {
+      "stepId": "step10-angle-calculation",
+      "type": "FILL_BLANK",
+      "prompt": "Calculate angle φ' = arctan(|v'_y|/|v'ₓ|) = arctan(12.99/22.5) = ? degrees",
+      "difficulty": 3,
+      "correct": "30",
+      "validation": {
+        "numericTolerance": 0.1,
+        "units": "degrees"
+      },
+      "explanations": {
+        "micro": "φ' = tan⁻¹(12.99/22.5) ≈ tan⁻¹(0.577) = 30°",
+        "conceptual": "Since both components are negative, the vector is in third quadrant. Angle from east is 180° + 30° = 210°, but φ' measured as acute angle between vector and equator is 30°."
+      }
+    }
+  ],
+
+  "flow": {
+    "startStepId": "step1",
+    "endStepIds": ["step10-angle-calculation"]
+  },
+
+  "solutions": {
+    "finalAnswer": {
+      "type": "TEXT",
+      "value": "v' ≈ 26 km/h, φ' = 30°",
+      "notes": "Wind appears to come from 30° south of west relative to the ship."
+    },
+    "synthesis": [
+      "The relative velocity is v' = v - v₀",
+      "Wind: v = 15 km/h at 60° south of east → components: (7.5, -12.99) km/h",
+      "Ship: v₀ = 30 km/h east → (30, 0) km/h",
+      "Relative: v' = (7.5-30, -12.99-0) = (-22.5, -12.99) km/h",
+      "Magnitude: √(22.5² + 12.99²) ≈ 26 km/h",
+      "Angle: φ' = tan⁻¹(12.99/22.5) ≈ 30° south of west"
+    ],
+    "limitingCases": [
+      {
+        "condition": "If v₀ = 0 (ship stationary)",
+        "expected": "v' = v, φ' = φ = 60°",
+        "why": "No relative motion between frames"
+      },
+      {
+        "condition": "If v₀ = v cosφ = 7.5 km/h",
+        "expected": "v'ₓ = 0, v' points directly south",
+        "why": "Ship matches east component of wind"
+      }
+    ],
+    "alternativePaths": [
+      {
+        "label": "Vector triangle method",
+        "outline": [
+          "Draw v₀ eastward",
+          "Draw v at 60° south of east",
+          "Complete triangle: v' = v - v₀",
+          "Use law of cosines: v'² = v² + v₀² - 2vv₀cosφ",
+          "Use law of sines for angle"
+        ],
+        "finalAnswer": {
+          "type": "TEXT",
+          "value": "Same result: v' = √(15² + 30² - 2×15×30×cos60°) = √(225+900-450) = √675 = 25.98 km/h"
+        }
+      }
+    ]
+  },
+
+  "prerequisites": {
+    "concepts": [
+      {
+        "conceptId": "relative-velocity",
+        "name": "Relative Velocity",
+        "importance": "critical",
+        "reason": "Core concept for solving the problem"
+      },
+      {
+        "conceptId": "vector-components",
+        "name": "Vector Components",
+        "importance": "critical",
+        "reason": "Need to break velocities into x and y components"
+      }
+    ],
+    "questions": [
+      {
+        "questionId": "basic-relative-velocity-1",
+        "title": "Basic Relative Velocity: Boat in River",
+        "relationship": "simpler-version",
+        "required": false
+      }
+    ],
+    "skills": ["vector-decomposition", "trigonometry", "coordinate-geometry"],
+    "minimumMastery": 0.6
+  },
+
+  "questionBank": {
+    "templateFingerprint": "given:v0,v,phi|asked:v-prime,phi-prime|scenario:relative-motion-2d",
+    "sourcePatternId": "relative-velocity-ship-wind",
+    "isOriginal": false,
+    "similarQuestionIds": ["jee-2018-relative-velocity-2", "hc-verma-1-9"],
+    "searchKeywords": ["relative velocity", "ship", "wind", "vector addition", "Irodov"],
+    "conceptIds": ["relative-motion", "vector-addition", "kinematics-2d"],
+    "prerequisiteConceptIds": ["vectors", "trigonometry", "coordinate-systems"],
+    "errorTags": ["sign-error", "angle-interpretation", "reference-frame-confusion"]
+  },
+
+  "authoring": {
+    "reviewStatus": "draft",
+    "notes": "Need to verify interpretation of 'southeastern wind at 60° to equator'",
+    "canonicalPatterns": ["relative-velocity-2d", "vector-subtraction", "angle-calculation"]
+  },
+
+  "analytics": {
+    "timesAttempted": 0,
+    "timesCompleted": 0,
+    "avgCompletionRate": null,
+    "avgTimeToCompleteSec": null,
+    "avgHintsUsed": null,
+    "avgScore": null,
+    "commonMistakes": [],
+    "lastUpdated": null
+  }
+}

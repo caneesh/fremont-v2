@@ -1,0 +1,329 @@
+{
+  "schemaVersion": "question.v1",
+  "questionId": "mech-incline-001",
+
+  "metadata": {
+    "title": "Child on Playground Slide",
+    "difficulty": 2,
+    "estimatedTimeSec": 480,
+    "language": "en",
+    "source": {
+      "kind": "original",
+      "reference": "Generated from HC-Verma pattern",
+      "year": 2025
+    },
+    "version": 1,
+    "createdAt": "2025-01-15T10:30:00Z",
+    "updatedAt": "2025-01-15T10:30:00Z"
+  },
+
+  "classification": {
+    "topicTags": ["mechanics", "newton-laws", "dynamics"],
+    "patternTags": ["inclined-plane", "single-body", "frictionless"],
+    "metaSkillTags": ["fbd-drawing", "component-resolution"],
+    "trapTags": ["sin-cos-confusion", "sign-convention"],
+    "learningObjectives": [
+      "Apply Newton's second law to inclined plane problems",
+      "Resolve weight into components parallel and perpendicular to incline"
+    ]
+  },
+
+  "prompt": {
+    "text": "A child sits on a smooth plastic slide at a playground. The slide makes an angle of 40° with the ground. If the child has a mass of 25 kg and friction is negligible, calculate:\n\n(a) The acceleration of the child as they slide down\n(b) The force the slide exerts perpendicular to its surface\n\nUse g = 10 m/s²",
+    "context": "Assume the child can be modeled as a point mass. The slide surface is perfectly smooth.",
+    "diagram": {
+      "type": "static",
+      "assetId": "incline-child-diagram-001",
+      "annotations": ["angle-theta", "normal-force", "weight"]
+    },
+    "given": [
+      { "label": "Mass", "value": "25", "unit": "kg" },
+      { "label": "Angle", "value": "40", "unit": "°" },
+      { "label": "Gravity", "value": "10", "unit": "m/s²" },
+      { "label": "Friction", "value": "negligible", "unit": "" }
+    ],
+    "asked": [
+      { "label": "Acceleration", "expectedForm": "numeric" },
+      { "label": "Normal Force", "expectedForm": "numeric" }
+    ]
+  },
+
+  "assets": [
+    {
+      "assetId": "incline-child-diagram-001",
+      "kind": "svg",
+      "uri": "/assets/diagrams/incline-child.svg",
+      "alt": "Child on an inclined slide at 40 degrees"
+    }
+  ],
+
+  "steps": [
+    {
+      "stepId": "s1-identify",
+      "type": "MCQ_SINGLE",
+      "prompt": "What type of physics problem is this?",
+      "pattern": "inclined-plane",
+      "metaSkill": "problem-classification",
+      "topic": "newton-laws",
+      "difficulty": 1,
+      "choices": [
+        { "key": "A", "text": "Projectile motion" },
+        { "key": "B", "text": "Inclined plane / ramp problem" },
+        { "key": "C", "text": "Circular motion" },
+        { "key": "D", "text": "Simple harmonic motion" }
+      ],
+      "correct": "B",
+      "ui": {
+        "showTimer": false,
+        "allowHint": true,
+        "hintCost": 0.1
+      },
+      "validation": {
+        "maxAttempts": 2
+      },
+      "explanations": {
+        "micro": "This is an inclined plane problem - object moving along a sloped surface.",
+        "conceptual": "When an object moves along a tilted surface under gravity, we use inclined plane analysis.",
+        "hint": "Look at the geometry - the child moves along a slope."
+      },
+      "mistakeMapping": [
+        {
+          "when": { "onChoice": "A" },
+          "mistakeTypeId": "problem-type-confusion",
+          "severity": 2,
+          "message": "Projectile motion involves objects moving through air in a parabolic path."
+        },
+        {
+          "when": { "onChoice": "C" },
+          "mistakeTypeId": "problem-type-confusion",
+          "severity": 2,
+          "message": "Circular motion requires the object to move in a circle."
+        }
+      ]
+    },
+    {
+      "stepId": "s2-fbd",
+      "type": "DIAGRAM_FBD",
+      "prompt": "Draw the free body diagram for the child. What forces act on them?",
+      "pattern": "inclined-plane",
+      "metaSkill": "fbd-drawing",
+      "topic": "forces",
+      "difficulty": 2,
+      "diagramValidator": {
+        "scenarioId": "incline-single-body",
+        "requiredForces": ["mg", "N"],
+        "directionRules": [
+          { "force": "mg", "rule": "DOWN_GLOBAL" },
+          { "force": "N", "rule": "PERP_TO_SURFACE" }
+        ]
+      },
+      "ui": {
+        "allowHint": true,
+        "hintCost": 0.2
+      },
+      "explanations": {
+        "micro": "Two forces: Weight (mg) downward, Normal force (N) perpendicular to slide.",
+        "conceptual": "For any object on a surface, identify gravity and the contact force from the surface.",
+        "deep": "The normal force is always perpendicular to the contact surface, not vertical. This is a common source of confusion.",
+        "hint": "What pulls the child down? What prevents them from falling through the slide?"
+      },
+      "mistakeMapping": [
+        {
+          "when": { "onRegex": "friction" },
+          "mistakeTypeId": "including-absent-force",
+          "severity": 3,
+          "message": "The problem states friction is negligible - don't include friction force."
+        }
+      ]
+    },
+    {
+      "stepId": "s3-components",
+      "type": "MCQ_SINGLE",
+      "prompt": "What is the component of weight parallel to the slide (down the incline)?",
+      "pattern": "component-resolution",
+      "metaSkill": "vector-decomposition",
+      "topic": "vectors",
+      "difficulty": 3,
+      "choices": [
+        { "key": "A", "text": "$mg \\cos(40°)$" },
+        { "key": "B", "text": "$mg \\sin(40°)$" },
+        { "key": "C", "text": "$mg \\tan(40°)$" },
+        { "key": "D", "text": "$mg$" }
+      ],
+      "correct": "B",
+      "explanations": {
+        "micro": "Weight component along incline = mg sin(θ)",
+        "conceptual": "The angle θ is between the incline and horizontal. The component along the incline uses sine.",
+        "deep": "Draw the weight vector and project it onto the incline direction. The angle between weight and the perpendicular to incline equals θ.",
+        "contrast": "sin gives the component along the incline, cos gives the component perpendicular to it. A common mistake is swapping these.",
+        "hint": "Which trig function relates the opposite side to the hypotenuse?"
+      },
+      "mistakeMapping": [
+        {
+          "when": { "onChoice": "A" },
+          "mistakeTypeId": "sin-cos-swap",
+          "severity": 4,
+          "message": "You've swapped sin and cos. Draw the triangle carefully - sin is for the component along the incline."
+        }
+      ]
+    },
+    {
+      "stepId": "s4-acceleration",
+      "type": "NUMERIC",
+      "prompt": "Calculate the acceleration of the child down the slide. Enter your answer in m/s².",
+      "pattern": "newton-second-law",
+      "metaSkill": "equation-application",
+      "topic": "dynamics",
+      "difficulty": 2,
+      "correctNumeric": 6.43,
+      "validation": {
+        "numericTolerance": 0.05,
+        "units": "m/s²",
+        "maxAttempts": 3
+      },
+      "explanations": {
+        "micro": "a = g sin(40°) = 10 × 0.643 = 6.43 m/s²",
+        "conceptual": "Apply F = ma along the incline. The only force along the incline is mg sin(θ), so ma = mg sin(θ), giving a = g sin(θ).",
+        "deep": "Notice that mass cancels out - all objects slide down a frictionless incline with the same acceleration regardless of mass!",
+        "hint": "What is the net force along the incline? Apply Newton's second law."
+      },
+      "mistakeMapping": [
+        {
+          "when": { "onRegex": "^7\\.66" },
+          "mistakeTypeId": "sin-cos-swap",
+          "severity": 4,
+          "message": "You used cos instead of sin. The component along the incline uses sin(θ)."
+        },
+        {
+          "when": { "onRegex": "^10" },
+          "mistakeTypeId": "missing-component",
+          "severity": 3,
+          "message": "You used g directly without resolving into components. The acceleration along the incline is g sin(θ), not g."
+        }
+      ]
+    },
+    {
+      "stepId": "s5-normal",
+      "type": "NUMERIC",
+      "prompt": "Calculate the normal force exerted by the slide on the child. Enter your answer in N.",
+      "pattern": "equilibrium",
+      "metaSkill": "equation-application",
+      "topic": "forces",
+      "difficulty": 2,
+      "correctNumeric": 191.5,
+      "validation": {
+        "numericTolerance": 0.5,
+        "units": "N",
+        "maxAttempts": 3
+      },
+      "explanations": {
+        "micro": "N = mg cos(40°) = 25 × 10 × 0.766 = 191.5 N",
+        "conceptual": "Perpendicular to the incline, forces must balance (no acceleration in that direction). So N = mg cos(θ).",
+        "deep": "The normal force is less than the weight (191.5 N vs 250 N) because only the perpendicular component of weight is supported by the surface.",
+        "hint": "What is the component of weight perpendicular to the slide? The normal force balances this."
+      },
+      "mistakeMapping": [
+        {
+          "when": { "onRegex": "^160" },
+          "mistakeTypeId": "sin-cos-swap",
+          "severity": 4,
+          "message": "You used sin instead of cos. The normal force balances the perpendicular component: mg cos(θ)."
+        },
+        {
+          "when": { "onRegex": "^250" },
+          "mistakeTypeId": "missing-component",
+          "severity": 3,
+          "message": "You used mg directly. On an incline, N ≠ mg. The normal force equals mg cos(θ)."
+        }
+      ]
+    },
+    {
+      "stepId": "s6-verify",
+      "type": "MCQ_SINGLE",
+      "prompt": "Sanity check: If the angle were 0° (flat ground), what would be the acceleration and normal force?",
+      "pattern": "limiting-case",
+      "metaSkill": "verification",
+      "topic": "problem-solving",
+      "difficulty": 2,
+      "choices": [
+        { "key": "A", "text": "a = 0, N = mg" },
+        { "key": "B", "text": "a = g, N = 0" },
+        { "key": "C", "text": "a = 0, N = 0" },
+        { "key": "D", "text": "a = g, N = mg" }
+      ],
+      "correct": "A",
+      "explanations": {
+        "micro": "At θ = 0°: a = g sin(0°) = 0, N = mg cos(0°) = mg. Object at rest on flat ground.",
+        "conceptual": "Limiting cases help verify your formula. At θ = 0°, the 'incline' is flat, so no acceleration and full weight supported.",
+        "deep": "Always check limiting cases: θ = 0° (flat) and θ = 90° (vertical drop). Your formulas should give physically sensible results."
+      }
+    }
+  ],
+
+  "flow": {
+    "startStepId": "s1-identify",
+    "endStepIds": ["s6-verify"]
+  },
+
+  "solutions": {
+    "finalAnswer": {
+      "type": "NUMERIC",
+      "value": 6.43,
+      "units": "m/s²",
+      "tolerance": 0.05,
+      "notes": "Part (a). Part (b) answer is 191.5 N."
+    },
+
+    "synthesis": [
+      "This is an inclined plane problem with a single body and no friction.",
+      "Forces: Weight (mg = 250 N) downward, Normal force perpendicular to surface.",
+      "Resolve weight: mg sin(40°) = 160.7 N along incline, mg cos(40°) = 191.5 N perpendicular.",
+      "Apply F = ma along incline: a = g sin(40°) = 6.43 m/s².",
+      "Equilibrium perpendicular: N = mg cos(40°) = 191.5 N."
+    ],
+
+    "limitingCases": [
+      {
+        "condition": "θ → 0° (flat surface)",
+        "expected": "a → 0, N → mg",
+        "why": "On flat ground, object doesn't accelerate and full weight is supported."
+      },
+      {
+        "condition": "θ → 90° (vertical drop)",
+        "expected": "a → g, N → 0",
+        "why": "Free fall - no contact with surface."
+      }
+    ],
+
+    "alternativePaths": [
+      {
+        "label": "Energy method",
+        "outline": [
+          "Use conservation of energy: mgh = ½mv²",
+          "h = L sin(θ) where L is slide length",
+          "Find v at bottom, then use kinematics to get a"
+        ],
+        "finalAnswer": {
+          "type": "NUMERIC",
+          "value": 6.43,
+          "units": "m/s²"
+        }
+      }
+    ],
+
+    "fullDerivation": "Along incline: $\\sum F_{\\parallel} = ma$\n$mg\\sin\\theta = ma$\n$a = g\\sin\\theta = 10 \\times \\sin(40°) = 6.43$ m/s²\n\nPerpendicular to incline: $\\sum F_{\\perp} = 0$\n$N - mg\\cos\\theta = 0$\n$N = mg\\cos\\theta = 25 \\times 10 \\times \\cos(40°) = 191.5$ N",
+
+    "answerKey": {
+      "acceleration": 6.43,
+      "normalForce": 191.5,
+      "accelerationUnits": "m/s²",
+      "normalForceUnits": "N"
+    }
+  },
+
+  "authoring": {
+    "reviewStatus": "approved",
+    "notes": "Generated from HC-Verma inclined plane pattern. Good introductory problem.",
+    "canonicalPatterns": ["inclined-plane-frictionless", "newton-second-law-1d"]
+  }
+}
