@@ -46,6 +46,7 @@ import ConceptContrastModal from './ConceptContrastModal'
 import type { ErrorTag } from '@/types/circuitBreaker'
 import type { PreFlightCheck, PreFlightValidation } from '@/types/preFlightCheck'
 import type { SocraticRewindContext, RewindTriggerSource } from '@/types/socraticRewind'
+import { buildRewindContextFromCollision } from '@/types/socraticRewind'
 import type { ConceptContrastChallenge, ConceptContrastValidation } from '@/types/conceptContrast'
 import {
   buildContextFromGradeResult,
@@ -53,6 +54,20 @@ import {
 } from '@/lib/socraticRewindService'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { usePhasedScaffoldContext } from './PhasedScaffoldWrapper'
+import ConfidenceRating from './ConfidenceRating'
+import type { Confidence } from '@/types/confidence'
+import { getConfidenceOutcome } from '@/lib/confidenceWeightedSRS'
+import {
+  createCardIfNotExists,
+  getFilteredCards,
+  type CreateCardInput,
+} from '@/lib/mistakeNotebook'
+import type { MistakeTrigger, MistakeCard } from '@/types/mistakeNotebook'
+import { extractConstraints } from '@/lib/constraintExtractor'
+import { analyzeStudentWork, detectCollisions } from '@/lib/constraintCollisionEngine'
+import { generateSocraticDialogue } from '@/lib/constraintDialogueEngine'
+import type { ProblemConstraintData, ConstraintCollision, SocraticDialogue } from '@/types/constraintCollision'
+import ConstraintFeedback from './ConstraintFeedback'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -87,6 +102,23 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [highlightedProblemRange, setHighlightedProblemRange] = useState<{ start: number; end: number } | null>(null)
   const [showSubmissionCanvas, setShowSubmissionCanvas] = useState(false)
   const [solutionGradeResult, setSolutionGradeResult] = useState<GradeSolutionResponse | null>(null)
+
+  // Confidence rating state
+  const [pendingConfidenceStepId, setPendingConfidenceStepId] = useState<number | null>(null)
+  const [stepConfidenceRatings, setStepConfidenceRatings] = useState<Map<number, Confidence>>(new Map())
+
+  // Mistake notebook state - related past mistakes for current concepts
+  const [relatedMistakes, setRelatedMistakes] = useState<MistakeCard[]>([])
+  const [showMistakeNotification, setShowMistakeNotification] = useState(false)
+  const [lastCreatedMistakeCard, setLastCreatedMistakeCard] = useState<MistakeCard | null>(null)
+
+  // Constraint Collision Detection state
+  const [problemConstraints, setProblemConstraints] = useState<ProblemConstraintData | null>(null)
+  const [constraintCollisions, setConstraintCollisions] = useState<ConstraintCollision[]>([])
+  const [constraintDialogue, setConstraintDialogue] = useState<SocraticDialogue | null>(null)
+  const [dismissedCollisions, setDismissedCollisions] = useState<Set<string>>(new Set())
+  const constraintCheckTimerRef = useRef<NodeJS.Timeout | null>(null)
+
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const problemStatementRef = useRef<HTMLParagraphElement>(null)
@@ -189,21 +221,131 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [circuitBreakerState, currentDrill, showDrillModal, startDrill])
 
+  // Helper to build Socratic Rewind context from circuit breaker
+  const buildCircuitBreakerRewindContext = useCallback((): SocraticRewindContext | null => {
+    if (!warningTag) return null
+
+    // Get the last completed step as the anchor
+    const lastCompletedStepId = completedSteps.length > 0
+      ? Math.max(...completedSteps)
+      : 0
+    const previousStep = data.steps[lastCompletedStepId]
+    if (!previousStep) return null
+
+    // Map error tags to error types
+    const tagToErrorType: Record<string, SocraticRewindContext['currentError']['errorType']> = {
+      sign_convention: 'sign_convention',
+      vector_components: 'vector_direction',
+      trig_identities: 'algebra_error',
+      unit_conversion: 'unit_error',
+      algebra_manipulation: 'algebra_error',
+      conservation_scope: 'wrong_equation',
+      reference_frame: 'vector_direction',
+      force_identification: 'force_missing',
+    }
+
+    const tagToDescription: Record<string, string> = {
+      sign_convention: 'Sign convention errors were detected',
+      vector_components: 'Vector component errors were detected',
+      trig_identities: 'Trigonometric identity errors were detected',
+      unit_conversion: 'Unit conversion errors were detected',
+      algebra_manipulation: 'Algebraic manipulation errors were detected',
+      conservation_scope: 'Conservation law scope errors were detected',
+      reference_frame: 'Reference frame errors were detected',
+      force_identification: 'Force identification errors were detected',
+    }
+
+    return {
+      previousValidStep: {
+        stepId: lastCompletedStepId,
+        stepTitle: previousStep.title,
+        stepContent: previousStep.question || previousStep.title,
+        userAnswer: stepAnswers.get(lastCompletedStepId),
+      },
+      currentError: {
+        description: tagToDescription[warningTag] || 'Multiple errors of the same type were detected',
+        errorType: tagToErrorType[warningTag] || 'other',
+      },
+      violatedPrinciple: {
+        name: warningTag.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        description: 'This error pattern triggered the circuit breaker after repeated occurrences.',
+        category: 'math',
+      },
+      problemContext: {
+        problemText: data.problem,
+        domain: data.domain,
+        subdomain: data.subdomain,
+      },
+    }
+  }, [warningTag, completedSteps, data, stepAnswers])
+
   // Drill completion handlers
   const handleDrillComplete = useCallback((success: boolean) => {
     completeDrill(success)
     setShowDrillModal(false)
-  }, [completeDrill])
+
+    // Trigger Socratic Rewind if drill was failed
+    if (!success) {
+      const rewindContext = buildCircuitBreakerRewindContext()
+      if (rewindContext) {
+        // Small delay to let drill modal close
+        setTimeout(() => {
+          setSocraticRewindContext(rewindContext)
+          setSocraticRewindTrigger('circuit_breaker')
+          setShowSocraticRewind(true)
+        }, 500)
+      }
+    }
+  }, [completeDrill, buildCircuitBreakerRewindContext])
 
   const handleDrillSkip = useCallback(() => {
     skipDrill()
     setShowDrillModal(false)
-  }, [skipDrill])
+
+    // Trigger Socratic Rewind when drill is skipped
+    const rewindContext = buildCircuitBreakerRewindContext()
+    if (rewindContext) {
+      // Small delay to let drill modal close
+      setTimeout(() => {
+        setSocraticRewindContext(rewindContext)
+        setSocraticRewindTrigger('circuit_breaker')
+        setShowSocraticRewind(true)
+      }, 500)
+    }
+  }, [skipDrill, buildCircuitBreakerRewindContext])
 
   // Handler for micro-task incorrect events (passed to MicroTaskStepAccordion)
   const handleTaskIncorrect = useCallback((stepId: number, errorTag: ErrorTag) => {
     recordCircuitBreakerError(errorTag, stepId, 'task_incorrect')
-  }, [recordCircuitBreakerError])
+
+    // Create mistake card for incorrect micro-task
+    if (FEATURE_FLAGS.MISTAKE_NOTEBOOK) {
+      const step = (data as MicroTaskScaffoldData).steps.find(s => s.id === stepId)
+      if (step) {
+        const cardInput: CreateCardInput = {
+          problemId: generateProblemId(data.problem),
+          problemTitle: generateProblemTitle(data.problem),
+          stepId,
+          stepTitle: step.title,
+          conceptTags: step.requiredConcepts || [],
+          stepType: step.stepType || 'physics_concept',
+          domain: data.domain,
+          subdomain: data.subdomain,
+          trigger: 'task_incorrect' as MistakeTrigger,
+          hintLevelReached: microTaskProgress.get(stepId)?.currentLevel || 1,
+          attemptCount: microTaskProgress.get(stepId)?.taskAttempts.reduce((sum, t) => sum + t.attempts, 0) || 1,
+        }
+
+        const newCard = createCardIfNotExists(cardInput)
+        if (newCard) {
+          setLastCreatedMistakeCard(newCard)
+          setShowMistakeNotification(true)
+          setTimeout(() => setShowMistakeNotification(false), 3000)
+          console.log(`[MistakeNotebook] Created card for micro-task ${stepId}: ${newCard.misconceptionNote}`)
+        }
+      }
+    }
+  }, [recordCircuitBreakerError, data, microTaskProgress])
 
   // Handlers for micro-task mode
   const handleMicroTaskComplete = useCallback((stepId: number, level: number, explanation: string) => {
@@ -239,10 +381,16 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps(prev => [...prev, stepId])
     }
-    // Move to next step
-    const stepIndex = (data as MicroTaskScaffoldData).steps.findIndex(s => s.id === stepId)
-    if (stepIndex < (data as MicroTaskScaffoldData).steps.length - 1) {
-      setCurrentStep(stepIndex + 1)
+
+    // Show confidence prompt before moving to next step
+    if (FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS) {
+      setPendingConfidenceStepId(stepId)
+    } else {
+      // Without confidence feature, move directly to next step
+      const stepIndex = (data as MicroTaskScaffoldData).steps.findIndex(s => s.id === stepId)
+      if (stepIndex < (data as MicroTaskScaffoldData).steps.length - 1) {
+        setCurrentStep(stepIndex + 1)
+      }
     }
   }, [completedSteps, data])
 
@@ -255,6 +403,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     return generateProblemTitle(data.problem)
   }, [data.problem])
 
+  // Extract problem constraints on load for real-time collision detection
+  useEffect(() => {
+    const constraints = extractConstraints(data.problem, problemId())
+    setProblemConstraints(constraints)
+    console.log('[ConstraintCollision] Extracted constraints:', constraints.statedConstraints.length, 'stated,', constraints.impliedConstraints.length, 'implied')
+  }, [data.problem, problemId])
+
+  // Cleanup constraint check timer on unmount
+  useEffect(() => {
+    return () => {
+      if (constraintCheckTimerRef.current) {
+        clearTimeout(constraintCheckTimerRef.current)
+      }
+    }
+  }, [])
+
   // Track if we've done the initial load to prevent re-running on data updates
   const hasLoadedProgressRef = useRef(false)
 
@@ -266,6 +430,24 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       `${data.domain} - ${data.subdomain}`
     )
     setMistakeWarnings(warnings)
+
+    // Load related past mistakes from the mistake notebook
+    if (FEATURE_FLAGS.MISTAKE_NOTEBOOK) {
+      const conceptTags = data.concepts.map(c => c.id)
+      const pastMistakes = getFilteredCards({
+        conceptTags,
+        dueOnly: false, // Show all related, not just due
+      })
+      // Keep only the 3 most recent related mistakes
+      const recentMistakes = pastMistakes
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 3)
+      setRelatedMistakes(recentMistakes)
+
+      if (recentMistakes.length > 0) {
+        console.log(`[MistakeNotebook] Found ${recentMistakes.length} related past mistakes for this problem`)
+      }
+    }
 
     // Only load saved progress on initial mount, not on data updates
     // This prevents resetting completedSteps when adaptedData updates
@@ -380,6 +562,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         isCompleted: completedSteps.includes(stepId),
         userAnswer: stepAnswers.get(stepId),
         currentHintLevel: stepHintLevels.get(stepId),
+        confidence: stepConfidenceRatings.get(stepId),
       }
     })
 
@@ -398,7 +581,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
 
     return progress
-  }, [data, completedSteps, stepAnswers, stepHintLevels, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress])
 
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)
@@ -691,10 +874,111 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId])
     }
-    if (stepId < data.steps.length - 1) {
-      setCurrentStep(stepId + 1)
+
+    // Show confidence prompt before moving to next step
+    if (FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS) {
+      setPendingConfidenceStepId(stepId)
+    } else {
+      // Without confidence feature, move directly to next step
+      if (stepId < data.steps.length - 1) {
+        setCurrentStep(stepId + 1)
+      }
     }
   }
+
+  // Handle confidence rating submission
+  const handleConfidenceRated = useCallback((stepId: number, confidence: Confidence) => {
+    // Store the confidence rating
+    setStepConfidenceRatings(prev => {
+      const newMap = new Map(prev)
+      newMap.set(stepId, confidence)
+      return newMap
+    })
+
+    // Log confidence for SRS analytics
+    const hintLevel = stepHintLevels.get(stepId) || 0
+    const isCorrect = hintLevel < 5 // Consider it "correct" if they didn't need full solution
+    const outcome = getConfidenceOutcome(isCorrect, confidence)
+
+    // Log to console for debugging (in production, this would go to analytics)
+    console.log(`[Confidence-SRS] Step ${stepId}: ${confidence} confidence, outcome: ${outcome}`)
+
+    // Record to localStorage for pattern analysis
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = 'physiscaffold_confidence_log'
+        const existing = localStorage.getItem(storageKey)
+        const logs: Array<{
+          timestamp: string
+          problemId: string
+          stepId: number
+          confidence: Confidence
+          hintLevel: number
+          outcome: string
+        }> = existing ? JSON.parse(existing) : []
+
+        logs.push({
+          timestamp: new Date().toISOString(),
+          problemId: problemId(),
+          stepId,
+          confidence,
+          hintLevel,
+          outcome,
+        })
+
+        // Keep only last 100 entries
+        if (logs.length > 100) {
+          logs.splice(0, logs.length - 100)
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(logs))
+      } catch (error) {
+        console.error('Failed to log confidence:', error)
+      }
+    }
+
+    // Clear pending confidence prompt
+    setPendingConfidenceStepId(null)
+
+    // Move to next step (handle both micro-task and hint-based modes)
+    if (useMicroTasks) {
+      const stepIndex = (data as MicroTaskScaffoldData).steps.findIndex(s => s.id === stepId)
+      if (stepIndex < (data as MicroTaskScaffoldData).steps.length - 1) {
+        setCurrentStep(stepIndex + 1)
+      }
+    } else {
+      if (stepId < data.steps.length - 1) {
+        setCurrentStep(stepId + 1)
+      }
+    }
+
+    // Trigger autosave with confidence data
+    handleSaveDraft(true)
+  }, [data, useMicroTasks, handleSaveDraft, stepHintLevels, problemId])
+
+  // Skip confidence rating (auto-skip or manual)
+  const handleConfidenceSkipped = useCallback((stepId: number) => {
+    // Default to medium confidence when skipped
+    setStepConfidenceRatings(prev => {
+      const newMap = new Map(prev)
+      newMap.set(stepId, 'medium')
+      return newMap
+    })
+
+    setPendingConfidenceStepId(null)
+
+    // Move to next step (handle both micro-task and hint-based modes)
+    if (useMicroTasks) {
+      const stepIndex = (data as MicroTaskScaffoldData).steps.findIndex(s => s.id === stepId)
+      if (stepIndex < (data as MicroTaskScaffoldData).steps.length - 1) {
+        setCurrentStep(stepIndex + 1)
+      }
+    } else {
+      if (stepId < data.steps.length - 1) {
+        setCurrentStep(stepId + 1)
+      }
+    }
+  }, [data, useMicroTasks])
 
   const handleStepAnswerChange = (stepId: number, answer: string) => {
     setStepAnswers(prev => {
@@ -702,6 +986,49 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       newMap.set(stepId, answer)
       return newMap
     })
+
+    // Debounced constraint collision check as user types
+    if (FEATURE_FLAGS.CONSTRAINT_COLLISION && problemConstraints && answer.length > 20) {
+      // Clear previous timer
+      if (constraintCheckTimerRef.current) {
+        clearTimeout(constraintCheckTimerRef.current)
+      }
+
+      // Check after 1 second of no typing
+      constraintCheckTimerRef.current = setTimeout(() => {
+        // Combine all step answers for analysis
+        const allAnswers = new Map(stepAnswers)
+        allAnswers.set(stepId, answer)
+        const combinedSolution = Array.from(allAnswers.values()).join('\n')
+
+        // Analyze student work and detect collisions
+        const analysis = analyzeStudentWork(combinedSolution, problemConstraints)
+        const collisions = detectCollisions(problemConstraints, analysis)
+
+        // Filter out dismissed collisions
+        const activeCollisions = collisions.filter(c => !dismissedCollisions.has(c.id))
+
+        if (activeCollisions.length > 0) {
+          setConstraintCollisions(activeCollisions)
+
+          // Generate Socratic dialogue for the highest severity collision
+          const highSeverityCollision = activeCollisions.find(c => c.severity === 'high')
+          if (highSeverityCollision) {
+            // Build dialogue context from collision details
+            const dialogueContext = highSeverityCollision.studentAssumption ? {
+              wrongAssumption: highSeverityCollision.studentAssumption.description,
+              topicArea: highSeverityCollision.studentAssumption.category,
+            } : undefined
+            const dialogue = generateSocraticDialogue(highSeverityCollision, dialogueContext)
+            setConstraintDialogue(dialogue)
+            console.log('[ConstraintCollision] Detected collision:', highSeverityCollision.explanation)
+          }
+        } else {
+          setConstraintCollisions([])
+          setConstraintDialogue(null)
+        }
+      }, 1000)
+    }
   }
 
   const handleHintLevelChange = (stepId: number, level: number) => {
@@ -710,7 +1037,56 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       newMap.set(stepId, level)
       return newMap
     })
+
+    // Create mistake card when user needs significant help (level >= 2)
+    if (level >= 2 && FEATURE_FLAGS.MISTAKE_NOTEBOOK) {
+      const step = data.steps[stepId]
+      if (step) {
+        const cardInput: CreateCardInput = {
+          problemId: problemId(),
+          problemTitle: problemTitle(),
+          stepId,
+          stepTitle: step.title,
+          conceptTags: step.requiredConcepts || [],
+          stepType: step.stepType || 'physics_concept',
+          domain: data.domain,
+          subdomain: data.subdomain,
+          trigger: 'hint_requested' as MistakeTrigger,
+          hintLevelReached: level,
+        }
+
+        const newCard = createCardIfNotExists(cardInput)
+        if (newCard) {
+          setLastCreatedMistakeCard(newCard)
+          setShowMistakeNotification(true)
+          // Auto-hide notification after 3 seconds
+          setTimeout(() => setShowMistakeNotification(false), 3000)
+          console.log(`[MistakeNotebook] Created card for step ${stepId}: ${newCard.misconceptionNote}`)
+        }
+      }
+    }
   }
+
+  // Handle dismissing constraint collision feedback
+  const handleDismissConstraintFeedback = useCallback(() => {
+    // Mark all current collisions as dismissed
+    setDismissedCollisions(prev => {
+      const newSet = new Set(prev)
+      constraintCollisions.forEach(c => newSet.add(c.id))
+      return newSet
+    })
+    setConstraintCollisions([])
+    setConstraintDialogue(null)
+  }, [constraintCollisions])
+
+  // Handle highlighting problem text from constraint feedback
+  const handleHighlightProblemFromConstraint = useCallback((startIndex: number, endIndex: number) => {
+    setHighlightedProblemRange({ start: startIndex, end: endIndex })
+    // Auto-scroll to problem statement
+    problemStatementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // Clear highlight after 5 seconds
+    setTimeout(() => setHighlightedProblemRange(null), 5000)
+  }, [])
 
   // Handle targeted rewind from Socratic Debugger
   const handleTargetStep = useCallback((stepId: number) => {
@@ -971,7 +1347,47 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         setShowSocraticRewind(true)
       }
     }
-  }, [recordGradingErrors, currentStep, data, stepAnswers, completedSteps])
+
+    // Trigger Socratic Rewind for high-severity constraint collisions
+    if (result.constraintCollisions && result.constraintCollisions.length > 0) {
+      // Find the highest severity collision
+      const highSeverityCollision = result.constraintCollisions.find(c => c.severity === 'high')
+
+      if (highSeverityCollision && !showSocraticRewind) {
+        // Get the last completed step to use as the anchor
+        const lastCompletedStepId = completedSteps.length > 0
+          ? Math.max(...completedSteps)
+          : 0
+        const rawStep = data.steps[lastCompletedStepId]
+
+        if (rawStep) {
+          // Build a minimal Step object compatible with buildRewindContextFromCollision
+          const previousStep = {
+            id: rawStep.id,
+            title: rawStep.title,
+            question: rawStep.question,
+            hints: [], // Required by Step type, not used by the function
+            requiredConcepts: rawStep.requiredConcepts,
+          }
+          const rewindContext = buildRewindContextFromCollision(
+            highSeverityCollision,
+            previousStep,
+            stepAnswers.get(lastCompletedStepId),
+            data.problem,
+            data.domain,
+            data.subdomain
+          )
+
+          // Small delay to let user see the constraint feedback first
+          setTimeout(() => {
+            setSocraticRewindContext(rewindContext)
+            setSocraticRewindTrigger('constraint_collision')
+            setShowSocraticRewind(true)
+          }, 1500)
+        }
+      }
+    }
+  }, [recordGradingErrors, currentStep, data, stepAnswers, completedSteps, showSocraticRewind])
 
   // Handle highlighting problem text from constraint feedback
   const handleHighlightProblem = useCallback((startIndex: number, endIndex: number) => {
@@ -1114,12 +1530,96 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             />
           )}
 
+          {/* Related Past Mistakes from Mistake Notebook */}
+          {relatedMistakes.length > 0 && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    Related Past Mistakes ({relatedMistakes.length})
+                  </h4>
+                </div>
+                <button
+                  onClick={() => setRelatedMistakes([])}
+                  className="text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300"
+                  title="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
+                You&apos;ve struggled with similar concepts before. Review these to avoid the same mistakes:
+              </p>
+              <div className="space-y-2">
+                {relatedMistakes.map(mistake => (
+                  <div
+                    key={mistake.id}
+                    className="bg-white dark:bg-dark-card rounded border border-amber-100 dark:border-amber-800/50 p-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-text-primary truncate">
+                          {mistake.stepTitle}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">
+                          {mistake.misconceptionNote}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {mistake.conceptTags.slice(0, 2).map(tag => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-800/30 text-amber-700 dark:text-amber-300"
+                            >
+                              {tag.replace(/_/g, ' ')}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <span className={`
+                        ml-2 px-2 py-1 rounded text-xs font-medium
+                        ${mistake.severity === 'major' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                          mistake.severity === 'moderate' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' :
+                          'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'}
+                      `}>
+                        {mistake.severity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a
+                href="/mistake-notebook"
+                className="inline-flex items-center gap-1 mt-3 text-xs text-amber-700 dark:text-amber-300 hover:underline"
+              >
+                View all in Mistake Notebook
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          )}
+
           {/* Circuit Breaker Warning */}
           {warningMessage && warningTag && (
             <CircuitBreakerWarning
               message={warningMessage}
               errorTag={warningTag}
               onDismiss={dismissWarning}
+            />
+          )}
+
+          {/* Real-time Constraint Collision Feedback */}
+          {constraintCollisions.length > 0 && (
+            <ConstraintFeedback
+              collisions={constraintCollisions}
+              dialogue={constraintDialogue || undefined}
+              onDismiss={handleDismissConstraintFeedback}
+              onHighlightProblem={handleHighlightProblemFromConstraint}
             />
           )}
 
@@ -1421,6 +1921,66 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           onReturnToStep={handleSocraticRewindReturnToStep}
           onProceed={handleSocraticRewindProceed}
         />
+      )}
+
+      {/* Mistake Card Created Notification Toast */}
+      {showMistakeNotification && lastCreatedMistakeCard && (
+        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg shadow-lg p-4 max-w-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-amber-100 dark:bg-amber-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  Added to Mistake Notebook
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 truncate">
+                  {lastCreatedMistakeCard.misconceptionNote}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMistakeNotification(false)}
+                className="text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confidence Rating Prompt */}
+      {pendingConfidenceStepId !== null && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-dark-card rounded-xl shadow-2xl p-6 max-w-sm mx-4 animate-in zoom-in-95 duration-200">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                Step Completed!
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
+                Quick check: Rate your confidence in understanding this step
+              </p>
+            </div>
+
+            <ConfidenceRating
+              isCorrect={true}
+              onRate={(confidence) => handleConfidenceRated(pendingConfidenceStepId, confidence)}
+              onSkip={() => handleConfidenceSkipped(pendingConfidenceStepId)}
+              autoSkipDelay={8000}
+              showOutcome={true}
+            />
+          </div>
+        </div>
       )}
 
       {/* Problem Locked Overlay (when circuit breaker is tripped but drill not yet shown) */}

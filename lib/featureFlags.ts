@@ -103,6 +103,37 @@ export const FEATURE_FLAGS = {
    */
   PHASED_SCAFFOLD: process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD !== 'false'),
+
+  /**
+   * Feynman Hint Prompts
+   * When enabled, requires students to explain their conceptual understanding
+   * (Feynman style) before unlocking level 3+ hints (Strategy/Equation/Solution).
+   * This ensures students truly understand the "why" before getting computational help.
+   * Dynamically generates a Feynman prompt based on step concepts if no explicit
+   * feynmanPrompt config is provided.
+   */
+  FEYNMAN_HINT_PROMPTS: process.env.NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS !== 'false'),
+
+  /**
+   * Constraint Collision Detection
+   * When enabled, detects in real-time when student's work contradicts problem
+   * constraints (e.g., ignoring friction on a rough surface, using energy
+   * conservation with friction). Shows Socratic dialogue to guide correction.
+   * Triggers before wrong answers compound into bigger errors.
+   */
+  CONSTRAINT_COLLISION: process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION !== 'false'),
+
+  /**
+   * Paper Solution Upload
+   * When enabled, allows students to upload photos of handwritten solutions.
+   * Uses Claude Vision for OCR extraction, then analyzes the solution against
+   * step rubrics. Provides Socratic feedback on handwritten work.
+   * Useful for students who prefer to work on paper first.
+   */
+  PAPER_SOLUTION_UPLOAD: process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION !== 'false'),
 }
 
 /**

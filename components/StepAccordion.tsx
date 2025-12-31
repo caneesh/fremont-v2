@@ -6,10 +6,15 @@ import type { FeynmanScript, FeynmanValidationResult } from '@/types/feynman'
 import MathRenderer from './MathRenderer'
 import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
 import FeynmanMicroPrompt from './FeynmanMicroPrompt'
+import VerbalPlanRenderer from './micro-tasks/VerbalPlanRenderer'
+import { PaperSolutionUploader } from './paper-solution'
+import type { AnalyzeSolutionResponse } from '@/types/paperSolution'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
 import { onHintRequested, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 import { detectMisconceptionFlag, type MisconceptionFlag } from '@/lib/misconceptionFlags'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import type { FeynmanPromptConfig } from '@/types/feynman'
 
 interface StepAccordionProps {
   step: Step
@@ -62,9 +67,24 @@ export default function StepAccordion({
   const [misconceptionFlag, setMisconceptionFlag] = useState<MisconceptionFlag | null>(null)
   const [dismissedMisconceptions, setDismissedMisconceptions] = useState<Set<string>>(new Set())
 
-  // Feynman Micro-Prompt state
+  // Feynman Micro-Prompt state (for step-level Feynman prompts)
   const [feynmanPassed, setFeynmanPassed] = useState(false)
   const [feynmanResult, setFeynmanResult] = useState<FeynmanValidationResult | null>(null)
+
+  // Feynman check state for hint level 3+ gating
+  const [pendingHintFeynmanCheck, setPendingHintFeynmanCheck] = useState(false)
+  const [hintFeynmanPassed, setHintFeynmanPassed] = useState(false)
+  const [pendingHintLevel, setPendingHintLevel] = useState<number | null>(null)
+
+  // Equationless Path state - verbal plan before algebra
+  const [pendingVerbalPlan, setPendingVerbalPlan] = useState(false)
+  const [verbalPlanPassed, setVerbalPlanPassed] = useState(false)
+  const [verbalPlanResponse, setVerbalPlanResponse] = useState<string | null>(null)
+
+  // Paper Solution Upload state
+  const [showPaperUpload, setShowPaperUpload] = useState(false)
+  const [paperSolutionFeedback, setPaperSolutionFeedback] = useState<AnalyzeSolutionResponse | null>(null)
+  const [paperExtractedText, setPaperExtractedText] = useState<string>('')
 
   // Track step activation time for timeout detection
   const stepActivationTimeRef = useRef<number | null>(null)
@@ -150,10 +170,61 @@ export default function StepAccordion({
     }
   }
 
+  // Generate a dynamic Feynman prompt config based on step concepts
+  const generateDynamicFeynmanConfig = (): FeynmanPromptConfig => {
+    const conceptNames = relatedConcepts.map(c => c.name).join(' and ')
+    const conceptForPrompt = conceptNames || step.title
+
+    // Map step concepts to topic - use first required concept or step title
+    const topic = step.requiredConcepts[0] || step.title.toLowerCase().replace(/\s+/g, '_')
+
+    return {
+      question: `Before getting computational help, explain in your own words: Why does ${conceptForPrompt} apply to this step? What is the underlying mechanism?`,
+      topic: topic,
+      context: problemStatement,
+      requiredBefore: true,
+      minScore: 4,
+      maxAttempts: 3
+    }
+  }
+
+  // Check if Feynman gate should apply for a hint level
+  const shouldRequireFeynmanForHint = (level: number): boolean => {
+    // Only gate levels 3+ (Strategy, Equation, Solution)
+    if (level < 3) return false
+    // Only if feature flag is enabled
+    if (!FEATURE_FLAGS.FEYNMAN_HINT_PROMPTS) return false
+    // Only if user hasn't already passed a Feynman check for this step's hints
+    if (hintFeynmanPassed) return false
+    // Only if there are concepts to check understanding of
+    if (relatedConcepts.length === 0 && step.requiredConcepts.length === 0) return false
+    return true
+  }
+
   const handleUnlockNextHint = async () => {
     const nextLevel = currentHintLevel + 1
     if (nextLevel > 5) return
 
+    // Check if we need a verbal plan first (Equationless Path)
+    // This comes BEFORE Feynman - first articulate strategy, then explain concepts
+    if (shouldRequireVerbalPlan(nextLevel)) {
+      setPendingHintLevel(nextLevel)
+      setPendingVerbalPlan(true)
+      return  // Wait for verbal plan before proceeding
+    }
+
+    // Check if we need a Feynman check (conceptual understanding)
+    if (shouldRequireFeynmanForHint(nextLevel)) {
+      setPendingHintLevel(nextLevel)
+      setPendingHintFeynmanCheck(true)
+      return  // Wait for Feynman validation before proceeding
+    }
+
+    // Continue with actual hint unlock
+    await proceedWithHintUnlock(nextLevel)
+  }
+
+  const proceedWithHintUnlock = async (nextLevel: number) => {
     // Track hint request for mistake notebook (level 2+ indicates struggle)
     if (problemId && nextLevel >= 2) {
       const problemContext: ProblemContext = {
@@ -214,6 +285,132 @@ export default function StepAccordion({
     } else {
       // Levels 1-3 or already generated, just unlock
       onHintLevelChange(nextLevel)
+    }
+  }
+
+  // Handler for Feynman validation when gating hints
+  const handleHintFeynmanValidated = async (passed: boolean, result: FeynmanValidationResult) => {
+    if (passed && pendingHintLevel !== null) {
+      setHintFeynmanPassed(true)
+      setPendingHintFeynmanCheck(false)
+      // Now proceed with the actual hint unlock
+      await proceedWithHintUnlock(pendingHintLevel)
+      setPendingHintLevel(null)
+    }
+    // If failed, the FeynmanMicroPrompt component handles feedback
+  }
+
+  const handleHintFeynmanSkip = async () => {
+    // Allow skip but still mark as passed (user chose to bypass)
+    setHintFeynmanPassed(true)
+    setPendingHintFeynmanCheck(false)
+    if (pendingHintLevel !== null) {
+      await proceedWithHintUnlock(pendingHintLevel)
+      setPendingHintLevel(null)
+    }
+  }
+
+  // ============================================
+  // Equationless Path - Verbal Plan Before Algebra
+  // ============================================
+
+  // Check if verbal plan should be required for a hint level
+  const shouldRequireVerbalPlan = (level: number): boolean => {
+    // Only gate level 3+ (Strategy, Equation, Solution - algebra territory)
+    if (level < 3) return false
+    // Only if feature flag is enabled
+    if (!FEATURE_FLAGS.EQUATIONLESS_PATH) return false
+    // Only if user hasn't already submitted a verbal plan for this step
+    if (verbalPlanPassed) return false
+    // Apply to math manipulation steps, or any step at strategy level
+    // For other step types, still require if going to level 3+
+    return true
+  }
+
+  // Generate verbal plan prompt based on step context
+  const generateVerbalPlanPrompt = () => {
+    const conceptNames = relatedConcepts.map(c => c.name).join(', ')
+
+    return {
+      question: `Before seeing the mathematical approach, describe your problem-solving strategy in plain words.`,
+      prompt: `For "${step.title}": What quantities do you know? What are you solving for? What physics principles or equations might help? Walk through your approach step by step.`,
+      minWords: 25,
+      requiredKeywords: [] as string[], // We're lenient - just want them to think through it
+      scaffoldingQuestions: [
+        'What information is given in the problem?',
+        'What physical principle applies here?',
+        'How will you connect the knowns to the unknowns?'
+      ]
+    }
+  }
+
+  // Handle verbal plan submission
+  const handleVerbalPlanSubmit = async (response: string, isValid: boolean) => {
+    if (isValid) {
+      setVerbalPlanPassed(true)
+      setVerbalPlanResponse(response)
+      setPendingVerbalPlan(false)
+
+      // Check if Feynman is also required
+      if (pendingHintLevel !== null) {
+        if (shouldRequireFeynmanForHint(pendingHintLevel)) {
+          // Move to Feynman check
+          setPendingHintFeynmanCheck(true)
+        } else {
+          // No Feynman needed, proceed to unlock
+          await proceedWithHintUnlock(pendingHintLevel)
+          setPendingHintLevel(null)
+        }
+      }
+    }
+    // If not valid, VerbalPlanRenderer shows feedback and user can retry
+  }
+
+  // Skip verbal plan (user chooses to bypass)
+  const handleVerbalPlanSkip = async () => {
+    setVerbalPlanPassed(true)
+    setPendingVerbalPlan(false)
+
+    if (pendingHintLevel !== null) {
+      // Check if Feynman is still required
+      if (shouldRequireFeynmanForHint(pendingHintLevel)) {
+        setPendingHintFeynmanCheck(true)
+      } else {
+        await proceedWithHintUnlock(pendingHintLevel)
+        setPendingHintLevel(null)
+      }
+    }
+  }
+
+  // ============================================
+  // Paper Solution Upload Handlers
+  // ============================================
+
+  // Handle extracted text from paper solution
+  const handlePaperExtractedText = (text: string) => {
+    setPaperExtractedText(text)
+    // Also update the main answer field
+    onAnswerChange(text)
+  }
+
+  // Handle paper solution analysis complete
+  const handlePaperAnalysisComplete = (feedback: AnalyzeSolutionResponse) => {
+    setPaperSolutionFeedback(feedback)
+
+    // If analysis passed, mark step as complete
+    if (feedback.status === 'pass') {
+      onComplete()
+    }
+    // For partial/unclear, keep showing feedback so user can revise
+    // For fail, keep the uploader open for revision
+  }
+
+  // Toggle between typed answer and paper upload
+  const handleTogglePaperUpload = () => {
+    setShowPaperUpload(!showPaperUpload)
+    // Clear feedback when switching modes
+    if (!showPaperUpload) {
+      setPaperSolutionFeedback(null)
     }
   }
 
@@ -419,11 +616,92 @@ export default function StepAccordion({
             {/* Progressive Hint Ladder */}
             {showStepContent && (
             <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
+              {/* Equationless Path - Verbal Plan Before Algebra */}
+              {pendingVerbalPlan && (
+                <div className="mb-5 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h6 className="text-sm font-bold text-indigo-900 dark:text-indigo-200">
+                        Describe Your Strategy First
+                      </h6>
+                      <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                        Level {pendingHintLevel} contains equations. Before jumping to math, articulate your approach in words.
+                      </p>
+                    </div>
+                  </div>
+                  <VerbalPlanRenderer
+                    question={generateVerbalPlanPrompt().question}
+                    prompt={generateVerbalPlanPrompt().prompt}
+                    minWords={generateVerbalPlanPrompt().minWords}
+                    requiredKeywords={generateVerbalPlanPrompt().requiredKeywords}
+                    scaffoldingQuestions={generateVerbalPlanPrompt().scaffoldingQuestions}
+                    onSubmit={handleVerbalPlanSubmit}
+                  />
+                  <button
+                    onClick={handleVerbalPlanSkip}
+                    className="mt-3 w-full py-2 text-sm text-indigo-400 dark:text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Skip and show hint anyway
+                  </button>
+                </div>
+              )}
+
+              {/* Feynman Check Modal for Level 3+ Hints */}
+              {pendingHintFeynmanCheck && (
+                <div className="mb-5 p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-300 dark:border-purple-700 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                      <span className="text-white text-lg">🎓</span>
+                    </div>
+                    <div>
+                      <h6 className="text-sm font-bold text-purple-900 dark:text-purple-200">
+                        Explain Before Proceeding
+                      </h6>
+                      <p className="text-xs text-purple-700 dark:text-purple-300">
+                        Level {pendingHintLevel} contains computational help. First, show you understand the concept.
+                      </p>
+                    </div>
+                  </div>
+                  <FeynmanMicroPrompt
+                    config={step.feynmanPrompt || generateDynamicFeynmanConfig()}
+                    problemStatement={problemStatement}
+                    onValidated={handleHintFeynmanValidated}
+                    onSkip={handleHintFeynmanSkip}
+                  />
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h5 className="text-base font-bold text-gray-900 dark:text-dark-text-primary">
-                    Progressive Hint Ladder
-                  </h5>
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-base font-bold text-gray-900 dark:text-dark-text-primary">
+                      Progressive Hint Ladder
+                    </h5>
+                    {/* Verbal Plan Passed Indicator */}
+                    {verbalPlanPassed && FEATURE_FLAGS.EQUATIONLESS_PATH && (
+                      <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-medium rounded-full flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Strategy Articulated
+                      </span>
+                    )}
+                    {/* Feynman Check Passed Indicator */}
+                    {hintFeynmanPassed && FEATURE_FLAGS.FEYNMAN_HINT_PROMPTS && (
+                      <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full flex items-center gap-1">
+                        <span>🎓</span>
+                        Conceptual Check Passed
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-600 dark:text-dark-text-muted mt-1">
                     Unlock hints progressively. Try thinking before revealing each level.
                   </p>
@@ -562,11 +840,17 @@ export default function StepAccordion({
                             </h6>
                           </div>
 
-                          {isNextHint && (
+                          {isNextHint && !pendingHintFeynmanCheck && !pendingVerbalPlan && (
                             <button
                               onClick={handleUnlockNextHint}
                               disabled={isGenerating}
-                              className="px-3 py-1 bg-yellow-600 text-white rounded text-xs font-medium hover:bg-yellow-700 disabled:bg-yellow-400 flex items-center gap-1"
+                              className={`px-3 py-1 text-white rounded text-xs font-medium flex items-center gap-1 ${
+                                shouldRequireVerbalPlan(level)
+                                  ? 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400'
+                                  : shouldRequireFeynmanForHint(level)
+                                  ? 'bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400'
+                                  : 'bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-400'
+                              }`}
                             >
                               {isGenerating ? (
                                 <>
@@ -575,6 +859,18 @@ export default function StepAccordion({
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                   </svg>
                                   Generating...
+                                </>
+                              ) : shouldRequireVerbalPlan(level) ? (
+                                <>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                  </svg>
+                                  Describe Strategy
+                                </>
+                              ) : shouldRequireFeynmanForHint(level) ? (
+                                <>
+                                  <span>🎓</span>
+                                  Explain to Unlock
                                 </>
                               ) : (
                                 <>
@@ -595,6 +891,14 @@ export default function StepAccordion({
                         ) : isFutureHint ? (
                           <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">
                             Locked - unlock previous hints first
+                          </p>
+                        ) : isNextHint && shouldRequireVerbalPlan(level) ? (
+                          <p className="text-xs text-indigo-700 dark:text-indigo-300 italic">
+                            Describe your problem-solving strategy in words before seeing equations
+                          </p>
+                        ) : isNextHint && shouldRequireFeynmanForHint(level) ? (
+                          <p className="text-xs text-purple-700 dark:text-purple-300 italic">
+                            Explain your conceptual understanding to unlock computational help
                           </p>
                         ) : isNextHint && level >= 4 ? (
                           <p className="text-xs text-gray-700 dark:text-dark-text-secondary italic">
@@ -633,13 +937,66 @@ export default function StepAccordion({
                 </h5>
                 <MathRenderer text={step.question} className="mb-3 text-gray-900 dark:text-dark-text-primary" />
 
-                <textarea
-                  placeholder="Type your reasoning here..."
-                  className="w-full px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white dark:bg-dark-card-soft text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-muted"
-                  rows={3}
-                  value={userAnswer}
-                  onChange={(e) => onAnswerChange(e.target.value)}
-                />
+                {/* Toggle between typed answer and paper upload */}
+                {FEATURE_FLAGS.PAPER_SOLUTION_UPLOAD && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      onClick={() => setShowPaperUpload(false)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                        !showPaperUpload
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-white dark:bg-dark-card border border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Type Answer
+                    </button>
+                    <button
+                      onClick={() => setShowPaperUpload(true)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                        showPaperUpload
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-white dark:bg-dark-card border border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Upload Paper Solution
+                    </button>
+                  </div>
+                )}
+
+                {/* Typed answer mode */}
+                {!showPaperUpload && (
+                  <textarea
+                    placeholder="Type your reasoning here..."
+                    className="w-full px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white dark:bg-dark-card-soft text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-muted"
+                    rows={3}
+                    value={userAnswer}
+                    onChange={(e) => onAnswerChange(e.target.value)}
+                  />
+                )}
+
+                {/* Paper upload mode */}
+                {showPaperUpload && FEATURE_FLAGS.PAPER_SOLUTION_UPLOAD && (
+                  <PaperSolutionUploader
+                    stepId={step.id}
+                    stepTitle={step.title}
+                    stepObjective={step.question || step.title}
+                    requiredElements={step.requiredConcepts || []}
+                    commonMistakes={[]}
+                    problemText={problemStatement || ''}
+                    domain={domain || 'physics'}
+                    subdomain={subdomain || 'mechanics'}
+                    relevantConcepts={step.requiredConcepts || []}
+                    onExtractedTextChange={handlePaperExtractedText}
+                    onAnalysisComplete={handlePaperAnalysisComplete}
+                  />
+                )}
               </div>
             )}
 

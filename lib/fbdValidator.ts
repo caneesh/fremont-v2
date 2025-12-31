@@ -93,13 +93,20 @@ function inferDirectionName(angle: number): string {
 // ============================================
 
 /**
+ * Get force name safely, with fallback for unknown types
+ */
+function getForceName(type: ForceType): string {
+  return FORCE_METADATA[type]?.name ?? type
+}
+
+/**
  * Generate human-readable feedback from validation result
  */
 function generateFeedback(result: FBDValidationResult): string {
   const parts: string[] = []
 
   if (result.missingForces.length > 0) {
-    const forceNames = result.missingForces.map(t => FORCE_METADATA[t].name)
+    const forceNames = result.missingForces.map(t => getForceName(t))
     if (forceNames.length === 1) {
       parts.push(`Missing: ${forceNames[0]} force`)
     } else {
@@ -109,14 +116,14 @@ function generateFeedback(result: FBDValidationResult): string {
 
   if (result.incorrectDirections.length > 0) {
     for (const error of result.incorrectDirections) {
-      const forceName = FORCE_METADATA[error.force].name
+      const forceName = getForceName(error.force)
       parts.push(`${forceName} force direction is incorrect`)
     }
   }
 
   if (result.extraForces.length > 0 && result.isValid) {
     // Only mention extra forces as a note if diagram is otherwise valid
-    const forceNames = result.extraForces.map(t => FORCE_METADATA[t].name)
+    const forceNames = result.extraForces.map(t => getForceName(t))
     parts.push(`Note: ${forceNames.join(', ')} may not be needed here`)
   }
 
@@ -237,7 +244,7 @@ export function generateHint(
         case 'tension':
           return 'Is there a rope or string? What force does it exert on the object?'
         default:
-          return `You're missing the ${FORCE_METADATA[missing].name} force.`
+          return `You're missing the ${getForceName(missing)} force.`
       }
     }
     if (result.incorrectDirections.length > 0) {
@@ -253,7 +260,7 @@ export function generateHint(
         case 'friction':
           return 'Friction acts parallel to the surface, opposing the direction of (potential) motion.'
         default:
-          return `Check the direction of the ${FORCE_METADATA[error.force].name} force.`
+          return `Check the direction of the ${getForceName(error.force)} force.`
       }
     }
   }
@@ -261,7 +268,9 @@ export function generateHint(
   // Third+ hint: very specific
   if (result.missingForces.length > 0) {
     const missing = result.missingForces[0]
-    return `Add the ${FORCE_METADATA[missing].name} (${FORCE_METADATA[missing].defaultLabel}) force to your diagram.`
+    const meta = FORCE_METADATA[missing]
+    const label = meta ? `${meta.name} (${meta.defaultLabel})` : missing
+    return `Add the ${label} force to your diagram.`
   }
 
   if (result.incorrectDirections.length > 0) {
@@ -271,7 +280,7 @@ export function generateHint(
       : error.expected === 'along-surface'
       ? 'parallel to the surface'
       : error.expected
-    return `The ${FORCE_METADATA[error.force].name} force should point ${expectedDir}.`
+    return `The ${getForceName(error.force)} force should point ${expectedDir}.`
   }
 
   return 'Check all forces are correctly placed and oriented.'

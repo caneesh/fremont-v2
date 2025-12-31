@@ -20,6 +20,7 @@ export interface StepProgress {
   isCompleted: boolean
   userAnswer?: string
   currentHintLevel?: number // Tracks which hint level (1-5) the user has unlocked
+  confidence?: 'low' | 'medium' | 'high' // Self-reported confidence for SRS scheduling
 }
 
 /**
@@ -35,6 +36,7 @@ export interface MicroTaskStepProgress {
     isCompleted: boolean
   }[]
   collectedInsights: string[]  // Explanations earned from completed tasks
+  confidence?: 'low' | 'medium' | 'high' // Self-reported confidence for SRS scheduling
 }
 
 export interface ReflectionAnswer {
