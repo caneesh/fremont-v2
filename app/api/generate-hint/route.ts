@@ -76,7 +76,7 @@ Output ONLY valid JSON:
 Respond with ONLY the JSON, no other text.`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       messages: [
         {
