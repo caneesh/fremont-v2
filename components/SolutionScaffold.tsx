@@ -68,6 +68,11 @@ import { analyzeStudentWork, detectCollisions } from '@/lib/constraintCollisionE
 import { generateSocraticDialogue } from '@/lib/constraintDialogueEngine'
 import type { ProblemConstraintData, ConstraintCollision, SocraticDialogue } from '@/types/constraintCollision'
 import ConstraintFeedback from './ConstraintFeedback'
+import AdaptivePreflightModal from './AdaptivePreflightModal'
+import {
+  shouldShowAdaptivePreflight,
+  type StepRiskAssessment,
+} from '@/lib/adaptivePreflightService'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -129,6 +134,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPreFlightCheck, setShowPreFlightCheck] = useState(false)
   const [currentPreFlightCheck, setCurrentPreFlightCheck] = useState<PreFlightCheck | null>(null)
   const [passedPreFlightChecks, setPassedPreFlightChecks] = useState<Set<string>>(new Set())
+
+  // Adaptive Preflight state
+  const [showAdaptivePreflight, setShowAdaptivePreflight] = useState(false)
+  const [currentAdaptiveAssessment, setCurrentAdaptiveAssessment] = useState<StepRiskAssessment | null>(null)
+  const [passedAdaptivePreflightSteps, setPassedAdaptivePreflightSteps] = useState<Set<number>>(new Set())
 
   // Concept Contrast state
   const [showConceptContrast, setShowConceptContrast] = useState(false)
@@ -1271,6 +1281,69 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     return true // Allow step activation
   }, [data, passedPreFlightChecks])
 
+  // Check for adaptive preflight requirement when activating a step
+  const checkAdaptivePreflightRequirement = useCallback((stepIndex: number): boolean => {
+    // Only check if feature is enabled
+    if (!FEATURE_FLAGS.ADAPTIVE_PREFLIGHT) return true
+
+    // Skip if already passed for this step
+    if (passedAdaptivePreflightSteps.has(stepIndex)) return true
+
+    const step = data.steps[stepIndex]
+    const requiredConceptIds = step.requiredConcepts || []
+
+    // Skip if no concepts to assess
+    if (requiredConceptIds.length === 0) return true
+
+    // Use a stable student ID (could be from auth, but using localStorage for now)
+    const studentId = typeof window !== 'undefined'
+      ? localStorage.getItem('physiscaffold_student_id') || 'anonymous'
+      : 'anonymous'
+
+    const { shouldShow, assessment } = shouldShowAdaptivePreflight(
+      stepIndex,
+      step.id,
+      requiredConceptIds,
+      data.concepts,
+      studentId,
+      passedAdaptivePreflightSteps
+    )
+
+    if (shouldShow && assessment) {
+      setCurrentAdaptiveAssessment(assessment)
+      setShowAdaptivePreflight(true)
+      return false // Block step activation
+    }
+
+    return true // Allow step activation
+  }, [data, passedAdaptivePreflightSteps])
+
+  // Handle adaptive preflight proceed
+  const handleAdaptivePreflightProceed = useCallback(() => {
+    if (currentAdaptiveAssessment) {
+      setPassedAdaptivePreflightSteps(prev => new Set([...prev, currentAdaptiveAssessment.stepIndex]))
+    }
+    setShowAdaptivePreflight(false)
+    setCurrentAdaptiveAssessment(null)
+  }, [currentAdaptiveAssessment])
+
+  // Handle adaptive preflight review concepts
+  const handleAdaptivePreflightReview = useCallback(() => {
+    // Mark as passed but suggest review (could navigate to concept panel or similar)
+    if (currentAdaptiveAssessment) {
+      setPassedAdaptivePreflightSteps(prev => new Set([...prev, currentAdaptiveAssessment.stepIndex]))
+    }
+    setShowAdaptivePreflight(false)
+    setCurrentAdaptiveAssessment(null)
+    // Could trigger concept panel expansion here if desired
+  }, [currentAdaptiveAssessment])
+
+  // Handle adaptive preflight close
+  const handleAdaptivePreflightClose = useCallback(() => {
+    setShowAdaptivePreflight(false)
+    setCurrentAdaptiveAssessment(null)
+  }, [])
+
   // Check if concept contrast should trigger for this step
   const shouldTriggerConceptContrast = useCallback((stepIndex: number): boolean => {
     if (!FEATURE_FLAGS.CONCEPT_CONTRAST) return false
@@ -1301,9 +1374,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
   // Combined step activation handler with concept contrast trigger
   const handleStepActivation = useCallback((stepIndex: number) => {
-    // First check pre-flight requirement
+    // First check pre-flight requirement (static, from scaffold)
     if (!checkPreFlightRequirement(stepIndex)) {
       return // Pre-flight check is blocking
+    }
+
+    // Then check adaptive preflight requirement (dynamic, from learning history)
+    if (!checkAdaptivePreflightRequirement(stepIndex)) {
+      return // Adaptive preflight check is blocking
     }
 
     // Set the step as active
@@ -1315,7 +1393,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         triggerConceptContrast(stepIndex)
       }, 500)
     }
-  }, [checkPreFlightRequirement, shouldTriggerConceptContrast, triggerConceptContrast])
+  }, [checkPreFlightRequirement, checkAdaptivePreflightRequirement, shouldTriggerConceptContrast, triggerConceptContrast])
 
   // Handle solution grade complete
   const handleGradeComplete = useCallback((result: GradeSolutionResponse) => {
@@ -2013,6 +2091,21 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           onComplete={handlePreFlightComplete}
           onSkip={handlePreFlightSkip}
           onClose={() => setShowPreFlightCheck(false)}
+        />
+      )}
+
+      {/* Adaptive Preflight Modal */}
+      {showAdaptivePreflight && currentAdaptiveAssessment && (
+        <AdaptivePreflightModal
+          assessment={currentAdaptiveAssessment}
+          stepTitle={data.steps[currentAdaptiveAssessment.stepIndex]?.title || 'Step'}
+          conceptNames={
+            (data.steps[currentAdaptiveAssessment.stepIndex]?.requiredConcepts || [])
+              .map(id => data.concepts.find(c => c.id === id)?.name || id)
+          }
+          onProceed={handleAdaptivePreflightProceed}
+          onReviewConcepts={handleAdaptivePreflightReview}
+          onClose={handleAdaptivePreflightClose}
         />
       )}
 

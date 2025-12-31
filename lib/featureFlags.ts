@@ -159,6 +159,21 @@ export const FEATURE_FLAGS = {
    */
   STUDY_PLAN_V2: process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 !== 'false'),
+
+  /**
+   * Adaptive Preflight Gating
+   * When enabled, auto-inserts preflight checks on steps with high mistake
+   * probability. Uses data from:
+   * - Mistake Notebook (SRS cards, severity, recency)
+   * - Mistake Tracking (struggle rates, patterns)
+   * - Concept Mastery (mastery scores)
+   *
+   * A risk score is calculated for each step, and steps above the threshold
+   * (default 0.55) trigger a preflight check requiring students to verify
+   * their understanding before proceeding.
+   */
+  ADAPTIVE_PREFLIGHT: process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT !== 'false'),
 }
 
 /**
