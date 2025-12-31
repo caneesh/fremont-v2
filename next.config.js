@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Use standalone output mode for better compatibility
-  output: 'standalone',
-  // Increase build worker memory and reduce parallelism to avoid race conditions
+  // Reduce build parallelism to avoid race conditions in Vercel
   experimental: {
     workerThreads: false,
     cpus: 1,
