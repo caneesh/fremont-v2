@@ -46,6 +46,8 @@ vi.mock('@/lib/mistakeTriggers', () => ({
 vi.mock('@/lib/featureFlags', () => ({
   FEATURE_FLAGS: {
     REVEAL_RECONSTRUCT_VALIDATE: true,
+    WHY_THIS_STEP: true,
+    CONFIDENCE_WEIGHTED_SRS: false,
   },
 }))
 
@@ -506,7 +508,8 @@ describe('MicroTaskStepAccordion', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button'))
+      // Click the header button (contains the step title)
+      fireEvent.click(screen.getByText('Test Step'))
       expect(onActivate).toHaveBeenCalledWith(step.id)
     })
 
@@ -946,6 +949,223 @@ describe('MicroTaskStepAccordion', () => {
 
       expect(await screen.findByText('E1')).not.toBeNull()
       expect(onTaskComplete).toHaveBeenCalledWith(step.id, 1, 'E1')
+    })
+  })
+
+  describe('Why this step? explainer', () => {
+    beforeEach(() => {
+      FEATURE_FLAGS.WHY_THIS_STEP = true
+      global.fetch = vi.fn()
+    })
+
+    it('shows "Why?" button when feature flag is enabled and step is not locked', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.getByText('Why?')).toBeInTheDocument()
+    })
+
+    it('hides "Why?" button when step is locked', () => {
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={false}
+          isCompleted={false}
+          isLocked={true}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.queryByText('Why?')).not.toBeInTheDocument()
+    })
+
+    it('hides "Why?" button when feature flag is disabled', () => {
+      FEATURE_FLAGS.WHY_THIS_STEP = false
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      expect(screen.queryByText('Why?')).not.toBeInTheDocument()
+    })
+
+    it('fetches and displays explanation when "Why?" button is clicked', async () => {
+      const mockExplanation = 'This step helps you identify all forces acting on the object.'
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, explanation: mockExplanation }),
+      })
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          problemStatement="A block on an incline"
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('Why?'))
+
+      // Should show loading state
+      expect(screen.getByText('Generating explanation...')).toBeInTheDocument()
+
+      // Wait for explanation to appear
+      expect(await screen.findByText(mockExplanation)).toBeInTheDocument()
+
+      // Verify API was called with correct parameters
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/scaffold/step/explain',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    })
+
+    it('shows "Why this step?" header in explanation panel', async () => {
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, explanation: 'Test explanation' }),
+      })
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('Why?'))
+
+      expect(await screen.findByText('Why this step?')).toBeInTheDocument()
+    })
+
+    it('toggles explanation visibility when clicked again', async () => {
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, explanation: 'Test explanation' }),
+      })
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Click to show
+      fireEvent.click(screen.getByText('Why?'))
+      expect(await screen.findByText('Test explanation')).toBeInTheDocument()
+
+      // Click to hide
+      fireEvent.click(screen.getByText('Why?'))
+      expect(screen.queryByText('Test explanation')).not.toBeInTheDocument()
+
+      // Click to show again (should not refetch)
+      fireEvent.click(screen.getByText('Why?'))
+      expect(await screen.findByText('Test explanation')).toBeInTheDocument()
+      expect(global.fetch).toHaveBeenCalledTimes(1) // Only called once
+    })
+
+    it('shows error message when API call fails', async () => {
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ success: false, error: 'API error' }),
+      })
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      fireEvent.click(screen.getByText('Why?'))
+
+      expect(await screen.findByText('Could not load explanation.')).toBeInTheDocument()
+    })
+
+    it('can close explanation panel by clicking Why button again', async () => {
+      ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, explanation: 'Test explanation' }),
+      })
+
+      render(
+        <MicroTaskStepAccordion
+          step={step}
+          stepNumber={1}
+          isActive={true}
+          isCompleted={false}
+          isLocked={false}
+          concepts={concepts}
+          onTaskComplete={onTaskComplete}
+          onComplete={onComplete}
+          onActivate={onActivate}
+        />
+      )
+
+      // Open explanation
+      fireEvent.click(screen.getByText('Why?'))
+      expect(await screen.findByText('Test explanation')).toBeInTheDocument()
+      expect(screen.getByText('Why this step?')).toBeInTheDocument()
+
+      // Click Why? again to close
+      fireEvent.click(screen.getByText('Why?'))
+      expect(screen.queryByText('Test explanation')).not.toBeInTheDocument()
     })
   })
 })
