@@ -155,10 +155,9 @@ export const FEATURE_FLAGS = {
    * - Confidence-weighted spaced repetition (SRS)
    *
    * The original topic-based Study Plan (v1) remains available when disabled.
-   * Default: ON in development, OFF in production unless configured.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2=false)
    */
-  STUDY_PLAN_V2: process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 !== 'false'),
+  STUDY_PLAN_V2: process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 !== 'false',
 
   /**
    * Adaptive Preflight Gating
