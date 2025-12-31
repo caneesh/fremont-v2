@@ -14,6 +14,8 @@ import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
 import { onHintRequested, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 import { detectMisconceptionFlag, type MisconceptionFlag } from '@/lib/misconceptionFlags'
+import { errorPatternService } from '@/lib/errorPatternService'
+import type { ErrorPatternSummary } from '@/types/errorPatterns'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import type { FeynmanPromptConfig } from '@/types/feynman'
 
@@ -67,6 +69,10 @@ export default function StepAccordion({
   const [isGeneratingHint, setIsGeneratingHint] = useState<number | null>(null)
   const [misconceptionFlag, setMisconceptionFlag] = useState<MisconceptionFlag | null>(null)
   const [dismissedMisconceptions, setDismissedMisconceptions] = useState<Set<string>>(new Set())
+
+  // Error Pattern Prevention - personalized watch-outs from history
+  const [errorWatchOuts, setErrorWatchOuts] = useState<ErrorPatternSummary[]>([])
+  const [dismissedWatchOuts, setDismissedWatchOuts] = useState<Set<string>>(new Set())
 
   // Feynman Micro-Prompt state (for step-level Feynman prompts)
   const [feynmanPassed, setFeynmanPassed] = useState(false)
@@ -470,6 +476,71 @@ export default function StepAccordion({
     setMisconceptionFlag(detected)
   }, [userAnswer, warningBeacon, dismissedMisconceptions])
 
+  // Load personalized watch-outs from error history when step becomes active
+  // Show before equation/math steps to prevent recurring mistakes
+  useEffect(() => {
+    if (!isActive || isCompleted) {
+      setErrorWatchOuts([])
+      return
+    }
+
+    // Only show for equation/math steps or when entering hint level 3+
+    // Note: 'math_manipulation' is the step type for equation work; 'equation' is OutlineStepType from phased scaffold
+    const isEquationStep = step.stepType === 'math_manipulation'
+    if (!isEquationStep && currentHintLevel < 3) {
+      return
+    }
+
+    // Get student's critical patterns (high severity, 2+ occurrences, not mastered)
+    // Use a simple student ID from localStorage or default
+    const studentId = typeof window !== 'undefined'
+      ? localStorage.getItem('physiscaffold_student_id') || 'anonymous'
+      : 'anonymous'
+
+    const criticalPatterns = errorPatternService.getCriticalPatterns(studentId)
+
+    // Filter to patterns relevant to this step's concepts
+    const relevantPatterns = criticalPatterns.filter(summary => {
+      // Check if pattern is relevant based on concepts
+      const stepConcepts = step.requiredConcepts || []
+      const patternConcepts = summary.pattern.relatedConcepts.map(c => c.toLowerCase())
+      const patternTopics = summary.pattern.commonIn.map(t => t.toLowerCase())
+
+      // Match on concepts, domain, or subdomain
+      const hasConceptMatch = stepConcepts.some(concept =>
+        patternConcepts.some(pc => pc.includes(concept.toLowerCase()) || concept.toLowerCase().includes(pc))
+      )
+      const hasDomainMatch = domain && patternTopics.some(topic =>
+        topic.includes(domain.toLowerCase()) || domain.toLowerCase().includes(topic)
+      )
+      const hasSubdomainMatch = subdomain && patternTopics.some(topic =>
+        topic.includes(subdomain.toLowerCase()) || subdomain.toLowerCase().includes(topic)
+      )
+
+      // For math steps, also include algebra-related patterns
+      const isAlgebraPattern = summary.pattern.category === 'ALGEBRA_MANIPULATION' ||
+        summary.pattern.category === 'SIGN_CONVENTION'
+      const mathStepMatch = isEquationStep && isAlgebraPattern
+
+      return hasConceptMatch || hasDomainMatch || hasSubdomainMatch || mathStepMatch
+    })
+
+    // Take top 2 most relevant (already sorted by severity & occurrences)
+    const topWatchOuts = relevantPatterns
+      .filter(p => !dismissedWatchOuts.has(p.pattern.id))
+      .slice(0, 2)
+
+    setErrorWatchOuts(topWatchOuts)
+  }, [isActive, isCompleted, step.stepType, step.requiredConcepts, currentHintLevel, domain, subdomain, dismissedWatchOuts])
+
+  const handleDismissWatchOut = (patternId: string) => {
+    setDismissedWatchOuts(prev => {
+      const next = new Set(prev)
+      next.add(patternId)
+      return next
+    })
+  }
+
   return (
     <div
       className={`border-2 rounded-lg overflow-hidden transition-all ${
@@ -588,6 +659,54 @@ export default function StepAccordion({
                   <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5" title={`Common mistake: ${warningBeacon.tag}`}>
                     Most common mistake here
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error Pattern Watch-Outs - Personalized warnings from student's error history */}
+            {showStepContent && errorWatchOuts.length > 0 && (
+              <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-300 dark:border-rose-700 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-800/40 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wide">
+                    Watch-Outs From Your History
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  {errorWatchOuts.map((summary) => (
+                    <div
+                      key={summary.pattern.id}
+                      className="flex items-start justify-between gap-2 bg-white dark:bg-dark-card-soft rounded p-2 border border-rose-200 dark:border-rose-800"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-rose-900 dark:text-rose-100">
+                          {summary.pattern.title}
+                        </p>
+                        <p className="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
+                          {summary.pattern.remediation}
+                        </p>
+                        <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">
+                          {summary.occurrences}x in past problems
+                          {summary.trend === 'worsening' && ' • Getting more frequent'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDismissWatchOut(summary.pattern.id)}
+                        className="flex-shrink-0 text-xs text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 p-1"
+                        title="Dismiss"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
