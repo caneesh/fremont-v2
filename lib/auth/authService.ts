@@ -2,6 +2,15 @@ import type { PilotUser, UserSession } from '@/types/auth'
 
 // Pilot access codes (in production, store in database or environment variables)
 const PILOT_CODES: Record<string, PilotUser> = {
+  // Dev/testing access code
+  'DEV': {
+    code: 'DEV',
+    userId: 'dev-user',
+    name: 'Developer',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    lastActiveAt: new Date().toISOString(),
+  },
   'PILOT-ALPHA-001': {
     code: 'PILOT-ALPHA-001',
     userId: 'user-001',
