@@ -58,6 +58,14 @@ STEP TYPES GUIDE:
 - "compute": Algebraic manipulation, solving
 - "check": Sanity check, verification, limiting cases
 
+SCENARIO DETECTION (for diagram steps):
+- "wedge" or "block-on-wedge": Block on accelerating wedge, wedge problems
+- "incline": Simple inclined plane with fixed surface
+- "pulley": Pulley systems with ropes/strings
+- "hanging": Objects suspended from ceiling/support
+- "rotating": Rotating reference frames, circular motion
+- "horizontal": Block on flat surface
+
 Output ONLY the JSON, nothing else.`
 }
 

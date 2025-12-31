@@ -41,7 +41,7 @@ export interface PlacedForce {
 // Diagram Step Schema (from AI)
 // ============================================
 
-export type ScenarioType = 'incline' | 'hanging' | 'pulley' | 'horizontal' | 'rotating'
+export type ScenarioType = 'incline' | 'hanging' | 'pulley' | 'horizontal' | 'rotating' | 'wedge' | 'block-on-wedge'
 export type ObjectShape = 'block' | 'point' | 'sphere'
 
 export interface RequiredForce {

@@ -8,6 +8,7 @@ import FeynmanDialoguePlayer from './audio/FeynmanDialoguePlayer'
 import FeynmanMicroPrompt from './FeynmanMicroPrompt'
 import VerbalPlanRenderer from './micro-tasks/VerbalPlanRenderer'
 import { PaperSolutionUploader } from './paper-solution'
+import SocraticTutorChat from './SocraticTutorChat'
 import type { AnalyzeSolutionResponse } from '@/types/paperSolution'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
@@ -86,6 +87,9 @@ export default function StepAccordion({
   const [paperSolutionFeedback, setPaperSolutionFeedback] = useState<AnalyzeSolutionResponse | null>(null)
   const [paperExtractedText, setPaperExtractedText] = useState<string>('')
 
+  // Socratic Tutor Chat state
+  const [showSocraticTutor, setShowSocraticTutor] = useState(false)
+
   // Track step activation time for timeout detection
   const stepActivationTimeRef = useRef<number | null>(null)
 
@@ -128,6 +132,26 @@ export default function StepAccordion({
       onStepTimeout(problemContext, stepContext, durationMs)
     }
 
+    // Show Socratic tutor chat if enabled (triggers professor check-in)
+    if (FEATURE_FLAGS.SOCRATIC_TUTOR_CHAT && !showSocraticTutor) {
+      setShowSocraticTutor(true)
+      return  // Wait for tutor to resolve before marking complete
+    }
+
+    onComplete()
+    setIsExpanded(false)
+  }
+
+  // Called when Socratic tutor confirms understanding
+  const handleSocraticResolved = () => {
+    setShowSocraticTutor(false)
+    onComplete()
+    setIsExpanded(false)
+  }
+
+  // Skip Socratic tutor
+  const handleSocraticSkip = () => {
+    setShowSocraticTutor(false)
     onComplete()
     setIsExpanded(false)
   }
@@ -679,6 +703,40 @@ export default function StepAccordion({
                 </div>
               )}
 
+              {/* Professor Explains - Prominent Dialogue Button */}
+              <button
+                onClick={handleAudioHint}
+                disabled={isLoadingAudio}
+                className="w-full mb-4 p-4 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-600 dark:hover:to-indigo-600 disabled:from-purple-300 disabled:to-indigo-300 dark:disabled:from-purple-400 dark:disabled:to-indigo-400 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
+                      🎭
+                    </div>
+                    <div className="text-left">
+                      <h6 className="font-bold text-base">Professor Explains</h6>
+                      <p className="text-purple-100 text-sm">
+                        {isLoadingAudio ? 'Generating conversation...' : 'Hear a student-professor dialogue about this concept'}
+                      </p>
+                    </div>
+                  </div>
+                  {isLoadingAudio ? (
+                    <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                      <span className="text-sm font-medium">Listen</span>
+                    </div>
+                  )}
+                </div>
+              </button>
+
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -706,26 +764,6 @@ export default function StepAccordion({
                     Unlock hints progressively. Try thinking before revealing each level.
                   </p>
                 </div>
-                {currentHintLevel > 0 && (
-                  <button
-                    onClick={handleAudioHint}
-                    disabled={isLoadingAudio}
-                    className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-300 text-xs font-medium flex items-center gap-2"
-                    title="Get an intuitive audio explanation"
-                  >
-                    {isLoadingAudio ? (
-                      <>
-                        <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Loading...
-                      </>
-                    ) : (
-                      <>🎭 Audio</>
-                    )}
-                  </button>
-                )}
               </div>
 
               {/* Visual Hint Progress Stepper */}
@@ -1001,7 +1039,7 @@ export default function StepAccordion({
             )}
 
             {/* Action Button */}
-            {showStepContent && (
+            {showStepContent && !showSocraticTutor && (
             <div className="flex justify-end pt-2">
               <button
                 onClick={handleComplete}
@@ -1010,6 +1048,20 @@ export default function StepAccordion({
                 Mark as Complete →
               </button>
             </div>
+            )}
+
+            {/* Socratic Tutor Chat - Live professor check-in */}
+            {showSocraticTutor && (
+              <div className="mt-4">
+                <SocraticTutorChat
+                  problemText={problemStatement || ''}
+                  stepTitle={step.title}
+                  stepContent={step.hints.map(h => h.content).join('\n')}
+                  requiredConcepts={step.requiredConcepts || []}
+                  onResolved={handleSocraticResolved}
+                  onSkip={handleSocraticSkip}
+                />
+              </div>
             )}
           </div>
         </div>

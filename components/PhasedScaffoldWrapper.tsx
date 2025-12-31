@@ -239,65 +239,115 @@ export function usePhasedScaffoldContext() {
 }
 
 /**
- * Skeleton loading component for outline
+ * Skeleton loading component for outline - Beautiful animated loading experience
  */
 function OutlineLoadingSkeleton() {
+  const [messageIndex, setMessageIndex] = useState(0)
+  const [tipIndex, setTipIndex] = useState(0)
+
+  const loadingMessages = [
+    'Analyzing your problem...',
+    'Identifying key concepts...',
+    'Breaking down the solution...',
+    'Crafting step-by-step guidance...',
+    'Almost ready...',
+  ]
+
+  const tips = [
+    'Try to identify the given quantities before starting.',
+    'Draw a diagram to visualize the problem.',
+    'Think about which physics principles might apply.',
+    'Break complex problems into smaller parts.',
+    'Check units throughout your calculation.',
+  ]
+
+  useEffect(() => {
+    const messageTimer = setInterval(() => {
+      setMessageIndex(prev => (prev + 1) % loadingMessages.length)
+    }, 2500)
+
+    const tipTimer = setInterval(() => {
+      setTipIndex(prev => (prev + 1) % tips.length)
+    }, 5000)
+
+    return () => {
+      clearInterval(messageTimer)
+      clearInterval(tipTimer)
+    }
+  }, [])
+
   return (
-    <div className="space-y-6 animate-pulse">
-      {/* Header skeleton */}
-      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-6 border border-transparent dark:border-dark-border">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="h-6 w-32 bg-gray-200 dark:bg-dark-border rounded-full mb-2" />
-            <div className="h-8 w-48 bg-gray-200 dark:bg-dark-border rounded" />
+    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
+      {/* Main loading card */}
+      <div className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl border border-gray-100 dark:border-dark-border p-8 max-w-lg w-full text-center">
+        {/* Animated icon */}
+        <div className="relative w-24 h-24 mx-auto mb-6">
+          {/* Outer ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-indigo-100 dark:border-indigo-900/30" />
+          {/* Spinning ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-indigo-500 dark:border-t-indigo-400 animate-spin" />
+          {/* Inner circle with icon */}
+          <div className="absolute inset-3 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 flex items-center justify-center shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
           </div>
-          <div className="h-10 w-28 bg-gray-200 dark:bg-dark-border rounded-lg" />
         </div>
-        <div className="space-y-2">
-          <div className="h-4 w-full bg-gray-200 dark:bg-dark-border rounded" />
-          <div className="h-4 w-5/6 bg-gray-200 dark:bg-dark-border rounded" />
-          <div className="h-4 w-4/6 bg-gray-200 dark:bg-dark-border rounded" />
+
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
+          Building Your Scaffold
+        </h2>
+
+        {/* Animated loading message */}
+        <p className="text-indigo-600 dark:text-indigo-400 font-medium mb-6 h-6 transition-opacity duration-300">
+          {loadingMessages[messageIndex]}
+        </p>
+
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 mb-8">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                i <= messageIndex
+                  ? 'bg-indigo-500 dark:bg-indigo-400 scale-100'
+                  : 'bg-gray-200 dark:bg-dark-border scale-75'
+              }`}
+            />
+          ))}
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Steps skeleton */}
-        <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-6 border border-transparent dark:border-dark-border">
-            <div className="h-6 w-40 bg-gray-200 dark:bg-dark-border rounded mb-4" />
-            <div className="h-4 w-64 bg-gray-100 dark:bg-dark-border-strong rounded mb-6" />
-
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <StepSkeleton key={i} index={i} />
-              ))}
+        {/* Tip section */}
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide mb-1">
+                Pro Tip
+              </p>
+              <p className="text-sm text-amber-700 dark:text-amber-200 transition-opacity duration-500">
+                {tips[tipIndex]}
+              </p>
             </div>
           </div>
         </div>
-
-        {/* Concept panel skeleton */}
-        <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-4 border border-transparent dark:border-dark-border">
-            <div className="h-5 w-24 bg-gray-200 dark:bg-dark-border rounded mb-4" />
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded-lg">
-                  <div className="h-4 w-24 bg-gray-200 dark:bg-dark-border rounded mb-2" />
-                  <div className="h-3 w-full bg-gray-100 dark:bg-dark-border-strong rounded" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Loading indicator */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-dark-card shadow-lg rounded-full px-6 py-3 flex items-center gap-3 border border-gray-200 dark:border-dark-border">
-        <div className="w-5 h-5 border-2 border-primary-600 dark:border-accent border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-          Generating scaffold...
-        </span>
+      {/* Subtle background animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-200 dark:bg-indigo-900/20 rounded-full blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-200 dark:bg-purple-900/20 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
+
+      {/* Estimated time */}
+      <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-6">
+        This usually takes 10-20 seconds
+      </p>
     </div>
   )
 }

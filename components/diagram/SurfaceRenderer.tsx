@@ -212,6 +212,154 @@ export default function SurfaceRenderer({
     )
   }
 
+  if (scenarioType === 'wedge' || scenarioType === 'block-on-wedge') {
+    // Block on accelerating wedge - two-body system
+    const angle = (typeof surfaceAngle === 'number' && !isNaN(surfaceAngle)) ? surfaceAngle : 30
+    const angleRad = (angle * Math.PI) / 180
+
+    // Wedge dimensions
+    const wedgeBase = 160
+    const wedgeHeight = wedgeBase * Math.tan(angleRad)
+
+    // Position wedge
+    const wedgeLeft = centerX - wedgeBase / 2 - 20
+    const wedgeBottom = centerY + 80
+    const wedgeRight = wedgeLeft + wedgeBase
+    const wedgeTop = wedgeBottom - wedgeHeight
+
+    // Block on wedge (smaller block sitting on the inclined surface)
+    const blockSize = 35
+    const blockCenterOnSlope = 0.5 // Position along slope (0-1)
+    const blockX = wedgeLeft + blockCenterOnSlope * wedgeBase
+    const blockY = wedgeBottom - blockCenterOnSlope * wedgeHeight
+
+    return (
+      <g>
+        {/* Frictionless ground indicator */}
+        <line
+          x1={wedgeLeft - 40}
+          y1={wedgeBottom}
+          x2={wedgeRight + 60}
+          y2={wedgeBottom}
+          stroke="#374151"
+          strokeWidth={3}
+        />
+        {/* Rollers under wedge to indicate frictionless */}
+        <g fill="#9ca3af" stroke="#6b7280">
+          <circle cx={wedgeLeft + 20} cy={wedgeBottom + 8} r={6} />
+          <circle cx={wedgeRight - 20} cy={wedgeBottom + 8} r={6} />
+          <circle cx={centerX - 10} cy={wedgeBottom + 8} r={6} />
+        </g>
+
+        {/* Wedge (mass M) */}
+        <polygon
+          points={`${wedgeLeft},${wedgeBottom} ${wedgeRight},${wedgeBottom} ${wedgeRight},${wedgeTop}`}
+          fill="#a8a29e"
+          stroke="#57534e"
+          strokeWidth={2}
+        />
+        {/* Wedge label */}
+        <text
+          x={wedgeRight - 30}
+          y={wedgeBottom - 15}
+          fontSize={14}
+          fontWeight="bold"
+          fill="#44403c"
+        >
+          M
+        </text>
+
+        {/* Block on wedge (mass m) */}
+        <g transform={`translate(${blockX}, ${blockY}) rotate(${-angle})`}>
+          <rect
+            x={-blockSize / 2}
+            y={-blockSize}
+            width={blockSize}
+            height={blockSize}
+            fill="#60a5fa"
+            stroke="#2563eb"
+            strokeWidth={2}
+            rx={3}
+          />
+          <text
+            x={0}
+            y={-blockSize / 2 + 5}
+            fontSize={14}
+            fontWeight="bold"
+            fill="#1e40af"
+            textAnchor="middle"
+          >
+            m
+          </text>
+        </g>
+
+        {/* Angle arc at base of wedge */}
+        <path
+          d={`M ${wedgeRight - 35} ${wedgeBottom} A 35 35 0 0 0 ${wedgeRight - 35 * Math.cos(angleRad)} ${wedgeBottom - 35 * Math.sin(angleRad)}`}
+          fill="none"
+          stroke="#6366f1"
+          strokeWidth={1.5}
+        />
+        {/* Angle label α */}
+        <text
+          x={wedgeRight - 50}
+          y={wedgeBottom - 12}
+          fontSize={14}
+          fill="#6366f1"
+          fontStyle="italic"
+        >
+          α
+        </text>
+
+        {/* Acceleration arrow (indicating wedge is accelerating) */}
+        <g>
+          <line
+            x1={wedgeLeft - 30}
+            y1={wedgeBottom - wedgeHeight / 2}
+            x2={wedgeLeft - 70}
+            y2={wedgeBottom - wedgeHeight / 2}
+            stroke="#dc2626"
+            strokeWidth={2.5}
+            markerEnd="url(#accelArrow)"
+          />
+          <defs>
+            <marker
+              id="accelArrow"
+              markerWidth={10}
+              markerHeight={10}
+              refX={0}
+              refY={5}
+              orient="auto"
+            >
+              <path d="M 10 0 L 0 5 L 10 10 z" fill="#dc2626" />
+            </marker>
+          </defs>
+          <text
+            x={wedgeLeft - 55}
+            y={wedgeBottom - wedgeHeight / 2 - 10}
+            fontSize={12}
+            fontWeight="bold"
+            fill="#dc2626"
+          >
+            a
+          </text>
+        </g>
+
+        {/* "Frictionless" labels */}
+        <text
+          x={centerX}
+          y={wedgeBottom + 28}
+          fontSize={10}
+          fill="#6b7280"
+          textAnchor="middle"
+          fontStyle="italic"
+        >
+          frictionless surface
+        </text>
+      </g>
+    )
+  }
+
   // Default: horizontal surface
   return (
     <g>

@@ -57,13 +57,21 @@ OUTPUT FORMAT:
     "context": "Brief context"
   },
   "fbd_data": null or {
-    "scenario_type": "incline|hanging|pulley|horizontal",
+    "scenario_type": "incline|hanging|pulley|horizontal|wedge|block-on-wedge|rotating",
     "object_shape": "block|point|sphere",
     "surface_angle": 30,
     "required_forces": [
       {"type": "weight", "direction": "down", "label": "mg"}
     ]
   }
+
+SCENARIO TYPE GUIDE:
+- "wedge" or "block-on-wedge": Use for accelerating wedge problems (block on moving wedge)
+- "incline": Use for FIXED inclined planes only
+- "pulley": Pulley systems
+- "hanging": Suspended objects
+- "rotating": Circular/rotational motion
+- "horizontal": Flat surface problems
 }`
 
 export function buildStepExpansionPrompt(

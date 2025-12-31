@@ -134,6 +134,31 @@ export const FEATURE_FLAGS = {
    */
   PAPER_SOLUTION_UPLOAD: process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION !== 'false'),
+
+  /**
+   * Socratic Tutor Chat
+   * When enabled, shows a live chat with a professor after completing a step.
+   * The professor asks 1-2 comprehension questions, and if the student struggles,
+   * engages in a dynamic Socratic dialogue until understanding is confirmed.
+   * Celebrates with confetti when the student demonstrates mastery.
+   */
+  SOCRATIC_TUTOR_CHAT: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR !== 'false'),
+
+  /**
+   * Study Plan v2 - Pattern-First Learning
+   * When enabled, provides an alternative study plan experience driven by:
+   * - Meta-skills (foundational thinking skills)
+   * - Pattern Tracks (core problem-solving patterns)
+   * - Topic exposure (secondary, aligned to patterns)
+   * - Error recycling (mistake → pattern → fix loop)
+   * - Confidence-weighted spaced repetition (SRS)
+   *
+   * The original topic-based Study Plan (v1) remains available when disabled.
+   * Default: ON in development, OFF in production unless configured.
+   */
+  STUDY_PLAN_V2: process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2 !== 'false'),
 }
 
 /**
