@@ -8,9 +8,12 @@ import type {
   ChatMessage,
 } from '@/types/socraticTutor'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
 
 // Generate initial comprehension questions for a step
 export async function GET(request: NextRequest) {
@@ -55,7 +58,8 @@ Rules:
 - Make them specific to this step, not generic
 - Respond with ONLY valid JSON`
 
-    const response = await anthropic.messages.create({
+    const client = getAnthropicClient()
+    const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       temperature: 0.3,
@@ -150,7 +154,8 @@ ${studentAnswer}
 
 Respond with ONLY valid JSON.`
 
-    const response = await anthropic.messages.create({
+    const client = getAnthropicClient()
+    const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 800,
       temperature: 0.4,
