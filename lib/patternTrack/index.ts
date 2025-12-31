@@ -21,5 +21,5 @@ export {
   type IRepositoryFactory,
 } from './repositories'
 
-// Service layer (to be implemented)
-// export * from './services'
+// Service layer
+export * from './services'

@@ -1,16 +1,28 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import type { MiniProblem } from '@/lib/patternTrack'
+import MiniProblemSuggestion from './MiniProblemSuggestion'
 
 interface PostSolveActivityProps {
   problemText: string
   onDismiss: () => void
+  /** Weak concepts from the solved problem (optional) */
+  weakConcepts?: string[]
+  /** Called when user selects a reinforcement mini-problem */
+  onSelectMiniProblem?: (problem: MiniProblem) => void
 }
 
-export default function PostSolveActivity({ problemText, onDismiss }: PostSolveActivityProps) {
+export default function PostSolveActivity({
+  problemText,
+  onDismiss,
+  weakConcepts = [],
+  onSelectMiniProblem
+}: PostSolveActivityProps) {
   const router = useRouter()
+  const hasWeakConcepts = weakConcepts.length > 0 && onSelectMiniProblem
 
-  // Only show "Spot the Mistake" activity
+  // "Spot the Mistake" activity
   const activity = {
     id: 'spot-mistake',
     title: 'Spot the Mistake',
@@ -70,7 +82,29 @@ export default function PostSolveActivity({ problemText, onDismiss }: PostSolveA
           </p>
         </div>
 
-        {/* Activity Card */}
+        {/* Concept Bridge - Mini-problem suggestion for weak concepts */}
+        {hasWeakConcepts && (
+          <div className="mx-4 mb-4">
+            <MiniProblemSuggestion
+              weakConcepts={weakConcepts}
+              onSelectProblem={onSelectMiniProblem}
+              maxProblems={2}
+              title="Reinforce What You Learned"
+              compact={true}
+            />
+          </div>
+        )}
+
+        {/* Divider if both options are shown */}
+        {hasWeakConcepts && (
+          <div className="mx-4 mb-4 flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-500 uppercase tracking-wide">or</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+        )}
+
+        {/* Activity Card - Spot the Mistake */}
         <div className="bg-white p-6 mx-4 mb-6 rounded-lg border-2 border-gray-200">
           <h3 className={`text-xl font-bold ${colors.text} mb-2`}>
             {activity.title}

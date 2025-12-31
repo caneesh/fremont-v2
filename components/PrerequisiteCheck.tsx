@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import type { PrerequisiteQuestion, PrerequisiteAnswer, PrerequisiteResult } from '@/types/prerequisites'
 import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import type { MiniProblem } from '@/lib/patternTrack'
+import MiniProblemSuggestion from './MiniProblemSuggestion'
 
 interface PrerequisiteCheckProps {
   concepts: Array<{
@@ -13,14 +15,18 @@ interface PrerequisiteCheckProps {
   }>
   onComplete: (result: PrerequisiteResult) => void
   onSkip?: () => void
+  /** Called when user selects a mini-problem for a weak concept */
+  onSelectMiniProblem?: (problem: MiniProblem, result: PrerequisiteResult) => void
 }
 
-export default function PrerequisiteCheck({ concepts, onComplete, onSkip }: PrerequisiteCheckProps) {
+export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSelectMiniProblem }: PrerequisiteCheckProps) {
   const [questions, setQuestions] = useState<PrerequisiteQuestion[]>([])
   const [answers, setAnswers] = useState<PrerequisiteAnswer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [passingScore, setPassingScore] = useState(2)
+  const [checkResult, setCheckResult] = useState<PrerequisiteResult | null>(null)
+  const [showMiniProblems, setShowMiniProblems] = useState(false)
 
   useEffect(() => {
     loadQuestions()
@@ -106,7 +112,26 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip }: Prer
       answers: checkedAnswers,
     }
 
-    onComplete(result)
+    // If there are weak concepts and a mini-problem handler is provided,
+    // show the mini-problem suggestion before completing
+    if (weakConcepts.length > 0 && onSelectMiniProblem) {
+      setCheckResult(result)
+      setShowMiniProblems(true)
+    } else {
+      onComplete(result)
+    }
+  }
+
+  const handleMiniProblemSelect = (problem: MiniProblem) => {
+    if (checkResult && onSelectMiniProblem) {
+      onSelectMiniProblem(problem, checkResult)
+    }
+  }
+
+  const handleSkipMiniProblems = () => {
+    if (checkResult) {
+      onComplete(checkResult)
+    }
   }
 
   const allAnswered = answers.every(a => a.answer.trim() !== '')
@@ -146,6 +171,57 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip }: Prer
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show mini-problem suggestion after check completion if there are weak concepts
+  if (showMiniProblems && checkResult && checkResult.weakConcepts.length > 0) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-amber-400">
+          {/* Result Summary */}
+          <div className="mb-6 text-center">
+            <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+              checkResult.passed ? 'bg-green-100' : 'bg-amber-100'
+            }`}>
+              {checkResult.passed ? (
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {checkResult.passed ? 'Prerequisites Check Passed!' : 'Some Concepts Need Review'}
+            </h2>
+            <p className="text-gray-600">
+              You got {checkResult.correctAnswers} out of {checkResult.totalQuestions} correct
+            </p>
+          </div>
+
+          {/* Mini-problem suggestion */}
+          <MiniProblemSuggestion
+            weakConcepts={checkResult.weakConcepts}
+            onSelectProblem={handleMiniProblemSelect}
+            onSkip={handleSkipMiniProblems}
+            maxProblems={2}
+            title="Quick Practice Before You Continue"
+          />
+
+          {/* Continue without practice */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleSkipMiniProblems}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+            >
+              Continue to Problem
+            </button>
           </div>
         </div>
       </div>
