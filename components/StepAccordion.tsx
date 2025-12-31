@@ -484,32 +484,39 @@ export default function StepAccordion({
       return
     }
 
-    // Only show for equation/math steps or when entering hint level 3+
-    // Note: 'math_manipulation' is the step type for equation work; 'equation' is OutlineStepType from phased scaffold
-    const isEquationStep = step.stepType === 'math_manipulation'
-    if (!isEquationStep && currentHintLevel < 3) {
-      return
-    }
-
-    // Get student's critical patterns (high severity, 2+ occurrences, not mastered)
-    // Use a simple student ID from localStorage or default
+    // Get student's error pattern summaries (not just critical - we'll filter ourselves)
     const studentId = typeof window !== 'undefined'
       ? localStorage.getItem('physiscaffold_student_id') || 'anonymous'
       : 'anonymous'
 
-    const criticalPatterns = errorPatternService.getCriticalPatterns(studentId)
+    const allPatterns = errorPatternService.getErrorPatternSummaries(studentId)
 
-    // Filter to patterns relevant to this step's concepts
-    const relevantPatterns = criticalPatterns.filter(summary => {
-      // Check if pattern is relevant based on concepts
-      const stepConcepts = step.requiredConcepts || []
+    // Filter to patterns with 2+ occurrences that aren't mastered
+    const activePatterns = allPatterns.filter(summary =>
+      summary.occurrences >= 2 && !summary.mastered
+    )
+
+    if (activePatterns.length === 0) {
+      setErrorWatchOuts([])
+      return
+    }
+
+    // Check if this is an equation/math step (used for pattern filtering below)
+    const isEquationStep = step.stepType === 'math_manipulation'
+
+    // Filter to patterns relevant to this step's concepts/domain
+    const stepConcepts = step.requiredConcepts || []
+
+    const relevantPatterns = activePatterns.filter(summary => {
       const patternConcepts = summary.pattern.relatedConcepts.map(c => c.toLowerCase())
       const patternTopics = summary.pattern.commonIn.map(t => t.toLowerCase())
 
-      // Match on concepts, domain, or subdomain
+      // Match on concepts
       const hasConceptMatch = stepConcepts.some(concept =>
         patternConcepts.some(pc => pc.includes(concept.toLowerCase()) || concept.toLowerCase().includes(pc))
       )
+
+      // Match on domain/subdomain
       const hasDomainMatch = domain && patternTopics.some(topic =>
         topic.includes(domain.toLowerCase()) || domain.toLowerCase().includes(topic)
       )
@@ -517,12 +524,17 @@ export default function StepAccordion({
         topic.includes(subdomain.toLowerCase()) || subdomain.toLowerCase().includes(topic)
       )
 
-      // For math steps, also include algebra-related patterns
+      // For equation steps, also include sign/algebra patterns
       const isAlgebraPattern = summary.pattern.category === 'ALGEBRA_MANIPULATION' ||
         summary.pattern.category === 'SIGN_CONVENTION'
       const mathStepMatch = isEquationStep && isAlgebraPattern
 
-      return hasConceptMatch || hasDomainMatch || hasSubdomainMatch || mathStepMatch
+      // Generic physics match - show mechanics patterns for physics problems
+      const isPhysicsPattern = patternTopics.some(t =>
+        t.includes('mechanics') || t.includes('dynamics') || t.includes('kinematics')
+      )
+
+      return hasConceptMatch || hasDomainMatch || hasSubdomainMatch || mathStepMatch || isPhysicsPattern
     })
 
     // Take top 2 most relevant (already sorted by severity & occurrences)
@@ -531,7 +543,7 @@ export default function StepAccordion({
       .slice(0, 2)
 
     setErrorWatchOuts(topWatchOuts)
-  }, [isActive, isCompleted, step.stepType, step.requiredConcepts, currentHintLevel, domain, subdomain, dismissedWatchOuts])
+  }, [isActive, isCompleted, step.stepType, step.requiredConcepts, domain, subdomain, dismissedWatchOuts])
 
   const handleDismissWatchOut = (patternId: string) => {
     setDismissedWatchOuts(prev => {
