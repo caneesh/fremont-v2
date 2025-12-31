@@ -167,3 +167,69 @@ export function isMicroTaskScaffold(data: unknown): data is MicroTaskScaffoldDat
     isMicroTaskStep((data as MicroTaskScaffoldData).steps[0])
   )
 }
+
+// ============================================
+// Multi-Attempt Difficulty Tuning Types
+// ============================================
+
+/**
+ * Difficulty levels for micro-tasks
+ */
+export type TaskDifficulty = 'easy' | 'medium' | 'hard'
+
+/**
+ * Record of a single task attempt for difficulty tuning
+ */
+export interface AttemptRecord {
+  stepId: string
+  taskLevel: number
+  isCorrect: boolean
+  attemptNumber: number   // Which attempt this was (1-indexed)
+  timestamp: number       // Unix timestamp
+  difficulty: TaskDifficulty  // Difficulty at time of attempt
+}
+
+/**
+ * Aggregated performance metrics for a step
+ */
+export interface StepPerformanceMetrics {
+  stepId: string
+  totalAttempts: number
+  correctOnFirstTry: number
+  correctAfterMultiple: number
+  totalIncorrect: number
+  averageAttemptsToCorrect: number
+}
+
+/**
+ * Configuration for difficulty tuning behavior
+ */
+export interface DifficultyTuningConfig {
+  /** Number of consecutive correct first-try answers to trigger difficulty increase */
+  increaseThreshold: number
+  /** Number of consecutive wrong answers to trigger difficulty decrease */
+  decreaseThreshold: number
+  /** Whether to tune within a step (micro-task level) or across steps */
+  tuneScope: 'task' | 'step' | 'session'
+  /** Enable/disable tuning */
+  enabled: boolean
+}
+
+/**
+ * Default difficulty tuning configuration
+ */
+export const DEFAULT_TUNING_CONFIG: DifficultyTuningConfig = {
+  increaseThreshold: 2,  // 2 correct first-tries → increase difficulty
+  decreaseThreshold: 2,  // 2 wrong attempts → decrease difficulty
+  tuneScope: 'step',
+  enabled: true,
+}
+
+/**
+ * Result of difficulty tuning calculation
+ */
+export interface TuningResult {
+  recommendedDifficulty: TaskDifficulty
+  reason: 'increase' | 'decrease' | 'maintain'
+  confidence: number  // 0-1, how confident we are in this recommendation
+}

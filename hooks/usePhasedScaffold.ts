@@ -14,7 +14,16 @@ import type {
   FinalSolveResponse,
   OutlineStep,
 } from '@/types/phasedScaffold'
-import type { MicroTaskScaffoldData, MicroTaskStep, MicroTask } from '@/types/microTask'
+import type {
+  MicroTaskScaffoldData,
+  MicroTaskStep,
+  MicroTask,
+  AttemptRecord,
+  TaskDifficulty,
+  DifficultyTuningConfig,
+  TuningResult,
+} from '@/types/microTask'
+import { DEFAULT_TUNING_CONFIG } from '@/types/microTask'
 import type { DiagramStepData, RequiredForce, ForceDirection } from '@/types/diagram'
 import { authenticatedFetch } from '@/lib/api/apiClient'
 
@@ -27,6 +36,10 @@ export interface PhasedScaffoldState {
   finalSolve: FinalSolveResponse | null
   error: string | null
   currentLoadingStepId: string | null
+  /** Attempt history for difficulty tuning */
+  attemptHistory: AttemptRecord[]
+  /** Current difficulty level per step (tuned based on performance) */
+  stepDifficulties: Map<string, TaskDifficulty>
 }
 
 export interface UsePhasedScaffoldReturn {
@@ -35,6 +48,12 @@ export interface UsePhasedScaffoldReturn {
   loadStepExpansion: (stepId: string) => Promise<StepExpansionResponse | null>
   loadFinalSolve: (stepsCompleted?: string[]) => Promise<FinalSolveResponse | null>
   getAdaptedScaffoldData: () => MicroTaskScaffoldData | null
+  /** Record a task attempt for difficulty tuning */
+  recordAttempt: (stepId: string, taskLevel: number, isCorrect: boolean, attemptNumber: number) => void
+  /** Get the current tuned difficulty for a step */
+  getStepDifficulty: (stepId: string) => TaskDifficulty
+  /** Configure difficulty tuning behavior */
+  setTuningConfig: (config: Partial<DifficultyTuningConfig>) => void
   reset: () => void
 }
 
@@ -49,10 +68,15 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
     finalSolve: null,
     error: null,
     currentLoadingStepId: null,
+    attemptHistory: [],
+    stepDifficulties: new Map(),
   })
 
   // Use ref to maintain stable reference to current outline
   const outlineRef = useRef<OutlineScaffoldResponse | null>(null)
+
+  // Tuning configuration ref (doesn't need to trigger re-renders)
+  const tuningConfigRef = useRef<DifficultyTuningConfig>(DEFAULT_TUNING_CONFIG)
 
   /**
    * Load outline scaffold (Phase A)
@@ -385,10 +409,138 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
   }, [state])
 
   /**
+   * Calculate tuned difficulty based on attempt history
+   * Uses sliding window of recent attempts to determine if difficulty should change
+   */
+  const calculateTunedDifficulty = useCallback((
+    stepId: string,
+    currentDifficulty: TaskDifficulty,
+    attemptHistory: AttemptRecord[]
+  ): TuningResult => {
+    const config = tuningConfigRef.current
+    if (!config.enabled) {
+      return { recommendedDifficulty: currentDifficulty, reason: 'maintain', confidence: 1 }
+    }
+
+    // Filter attempts for this step (or all attempts if session scope)
+    const relevantAttempts = config.tuneScope === 'session'
+      ? attemptHistory
+      : attemptHistory.filter(a => a.stepId === stepId)
+
+    if (relevantAttempts.length === 0) {
+      return { recommendedDifficulty: currentDifficulty, reason: 'maintain', confidence: 0.5 }
+    }
+
+    // Look at recent attempts (sliding window)
+    const recentAttempts = relevantAttempts.slice(-5)
+
+    // Count correct first-tries and consecutive wrongs
+    let consecutiveCorrectFirstTries = 0
+    let consecutiveWrongs = 0
+
+    for (const attempt of recentAttempts.reverse()) {
+      if (attempt.isCorrect && attempt.attemptNumber === 1) {
+        consecutiveCorrectFirstTries++
+        consecutiveWrongs = 0
+      } else if (!attempt.isCorrect) {
+        consecutiveWrongs++
+        consecutiveCorrectFirstTries = 0
+      } else {
+        // Correct but not first try - reset both
+        consecutiveCorrectFirstTries = 0
+        consecutiveWrongs = 0
+      }
+    }
+
+    // Determine if we should adjust difficulty
+    const difficultyOrder: TaskDifficulty[] = ['easy', 'medium', 'hard']
+    const currentIndex = difficultyOrder.indexOf(currentDifficulty)
+
+    if (consecutiveCorrectFirstTries >= config.increaseThreshold && currentIndex < 2) {
+      // Student is doing well - increase difficulty
+      return {
+        recommendedDifficulty: difficultyOrder[currentIndex + 1],
+        reason: 'increase',
+        confidence: Math.min(consecutiveCorrectFirstTries / (config.increaseThreshold + 1), 1),
+      }
+    }
+
+    if (consecutiveWrongs >= config.decreaseThreshold && currentIndex > 0) {
+      // Student is struggling - decrease difficulty
+      return {
+        recommendedDifficulty: difficultyOrder[currentIndex - 1],
+        reason: 'decrease',
+        confidence: Math.min(consecutiveWrongs / (config.decreaseThreshold + 1), 1),
+      }
+    }
+
+    return { recommendedDifficulty: currentDifficulty, reason: 'maintain', confidence: 0.7 }
+  }, [])
+
+  /**
+   * Record a task attempt and update difficulty if needed
+   */
+  const recordAttempt = useCallback((
+    stepId: string,
+    taskLevel: number,
+    isCorrect: boolean,
+    attemptNumber: number
+  ) => {
+    setState(prev => {
+      const currentDifficulty = prev.stepDifficulties.get(stepId) || 'medium'
+
+      // Create new attempt record
+      const newAttempt: AttemptRecord = {
+        stepId,
+        taskLevel,
+        isCorrect,
+        attemptNumber,
+        timestamp: Date.now(),
+        difficulty: currentDifficulty,
+      }
+
+      const newHistory = [...prev.attemptHistory, newAttempt]
+
+      // Calculate if difficulty should change
+      const tuningResult = calculateTunedDifficulty(stepId, currentDifficulty, newHistory)
+
+      // Update step difficulties if changed
+      const newStepDifficulties = new Map(prev.stepDifficulties)
+      if (tuningResult.recommendedDifficulty !== currentDifficulty) {
+        newStepDifficulties.set(stepId, tuningResult.recommendedDifficulty)
+        console.log(
+          `[Difficulty Tuning] Step ${stepId}: ${currentDifficulty} → ${tuningResult.recommendedDifficulty} (${tuningResult.reason})`
+        )
+      }
+
+      return {
+        ...prev,
+        attemptHistory: newHistory,
+        stepDifficulties: newStepDifficulties,
+      }
+    })
+  }, [calculateTunedDifficulty])
+
+  /**
+   * Get the current tuned difficulty for a step
+   */
+  const getStepDifficulty = useCallback((stepId: string): TaskDifficulty => {
+    return state.stepDifficulties.get(stepId) || 'medium'
+  }, [state.stepDifficulties])
+
+  /**
+   * Configure difficulty tuning behavior
+   */
+  const setTuningConfig = useCallback((config: Partial<DifficultyTuningConfig>) => {
+    tuningConfigRef.current = { ...tuningConfigRef.current, ...config }
+  }, [])
+
+  /**
    * Reset all state
    */
   const reset = useCallback(() => {
     outlineRef.current = null
+    tuningConfigRef.current = DEFAULT_TUNING_CONFIG
     setState({
       loadingState: 'idle',
       outline: null,
@@ -396,6 +548,8 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
       finalSolve: null,
       error: null,
       currentLoadingStepId: null,
+      attemptHistory: [],
+      stepDifficulties: new Map(),
     })
   }, [])
 
@@ -405,6 +559,9 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
     loadStepExpansion,
     loadFinalSolve,
     getAdaptedScaffoldData,
+    recordAttempt,
+    getStepDifficulty,
+    setTuningConfig,
     reset,
   }
 }
