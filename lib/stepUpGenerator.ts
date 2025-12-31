@@ -1,9 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { StepUpRequest, StepUpProblem } from '@/types/stepUp'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  })
+}
 
 /**
  * Physics Curriculum Architect
@@ -89,7 +92,7 @@ Each step adds ONE thing. Each step builds on previous intuition.
 
 Respond with ONLY the JSON object, no other text.`
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 2048,
     messages: [

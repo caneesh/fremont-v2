@@ -40,10 +40,12 @@ import {
   SCHEMA_VERSION,
 } from './scaffoldCache'
 
-// Initialize the Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  })
+}
 
 export interface OutlineOptions {
   density?: 1 | 2 | 3 | 4 | 5
@@ -112,7 +114,7 @@ export async function generateOutlineScaffold(
   })
 
   // Call Anthropic API with reduced token limit for speed
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: OUTLINE_MAX_TOKENS,
     system: OUTLINE_SYSTEM_PROMPT,
@@ -189,7 +191,7 @@ export async function generateStepExpansion(
   const userPrompt = buildStepExpansionPrompt(problem, outlineSteps, targetStepId)
 
   // Call Anthropic API
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: STEP_EXPANSION_MAX_TOKENS,
     system: STEP_EXPANSION_SYSTEM_PROMPT,
@@ -272,7 +274,7 @@ export async function generateFinalSolve(
   const userPrompt = buildFinalSolvePrompt(problem, stepsCompleted)
 
   // Call Anthropic API
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: FINAL_SOLVE_MAX_TOKENS,
     system: FINAL_SOLVE_SYSTEM_PROMPT,

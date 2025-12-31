@@ -1,9 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { FeynmanScript, FeynmanRequest } from '@/types/feynman'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  })
+}
 
 /**
  * The Feynman Scriptwriter
@@ -77,7 +80,7 @@ ${problemStatement ? `**Problem**: ${problemStatement}` : ''}
 
 Generate the script now. Respond with ONLY the JSON, no other text.`
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 1024,
     messages: [

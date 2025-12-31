@@ -15,10 +15,12 @@ import type {
 } from '@/types/feynman'
 import { getTopicKeywords, COMMON_MECHANISM_WORDS, GENERIC_FORBIDDEN_PATTERNS } from './feynmanKeywords'
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  })
+}
 
 /**
  * System prompt for the LLM validator
@@ -271,7 +273,7 @@ STUDENT'S EXPLANATION:
 Analyze this explanation and respond with JSON only.`
 
   try {
-    const message = await anthropic.messages.create({
+    const message = await getAnthropicClient().messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1024,
       system: FEYNMAN_VALIDATOR_SYSTEM_PROMPT,

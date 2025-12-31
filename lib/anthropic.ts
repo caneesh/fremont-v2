@@ -3,10 +3,12 @@ import { FEATURE_FLAGS } from './featureFlags'
 import type { DiagramStepData, RequiredForce, ScenarioType, ObjectShape } from '@/types/diagram'
 import type { PreFlightCheck, PreCondition, TrapOption, PreFlightCheckItem } from '@/types/preFlightCheck'
 
-// Initialize the Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-})
+// Create client lazily to ensure env vars are available in serverless context
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  })
+}
 
 export interface SolverResponse {
   solution: string
@@ -470,7 +472,7 @@ Respond with ONLY the JSON, no other text.`
     text: combinedPrompt,
   })
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 6144, // Reduced since we're only generating 3 hint levels
     messages: [
@@ -725,7 +727,7 @@ Respond with ONLY valid JSON, no other text.`
     text: microTaskPrompt,
   })
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 8192,
     messages: [
@@ -790,7 +792,7 @@ COMMON PITFALLS:
 FINAL ANSWER:
 [Single line with the final numerical answer and units]`
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 4096,
     messages: [
@@ -978,7 +980,7 @@ Output your response as valid JSON with this EXACT structure:
 
 Respond with ONLY the JSON, no other text.`
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 8192, // Increased for 5-level hint ladder
     messages: [
@@ -1098,7 +1100,7 @@ CRITICAL RULES:
 
 Respond with ONLY valid JSON, no other text.`
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 2048,
     messages: [
