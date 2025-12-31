@@ -9,6 +9,7 @@ import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import PageHeader from '@/components/PageHeader'
+import ProblemReplay from '@/components/ProblemReplay'
 
 export default function HistoryPage() {
   const router = useRouter()
@@ -19,6 +20,7 @@ export default function HistoryPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
+  const [expandedTimeline, setExpandedTimeline] = useState<string | null>(null)
 
   useEffect(() => {
     loadHistory()
@@ -265,6 +267,21 @@ export default function HistoryPage() {
                       Open
                     </button>
                     <button
+                      onClick={() => setExpandedTimeline(
+                        expandedTimeline === attempt.problemId ? null : attempt.problemId
+                      )}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-sm border transition-colors ${
+                        expandedTimeline === attempt.problemId
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-500/50 text-blue-700 dark:text-blue-400'
+                          : 'bg-white dark:bg-dark-card-soft border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-border'
+                      }`}
+                      title="View timeline"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                    <button
                       onClick={() => handleToggleReview(attempt.problemId)}
                       className={`px-3 sm:px-4 py-2 rounded-lg text-sm border transition-colors ${
                         attempt.reviewFlag
@@ -290,6 +307,17 @@ export default function HistoryPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Timeline Replay */}
+                {expandedTimeline === attempt.problemId && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+                    <ProblemReplay
+                      problemId={attempt.problemId}
+                      problemTitle={attempt.problemTitle}
+                      onClose={() => setExpandedTimeline(null)}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
