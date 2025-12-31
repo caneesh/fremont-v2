@@ -31,7 +31,7 @@ import {
 // Main Service Class
 // ============================================
 
-class StudyPlanV2Service {
+export class StudyPlanV2Service {
   private repo: StudyPlanV2Repository
 
   constructor(repo: StudyPlanV2Repository = studyPlanV2Repository) {
