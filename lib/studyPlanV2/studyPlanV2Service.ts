@@ -92,6 +92,32 @@ class StudyPlanV2Service {
     return patterns.map(p => this.getPatternState(userId, p.id))
   }
 
+  /**
+   * Mark a pattern session as completed (learn, practice, or drill)
+   */
+  markPatternSessionComplete(
+    userId: string,
+    patternId: string,
+    sessionType: 'learn' | 'practice' | 'drill'
+  ): void {
+    let state = this.repo.user.getUserPatternState(userId, patternId)
+    if (!state) {
+      state = createInitialPatternState(userId, patternId)
+    }
+
+    if (sessionType === 'learn' && !state.learnCompleted) {
+      state.learnCompleted = true
+      state.learnCompletedAt = new Date().toISOString()
+    } else if (sessionType === 'practice' && !state.guidedPracticeCompleted) {
+      state.guidedPracticeCompleted = true
+      state.guidedPracticeCompletedAt = new Date().toISOString()
+    } else if (sessionType === 'drill') {
+      state.drillsAttempted += 1
+    }
+
+    this.repo.user.saveUserPatternState(state)
+  }
+
   // ============================================
   // Pattern Track Operations
   // ============================================

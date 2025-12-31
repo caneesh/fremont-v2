@@ -107,10 +107,17 @@ export function advanceV2Session(): string | null {
 
   const nextIndex = session.currentIndex + 1
   if (nextIndex >= session.problemIds.length) {
-    // Session complete - mark plan item as completed
+    const userId = authService.getUserId() || 'default-user'
+
+    // Session complete - mark plan item as completed (if from daily plan)
     if (session.itemId) {
-      const userId = authService.getUserId() || 'default-user'
       studyPlanV2Service.completePlanItem(userId, session.itemId)
+    }
+
+    // Mark pattern session as complete (learn/practice/drill)
+    if (session.patternId && session.type) {
+      const sessionType = session.type as 'learn' | 'practice' | 'drill'
+      studyPlanV2Service.markPatternSessionComplete(userId, session.patternId, sessionType)
     }
 
     // Clear session
@@ -141,10 +148,17 @@ export function completeV2Session(): void {
   const session = getV2SessionInfo()
   if (!session) return
 
+  const userId = authService.getUserId() || 'default-user'
+
   // Mark plan item as completed if we have an item ID
   if (session.itemId) {
-    const userId = authService.getUserId() || 'default-user'
     studyPlanV2Service.completePlanItem(userId, session.itemId)
+  }
+
+  // Mark pattern session as complete (learn/practice/drill)
+  if (session.patternId && session.type) {
+    const sessionType = session.type as 'learn' | 'practice' | 'drill'
+    studyPlanV2Service.markPatternSessionComplete(userId, session.patternId, sessionType)
   }
 
   clearV2Session()

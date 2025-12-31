@@ -80,8 +80,14 @@ Rules:
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error generating questions:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const hasApiKey = !!process.env.ANTHROPIC_API_KEY
     return NextResponse.json(
-      { error: 'Failed to generate questions' },
+      {
+        error: 'Failed to generate questions',
+        details: errorMessage.substring(0, 100),
+        hasApiKey
+      },
       { status: 500 }
     )
   }
@@ -176,8 +182,14 @@ Respond with ONLY valid JSON.`
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error analyzing answer:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const hasApiKey = !!process.env.ANTHROPIC_API_KEY
     return NextResponse.json(
-      { error: 'Failed to analyze answer' },
+      {
+        error: 'Failed to analyze answer',
+        details: errorMessage.substring(0, 100),
+        hasApiKey
+      },
       { status: 500 }
     )
   }
