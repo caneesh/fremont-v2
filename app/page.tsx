@@ -8,6 +8,7 @@ import PhasedScaffoldWrapper from '@/components/PhasedScaffoldWrapper'
 import PrerequisiteCheck from '@/components/PrerequisiteCheck'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
+import Image from 'next/image'
 import ContinueBanner from '@/components/ContinueBanner'
 import DemoTour from '@/components/DemoTour'
 import DailyDebriefCard from '@/components/DailyDebriefCard'
@@ -257,9 +258,16 @@ function HomeContent() {
             <div className="flex-1 text-center md:text-center">
               <button
                 onClick={handleReset}
-                className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-2 md:mb-4 hover:opacity-80 transition-opacity cursor-pointer"
+                className="mb-2 md:mb-4 hover:opacity-80 transition-opacity cursor-pointer"
               >
-                PhysiScaffold
+                <Image
+                  src="/logo.png"
+                  alt="PhysiScaffold"
+                  width={300}
+                  height={60}
+                  className="h-10 sm:h-12 md:h-14 w-auto mx-auto dark:brightness-110 dark:contrast-90"
+                  priority
+                />
               </button>
             </div>
             {/* Desktop Navigation - Hidden on mobile */}

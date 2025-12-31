@@ -6,6 +6,10 @@ import { ThemeProvider } from '@/lib/ThemeContext'
 export const metadata: Metadata = {
   title: 'PhysiScaffold - The Socratic Physics Engine',
   description: 'Active Decomposition: We don\'t give answers; we give the framework for the answer.',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 }
 
 export default function RootLayout({

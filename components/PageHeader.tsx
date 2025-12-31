@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 interface PageHeaderProps {
@@ -23,9 +24,14 @@ export default function PageHeader({
         href="/"
         className="inline-flex items-center gap-2 group mb-3"
       >
-        <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-          PhysiScaffold
-        </span>
+        <Image
+          src="/logo.png"
+          alt="PhysiScaffold"
+          width={180}
+          height={40}
+          className="h-8 sm:h-10 w-auto group-hover:opacity-80 transition-opacity dark:brightness-110 dark:contrast-90"
+          priority
+        />
         <svg
           className="w-4 h-4 text-gray-400 dark:text-dark-text-muted group-hover:text-gray-600 dark:group-hover:text-dark-text-secondary transition-colors"
           fill="none"

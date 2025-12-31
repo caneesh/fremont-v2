@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { authService } from '@/lib/auth/authService'
 import { quotaService } from '@/lib/auth/quotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
@@ -69,9 +70,14 @@ export default function AuthGate({ children }: AuthGateProps) {
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark-lg p-6 sm:p-8 border border-transparent dark:border-dark-border">
             {/* Logo/Header */}
             <div className="text-center mb-6 sm:mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
-                PhysiScaffold
-              </h1>
+              <Image
+                src="/logo.png"
+                alt="PhysiScaffold"
+                width={280}
+                height={56}
+                className="h-12 sm:h-14 w-auto mx-auto mb-2 dark:brightness-110 dark:contrast-90"
+                priority
+              />
               <p className="text-base sm:text-lg text-gray-600 dark:text-dark-text-secondary italic">
                 The Socratic Physics Engine
               </p>
