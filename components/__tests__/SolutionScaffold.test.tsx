@@ -290,6 +290,34 @@ vi.mock('../simulation', () => ({
   WhatIfSimulation: () => <div data-testid="what-if-simulation" />,
 }))
 
+vi.mock('../SocraticRewindModal', () => ({
+  default: ({
+    isOpen,
+    context,
+    triggerSource,
+    onClose,
+    onReturnToStep,
+    onProceed,
+  }: {
+    isOpen: boolean
+    context: { previousValidStep: { stepId: number } }
+    triggerSource: string
+    onClose: () => void
+    onReturnToStep: (stepId: number) => void
+    onProceed: () => void
+  }) =>
+    isOpen ? (
+      <div data-testid="socratic-rewind-modal" data-trigger={triggerSource}>
+        <span data-testid="rewind-step-id">{context?.previousValidStep?.stepId}</span>
+        <button onClick={onClose}>close-rewind</button>
+        <button onClick={() => onReturnToStep(context?.previousValidStep?.stepId ?? 0)}>
+          return-to-step
+        </button>
+        <button onClick={onProceed}>proceed-anyway</button>
+      </div>
+    ) : null,
+}))
+
 const baseConcepts = [
   { id: 'c1', name: 'Concept 1', definition: 'Def' },
 ]
@@ -1529,6 +1557,128 @@ describe('SolutionScaffold', () => {
       const calls = vi.mocked(problemHistoryService.saveDraft).mock.calls
       const savedProgress = calls[calls.length - 1][2]
       expect(savedProgress.currentStep).toBe(1)
+    })
+  })
+
+  describe('Recover from stuck button', () => {
+    it('renders the Stuck button in the Solution Roadmap header', () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      const stuckButton = screen.getByTitle('Get help if you\'re stuck on the current step')
+      expect(stuckButton).toBeDefined()
+      expect(stuckButton.textContent).toContain('Stuck?')
+    })
+
+    it('opens Socratic Rewind modal when Stuck button is clicked', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // Modal should not be visible initially
+      expect(screen.queryByTestId('socratic-rewind-modal')).toBeNull()
+
+      // Click the Stuck button
+      const stuckButton = screen.getByTitle('Get help if you\'re stuck on the current step')
+      await act(async () => {
+        fireEvent.click(stuckButton)
+      })
+
+      // Modal should now be visible with manual trigger
+      const modal = screen.getByTestId('socratic-rewind-modal')
+      expect(modal).toBeDefined()
+      expect(modal.getAttribute('data-trigger')).toBe('manual')
+    })
+
+    it('closes Socratic Rewind modal when close button is clicked', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // Open the modal
+      const stuckButton = screen.getByTitle('Get help if you\'re stuck on the current step')
+      await act(async () => {
+        fireEvent.click(stuckButton)
+      })
+
+      expect(screen.getByTestId('socratic-rewind-modal')).toBeDefined()
+
+      // Close the modal
+      await act(async () => {
+        fireEvent.click(screen.getByText('close-rewind'))
+      })
+
+      expect(screen.queryByTestId('socratic-rewind-modal')).toBeNull()
+    })
+
+    it('builds context from current step when Stuck button is clicked', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // Complete the first step to have a previous valid step
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('complete-step')[0])
+      })
+
+      // Now on step 2, click Stuck
+      const stuckButton = screen.getByTitle('Get help if you\'re stuck on the current step')
+      await act(async () => {
+        fireEvent.click(stuckButton)
+      })
+
+      // The modal should show with the previous step (step 0, which is index 0)
+      const stepIdSpan = screen.getByTestId('rewind-step-id')
+      expect(stepIdSpan.textContent).toBe('0')
+    })
+
+    it('allows proceeding from Socratic Rewind modal', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // Complete first step
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('complete-step')[0])
+      })
+
+      // Verify we're on step 2 (index 1)
+      const stepNodes = screen.getAllByTestId('step-accordion')
+      expect(stepNodes[1].getAttribute('data-active')).toBe('true')
+
+      // Click Stuck button
+      const stuckButton = screen.getByTitle('Get help if you\'re stuck on the current step')
+      await act(async () => {
+        fireEvent.click(stuckButton)
+      })
+
+      // Modal should be open
+      expect(screen.getByTestId('socratic-rewind-modal')).toBeDefined()
+
+      // Click proceed anyway - this should trigger the proceed callback
+      await act(async () => {
+        fireEvent.click(screen.getByText('proceed-anyway'))
+      })
+
+      // Modal still open (proceed doesn't auto-close, user must close explicitly)
+      // In real usage, the modal handles this internally
+      expect(screen.getByTestId('socratic-rewind-modal')).toBeDefined()
     })
   })
 })
