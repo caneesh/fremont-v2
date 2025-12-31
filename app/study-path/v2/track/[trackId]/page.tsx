@@ -1,12 +1,25 @@
-export default function PatternTrackPage({
-  params,
-}: {
-  params: Promise<{ trackId: string }>
-}) {
+'use client'
+
+import { useParams, useRouter } from 'next/navigation'
+import PatternTrackDetail from '@/components/PatternTrackDetail'
+import MobileNav from '@/components/MobileNav'
+import PageHeader from '@/components/PageHeader'
+
+export default function PatternTrackPage() {
+  const params = useParams()
+  const router = useRouter()
+  const trackId = params.trackId as string
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
-      <h1 className="text-2xl font-bold">Pattern Track Detail</h1>
-      <p>Loading track...</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <MobileNav />
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <PageHeader />
+        <PatternTrackDetail
+          trackId={trackId}
+          onBack={() => router.push('/study-path')}
+        />
+      </div>
     </div>
   )
 }
