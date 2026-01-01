@@ -10,12 +10,13 @@ Welcome to PhysiScaffold - The Socratic Physics Engine. This guide walks you thr
 2. [Your Learning Dashboard](#2-your-learning-dashboard)
 3. [Learning a Pattern](#3-learning-a-pattern)
 4. [Solving Problems](#4-solving-problems)
-5. [Using Hints Effectively](#5-using-hints-effectively)
-6. [Practice and Drills](#6-practice-and-drills)
-7. [Tracking Your Progress](#7-tracking-your-progress)
-8. [Error Recovery and Review](#8-error-recovery-and-review)
-9. [Daily Limits and Quotas](#9-daily-limits-and-quotas)
-10. [Tips for Success](#10-tips-for-success)
+5. [Professor Check-In (Socratic Tutor)](#5-professor-check-in-socratic-tutor)
+6. [Using Hints Effectively](#6-using-hints-effectively)
+7. [Practice and Drills](#7-practice-and-drills)
+8. [Tracking Your Progress](#8-tracking-your-progress)
+9. [Error Recovery and Review](#9-error-recovery-and-review)
+10. [Daily Limits and Quotas](#10-daily-limits-and-quotas)
+11. [Tips for Success](#11-tips-for-success)
 
 ---
 
@@ -155,7 +156,67 @@ When you enter a problem, you'll see:
 
 ---
 
-## 5. Using Hints Effectively
+## 5. Professor Check-In (Socratic Tutor)
+
+After completing each step, a **Professor Check-In** appears to verify your understanding. This is your personal physics tutor ensuring you truly grasp the concepts!
+
+### What You'll See
+
+1. A purple chat window with a professor icon (👨‍🏫)
+2. A comprehension question about the step you just completed
+3. A text input to type your answer
+4. A "Skip" button (top right) if you need to move on
+
+### How It Works
+
+1. **Read the question** - The professor asks about the "why" behind the step
+2. **Type your answer** - Explain in your own words (1-2 sentences is fine)
+3. **Press Enter or click Send** - Submit your response
+4. **Receive feedback** - The professor responds to your answer
+
+### Possible Outcomes
+
+| Your Answer | What Happens |
+|-------------|--------------|
+| **Correct understanding** | Celebration with confetti! Auto-advances to next step |
+| **Partial understanding** | Professor asks a follow-up question to guide you |
+| **Misconception** | Professor gently redirects with a Socratic question |
+| **"I don't know"** | Professor breaks it down with a simpler question |
+
+### Example Conversation
+
+```
+👨‍🏫 Professor: "Why does the normal force point perpendicular
+    to the incline rather than straight up?"
+
+You: "Because surfaces can only push perpendicular to themselves,
+     they can't exert forces parallel to their surface."
+
+👨‍🏫 Professor: "Excellent! You've grasped the fundamental nature
+    of contact forces perfectly!"
+
+🎉 [Confetti celebration - Understanding verified!]
+```
+
+### Tips for Check-Ins
+
+1. **Explain the "why"** - Don't just restate what you did; explain why it works
+2. **Use your own words** - Paraphrasing shows real understanding
+3. **It's okay to be wrong** - The professor will guide you, not judge you
+4. **Be honest** - Saying "I'm not sure" leads to helpful follow-up questions
+5. **Skip sparingly** - These check-ins build deep understanding
+
+### Why This Matters
+
+The Professor Check-In ensures you're not just following steps mechanically. By explaining concepts in your own words, you:
+- Catch misconceptions early
+- Build lasting understanding
+- Develop the ability to teach others (Feynman technique)
+- Prepare for exam questions that test conceptual understanding
+
+---
+
+## 6. Using Hints Effectively
 
 PhysiScaffold provides **5 levels of progressive hints**. Use them strategically!
 
@@ -185,7 +246,7 @@ PhysiScaffold provides **5 levels of progressive hints**. Use them strategically
 
 ---
 
-## 6. Practice and Drills
+## 7. Practice and Drills
 
 ### Practice Mode
 
@@ -226,7 +287,7 @@ Your mastery for each pattern is tracked:
 
 ---
 
-## 7. Tracking Your Progress
+## 8. Tracking Your Progress
 
 ### Pattern Progress Badges
 
@@ -253,7 +314,7 @@ A pattern is mastered when:
 
 ---
 
-## 8. Error Recovery and Review
+## 9. Error Recovery and Review
 
 ### Common Mistakes
 
@@ -284,7 +345,7 @@ Access via the **Errors** tab in Study Path:
 
 ---
 
-## 9. Daily Limits and Quotas
+## 10. Daily Limits and Quotas
 
 As a pilot user, you have daily limits:
 
@@ -311,7 +372,7 @@ All limits reset at **midnight** (your local time).
 
 ---
 
-## 10. Tips for Success
+## 11. Tips for Success
 
 ### Before Starting a Problem
 
