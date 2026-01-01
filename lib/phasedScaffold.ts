@@ -146,6 +146,27 @@ export async function generateOutlineScaffold(
       concepts: outlineData.concepts || [],
       steps: outlineData.steps || [],
       estimated_time_mins: outlineData.estimated_time_mins || 15,
+      // Pattern-First Mode fields
+      pattern_options: outlineData.pattern_options,
+      primary_pattern_id: outlineData.primary_pattern_id,
+      // Apply default time pressure config if pattern options exist
+      time_pressure: outlineData.pattern_options?.length ? {
+        enablePatternFirst: true,
+        lockSeconds: 12,
+        showCountdown: true,
+        allowTimeoutProceed: true,
+      } : undefined,
+    }
+
+    // Validate pattern options
+    if (response.pattern_options?.length) {
+      const hasCorrectPattern = response.pattern_options.some(
+        p => p.id === response.primary_pattern_id
+      )
+      if (!hasCorrectPattern) {
+        console.warn(`[Phased Scaffold] Primary pattern "${response.primary_pattern_id}" not found in options`)
+      }
+      console.log(`[Phased Scaffold] Generated ${response.pattern_options.length} pattern options`)
     }
 
     // Cache the result

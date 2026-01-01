@@ -11,7 +11,7 @@ CRITICAL CONSTRAINTS:
 - Output ONLY valid JSON, no other text
 - Keep responses SHORT - this is an outline, not full content
 - Each step goal/task must be 1 sentence max
-- Total response must fit in ~1500 tokens
+- Total response must fit in ~1800 tokens
 
 OUTPUT FORMAT:
 {
@@ -32,6 +32,15 @@ OUTPUT FORMAT:
       "requires_fbd": true/false
     }
   ],
+  "pattern_options": [
+    {
+      "id": "kebab-case-id",
+      "name": "Pattern Name",
+      "description": "One sentence description",
+      "triggers": ["keyword1", "keyword2"]
+    }
+  ],
+  "primary_pattern_id": "kebab-case-id",
   "estimated_time_mins": 15
 }`
 
@@ -66,11 +75,33 @@ SCENARIO DETECTION (for diagram steps):
 - "rotating": Rotating reference frames, circular motion
 - "horizontal": Block on flat surface
 
+PATTERN OPTIONS (for pattern recognition training):
+Generate 4-6 pattern_options that include:
+1. The CORRECT primary pattern (set as primary_pattern_id)
+2. 3-5 plausible DISTRACTOR patterns from similar physics domains
+
+Common physics patterns to choose from:
+- conservation-of-momentum: Collisions, explosions, recoil
+- conservation-of-energy: Height changes, springs, no friction
+- work-energy-theorem: Force over distance, friction present
+- newton-laws: Force analysis, acceleration, equilibrium
+- kinematics: Motion with constant acceleration
+- projectile-motion: 2D motion under gravity
+- circular-motion: Rotation, centripetal force
+- simple-harmonic-motion: Oscillations, springs, pendulums
+- impulse-momentum: Quick impacts, force-time graphs
+- rotational-dynamics: Torque, moment of inertia
+- friction-analysis: Static/kinetic friction, rough surfaces
+- pulley-systems: Tension, connected masses
+- inclined-plane: Blocks on slopes
+
+Each pattern needs: id (kebab-case), name (display), description (1 sentence), triggers (2-3 keywords students look for)
+
 Output ONLY the JSON, nothing else.`
 }
 
 /**
  * Max tokens for outline generation
- * Kept low for fast response (~10-20s)
+ * Slightly higher to accommodate pattern options
  */
-export const OUTLINE_MAX_TOKENS = 2000
+export const OUTLINE_MAX_TOKENS = 2500

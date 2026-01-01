@@ -10,6 +10,7 @@
 import type { StepType } from './scaffold'
 import type { DiagramStepData } from './diagram'
 import type { FeynmanPromptConfig } from './feynman'
+import type { PatternOption, TimePressureConfig } from './patternFirst'
 
 // ============================================
 // Phase A: Outline Types
@@ -57,6 +58,11 @@ export interface OutlineScaffoldResponse {
   }>
   steps: OutlineStep[]      // 4-6 steps with minimal info
   estimated_time_mins: number // Rough estimate for user
+
+  // Pattern-First Mode fields (optional for backwards compatibility)
+  pattern_options?: PatternOption[]  // 4-6 pattern choices for recognition training
+  primary_pattern_id?: string        // The correct pattern ID
+  time_pressure?: TimePressureConfig // Timer configuration (defaults applied if missing)
 }
 
 // ============================================

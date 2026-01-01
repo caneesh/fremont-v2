@@ -397,6 +397,10 @@ export function usePhasedScaffold(): UsePhasedScaffoldReturn {
         expectedBehavior: 'The result should reduce to a known case.',
         type: 'limit' as const,
       },
+      // Pattern-First Mode fields (snake_case from API → camelCase for frontend)
+      patterns: outline.pattern_options,
+      primaryPatternId: outline.primary_pattern_id,
+      timePressure: outline.time_pressure,
       // Include phased scaffold metadata
       _scaffoldId: outline.scaffold_id,
       _schemaVersion: outline.schema_version,
