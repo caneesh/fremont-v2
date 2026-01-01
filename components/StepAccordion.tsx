@@ -18,6 +18,8 @@ import { errorPatternService } from '@/lib/errorPatternService'
 import type { ErrorPatternSummary } from '@/types/errorPatterns'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import type { FeynmanPromptConfig } from '@/types/feynman'
+import type { StepRebuildGateState } from '@/types/gatingPolicy'
+import RebuildGate from './RebuildGate'
 
 interface StepAccordionProps {
   step: Step
@@ -35,6 +37,11 @@ interface StepAccordionProps {
   problemTitle?: string
   domain?: string
   subdomain?: string
+  // P0 Rebuild Gate props
+  rebuildGateState?: StepRebuildGateState | null
+  onRebuildGateTriggered?: (stepId: number, stepTitle: string) => void
+  onRebuildGateAnswer?: (stepId: number, questionIndex: number, selectedIndex: number) => { isCorrect: boolean; allPassed: boolean }
+  canProceed?: boolean
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -56,6 +63,10 @@ export default function StepAccordion({
   problemTitle,
   domain,
   subdomain,
+  rebuildGateState,
+  onRebuildGateTriggered,
+  onRebuildGateAnswer,
+  canProceed = true,
   onAnswerChange,
   onComplete,
   onActivate,
@@ -120,6 +131,11 @@ export default function StepAccordion({
   }
 
   const handleComplete = () => {
+    // P0 Rebuild Gate: Block completion if rebuild gate is active and not passed
+    if (FEATURE_FLAGS.P0_REBUILD_GATES && rebuildGateState?.isActive && !rebuildGateState.gatePassed) {
+      return // Cannot complete until rebuild gate is passed
+    }
+
     // Track timeout if step took too long
     if (problemId && stepActivationTimeRef.current) {
       const durationMs = Date.now() - stepActivationTimeRef.current
@@ -305,6 +321,11 @@ export default function StepAccordion({
         })
 
         onHintLevelChange(nextLevel)
+
+        // P0 Rebuild Gate: Trigger rebuild gate when level 5 (Reveal) is unlocked
+        if (nextLevel === 5 && FEATURE_FLAGS.P0_REBUILD_GATES && onRebuildGateTriggered) {
+          onRebuildGateTriggered(step.id, step.title)
+        }
       } catch (error) {
         console.error('Failed to generate hint:', error)
         // Still unlock the level even if generation fails
@@ -315,6 +336,11 @@ export default function StepAccordion({
     } else {
       // Levels 1-3 or already generated, just unlock
       onHintLevelChange(nextLevel)
+
+      // P0 Rebuild Gate: Trigger rebuild gate when level 5 (Reveal) is unlocked
+      if (nextLevel === 5 && FEATURE_FLAGS.P0_REBUILD_GATES && onRebuildGateTriggered) {
+        onRebuildGateTriggered(step.id, step.title)
+      }
     }
   }
 
@@ -1090,6 +1116,21 @@ export default function StepAccordion({
                     ⚠️ You&apos;ve unlocked the full solution. Make sure you understand each step before moving forward.
                   </p>
                 </div>
+              )}
+
+              {/* P0 Rebuild Gate - shown after reveal (level 5) is used */}
+              {FEATURE_FLAGS.P0_REBUILD_GATES && rebuildGateState?.isActive && !rebuildGateState.gatePassed && onRebuildGateAnswer && (
+                <RebuildGate
+                  gateState={rebuildGateState}
+                  stepTitle={step.title}
+                  onAnswer={(questionIndex, selectedIndex) => {
+                    onRebuildGateAnswer(step.id, questionIndex, selectedIndex)
+                  }}
+                  onGatePassed={() => {
+                    // Gate passed - allow proceeding
+                    // The gate state is already updated by onRebuildGateAnswer
+                  }}
+                />
               )}
 
               {audioError && (

@@ -223,6 +223,34 @@ export const FEATURE_FLAGS = {
    */
   SKIP_COMMIT_GATE: process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT !== 'false'),
+
+  /**
+   * P0 Decision Gates
+   * When enabled, requires students to correctly complete micro-tasks before
+   * they can submit/complete a step (for concept, setup, equation step types).
+   *
+   * Features:
+   * - Configurable number of required correct answers (default: 1, or 2 if weak confidence)
+   * - Wrong answers show targeted feedback from micro_task.reasoning
+   * - Retry up to maxAttempts (default: 2); after that, auto-unlock Hint Level 2
+   * - Gating intensity increases if pattern gate was wrong or consecutive wrong submissions
+   */
+  P0_DECISION_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_DECISION_GATES === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_P0_DECISION_GATES !== 'false'),
+
+  /**
+   * P0 Rebuild Gates
+   * When enabled, forces students who use Hint Level 5 (Reveal/Full Solution)
+   * to demonstrate understanding before proceeding.
+   *
+   * Features:
+   * - Triggers immediately after reveal is shown
+   * - 2 questions: "Which pattern was used?" + "What was the first decision?"
+   * - Must answer correctly to unlock "Continue" / next step
+   * - Tracks: hint_used(level=5), rebuild_gate_shown, rebuild_gate_passed/failed
+   */
+  P0_REBUILD_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES !== 'false'),
 }
 
 /**

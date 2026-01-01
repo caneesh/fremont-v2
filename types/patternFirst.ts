@@ -73,6 +73,11 @@ export interface PatternScaffoldExtension {
 // ============================================
 
 /**
+ * Confidence level based on pattern gate performance
+ */
+export type PatternConfidence = 'strong' | 'weak'
+
+/**
  * User's pattern selection state
  */
 export interface PatternSelectionState {
@@ -82,6 +87,8 @@ export interface PatternSelectionState {
   decisionTimeMs: number
   /** Whether selection matches primary pattern (null if not yet evaluated) */
   isCorrect: boolean | null
+  /** Confidence level based on correctness (used for P0 gating) */
+  confidence: PatternConfidence
   /** Whether user proceeded without selection (timeout) */
   timedOut: boolean
   /** Timestamp of selection/timeout */
@@ -95,6 +102,7 @@ export const INITIAL_SELECTION_STATE: PatternSelectionState = {
   selectedPatternId: null,
   decisionTimeMs: 0,
   isCorrect: null,
+  confidence: 'weak',
   timedOut: false,
   timestamp: '',
 }

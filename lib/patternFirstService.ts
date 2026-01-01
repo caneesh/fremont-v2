@@ -152,6 +152,7 @@ export function createInitialSelectionState(): PatternSelectionState {
     selectedPatternId: null,
     decisionTimeMs: 0,
     isCorrect: null,
+    confidence: 'weak', // Default to weak until pattern is selected
     timedOut: false,
     timestamp: '',
   }
@@ -169,6 +170,7 @@ export function createSelectionState(
     selectedPatternId: patternId,
     decisionTimeMs: timeMs,
     isCorrect,
+    confidence: isCorrect ? 'strong' : 'weak',
     timedOut: false,
     timestamp: new Date().toISOString(),
   }
@@ -182,6 +184,7 @@ export function createTimeoutState(timeMs: number): PatternSelectionState {
     selectedPatternId: null,
     decisionTimeMs: timeMs,
     isCorrect: null,
+    confidence: 'weak', // Timeout always results in weak confidence
     timedOut: true,
     timestamp: new Date().toISOString(),
   }
@@ -209,6 +212,7 @@ export function fromProgressFormat(
     selectedPatternId: progress.selectedPatternId,
     decisionTimeMs: progress.patternDecisionTimeMs,
     isCorrect: progress.patternDecisionCorrect,
+    confidence: progress.patternDecisionCorrect ? 'strong' : 'weak',
     timedOut: progress.patternTimedOut,
     timestamp: '', // Not stored in progress format
   }

@@ -91,6 +91,17 @@ import {
   logPatternFirstUnlock,
   defaultTimePressure,
 } from '@/lib/patternFirstService'
+import type { SessionGatingPolicy, StepRebuildGateState } from '@/types/gatingPolicy'
+import {
+  getOrCreateSessionPolicy,
+  processPatternGateSelection,
+  processPatternGateTimeout,
+  triggerRebuildGate,
+  recordRebuildAnswer,
+  canProceedFromStep,
+  saveSessionPolicy,
+  clearSessionPolicy,
+} from '@/lib/gatingPolicyEngine'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -162,6 +173,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPatternFirst, setShowPatternFirst] = useState(false)
   const [patternSelectionState, setPatternSelectionState] = useState<PatternSelectionState | null>(null)
   const [isScaffoldLocked, setIsScaffoldLocked] = useState(false)
+
+  // P0 Gating Policy state
+  const [gatingPolicy, setGatingPolicy] = useState<SessionGatingPolicy | null>(null)
+  const gatingPolicyInitRef = useRef(false)
 
   // Skip-or-Commit Gate state
   const [showSkipCommitGate, setShowSkipCommitGate] = useState(false)
@@ -248,6 +263,62 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showSocraticRewind, setShowSocraticRewind] = useState(false)
   const [socraticRewindContext, setSocraticRewindContext] = useState<SocraticRewindContext | null>(null)
   const [socraticRewindTrigger, setSocraticRewindTrigger] = useState<RewindTriggerSource>('sanity_check_failed')
+
+  // Initialize P0 Gating Policy
+  useEffect(() => {
+    if (gatingPolicyInitRef.current) return
+    gatingPolicyInitRef.current = true
+
+    // Get or create session policy
+    const policy = getOrCreateSessionPolicy()
+    setGatingPolicy(policy)
+
+    // Clear policy on unmount (new problem = fresh policy)
+    return () => {
+      clearSessionPolicy()
+    }
+  }, [])
+
+  // P0 Rebuild Gate: Handler for when hint level 5 is used
+  const handleRebuildGateTriggered = useCallback((stepId: number, stepTitle: string) => {
+    if (!FEATURE_FLAGS.P0_REBUILD_GATES || !gatingPolicy) return
+
+    const updatedPolicy = triggerRebuildGate(
+      gatingPolicy,
+      stepId,
+      stepTitle,
+      data.patterns,
+      data.primaryPatternId
+    )
+    setGatingPolicy(updatedPolicy)
+  }, [gatingPolicy, data.patterns, data.primaryPatternId])
+
+  // P0 Rebuild Gate: Handler for answering rebuild questions
+  const handleRebuildGateAnswer = useCallback((stepId: number, questionIndex: number, selectedIndex: number) => {
+    if (!gatingPolicy) return { isCorrect: false, allPassed: false }
+
+    const { updatedPolicy, isCorrect, allPassed } = recordRebuildAnswer(
+      gatingPolicy,
+      stepId,
+      questionIndex,
+      selectedIndex
+    )
+    setGatingPolicy(updatedPolicy)
+
+    return { isCorrect, allPassed }
+  }, [gatingPolicy])
+
+  // P0 Rebuild Gate: Get gate state for a step
+  const getRebuildGateState = useCallback((stepId: number): StepRebuildGateState | null => {
+    if (!gatingPolicy) return null
+    return gatingPolicy.stepRebuildGates.get(stepId) || null
+  }, [gatingPolicy])
+
+  // P0 Rebuild Gate: Check if step can proceed
+  const canStepProceed = useCallback((stepId: number): boolean => {
+    if (!FEATURE_FLAGS.P0_REBUILD_GATES || !gatingPolicy) return true
+    return canProceedFromStep(gatingPolicy, stepId)
+  }, [gatingPolicy])
 
   // Auto-show drill modal when circuit breaker trips
   useEffect(() => {
@@ -576,6 +647,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             selectedPatternId: progress.patternSelection.selectedPatternId,
             decisionTimeMs: progress.patternSelection.patternDecisionTimeMs,
             isCorrect: progress.patternSelection.patternDecisionCorrect,
+            confidence: progress.patternSelection.patternDecisionCorrect ? 'strong' : 'weak',
             timedOut: progress.patternSelection.patternTimedOut,
             timestamp: '',
           })
@@ -643,6 +715,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     const state = createSelectionState(patternId, elapsedTimeMs, isCorrect)
     setPatternSelectionState(state)
 
+    // Update P0 gating policy with pattern gate result
+    if (gatingPolicy) {
+      const updatedPolicy = processPatternGateSelection(
+        gatingPolicy,
+        patternId,
+        data.primaryPatternId || '',
+        data.secondaryPatternIds,
+        elapsedTimeMs
+      )
+      setGatingPolicy(updatedPolicy)
+    }
+
     // Log analytics
     logPatternSelected(
       currentProblemId,
@@ -658,12 +742,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setIsScaffoldLocked(false)
       logPatternFirstUnlock(currentProblemId, true, isCorrect)
     }, 800)
-  }, [currentProblemId, data.primaryPatternId])
+  }, [currentProblemId, data.primaryPatternId, data.secondaryPatternIds, gatingPolicy])
 
   // Pattern-First Mode: Handler for timeout
   const handlePatternTimeout = useCallback((elapsedTimeMs: number) => {
     const state = createTimeoutState(elapsedTimeMs)
     setPatternSelectionState(state)
+
+    // Update P0 gating policy with timeout result (weak confidence)
+    if (gatingPolicy) {
+      const updatedPolicy = processPatternGateTimeout(gatingPolicy, elapsedTimeMs)
+      setGatingPolicy(updatedPolicy)
+    }
 
     // Log timeout
     logPatternTimeout(currentProblemId, elapsedTimeMs)
@@ -673,7 +763,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (timePressure.allowTimeoutProceed) {
       // Keep modal open but allow skip - handled by onSkip
     }
-  }, [currentProblemId, data.timePressure])
+  }, [currentProblemId, data.timePressure, gatingPolicy])
 
   // Pattern-First Mode: Handler for skip (after timeout)
   const handlePatternSkip = useCallback(() => {
@@ -2080,6 +2170,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       problemTitle={problemTitle()}
                       domain={data.domain}
                       subdomain={data.subdomain}
+                      rebuildGateState={getRebuildGateState(step.id)}
+                      onRebuildGateTriggered={handleRebuildGateTriggered}
+                      onRebuildGateAnswer={handleRebuildGateAnswer}
+                      canProceed={canStepProceed(step.id)}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => handleStepActivation(index)}
