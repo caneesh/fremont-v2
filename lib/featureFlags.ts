@@ -207,6 +207,22 @@ export const FEATURE_FLAGS = {
    */
   PATTERN_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST !== 'false'),
+
+  /**
+   * Skip-or-Commit Gate
+   * When enabled, forces learners to make a strategic decision at T=25 seconds:
+   * - Commit: continue solving the problem
+   * - Skip: exit and move to next problem (no shame)
+   *
+   * This trains exam-time strategy by forcing quick triage decisions.
+   * Features:
+   * - Configurable gate timing (default: 25 seconds)
+   * - Auto-commit after 8 seconds if user ignores
+   * - Session analytics for skip/commit patterns
+   * - "Should have skipped" flagging for problems where user spent >2x expected time AND got wrong
+   */
+  SKIP_COMMIT_GATE: process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT !== 'false'),
 }
 
 /**

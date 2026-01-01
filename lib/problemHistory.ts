@@ -155,6 +155,41 @@ class ProblemHistoryService {
   }
 
   /**
+   * Mark a problem as skipped (Skip-or-Commit Gate)
+   */
+  markAttemptSkipped(problemId: string): ProblemAttempt | null {
+    const attempts = this.getAllAttempts()
+    const index = attempts.findIndex(a => a.problemId === problemId)
+    const now = new Date().toISOString()
+
+    if (index < 0) {
+      // No existing attempt - create one with skipped status
+      const newAttempt: ProblemAttempt = {
+        id: this.generateId(),
+        problemId,
+        problemTitle: 'Skipped Problem',
+        status: 'SKIPPED',
+        reviewFlag: false,
+        createdAt: now,
+        updatedAt: now,
+      }
+      attempts.push(newAttempt)
+      this.saveAllAttempts(attempts)
+      return newAttempt
+    }
+
+    // Update existing attempt to skipped
+    attempts[index] = {
+      ...attempts[index],
+      status: 'SKIPPED',
+      updatedAt: now,
+    }
+
+    this.saveAllAttempts(attempts)
+    return attempts[index]
+  }
+
+  /**
    * Toggle review flag for a problem
    */
   toggleReview(problemId: string): ProblemAttempt | null {

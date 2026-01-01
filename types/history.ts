@@ -1,6 +1,6 @@
 import type { PatternSelectionProgress } from './patternFirst'
 
-export type ProblemStatus = 'IN_PROGRESS' | 'SOLVED'
+export type ProblemStatus = 'IN_PROGRESS' | 'SOLVED' | 'SKIPPED'
 
 export interface ProblemAttempt {
   id: string

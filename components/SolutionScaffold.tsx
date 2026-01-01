@@ -76,6 +76,9 @@ import {
 } from '@/lib/adaptivePreflightService'
 import PatternFirstModal from './PatternFirstModal'
 import type { PatternSelectionState, PatternSelectionProgress } from '@/types/patternFirst'
+import SkipCommitGateModal, { SkipToast } from './SkipCommitGateModal'
+import type { SkipCommitState, SkipCommitDecision } from '@/types/skipCommitGate'
+import { INITIAL_SKIP_COMMIT_STATE, DEFAULT_TIME_PRESSURE_CONFIG } from '@/types/skipCommitGate'
 import {
   shouldShowPatternFirst,
   validateSelection,
@@ -159,6 +162,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPatternFirst, setShowPatternFirst] = useState(false)
   const [patternSelectionState, setPatternSelectionState] = useState<PatternSelectionState | null>(null)
   const [isScaffoldLocked, setIsScaffoldLocked] = useState(false)
+
+  // Skip-or-Commit Gate state
+  const [showSkipCommitGate, setShowSkipCommitGate] = useState(false)
+  const [skipCommitState, setSkipCommitState] = useState<SkipCommitState>(INITIAL_SKIP_COMMIT_STATE)
+  const [showSkipToast, setShowSkipToast] = useState(false)
+  const skipCommitGateShownRef = useRef(false)
+  const skipCommitTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Concept Contrast state
   const [showConceptContrast, setShowConceptContrast] = useState(false)
@@ -671,6 +681,98 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     setIsScaffoldLocked(false)
     logPatternFirstUnlock(currentProblemId, false, null)
   }, [currentProblemId])
+
+  // Skip-or-Commit Gate: Timer to show the gate
+  useEffect(() => {
+    // Only run once
+    if (skipCommitGateShownRef.current) return
+    if (!FEATURE_FLAGS.SKIP_COMMIT_GATE) return
+    if (isProblemSolved || skipCommitState.decision) return
+
+    const gateSeconds = DEFAULT_TIME_PRESSURE_CONFIG.gateSeconds
+
+    skipCommitTimerRef.current = setTimeout(() => {
+      if (!skipCommitGateShownRef.current && !isProblemSolved) {
+        skipCommitGateShownRef.current = true
+        setShowSkipCommitGate(true)
+        setSkipCommitState(prev => ({
+          ...prev,
+          gateShownAt: Date.now(),
+        }))
+      }
+    }, gateSeconds * 1000)
+
+    return () => {
+      if (skipCommitTimerRef.current) {
+        clearTimeout(skipCommitTimerRef.current)
+      }
+    }
+  }, [isProblemSolved, skipCommitState.decision])
+
+  // Skip-or-Commit Gate: Handler for commit
+  const handleSkipCommitCommit = useCallback(() => {
+    const now = Date.now()
+    const decisionTimeMs = skipCommitState.gateShownAt
+      ? now - skipCommitState.gateShownAt
+      : null
+
+    setSkipCommitState({
+      decision: 'commit',
+      decisionTimeMs,
+      wasSkipped: false,
+      wasAutoCommit: false,
+      gateShownAt: skipCommitState.gateShownAt,
+      decisionMadeAt: now,
+    })
+    setShowSkipCommitGate(false)
+  }, [skipCommitState.gateShownAt])
+
+  // Skip-or-Commit Gate: Handler for skip
+  const handleSkipCommitSkip = useCallback(() => {
+    const now = Date.now()
+    const decisionTimeMs = skipCommitState.gateShownAt
+      ? now - skipCommitState.gateShownAt
+      : null
+
+    setSkipCommitState({
+      decision: 'skip',
+      decisionTimeMs,
+      wasSkipped: true,
+      wasAutoCommit: false,
+      gateShownAt: skipCommitState.gateShownAt,
+      decisionMadeAt: now,
+    })
+    setShowSkipCommitGate(false)
+
+    // Save attempt as skipped
+    problemHistoryService.markAttemptSkipped(problemId())
+
+    // Show toast
+    setShowSkipToast(true)
+    setTimeout(() => {
+      setShowSkipToast(false)
+      // Navigate to next problem / reset
+      onReset()
+    }, 2000)
+  }, [skipCommitState.gateShownAt, onReset])
+
+  // Skip-or-Commit Gate: Handler for auto-commit
+  const handleSkipCommitAutoCommit = useCallback(() => {
+    const now = Date.now()
+    const decisionTimeMs = skipCommitState.gateShownAt
+      ? now - skipCommitState.gateShownAt
+      : null
+
+    setSkipCommitState({
+      decision: 'auto_commit',
+      decisionTimeMs,
+      wasSkipped: false,
+      wasAutoCommit: true,
+      gateShownAt: skipCommitState.gateShownAt,
+      decisionMadeAt: now,
+    })
+    setShowSkipCommitGate(false)
+  }, [skipCommitState.gateShownAt])
 
   const getCurrentProgress = useCallback((): ProblemProgress => {
     const stepProgress: StepProgress[] = data.steps.map((step, index) => {
@@ -2345,6 +2447,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           canDismiss={(data.timePressure || defaultTimePressure).allowTimeoutProceed}
         />
       )}
+
+      {/* Skip-or-Commit Gate Modal */}
+      <SkipCommitGateModal
+        isOpen={showSkipCommitGate}
+        autoCommitSeconds={DEFAULT_TIME_PRESSURE_CONFIG.autoCommitSeconds}
+        onCommit={handleSkipCommitCommit}
+        onSkip={handleSkipCommitSkip}
+        onAutoCommit={handleSkipCommitAutoCommit}
+      />
+
+      {/* Skip Toast */}
+      <SkipToast isVisible={showSkipToast} />
 
       {/* Scaffold Locked Overlay (Pattern-First) */}
       {isScaffoldLocked && !showPatternFirst && (
