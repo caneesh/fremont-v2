@@ -1,6 +1,7 @@
 import type { DiagramStepData } from './diagram'
 import type { FeynmanPromptConfig } from './feynman'
 import type { PreFlightCheck } from './preFlightCheck'
+import type { PatternOption, TimePressureConfig } from './patternFirst'
 
 /**
  * Scaffold Density Level
@@ -124,6 +125,11 @@ export interface ScaffoldData {
   sanityCheckMatrix?: SanityCheckMatrix  // Three-pronged verification menu
   // Optional Pre-Flight Checks (formula condition validation)
   preFlightChecks?: PreFlightCheck[]     // Verify conditions before formula usage
+  // Pattern-First Mode (pattern identification before solving)
+  patterns?: PatternOption[]             // Available pattern options (4-8)
+  primaryPatternId?: string              // The correct/canonical pattern
+  secondaryPatternIds?: string[]         // Other applicable patterns
+  timePressure?: TimePressureConfig      // Time lock configuration
 }
 
 /**

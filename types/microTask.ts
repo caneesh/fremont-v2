@@ -8,6 +8,7 @@
 
 import type { Concept, SanityCheck, SanityCheckMatrix, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
 import type { FeynmanPromptConfig } from './feynman'
+import type { PatternOption, TimePressureConfig } from './patternFirst'
 
 // Supported micro-task types
 export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'VERBAL_PLAN'
@@ -94,6 +95,11 @@ export interface MicroTaskScaffoldData {
   warningBeacons?: WarningBeacon[]   // Step-specific warning beacons
   // Optional Sanity Check Matrix (enhanced verification)
   sanityCheckMatrix?: SanityCheckMatrix  // Three-pronged verification menu
+  // Pattern-First Mode (pattern identification before solving)
+  patterns?: PatternOption[]             // Available pattern options (4-8)
+  primaryPatternId?: string              // The correct/canonical pattern
+  secondaryPatternIds?: string[]         // Other applicable patterns
+  timePressure?: TimePressureConfig      // Time lock configuration
 }
 
 /**

@@ -50,6 +50,11 @@ export type EventType =
   | 'drill_started'
   | 'drill_completed'
   | 'drill_skipped'
+  // Pattern-First Mode events
+  | 'pattern_first_shown'
+  | 'pattern_selected'
+  | 'pattern_first_timeout'
+  | 'pattern_first_unlock'
 
 export interface EventMetadata {
   problemId?: string
@@ -75,6 +80,13 @@ export interface EventMetadata {
   drillSuccess?: boolean
   // Confidence-weighted SRS metadata
   confidence?: 'low' | 'medium' | 'high'
+  // Pattern-First Mode metadata
+  selectedPatternId?: string
+  primaryPatternId?: string
+  patternOptionsCount?: number
+  lockSeconds?: number
+  hadSelection?: boolean
+  wasCorrect?: boolean
   [key: string]: unknown // Allow additional metadata
 }
 

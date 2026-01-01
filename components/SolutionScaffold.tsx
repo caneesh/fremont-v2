@@ -74,6 +74,20 @@ import {
   shouldShowAdaptivePreflight,
   type StepRiskAssessment,
 } from '@/lib/adaptivePreflightService'
+import PatternFirstModal from './PatternFirstModal'
+import type { PatternSelectionState, PatternSelectionProgress } from '@/types/patternFirst'
+import {
+  shouldShowPatternFirst,
+  validateSelection,
+  createSelectionState,
+  createTimeoutState,
+  toProgressFormat,
+  logPatternFirstShown,
+  logPatternSelected,
+  logPatternTimeout,
+  logPatternFirstUnlock,
+  defaultTimePressure,
+} from '@/lib/patternFirstService'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -140,6 +154,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showAdaptivePreflight, setShowAdaptivePreflight] = useState(false)
   const [currentAdaptiveAssessment, setCurrentAdaptiveAssessment] = useState<StepRiskAssessment | null>(null)
   const [passedAdaptivePreflightSteps, setPassedAdaptivePreflightSteps] = useState<Set<number>>(new Set())
+
+  // Pattern-First Mode state
+  const [showPatternFirst, setShowPatternFirst] = useState(false)
+  const [patternSelectionState, setPatternSelectionState] = useState<PatternSelectionState | null>(null)
+  const [isScaffoldLocked, setIsScaffoldLocked] = useState(false)
 
   // Concept Contrast state
   const [showConceptContrast, setShowConceptContrast] = useState(false)
@@ -531,6 +550,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           })
           setMicroTaskProgress(microProgress)
         }
+
+        // Load pattern selection if it exists (Pattern-First Mode)
+        if (progress.patternSelection) {
+          setPatternSelectionState({
+            selectedPatternId: progress.patternSelection.selectedPatternId,
+            decisionTimeMs: progress.patternSelection.patternDecisionTimeMs,
+            isCorrect: progress.patternSelection.patternDecisionCorrect,
+            timedOut: progress.patternSelection.patternTimedOut,
+            timestamp: '',
+          })
+        }
       }
     }
 
@@ -564,6 +594,75 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepAnswers, completedSteps, stepHintLevels, currentStep, sanityCheckAnswer, microTaskProgress])
 
+  // Pattern-First Mode: Show modal on initial mount if enabled
+  const patternFirstShownRef = useRef(false)
+  useEffect(() => {
+    // Only run once on mount
+    if (patternFirstShownRef.current) return
+
+    // Check if pattern-first mode should show
+    const timePressure = data.timePressure || defaultTimePressure
+    const existingSelection = patternSelectionState ? toProgressFormat(patternSelectionState) : undefined
+
+    if (FEATURE_FLAGS.PATTERN_FIRST_MODE &&
+        shouldShowPatternFirst(data.patterns, data.primaryPatternId, timePressure, existingSelection)) {
+      patternFirstShownRef.current = true
+      setShowPatternFirst(true)
+      setIsScaffoldLocked(true)
+
+      // Log analytics
+      logPatternFirstShown(
+        currentProblemId,
+        data.patterns?.length || 0,
+        timePressure.lockSeconds
+      )
+    }
+  }, [data.patterns, data.primaryPatternId, data.timePressure, patternSelectionState, currentProblemId])
+
+  // Pattern-First Mode: Handler for pattern selection
+  const handlePatternSelect = useCallback((patternId: string, elapsedTimeMs: number, isCorrect: boolean) => {
+    const state = createSelectionState(patternId, elapsedTimeMs, isCorrect)
+    setPatternSelectionState(state)
+
+    // Log analytics
+    logPatternSelected(
+      currentProblemId,
+      patternId,
+      data.primaryPatternId || '',
+      isCorrect,
+      elapsedTimeMs
+    )
+
+    // Unlock scaffold after short delay for visual feedback
+    setTimeout(() => {
+      setShowPatternFirst(false)
+      setIsScaffoldLocked(false)
+      logPatternFirstUnlock(currentProblemId, true, isCorrect)
+    }, 800)
+  }, [currentProblemId, data.primaryPatternId])
+
+  // Pattern-First Mode: Handler for timeout
+  const handlePatternTimeout = useCallback((elapsedTimeMs: number) => {
+    const state = createTimeoutState(elapsedTimeMs)
+    setPatternSelectionState(state)
+
+    // Log timeout
+    logPatternTimeout(currentProblemId, elapsedTimeMs)
+
+    // Check if we allow proceeding after timeout
+    const timePressure = data.timePressure || defaultTimePressure
+    if (timePressure.allowTimeoutProceed) {
+      // Keep modal open but allow skip - handled by onSkip
+    }
+  }, [currentProblemId, data.timePressure])
+
+  // Pattern-First Mode: Handler for skip (after timeout)
+  const handlePatternSkip = useCallback(() => {
+    setShowPatternFirst(false)
+    setIsScaffoldLocked(false)
+    logPatternFirstUnlock(currentProblemId, false, null)
+  }, [currentProblemId])
+
   const getCurrentProgress = useCallback((): ProblemProgress => {
     const stepProgress: StepProgress[] = data.steps.map((step, index) => {
       // For micro-task mode, use step.id; for hint-based mode, use index
@@ -591,8 +690,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       progress.microTaskProgress = Array.from(microTaskProgress.values())
     }
 
+    // Include pattern selection if available (Pattern-First Mode)
+    if (patternSelectionState) {
+      progress.patternSelection = toProgressFormat(patternSelectionState)
+    }
+
     return progress
-  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState])
 
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)

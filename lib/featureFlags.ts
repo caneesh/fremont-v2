@@ -10,8 +10,9 @@ export const FEATURE_FLAGS = {
    * FBD Canvas - Interactive Free Body Diagram
    * When enabled, mechanics problems may include diagram steps
    * that require users to draw force diagrams.
+   * DISABLED: Causing step completion issues - needs better implementation
    */
-  FBD_CANVAS: process.env.NEXT_PUBLIC_ENABLE_FBD === 'true',
+  FBD_CANVAS: false,
 
   /**
    * Micro Tasks - Active learning mode
@@ -100,9 +101,9 @@ export const FEATURE_FLAGS = {
    * - Phase C: Final Solve (optional) - only when explicitly requested
    *
    * This dramatically reduces initial load time from 5+ minutes to ~15 seconds.
+   * DISABLED: Causing step UI issues (green steps without passing, fill-in-blanks broken)
    */
-  PHASED_SCAFFOLD: process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PHASED_SCAFFOLD !== 'false'),
+  PHASED_SCAFFOLD: false,
 
   /**
    * Feynman Hint Prompts
@@ -191,6 +192,21 @@ export const FEATURE_FLAGS = {
    */
   STEP_HEATMAP: process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP === 'true'
     || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP !== 'false'),
+
+  /**
+   * Pattern-First Mode
+   * When enabled, prompts students to identify the relevant physics pattern
+   * before accessing the solution scaffold. This builds pattern recognition
+   * skills crucial for physics problem-solving (fast recognition under time pressure).
+   *
+   * Features:
+   * - Timed pattern selection modal (default: 12 seconds)
+   * - Tracks decision accuracy and speed
+   * - Locks scaffold until selection or timeout
+   * - Analytics for pattern identification performance
+   */
+  PATTERN_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST === 'true'
+    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST !== 'false'),
 }
 
 /**

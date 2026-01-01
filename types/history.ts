@@ -1,3 +1,5 @@
+import type { PatternSelectionProgress } from './patternFirst'
+
 export type ProblemStatus = 'IN_PROGRESS' | 'SOLVED'
 
 export interface ProblemAttempt {
@@ -53,6 +55,8 @@ export interface ProblemProgress {
   // Micro-task mode fields (optional for backwards compatibility)
   useMicroTasks?: boolean
   microTaskProgress?: MicroTaskStepProgress[]
+  // Pattern-First Mode (pattern identification before solving)
+  patternSelection?: PatternSelectionProgress
 }
 
 export interface HistoryFilters {
