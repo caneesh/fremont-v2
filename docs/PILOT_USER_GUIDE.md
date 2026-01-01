@@ -17,6 +17,7 @@ Welcome to PhysiScaffold - The Socratic Physics Engine. This guide walks you thr
 9. [Error Recovery and Review](#9-error-recovery-and-review)
 10. [Daily Limits and Quotas](#10-daily-limits-and-quotas)
 11. [Tips for Success](#11-tips-for-success)
+12. [Appendix: Test Scenarios and Sample Data](#appendix-test-scenarios-and-sample-data)
 
 ---
 
@@ -449,6 +450,401 @@ Week 3+: Advanced Techniques + Mastery
 ├── Regular drill sessions
 └── Error review and targeted practice
 ```
+
+---
+
+## Appendix: Test Scenarios and Sample Data
+
+This section provides test data for validating PhysiScaffold features during development and QA testing.
+
+---
+
+### A. Authentication Test Data
+
+| Field | Test Value |
+|-------|------------|
+| Access Code | `PILOT-ALPHA-001` |
+| User ID | `user-001` |
+| Session Storage Key | `physiscaffold_session` |
+
+**Sample Session Object:**
+```json
+{
+  "userId": "user-001",
+  "code": "PILOT-ALPHA-001",
+  "authenticatedAt": "2024-01-15T10:00:00Z"
+}
+```
+
+---
+
+### B. Problem Scaffold Test Data
+
+**Sample Problem Inputs:**
+
+| Problem | Domain | Expected Output |
+|---------|--------|-----------------|
+| "A block slides down an incline." | Mechanics/Dynamics | Solution with force analysis steps |
+| "Bead on a Rotating Hoop" | Mechanics | Circular motion scaffold |
+| "A 5 kg block on 30 degree incline" | Mechanics | FBD and kinematic analysis |
+
+**Mock Outline Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "scaffold_id": "scaffold-1",
+    "schema_version": "v1",
+    "problem": "A block slides down an incline.",
+    "tags": {
+      "domain": "mechanics",
+      "subdomain": "dynamics",
+      "difficulty": "basic"
+    },
+    "concepts": [
+      { "id": "c1", "name": "Newton's Laws" }
+    ],
+    "steps": [
+      {
+        "step_id": "s1",
+        "title": "Define forces",
+        "goal": "List the forces acting on the block.",
+        "minimal_task": "Which forces act on the block?",
+        "step_type": "concept"
+      }
+    ],
+    "estimated_time_mins": 10
+  }
+}
+```
+
+**Mock Step Expansion Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "scaffold_id": "scaffold-1",
+    "step_id": "s1",
+    "micro_tasks": [
+      {
+        "task_id": "t1",
+        "type": "MCQ",
+        "question": "What is the block's weight?",
+        "options": ["mg", "ma", "N", "T"],
+        "correct_index": 0,
+        "reasoning": "Weight equals mg.",
+        "difficulty": "easy"
+      }
+    ],
+    "explanation": "Identify the forces before writing equations.",
+    "hints": [
+      { "level": 1, "content": "Draw the free body diagram first." }
+    ]
+  }
+}
+```
+
+---
+
+### C. Hint System Test Data
+
+**Hint Styles by Step Type:**
+
+| Step Type | Header Text | Tip Prefix |
+|-----------|-------------|------------|
+| `physics_concept` | "Think Conceptually" | "Ask yourself:" |
+| `math_manipulation` | "Math Coach Tip" | "Remember:" |
+| `diagram` | "Visualize It" | "Picture this:" |
+| `sanity_check` | "Check Your Work" | "Consider:" |
+
+**Sample Hint Levels:**
+```json
+{
+  "level": 1,
+  "title": "Concept Identification",
+  "content": "What physics principle governs this situation?"
+}
+```
+
+**Physics Domains for Contextual Tips:**
+
+| Domain | Sample Prompt |
+|--------|---------------|
+| Mechanics | Socratic prompts about forces and motion |
+| Electromagnetism | Field and charge interaction questions |
+| Thermodynamics | Heat and energy transfer prompts |
+| Waves/Optics | Oscillation and wave behavior questions |
+
+---
+
+### D. Error Pattern Service Test Data
+
+**Test Identifiers:**
+
+| Entity | Test Value |
+|--------|------------|
+| Student ID | `test-student-123` |
+| Problem ID | `problem-001` |
+| Pattern ID (High Severity) | `EP001` |
+| Pattern ID (Medium Severity) | `EP003` |
+| Pattern ID (Low Severity) | `EP007` |
+
+**Sample Error Recording:**
+```json
+{
+  "studentId": "test-student-123",
+  "patternId": "EP001",
+  "problemId": "problem-001",
+  "problemExcerpt": "A block slides down a frictionless incline...",
+  "studentAttempt": "I tried using energy conservation",
+  "correctApproach": "Use force analysis with Newton's laws",
+  "context": {
+    "topic": "Mechanics - Dynamics",
+    "difficulty": "medium",
+    "hintsUsed": 3,
+    "timeSpent": 300
+  }
+}
+```
+
+**Error Trend Detection:**
+
+| Scenario | Test Setup | Expected Trend |
+|----------|-----------|----------------|
+| Improving | 3 old errors (>7 days), 0 recent | `improving` |
+| Worsening | 1 old error, 3 recent errors (<7 days) | `worsening` |
+| Persistent | Equal old and recent errors | `persistent` |
+
+---
+
+### E. Drill System Test Data
+
+**Multiple Choice Drill:**
+```json
+{
+  "id": "drill_vec_001",
+  "linkedErrorTag": "vector_component",
+  "linkedCategory": "VECTOR_SCALAR_CONFUSION",
+  "expectedDurationSeconds": 10,
+  "maxAttempts": 2,
+  "task": {
+    "type": "MULTIPLE_CHOICE",
+    "level": 1,
+    "levelTitle": "Concept",
+    "question": "A force F acts at angle θ above the horizontal. Which gives the horizontal component?",
+    "options": ["F sin(θ)", "F cos(θ)", "F tan(θ)", "F / cos(θ)"],
+    "correctIndex": 1,
+    "explanation": "The horizontal component uses cosine: Fₓ = F cos(θ)",
+    "feedbackPerOption": [
+      "sin(θ) gives the vertical component, not horizontal",
+      "Correct! cos(θ) projects onto the horizontal axis",
+      "tan(θ) is the ratio of components, not a component itself",
+      "Division by cos is used for resolving along an inclined plane"
+    ]
+  },
+  "difficulty": "foundation",
+  "successMessage": "Remember: Fₓ = F cos(θ), Fᵧ = F sin(θ)"
+}
+```
+
+**Fill-in-the-Blank Drill:**
+```json
+{
+  "id": "drill_sign_001",
+  "linkedErrorTag": "sign_convention",
+  "linkedCategory": "SIGN_CONVENTION",
+  "expectedDurationSeconds": 10,
+  "maxAttempts": 2,
+  "task": {
+    "type": "FILL_BLANK",
+    "level": 1,
+    "levelTitle": "Concept",
+    "question": "Complete the sign convention rule:",
+    "sentence": "If upward is positive, then the acceleration due to gravity g is ____.",
+    "correctTerm": "negative",
+    "distractors": ["positive", "zero", "9.8"],
+    "explanation": "Gravity points downward, opposite to the positive direction."
+  },
+  "difficulty": "foundation",
+  "successMessage": "g direction depends on your chosen convention!"
+}
+```
+
+**Error Tags and Labels:**
+
+| Error Tag | Display Label | Trip Count |
+|-----------|---------------|------------|
+| `vector_component` | Vector Components | 3 |
+| `sign_convention` | Sign Convention | 3 |
+| `trig_identity` | Trigonometry | 3 |
+| `unit_conversion` | Unit Conversion | 4 |
+| `conservation_scope` | Conservation Scope | 2 |
+
+---
+
+### F. Circuit Breaker Test Data
+
+**Test Session:**
+
+| Field | Value |
+|-------|-------|
+| Session ID | `test-session-123` |
+| Problem ID | `problem-001` |
+| Error Tag | `vector_component` |
+
+**State Transitions:**
+
+| Current Errors | State | Should Intervene |
+|----------------|-------|------------------|
+| 0-1 | MONITORING | No |
+| 2 (warning count) | WARNING | No |
+| 3 (trip count) | TRIPPED | Yes |
+| During drill | DRILLING | No |
+| After drill | RECOVERED | No |
+
+**Threshold Configurations:**
+
+| Error Tag | Warning Count | Trip Count | Cooldown (min) |
+|-----------|---------------|------------|----------------|
+| `vector_component` | 2 | 3 | 30 |
+| `conservation_scope` | 1 | 2 | 20 |
+| `unit_conversion` | 3 | 4 | 15 |
+
+---
+
+### G. Progress Tracking Test Data
+
+**Session Types and Effects:**
+
+| Session Type | State Change |
+|--------------|--------------|
+| `learn` | Sets `learnCompleted: true` |
+| `practice` | Sets `guidedPracticeCompleted: true` |
+| `drill` | Increments `drillsAttempted` by 1 |
+
+**Sample Pattern State:**
+```json
+{
+  "userId": "user-1",
+  "patternId": "pat-1",
+  "learnCompleted": true,
+  "learnCompletedAt": "2024-01-10T10:00:00Z",
+  "guidedPracticeCompleted": true,
+  "guidedPracticeCompletedAt": "2024-01-12T10:00:00Z",
+  "drillsAttempted": 3,
+  "mastery": 0.75,
+  "recentFailCount": 2,
+  "lastSeenAt": "2024-01-14T10:00:00Z",
+  "reviewDueAt": "2024-01-20T10:00:00Z"
+}
+```
+
+**V2 Session Storage:**
+```json
+{
+  "patternId": "pat-1",
+  "problemIds": ["prob-1", "prob-2"],
+  "currentIndex": 0,
+  "type": "drill"
+}
+```
+
+---
+
+### H. Solution Scaffold UI Test Data
+
+**Scaffold Types:**
+
+| Type | Indicator | Component Used |
+|------|-----------|----------------|
+| Micro-task | Steps have `tasks` array | MicroTaskStepAccordion |
+| Hint-based | Steps have `hints` array | StepAccordion |
+
+**Grading Results:**
+
+| Status | Celebrate | Next Action |
+|--------|-----------|-------------|
+| `SUCCESS` | Yes | Optimize |
+| `MINOR_SLIP` | No | Fix line |
+| `CONCEPTUAL_GAP` | No | Review concept |
+
+**Student Outcome Classification:**
+
+| Hint Usage | Outcome |
+|------------|---------|
+| No hints | `independent` |
+| Hints 1-2 | `guided` |
+| Hints 3+ | `assisted` |
+
+---
+
+### I. Pre-Flight Check Test Data
+
+**Sample Pre-Flight Check:**
+```json
+{
+  "id": "test-check-1",
+  "targetStepId": 1,
+  "law": "kinematic_equations",
+  "displayName": "Kinematic Equations",
+  "formula": "v = v_0 + at",
+  "checkItems": [
+    {
+      "preCondition": {
+        "id": "constant_acceleration",
+        "description": "Acceleration must be constant",
+        "formalStatement": "a = constant",
+        "severity": "critical",
+        "checkQuestion": "Is the acceleration constant?",
+        "hints": ["Check if forces are constant"],
+        "problemTextIndicators": ["constant acceleration"],
+        "physicsRationale": "Kinematic equations are derived assuming constant a."
+      },
+      "options": [
+        {
+          "id": "opt-1",
+          "label": "Yes, acceleration is constant",
+          "isCorrect": true
+        },
+        {
+          "id": "opt-2",
+          "label": "No, acceleration varies with position",
+          "isCorrect": false,
+          "trapType": "condition_violation",
+          "misconceptionExplanation": "This would mean kinematics equations do not apply."
+        }
+      ],
+      "correctOptionIds": ["opt-1"],
+      "multiSelect": false
+    }
+  ],
+  "problemContext": {
+    "relevantText": "A ball is thrown upward with initial velocity 10 m/s."
+  },
+  "requiredToPass": 1,
+  "maxAttempts": 3
+}
+```
+
+**Severity Levels:**
+
+| Severity | Impact |
+|----------|--------|
+| `critical` | Must pass to proceed |
+| `warning` | Can proceed with caution |
+| `info` | Optional verification |
+
+---
+
+### J. LocalStorage Keys
+
+| Key | Purpose |
+|-----|---------|
+| `physiscaffold_session` | User authentication session |
+| `physiscaffold_error_patterns` | Error pattern tracking |
+| `physiscaffold_circuit_breaker` | Circuit breaker state |
+| `physiscaffold_user` | Current user ID |
+| `v2_session` (sessionStorage) | Active learning session |
 
 ---
 
