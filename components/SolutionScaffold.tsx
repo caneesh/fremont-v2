@@ -2321,6 +2321,38 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           </div>
         </div>
       )}
+
+      {/* Pattern-First Mode Modal */}
+      {showPatternFirst && data.patterns && data.primaryPatternId && (
+        <PatternFirstModal
+          patterns={data.patterns}
+          primaryPatternId={data.primaryPatternId}
+          lockSeconds={(data.timePressure || defaultTimePressure).lockSeconds}
+          showCountdown={(data.timePressure || defaultTimePressure).showCountdown}
+          problemText={data.problem}
+          onSelect={handlePatternSelect}
+          onTimeout={handlePatternTimeout}
+          onSkip={handlePatternSkip}
+          canDismiss={(data.timePressure || defaultTimePressure).allowTimeoutProceed}
+        />
+      )}
+
+      {/* Scaffold Locked Overlay (Pattern-First) */}
+      {isScaffoldLocked && !showPatternFirst && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl p-6 max-w-sm mx-4 text-center">
+            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 dark:border-indigo-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+              Getting Ready
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+              Loading pattern identification...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

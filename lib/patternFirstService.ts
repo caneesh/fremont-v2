@@ -11,7 +11,6 @@ import type {
   PatternSelectionState,
   PatternSelectionProgress,
   TimePressureConfig,
-  DEFAULT_TIME_PRESSURE,
 } from '@/types/patternFirst'
 import { eventLogger } from '@/lib/storage'
 
@@ -231,14 +230,26 @@ export function getPatternStats(): {
   timedOutCount: number
 } {
   // Query events from storage
-  const events = eventLogger.getEventsByType(['pattern_selected', 'pattern_first_timeout'])
+  const result = eventLogger.getEventsByType(['pattern_selected', 'pattern_first_timeout'])
 
+  // Handle case where storage query failed
+  if (!result.success || !result.data) {
+    return {
+      total: 0,
+      correct: 0,
+      accuracy: 0,
+      averageTimeMs: 0,
+      timedOutCount: 0,
+    }
+  }
+
+  const events = result.data
   const selectionEvents = events.filter((e) => e.type === 'pattern_selected')
   const timeoutEvents = events.filter((e) => e.type === 'pattern_first_timeout')
 
   const correctEvents = selectionEvents.filter((e) => e.metadata.isCorrect === true)
   const totalTime = selectionEvents.reduce(
-    (sum, e) => sum + (e.metadata.duration || 0),
+    (sum, e) => sum + ((e.metadata.duration as number) || 0),
     0
   )
 

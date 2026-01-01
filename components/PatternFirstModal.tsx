@@ -167,7 +167,7 @@ export default function PatternFirstModal({
             )}
             {hasTimedOut && !selectedPatternId && (
               <div className="bg-amber-500 rounded-full px-3 py-1 text-white text-sm font-medium">
-                Time's up!
+                Time&apos;s up!
               </div>
             )}
           </div>
@@ -242,7 +242,7 @@ export default function PatternFirstModal({
                 </svg>
                 <div>
                   <p className="font-medium text-amber-800 dark:text-amber-200">
-                    Time's up! Pick a pattern to continue.
+                    Time&apos;s up! Pick a pattern to continue.
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                     Selecting a pattern helps build recognition speed for exams.
