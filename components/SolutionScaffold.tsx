@@ -508,11 +508,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         // Get current steps for validation (if using micro-tasks)
         const microSteps = useMicroTasks ? (data as MicroTaskScaffoldData).steps : null
 
+        // Check if saved progress was from micro-tasks mode but current data isn't
+        // This happens when phased scaffold was disabled - don't restore stale completions
+        const savedWasMicroTasks = progress.useMicroTasks === true
+        const currentIsMicroTasks = useMicroTasks
+        const modeChanged = savedWasMicroTasks !== currentIsMicroTasks
+
         progress.stepProgress.forEach((sp: StepProgress) => {
           if (sp.userAnswer) {
             answers.set(sp.stepId, sp.userAnswer)
           }
-          if (sp.isCompleted) {
+          if (sp.isCompleted && !modeChanged) {
             // Validate: only restore completion if step has actual tasks loaded
             // This prevents false completion from stale localStorage when steps haven't been expanded
             if (microSteps) {
@@ -522,7 +528,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
               }
               // Skip completion for steps with no tasks (unexpanded phased scaffold steps)
             } else {
-              completed.push(sp.stepId)
+              // Only restore if we have a valid hint level (user actually worked on this step)
+              if (sp.currentHintLevel && sp.currentHintLevel > 0) {
+                completed.push(sp.stepId)
+              }
             }
           }
           if (sp.currentHintLevel) {
