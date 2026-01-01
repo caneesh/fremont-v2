@@ -142,9 +142,9 @@ export const FEATURE_FLAGS = {
    * The professor asks 1-2 comprehension questions, and if the student struggles,
    * engages in a dynamic Socratic dialogue until understanding is confirmed.
    * Celebrates with confetti when the student demonstrates mastery.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR=false)
    */
-  SOCRATIC_TUTOR_CHAT: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR !== 'false'),
+  SOCRATIC_TUTOR_CHAT: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR !== 'false',
 
   /**
    * Study Plan v2 - Pattern-First Learning
