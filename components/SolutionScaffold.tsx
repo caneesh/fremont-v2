@@ -91,7 +91,7 @@ import {
   logPatternFirstUnlock,
   defaultTimePressure,
 } from '@/lib/patternFirstService'
-import type { SessionGatingPolicy, StepRebuildGateState } from '@/types/gatingPolicy'
+import type { SessionGatingPolicy, StepRebuildGateState, StepDecisionGateState } from '@/types/gatingPolicy'
 import {
   getOrCreateSessionPolicy,
   processPatternGateSelection,
@@ -101,6 +101,10 @@ import {
   canProceedFromStep,
   saveSessionPolicy,
   clearSessionPolicy,
+  requiresDecisionGate,
+  getStepDecisionGateState,
+  recordMicroTaskAttempt,
+  getRequiredMicroTaskCount,
 } from '@/lib/gatingPolicyEngine'
 
 interface SolutionScaffoldProps {
@@ -318,6 +322,38 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const canStepProceed = useCallback((stepId: number): boolean => {
     if (!FEATURE_FLAGS.P0_REBUILD_GATES || !gatingPolicy) return true
     return canProceedFromStep(gatingPolicy, stepId)
+  }, [gatingPolicy])
+
+  // P0 Decision Gate: Check if step requires decision gate
+  const stepRequiresDecisionGate = useCallback((stepId: number, stepType: string | undefined, hasMicroTasks: boolean): boolean => {
+    if (!FEATURE_FLAGS.P0_DECISION_GATES || !gatingPolicy) return false
+    return requiresDecisionGate(gatingPolicy, stepId, stepType, hasMicroTasks)
+  }, [gatingPolicy])
+
+  // P0 Decision Gate: Get gate state for a step
+  const getDecisionGateState = useCallback((stepId: number): StepDecisionGateState | null => {
+    if (!gatingPolicy) return null
+    return getStepDecisionGateState(gatingPolicy, stepId)
+  }, [gatingPolicy])
+
+  // P0 Decision Gate: Record micro-task attempt
+  const handleRecordDecisionGateAttempt = useCallback((stepId: number, isCorrect: boolean): { shouldAutoUnlockHint: boolean } => {
+    if (!gatingPolicy) return { shouldAutoUnlockHint: false }
+
+    const { updatedPolicy, shouldAutoUnlockHint } = recordMicroTaskAttempt(
+      gatingPolicy,
+      stepId,
+      isCorrect
+    )
+    setGatingPolicy(updatedPolicy)
+
+    return { shouldAutoUnlockHint }
+  }, [gatingPolicy])
+
+  // P0 Decision Gate: Get required micro-task count
+  const getDecisionGateRequiredCount = useCallback((): number => {
+    if (!gatingPolicy) return 1
+    return getRequiredMicroTaskCount(gatingPolicy)
   }, [gatingPolicy])
 
   // Auto-show drill modal when circuit breaker trips
@@ -2153,6 +2189,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       onActivate={() => setCurrentStep(index)}
                       onRecordAttempt={phasedScaffoldContext?.recordAttempt}
                       getStepDifficulty={phasedScaffoldContext?.getStepDifficulty}
+                      decisionGateState={getDecisionGateState(step.id)}
+                      onRecordDecisionGateAttempt={handleRecordDecisionGateAttempt}
+                      requiresDecisionGate={stepRequiresDecisionGate(step.id, step.stepType, (step as MicroTaskStep).tasks?.length > 0)}
+                      requiredMicroTaskCount={getDecisionGateRequiredCount()}
                     />
                   ) : (
                     <StepAccordion

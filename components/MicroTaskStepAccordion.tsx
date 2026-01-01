@@ -19,6 +19,7 @@ import { eventLogger } from '@/lib/storage/eventLogger'
 import type { Confidence } from '@/types/confidence'
 import type { ErrorTag } from '@/types/circuitBreaker'
 import type { TaskDifficulty } from '@/types/microTask'
+import type { StepDecisionGateState } from '@/types/gatingPolicy'
 
 interface MicroTaskStepAccordionProps {
   step: MicroTaskStep
@@ -44,6 +45,11 @@ interface MicroTaskStepAccordionProps {
   onRecordAttempt?: (stepId: string, taskLevel: number, isCorrect: boolean, attemptNumber: number) => void
   // Get current tuned difficulty for this step
   getStepDifficulty?: (stepId: string) => TaskDifficulty
+  // P0 Decision Gate props
+  decisionGateState?: StepDecisionGateState | null
+  onRecordDecisionGateAttempt?: (stepId: number, isCorrect: boolean) => { shouldAutoUnlockHint: boolean }
+  requiresDecisionGate?: boolean
+  requiredMicroTaskCount?: number
 }
 
 export default function MicroTaskStepAccordion({
@@ -65,7 +71,11 @@ export default function MicroTaskStepAccordion({
   onActivate,
   onCircuitBreakerError,
   onRecordAttempt,
-  getStepDifficulty
+  getStepDifficulty,
+  decisionGateState,
+  onRecordDecisionGateAttempt,
+  requiresDecisionGate = false,
+  requiredMicroTaskCount = 1,
 }: MicroTaskStepAccordionProps) {
   // Get the outline step ID for difficulty tuning (from phased scaffold adapter)
   const outlineStepId = (step as MicroTaskStep & { _outlineStepId?: string })._outlineStepId || `s${step.id}`
@@ -200,6 +210,11 @@ export default function MicroTaskStepAccordion({
     const attemptCount = (taskAttempts.get(currentLevel) || 0) + 1
     onRecordAttempt?.(outlineStepId, currentLevel, true, attemptCount)
 
+    // P0 Decision Gate: Record correct attempt
+    if (FEATURE_FLAGS.P0_DECISION_GATES && onRecordDecisionGateAttempt) {
+      onRecordDecisionGateAttempt(step.id, true)
+    }
+
     if (useConfidenceSRS) {
       // Show confidence prompt before proceeding
       setPendingTaskResult({ isCorrect: true, explanation, attempts: attemptCount })
@@ -280,6 +295,15 @@ export default function MicroTaskStepAccordion({
 
     // Record attempt for difficulty tuning (incorrect answer)
     onRecordAttempt?.(outlineStepId, currentLevel, false, attempts)
+
+    // P0 Decision Gate: Record wrong attempt
+    if (FEATURE_FLAGS.P0_DECISION_GATES && onRecordDecisionGateAttempt) {
+      const { shouldAutoUnlockHint } = onRecordDecisionGateAttempt(step.id, false)
+      if (shouldAutoUnlockHint) {
+        // Auto-unlock hint after max attempts - handled by parent
+        console.log('[DecisionGate] Auto-unlocking hint for step', step.id)
+      }
+    }
 
     // Track mistake when 2+ wrong attempts on a task
     if (problemId && attempts >= 2) {
@@ -621,6 +645,23 @@ export default function MicroTaskStepAccordion({
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {Math.min(currentLevel - 1, step.tasks.length)}/{step.tasks.length} insights
             </span>
+            {/* P0 Decision Gate Progress */}
+            {FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState && !decisionGateState.gatePassed && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                {decisionGateState.microTasksPassedCount}/{requiredMicroTaskCount}
+              </span>
+            )}
+            {FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState?.gatePassed && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Gate Passed
+              </span>
+            )}
           </div>
         </div>
 
