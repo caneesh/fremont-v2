@@ -35,6 +35,9 @@ const TOPIC_KEYWORDS: Record<string, { keywords: string[]; weight: number }> = {
       'ground', 'air', 'falls', 'dropped', 'launched', 'initial',
       // Additional kinematics
       'distance', 'displacement', 'time', 'seconds', 'meters',
+      // SHM keywords (to distinguish from waves)
+      'mass on a spring', 'spring constant', 'oscillates', 'pendulum',
+      'simple harmonic', 'restoring force',
     ],
     weight: 1,
   },
