@@ -76,6 +76,12 @@ export type EventType =
   | 'momentum_recovery'
   | 'momentum_streak_reset'
   | 'momentum_feedback_shown'
+  // Learning Integrity events (silent detection)
+  | 'integrity_signal_detected'
+  | 'integrity_session_flagged'
+  | 'integrity_check_triggered'
+  | 'integrity_check_passed'
+  | 'integrity_check_failed'
 
 export interface EventMetadata {
   problemId?: string

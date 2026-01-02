@@ -297,6 +297,27 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONFIDENCE_REPAIR=false)
    */
   CONFIDENCE_REPAIR: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_REPAIR !== 'false',
+
+  /**
+   * Learning Integrity Monitor
+   * When enabled, silently tracks behavioral signals that may indicate
+   * AI-assisted answering (fast answers, tab switching, paste events).
+   *
+   * Key Principles:
+   * - Silent detection, never accusation
+   * - Pattern accumulation (not single incidents)
+   * - Generous thresholds (benefit of the doubt)
+   * - Gentle interventions framed as learning opportunities
+   *
+   * Interventions:
+   * - Comprehension checks ("Let's solidify this!")
+   * - Extra decision gates (silent)
+   * - Session flagging for review (silent)
+   *
+   * Never blocks progress or shames the student.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_LEARNING_INTEGRITY=false)
+   */
+  LEARNING_INTEGRITY: process.env.NEXT_PUBLIC_FEATURE_LEARNING_INTEGRITY !== 'false',
 }
 
 /**
