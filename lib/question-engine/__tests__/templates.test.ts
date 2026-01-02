@@ -901,10 +901,13 @@ describe('Template Content Quality', () => {
     }
   })
 
-  it('all templates end with a sanity check step', () => {
+  it('all templates end with a final verification/conclusion step', () => {
+    // Final steps can be: sanity check, verify, characterize (for optics), or series (for Bohr model)
+    const validFinalStepPatterns = ['sanity', 'verify', 'characterize', 'series']
     for (const template of Object.values(TEMPLATE_REGISTRY)) {
       const lastStep = template.stepBlueprints.at(-1)
-      expect(lastStep?.id).toContain('sanity')
+      const hasValidFinalStep = validFinalStepPatterns.some(pattern => lastStep?.id.includes(pattern))
+      expect(hasValidFinalStep).toBe(true)
     }
   })
 

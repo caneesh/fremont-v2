@@ -54,19 +54,21 @@ const TOPIC_KEYWORDS: Record<string, { keywords: string[]; weight: number }> = {
   electromagnetism: {
     keywords: [
       'electric', 'magnetic', 'charge', 'current', 'voltage',
-      'resistance', 'capacitor', 'inductor', 'circuit', 'field',
+      'resistance', 'capacitor', 'capacitance', 'inductor', 'circuit', 'field',
       'coulomb', 'gauss', 'ampere', 'faraday', 'lenz', 'emf',
       'dipole', 'potential', 'flux', 'solenoid', 'loop',
+      'parallel plate', 'dielectric', 'resistor', 'ohm',
     ],
-    weight: 1,
+    weight: 1.1,  // Slightly higher weight to handle energy/work overlap
   },
   optics: {
     keywords: [
       'light', 'lens', 'mirror', 'refraction', 'reflection',
       'interference', 'diffraction', 'polarization', 'wavelength',
       'focal', 'optical', 'prism', 'spectrum', 'snell', 'image',
+      'young', 'double slit', 'fringe', 'thin film', 'ray',
     ],
-    weight: 1,
+    weight: 1.1,  // Slightly higher weight
   },
   waves: {
     keywords: [
@@ -103,12 +105,12 @@ const MECHANICS_SUBTOPICS: Record<string, string[]> = {
   inclined_plane_friction: ['incline', 'friction', 'coefficient', 'rough', 'sliding'],
   newton_laws_2d: ['force', 'newton', 'equilibrium', '2d', 'components', 'fbd'],
   projectile: ['projectile', 'throw', 'launch', 'trajectory', 'range', 'height', 'horizontal', 'thrown', 'ball', 'cliff', 'flight', 'vertical', 'angle of projection', 'initial velocity', 'landing', 'ground', 'air', 'falls', 'dropped', 'launched', 'maximum height', 'time of flight'],
-  circular_motion: ['circular', 'centripetal', 'centrifugal', 'rotating', 'orbit', 'conical', 'banked', 'loop'],
+  circular_motion: ['circular', 'circle', 'centripetal', 'centrifugal', 'rotating', 'orbit', 'conical', 'banked', 'loop', 'horizontal circle', 'vertical circle'],
   momentum_collision: ['momentum', 'collision', 'elastic', 'inelastic', 'restitution', 'impact', 'stick'],
   work_energy: ['work', 'energy', 'kinetic', 'potential', 'conservation', 'spring', 'compressed'],
   rotational: ['rotation', 'angular', 'torque', 'moment of inertia', 'rolling'],
   pulley: ['pulley', 'rope', 'tension', 'atwood', 'string', 'massless'],
-  simple_harmonic_motion: ['oscillation', 'shm', 'harmonic', 'spring', 'pendulum', 'period', 'frequency', 'amplitude'],
+  simple_harmonic_motion: ['oscillation', 'oscillates', 'shm', 'simple harmonic', 'harmonic motion', 'spring mass', 'pendulum', 'period of oscillation', 'mass on a spring', 'mass on spring', 'spring constant'],
 }
 
 /**
