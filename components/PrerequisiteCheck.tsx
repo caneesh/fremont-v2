@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import type { PrerequisiteQuestion, PrerequisiteAnswer, PrerequisiteResult } from '@/types/prerequisites'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
 import type { MiniProblem } from '@/lib/patternTrack'
 import MiniProblemSuggestion from './MiniProblemSuggestion'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface PrerequisiteCheckProps {
   concepts: Array<{
@@ -20,6 +21,7 @@ interface PrerequisiteCheckProps {
 }
 
 export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSelectMiniProblem }: PrerequisiteCheckProps) {
+  const { pushToast } = useToast()
   const [questions, setQuestions] = useState<PrerequisiteQuestion[]>([])
   const [answers, setAnswers] = useState<PrerequisiteAnswer[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -43,8 +45,13 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSele
         body: JSON.stringify({ concepts }),
       })
 
-      // Check for quota exceeded
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setIsLoading(false)
         setError('Daily prerequisite check limit reached')
         return

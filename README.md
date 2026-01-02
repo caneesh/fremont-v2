@@ -107,6 +107,14 @@ Track your learning journey with comprehensive history management:
 3. **Work Through Steps**: Expand each step, read the hints, and answer Socratic questions
 4. **Complete the Sanity Check**: Verify your solution makes physical sense
 
+## Data Import (PDF → Questions)
+
+The repo includes import scripts under `scripts/` for extracting question JSON from PDFs.
+
+- Claude PDF extraction: `npx ts-node scripts/pdf-to-questions.ts --batch ./pdfs -o ./out/questions.json`
+- MathPix OCR → question JSON: `node scripts/mathpix-pdf-to-questions.mjs --batch ./pdfs --output-dir ./out`
+  - Requires `MATHPIX_APP_ID` and `MATHPIX_APP_KEY` in `.env` (and `ANTHROPIC_API_KEY` only if `--structure claude`)
+
 ### Sample Problems Included
 
 - Bead on a Rotating Hoop (Non-inertial frames, effective potential)

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import type { ProblemVariation } from '@/types/variation'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface ProblemVariationsProps {
   originalProblem: string
@@ -15,6 +16,7 @@ export default function ProblemVariations({
   coreConcept,
   onSelectVariation,
 }: ProblemVariationsProps) {
+  const { pushToast } = useToast()
   const [variations, setVariations] = useState<ProblemVariation[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,8 +42,13 @@ export default function ProblemVariations({
         }),
       })
 
-      // Check for quota exceeded
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setIsLoading(false)
         setError('Daily variations limit reached')
         setIsExpanded(false)

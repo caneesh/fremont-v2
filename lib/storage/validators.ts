@@ -204,6 +204,14 @@ export function validateProblemProgress(data: unknown): ValidationResult<Problem
 
   if (!isString(data.problemText)) errors.push('problemText must be a string')
   if (!isNumber(data.currentStep)) errors.push('currentStep must be a number')
+  if (
+    data.sessionMode !== undefined &&
+    data.sessionMode !== 'guided' &&
+    data.sessionMode !== 'assisted' &&
+    data.sessionMode !== 'exam'
+  ) {
+    errors.push('sessionMode must be guided, assisted, or exam if provided')
+  }
 
   if (!isArray(data.stepProgress)) {
     errors.push('stepProgress must be an array')

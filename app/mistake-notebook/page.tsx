@@ -20,12 +20,14 @@ import { getTodayDebrief, isDebriefDue } from '@/lib/dailyDebrief'
 import MistakeCardDisplay from '@/components/MistakeCardDisplay'
 import DailyDebriefCard from '@/components/DailyDebriefCard'
 import ReviewSession from '@/components/ReviewSession'
+import { useToast } from '@/components/ui/ToastProvider'
 
 type ViewMode = 'cards' | 'review'
 
 export default function MistakeNotebookPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { confirm } = useToast()
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
   const [cards, setCards] = useState<MistakeCard[]>([])
   const [debrief, setDebrief] = useState<DailyDebrief | null>(null)
@@ -91,11 +93,17 @@ export default function MistakeNotebookPage() {
   }
 
   // Card actions
-  const handleDelete = (id: string) => {
-    if (confirm('Delete this card? This cannot be undone.')) {
-      deleteCard(id)
-      loadData()
-    }
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Delete card?',
+      message: 'Delete this card? This cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      destructive: true,
+    })
+    if (!ok) return
+    deleteCard(id)
+    loadData()
   }
 
   const handleSuspend = (id: string) => {

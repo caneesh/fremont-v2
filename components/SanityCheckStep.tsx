@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import type { SanityCheck, Concept } from '@/types/scaffold'
 import type { ChatMessage, DebugConceptRequest, DebugConceptResponse, DebuggerStatus, ProblemContext } from '@/types/debugConcept'
 import MathRenderer from './MathRenderer'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface SanityCheckStepProps {
   sanityCheck: SanityCheck
@@ -32,6 +33,7 @@ export default function SanityCheckStep({
   onTargetStep,
   onSolved
 }: SanityCheckStepProps) {
+  const { pushToast } = useToast()
   const [status, setStatus] = useState<DebuggerStatus>('idle')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
@@ -114,7 +116,13 @@ export default function SanityCheckStep({
         body: JSON.stringify(request)
       })
 
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setStatus('idle')
         return
       }
@@ -180,7 +188,13 @@ export default function SanityCheckStep({
         body: JSON.stringify(request)
       })
 
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setStatus('chatting')
         return
       }

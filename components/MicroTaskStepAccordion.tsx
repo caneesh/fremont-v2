@@ -50,6 +50,8 @@ interface MicroTaskStepAccordionProps {
   onRecordDecisionGateAttempt?: (stepId: number, isCorrect: boolean) => { shouldAutoUnlockHint: boolean }
   requiresDecisionGate?: boolean
   requiredMicroTaskCount?: number
+  maxTaskLevel?: number
+  onSessionError?: (stepId: number) => void
 }
 
 export default function MicroTaskStepAccordion({
@@ -76,12 +78,20 @@ export default function MicroTaskStepAccordion({
   onRecordDecisionGateAttempt,
   requiresDecisionGate = false,
   requiredMicroTaskCount = 1,
+  maxTaskLevel,
+  onSessionError,
 }: MicroTaskStepAccordionProps) {
   // Get the outline step ID for difficulty tuning (from phased scaffold adapter)
   const outlineStepId = (step as MicroTaskStep & { _outlineStepId?: string })._outlineStepId || `s${step.id}`
 
   // Get current difficulty for this step
   const currentDifficulty = getStepDifficulty?.(outlineStepId) || 'medium'
+  const requestedMaxTaskLevel = maxTaskLevel ?? 5
+  const resolvedMaxTaskLevel = step.tasks.length > 0
+    ? Math.min(step.tasks.length, requestedMaxTaskLevel)
+    : requestedMaxTaskLevel
+  const availableTasks = step.tasks.filter(task => task.level <= resolvedMaxTaskLevel)
+  const totalTaskLevels = step.tasks.length > 0 ? availableTasks.length : requestedMaxTaskLevel
   const [isExpanded, setIsExpanded] = useState(isActive)
 
   // Track step activation time for timeout detection
@@ -95,11 +105,13 @@ export default function MicroTaskStepAccordion({
     levelTitle: string
     explanation: string
   }>>(
-    progress?.collectedInsights.map((explanation, idx) => ({
-      level: idx + 1,
-      levelTitle: step.tasks[idx]?.levelTitle || 'Concept',
-      explanation
-    })) || []
+    progress?.collectedInsights
+      .slice(0, resolvedMaxTaskLevel)
+      .map((explanation, idx) => ({
+        level: idx + 1,
+        levelTitle: availableTasks[idx]?.levelTitle || step.tasks[idx]?.levelTitle || 'Concept',
+        explanation
+      })) || []
   )
   const [isReadingMode, setIsReadingMode] = useState(false)
   const [expandedHintLevel, setExpandedHintLevel] = useState<number | null>(null)
@@ -140,6 +152,12 @@ export default function MicroTaskStepAccordion({
     }
   }, [isActive, isCompleted])
 
+  useEffect(() => {
+    if (resolvedMaxTaskLevel > 0 && currentLevel > resolvedMaxTaskLevel) {
+      setCurrentLevel(resolvedMaxTaskLevel)
+    }
+  }, [currentLevel, resolvedMaxTaskLevel])
+
   const handleToggle = () => {
     if (isLocked) return
     if (!isExpanded) {
@@ -163,7 +181,7 @@ export default function MicroTaskStepAccordion({
 
     if (isCorrect) {
       // Add to collected insights
-      const currentTask = step.tasks.find(t => t.level === currentLevel)
+      const currentTask = availableTasks.find(t => t.level === currentLevel)
       if (currentTask) {
         setCollectedInsights(prev => [...prev, {
           level: currentLevel,
@@ -176,7 +194,7 @@ export default function MicroTaskStepAccordion({
       onTaskComplete(step.id, currentLevel, explanation)
 
       // Move to next level
-      if (currentLevel < step.tasks.length) {
+      if (currentLevel < resolvedMaxTaskLevel) {
         setCurrentLevel(currentLevel + 1)
       } else {
         // All tasks completed - check for timeout
@@ -203,7 +221,7 @@ export default function MicroTaskStepAccordion({
     // Clear pending state
     setPendingTaskResult(null)
     setShowConfidencePrompt(false)
-  }, [step.id, step.tasks, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, onComplete])
+  }, [step.id, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
 
   const handleTaskCorrect = (explanation: string) => {
     // Record attempt for difficulty tuning (correct answer)
@@ -251,7 +269,7 @@ export default function MicroTaskStepAccordion({
   const inferErrorTag = useCallback((): ErrorTag => {
     const stepType = step.stepType || 'physics_concept'
     const title = step.title.toLowerCase()
-    const task = step.tasks[currentLevel - 1]
+    const task = availableTasks.find(t => t.level === currentLevel)
     const question = task?.question?.toLowerCase() || ''
 
     // Check for specific patterns in question/title
@@ -295,6 +313,7 @@ export default function MicroTaskStepAccordion({
 
     // Record attempt for difficulty tuning (incorrect answer)
     onRecordAttempt?.(outlineStepId, currentLevel, false, attempts)
+    onSessionError?.(step.id)
 
     // P0 Decision Gate: Record wrong attempt
     if (FEATURE_FLAGS.P0_DECISION_GATES && onRecordDecisionGateAttempt) {
@@ -354,15 +373,16 @@ export default function MicroTaskStepAccordion({
         onCircuitBreakerError(step.id, errorTag)
       }
     }
+    onSessionError?.(step.id)
 
     setIsReadingMode(true)
     // Expand the first non-completed level
-    const firstUncompletedLevel = step.tasks.find(t => t.level >= currentLevel)?.level || 1
+    const firstUncompletedLevel = availableTasks.find(t => t.level >= currentLevel)?.level || 1
     setExpandedHintLevel(firstUncompletedLevel)
   }
 
   const handleHintRead = (level: number) => {
-    const task = step.tasks.find(t => t.level === level)
+    const task = availableTasks.find(t => t.level === level)
     if (!task) return
 
     // Add to collected insights if not already there
@@ -377,9 +397,9 @@ export default function MicroTaskStepAccordion({
     }
 
     // Move to next level if this was the current level
-    if (level === currentLevel && currentLevel < step.tasks.length) {
+    if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
-    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+    } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
       onComplete(step.id)
     }
   }
@@ -396,7 +416,7 @@ export default function MicroTaskStepAccordion({
 
   // Handle reveal flow completion (from RevealReconstructValidate modal)
   const handleRevealFlowComplete = useCallback((outcome: ValidationOutcome, explanation: string, level: number) => {
-    const task = step.tasks.find(t => t.level === level)
+    const task = availableTasks.find(t => t.level === level)
     if (!task) return
 
     // Update learning status based on outcome
@@ -418,19 +438,19 @@ export default function MicroTaskStepAccordion({
     }
 
     // Move to next level if this was the current level
-    if (level === currentLevel && currentLevel < step.tasks.length) {
+    if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
-    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+    } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
       onComplete(step.id)
     }
 
     // Close the modal
     setRevealFlowTask(null)
-  }, [step.tasks, step.id, collectedInsights, currentLevel, onTaskComplete, onComplete])
+  }, [step.id, collectedInsights, currentLevel, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
 
   // Handle reveal flow skip (user skipped comprehension check)
   const handleRevealFlowSkip = useCallback((level: number) => {
-    const task = step.tasks.find(t => t.level === level)
+    const task = availableTasks.find(t => t.level === level)
     if (!task) return
 
     // Mark as revealed but not validated
@@ -452,29 +472,29 @@ export default function MicroTaskStepAccordion({
     }
 
     // Move to next level
-    if (level === currentLevel && currentLevel < step.tasks.length) {
+    if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
-    } else if (level === currentLevel && currentLevel >= step.tasks.length) {
+    } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
       onComplete(step.id)
     }
 
     // Close the modal
     setRevealFlowTask(null)
-  }, [step.tasks, step.id, collectedInsights, currentLevel, onTaskComplete, onComplete])
+  }, [step.id, collectedInsights, currentLevel, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
 
   // Handle opening reveal flow for a specific task level
   const handleOpenRevealFlow = useCallback((taskLevel: number) => {
-    const task = step.tasks.find(t => t.level === taskLevel)
+    const task = availableTasks.find(t => t.level === taskLevel)
     if (task) {
       setRevealFlowTask(task)
     }
-  }, [step.tasks])
+  }, [availableTasks])
 
   // Get current task
-  const currentTask = step.tasks.find(t => t.level === currentLevel)
+  const currentTask = availableTasks.find(t => t.level === currentLevel)
   // Handle empty tasks array - show loading state instead of completed
   const hasNoTasks = step.tasks.length === 0
-  const allTasksCompleted = !hasNoTasks && (currentLevel > step.tasks.length || isCompleted)
+  const allTasksCompleted = !hasNoTasks && (currentLevel > resolvedMaxTaskLevel || isCompleted)
 
   // Get required concepts for this step
   const requiredConcepts = concepts.filter(c =>
@@ -527,7 +547,7 @@ export default function MicroTaskStepAccordion({
           stepType: step.stepType,
           problemText: problemStatement || '',
           stepPosition: stepNumber,
-          totalSteps: step.tasks.length > 0 ? step.tasks.length : 5, // Estimate if not loaded
+          totalSteps: totalTaskLevels,
           requiredConcepts: step.requiredConcepts,
         }),
       })
@@ -543,7 +563,7 @@ export default function MicroTaskStepAccordion({
     } finally {
       setIsLoadingWhyStep(false)
     }
-  }, [whyStepExplanation, showWhyStep, step.title, step.stepType, step.requiredConcepts, step.tasks.length, problemStatement, stepNumber])
+  }, [whyStepExplanation, showWhyStep, step.title, step.stepType, step.requiredConcepts, totalTaskLevels, problemStatement, stepNumber])
 
   return (
     <div
@@ -629,7 +649,7 @@ export default function MicroTaskStepAccordion({
           <div className="flex items-center gap-2 mt-1">
             {/* Progress dots */}
             <div className="flex gap-1">
-              {step.tasks.map((task) => (
+              {availableTasks.map((task) => (
                 <div
                   key={task.level}
                   className={`w-2 h-2 rounded-full ${
@@ -643,7 +663,7 @@ export default function MicroTaskStepAccordion({
               ))}
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">
-              {Math.min(currentLevel - 1, step.tasks.length)}/{step.tasks.length} insights
+              {Math.min(currentLevel - 1, totalTaskLevels)}/{totalTaskLevels} insights
             </span>
             {/* P0 Decision Gate Progress */}
             {FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState && !decisionGateState.gatePassed && (
@@ -793,7 +813,7 @@ export default function MicroTaskStepAccordion({
           {showStepContent && collectedInsights.length > 0 && !isReadingMode && (
             <CollectedInsights
               insights={collectedInsights}
-              totalLevels={step.tasks.length}
+              totalLevels={totalTaskLevels}
             />
           )}
 
@@ -874,14 +894,14 @@ export default function MicroTaskStepAccordion({
               </div>
 
               {/* Socratic Ladder - Hint tiers with enforcement */}
-              {step.tasks.map((task) => {
+              {availableTasks.map((task) => {
                 const isCollected = collectedInsights.some(i => i.level === task.level)
                 const isExpanded = expandedHintLevel === task.level
                 const learningStatus = levelLearningStatus.get(task.level)
 
                 // Tier enforcement: A tier is locked if any earlier tier hasn't been read
                 // Tier N is unlocked only if all tiers 1 to N-1 are collected
-                const isTierLocked = step.tasks
+                const isTierLocked = availableTasks
                   .filter(t => t.level < task.level)
                   .some(t => !collectedInsights.some(i => i.level === t.level))
 
@@ -1034,7 +1054,7 @@ export default function MicroTaskStepAccordion({
                 Step Completed!
               </div>
               <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                All {step.tasks.length} insights earned for this step.
+                All {totalTaskLevels} insights earned for this step.
               </p>
             </div>
           )}

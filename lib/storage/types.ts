@@ -66,6 +66,16 @@ export type EventType =
   | 'recovery_warmup_completed'
   | 'recovery_mode_completed'
   | 'recovery_mode_abandoned'
+  // Momentum Engine events
+  | 'momentum_decision_win'
+  | 'momentum_decision_streak'
+  | 'momentum_hint_free_win'
+  | 'momentum_hint_free_streak'
+  | 'momentum_rebuild_win'
+  | 'momentum_rebuild_streak'
+  | 'momentum_recovery'
+  | 'momentum_streak_reset'
+  | 'momentum_feedback_shown'
 
 export interface EventMetadata {
   problemId?: string
@@ -108,6 +118,12 @@ export interface EventMetadata {
   circuitBreakerTripped?: boolean
   averageStepTimeMs?: number
   sessionEndedMidProblem?: boolean
+  // Momentum Engine metadata
+  streakType?: 'decision' | 'hintFree' | 'rebuild'
+  streakCount?: number
+  isRecovery?: boolean
+  patternId?: string
+  momentumEventType?: string
   [key: string]: unknown // Allow additional metadata
 }
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import SolutionScaffold from '@/components/SolutionScaffold'
 import type { ScaffoldData } from '@/types/scaffold'
+import type { MultipleChoiceTask } from '@/types/microTask'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -22,6 +23,7 @@ export default function TimePressureDevPage() {
       {
         id: 0,
         title: 'Identify the driving energy change',
+        stepType: 'physics_concept',
         requiredConcepts: ['c2'],
         hints: [
           { level: 1, title: 'Concept Identification', content: 'Use gravity → potential energy decreases.' },
@@ -30,10 +32,34 @@ export default function TimePressureDevPage() {
           { level: 4, title: 'Structural Equation', content: '½mv² = mg(s sinθ).' },
           { level: 5, title: 'Full Solution', content: 'v = √(2gsinθ·s).' },
         ],
+        // Decision Gate Tasks - must answer correctly before completing step
+        decisionGateTasks: [
+          {
+            type: 'MULTIPLE_CHOICE',
+            level: 1,
+            levelTitle: 'Concept',
+            question: 'Which type of energy is being converted in this problem?',
+            options: [
+              'Gravitational potential energy to kinetic energy',
+              'Kinetic energy to thermal energy',
+              'Chemical energy to kinetic energy',
+              'Elastic potential energy to kinetic energy',
+            ],
+            correctIndex: 0,
+            explanation: 'As the block slides down, gravitational potential energy (mgh) converts to kinetic energy (½mv²).',
+            feedbackPerOption: [
+              'Correct! The block loses height and gains speed.',
+              'No friction means no thermal energy loss.',
+              'There is no chemical reaction here.',
+              'There are no springs or elastic elements.',
+            ],
+          } as MultipleChoiceTask,
+        ],
       },
       {
         id: 1,
         title: 'Compute the speed',
+        stepType: 'math_manipulation',
         requiredConcepts: ['c1', 'c2'],
         hints: [
           { level: 1, title: 'Concept Identification', content: 'Plug numbers into v = √(2gsinθ·s).' },
@@ -41,6 +67,24 @@ export default function TimePressureDevPage() {
           { level: 3, title: 'Strategy Selection', content: 'Use g ≈ 9.8 m/s².' },
           { level: 4, title: 'Structural Equation', content: 'v = √(9.8×3) ≈ √29.4.' },
           { level: 5, title: 'Full Solution', content: 'v ≈ 5.4 m/s.' },
+        ],
+        // Decision Gate Tasks for step 2
+        decisionGateTasks: [
+          {
+            type: 'MULTIPLE_CHOICE',
+            level: 1,
+            levelTitle: 'Concept',
+            question: 'What is sin(30°)?',
+            options: ['0.5', '0.866', '1.0', '0.707'],
+            correctIndex: 0,
+            explanation: 'sin(30°) = 0.5 is a key trigonometric value to memorize.',
+            feedbackPerOption: [
+              'Correct!',
+              'That\'s sin(60°).',
+              'That\'s sin(90°).',
+              'That\'s sin(45°).',
+            ],
+          } as MultipleChoiceTask,
         ],
       },
     ],
@@ -87,7 +131,7 @@ export default function TimePressureDevPage() {
             Time Pressure Dev Playground
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Pattern-First + Skip/Commit gates. Feature flags: PATTERN_FIRST_MODE={String(FEATURE_FLAGS.PATTERN_FIRST_MODE)}, SKIP_COMMIT_GATE={String(FEATURE_FLAGS.SKIP_COMMIT_GATE)}.
+            Pattern-First + Skip/Commit + Decision Gates. Flags: P0_DECISION_GATES={String(FEATURE_FLAGS.P0_DECISION_GATES)}, P0_REBUILD_GATES={String(FEATURE_FLAGS.P0_REBUILD_GATES)}.
           </p>
         </div>
 

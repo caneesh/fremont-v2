@@ -10,9 +10,11 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import PageHeader from '@/components/PageHeader'
 import ProblemReplay from '@/components/ProblemReplay'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function HistoryPage() {
   const router = useRouter()
+  const { confirm } = useToast()
   const [attempts, setAttempts] = useState<ProblemAttempt[]>([])
   const [filteredStatus, setFilteredStatus] = useState<ProblemStatus | ''>('')
   const [filteredReview, setFilteredReview] = useState<boolean | ''>('')
@@ -42,11 +44,17 @@ export default function HistoryPage() {
     setTotal(result.total)
   }
 
-  const handleDelete = (problemId: string) => {
-    if (confirm('Are you sure you want to delete this attempt?')) {
-      problemHistoryService.deleteAttempt(problemId)
-      loadHistory()
-    }
+  const handleDelete = async (problemId: string) => {
+    const ok = await confirm({
+      title: 'Delete attempt?',
+      message: 'Are you sure you want to delete this attempt? This cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      destructive: true,
+    })
+    if (!ok) return
+    problemHistoryService.deleteAttempt(problemId)
+    loadHistory()
   }
 
   const handleToggleReview = (problemId: string) => {

@@ -112,6 +112,17 @@ import {
   getRequiredMicroTaskCount,
   updateCognitiveLoadLevel,
 } from '@/lib/gatingPolicyEngine'
+import type { MomentumState, MomentumEvent } from '@/types/momentum'
+import {
+  getOrCreateMomentumState,
+  recordDecisionWin,
+  recordDecisionFailure,
+  recordHintFreeWin,
+  recordRebuildWin,
+  consumePendingEvent,
+  saveMomentumState,
+} from '@/lib/momentumEngine'
+import MomentumFeedback from './MomentumFeedback'
 import {
   getOrCreateCognitiveLoadState,
   getOrCreateSessionLoadMetrics,
@@ -128,6 +139,16 @@ import {
   type SessionLoadMetrics,
 } from '@/lib/cognitiveLoadService'
 import type { HighLoadUIConfig } from '@/types/cognitiveLoad'
+import type { SessionMode, SessionModeState } from '@/types/sessionMode'
+import {
+  createInitialSessionModeState,
+  evaluateSessionMode,
+  getModePresentationConfig,
+  getOrCreateSessionModeState,
+  getVisibleStepIndexes,
+  recordSessionModeError,
+  saveSessionModeState,
+} from '@/lib/sessionModePolicyEngine'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -162,6 +183,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [highlightedProblemRange, setHighlightedProblemRange] = useState<{ start: number; end: number } | null>(null)
   const [showSubmissionCanvas, setShowSubmissionCanvas] = useState(false)
   const [solutionGradeResult, setSolutionGradeResult] = useState<GradeSolutionResponse | null>(null)
+  const [sessionMode, setSessionMode] = useState<SessionMode>('guided')
+  const [sessionModeState, setSessionModeState] = useState<SessionModeState | null>(null)
+  const [problemMasteryScore, setProblemMasteryScore] = useState(0)
+  const [stepErrorCounts, setStepErrorCounts] = useState<Map<number, number>>(new Map())
+  const masteryScoreRef = useRef(0)
+  const [sessionModeSeed, setSessionModeSeed] = useState<SessionMode | null>(null)
 
   // Confidence rating state
   const [pendingConfidenceStepId, setPendingConfidenceStepId] = useState<number | null>(null)
@@ -227,6 +254,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const skipCommitGateShownRef = useRef(false)
   const skipCommitTimerRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Momentum Engine state
+  const [momentumState, setMomentumState] = useState<MomentumState | null>(null)
+  const [pendingMomentumEvent, setPendingMomentumEvent] = useState<MomentumEvent | null>(null)
+  const momentumInitRef = useRef(false)
+
   // Concept Contrast state
   const [showConceptContrast, setShowConceptContrast] = useState(false)
   const [currentConceptContrastChallenge, setCurrentConceptContrastChallenge] = useState<ConceptContrastChallenge | null>(null)
@@ -236,6 +268,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
   const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
+  const modeConfig = useMemo(() => getModePresentationConfig(sessionMode), [sessionMode])
+  const visibleStepIndexes = useMemo(
+    () => getVisibleStepIndexes(modeConfig.stepVisibility, currentStep, data.steps.length),
+    [modeConfig.stepVisibility, currentStep, data.steps.length]
+  )
 
   // Dev: Skip steps mode for testing sanity check UI
   const searchParams = useSearchParams()
@@ -253,6 +290,41 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     () => getSkipCommitTimePressure(data.timePressure),
     [data.timePressure]
   )
+
+  const computeProblemMasteryScore = useCallback(() => {
+    if (typeof window === 'undefined') return 0
+    const studentId = localStorage.getItem('physiscaffold_user') || 'anonymous'
+    const conceptMapping = conceptMappingService.mapConcepts(
+      data.concepts,
+      CONCEPT_NETWORK_DATA.network.nodes
+    )
+    const masteryScores = data.concepts.map((concept) => {
+      const mappedConceptId = conceptMapping.get(concept.id) || concept.id
+      const masteryData = conceptMasteryService.getConceptMastery(studentId, mappedConceptId)
+      return masteryData?.masteryScore ?? 0
+    })
+    if (masteryScores.length === 0) return 0
+    const total = masteryScores.reduce((sum, score) => sum + score, 0)
+    return total / masteryScores.length
+  }, [data.concepts])
+
+  useEffect(() => {
+    const mastery = computeProblemMasteryScore()
+    masteryScoreRef.current = mastery
+    setProblemMasteryScore(mastery)
+  }, [computeProblemMasteryScore])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const seedMode = sessionModeSeed || 'guided'
+    const baseState = sessionModeState ?? getOrCreateSessionModeState(seedMode)
+    const { state: updatedState } = evaluateSessionMode(
+      baseState,
+      masteryScoreRef.current
+    )
+    setSessionModeState(updatedState)
+    setSessionMode(updatedState.mode)
+  }, [problemMasteryScore, sessionModeSeed])
 
   useEffect(() => {
     if (!showSkipCommitAnalytics) return
@@ -287,6 +359,21 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       phasedScaffoldContext.loadStepExpansion(currentStepData._outlineStepId)
     }
   }, [currentStep, data.steps, phasedScaffoldContext, useMicroTasks])
+
+  useEffect(() => {
+    if (!sessionModeState) return
+    const { state: updatedState } = evaluateSessionMode(
+      sessionModeState,
+      masteryScoreRef.current
+    )
+    if (
+      updatedState.mode !== sessionModeState.mode ||
+      updatedState.recentErrorTimestamps.length !== sessionModeState.recentErrorTimestamps.length
+    ) {
+      setSessionModeState(updatedState)
+      setSessionMode(updatedState.mode)
+    }
+  }, [currentStep, sessionModeState])
 
   // Determine if all steps are "complete" (real or simulated for testing)
   const allStepsComplete = useMemo(() => {
@@ -326,7 +413,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [socraticRewindContext, setSocraticRewindContext] = useState<SocraticRewindContext | null>(null)
   const [socraticRewindTrigger, setSocraticRewindTrigger] = useState<RewindTriggerSource>('sanity_check_failed')
 
-  // Initialize P0 Gating Policy and Cognitive Load Governor
+  // Initialize P0 Gating Policy, Cognitive Load Governor, and Momentum Engine
   useEffect(() => {
     if (gatingPolicyInitRef.current) return
     gatingPolicyInitRef.current = true
@@ -342,6 +429,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setCognitiveLoadState(loadState)
       setCognitiveLoadMetrics(loadMetrics)
       setCognitiveLoadUIConfig(getUIConfigForLoadScore(loadState.score))
+    }
+
+    // Initialize Momentum Engine (always enabled - lightweight motivation)
+    if (!momentumInitRef.current) {
+      momentumInitRef.current = true
+      const momentum = getOrCreateMomentumState()
+      setMomentumState(momentum)
     }
 
     // Clear policy and cognitive load state on unmount (new problem = fresh state)
@@ -405,8 +499,24 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     )
     setGatingPolicy(updatedPolicy)
 
+    // Track momentum for rebuild gate pass
+    if (allPassed && momentumState) {
+      const patternId = data.primaryPatternId
+      const problemId = generateProblemId(data.problem)
+
+      const { updatedState, event } = recordRebuildWin(momentumState, {
+        patternId,
+        stepId,
+        problemId,
+      })
+      setMomentumState(updatedState)
+      if (event) {
+        setPendingMomentumEvent(event)
+      }
+    }
+
     return { isCorrect, allPassed }
-  }, [gatingPolicy])
+  }, [gatingPolicy, momentumState, data.primaryPatternId, data.problem])
 
   // P0 Rebuild Gate: Get gate state for a step
   const getRebuildGateState = useCallback((stepId: number): StepRebuildGateState | null => {
@@ -436,6 +546,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const handleRecordDecisionGateAttempt = useCallback((stepId: number, isCorrect: boolean): { shouldAutoUnlockHint: boolean } => {
     if (!gatingPolicy) return { shouldAutoUnlockHint: false }
 
+    // Check if this is a first attempt (no previous attempts on this task)
+    const currentGateState = getStepDecisionGateState(gatingPolicy, stepId)
+    const isFirstAttempt = currentGateState.currentAttempts === 0
+
     const { updatedPolicy, shouldAutoUnlockHint } = recordMicroTaskAttempt(
       gatingPolicy,
       stepId,
@@ -443,8 +557,38 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     )
     setGatingPolicy(updatedPolicy)
 
+    if (!isCorrect) {
+      registerSessionError(stepId)
+    }
+
+    // Track momentum for decision gates
+    if (momentumState) {
+      const patternId = data.primaryPatternId
+      const problemId = generateProblemId(data.problem)
+
+      if (isCorrect) {
+        const { updatedState, event } = recordDecisionWin(momentumState, {
+          isFirstAttempt,
+          patternId,
+          stepId,
+          problemId,
+        })
+        setMomentumState(updatedState)
+        if (event) {
+          setPendingMomentumEvent(event)
+        }
+      } else {
+        const { updatedState } = recordDecisionFailure(momentumState, {
+          patternId,
+          stepId,
+          problemId,
+        })
+        setMomentumState(updatedState)
+      }
+    }
+
     return { shouldAutoUnlockHint }
-  }, [gatingPolicy])
+  }, [gatingPolicy, momentumState, data.primaryPatternId, data.problem])
 
   // P0 Decision Gate: Get required micro-task count
   const getDecisionGateRequiredCount = useCallback((): number => {
@@ -610,14 +754,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       // Guard: only mark complete if step has tasks (prevents false completion for unexpanded steps)
       const microData = data as MicroTaskScaffoldData
       const step = microData.steps.find(s => s.id === stepId)
-      if (step && step.tasks.length > 0 && current.currentLevel > step.tasks.length) {
+      const maxTaskLevel = step ? Math.min(step.tasks.length, modeConfig.maxTaskLevel) : 0
+      if (step && step.tasks.length > 0 && current.currentLevel > maxTaskLevel) {
         current.isCompleted = true
       }
 
       newMap.set(stepId, current)
       return newMap
     })
-  }, [data])
+  }, [data, modeConfig.maxTaskLevel])
 
   const handleMicroStepComplete = useCallback((stepId: number) => {
     // Mark step as completed
@@ -636,6 +781,28 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       }
     }
   }, [completedSteps, data])
+
+  const recordStepError = useCallback((stepId: number) => {
+    setStepErrorCounts(prev => {
+      const next = new Map(prev)
+      next.set(stepId, (next.get(stepId) || 0) + 1)
+      return next
+    })
+  }, [])
+
+  const registerSessionError = useCallback((stepId?: number) => {
+    if (stepId !== undefined) {
+      recordStepError(stepId)
+    }
+    const seedMode = sessionModeSeed || 'guided'
+    const baseState = sessionModeState ?? getOrCreateSessionModeState(seedMode)
+    const { state: updatedState } = recordSessionModeError(
+      baseState,
+      masteryScoreRef.current
+    )
+    setSessionModeState(updatedState)
+    setSessionMode(updatedState.mode)
+  }, [recordStepError, sessionModeSeed, sessionModeState])
 
   // Generate a unique problem ID based on the problem text hash
   const problemId = useCallback(() => {
@@ -717,6 +884,14 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         const answers = new Map<number, string>()
         const completed: number[] = []
         const hintLevels = new Map<number, number>()
+
+        if (progress.sessionMode) {
+          const seededState = createInitialSessionModeState(progress.sessionMode)
+          saveSessionModeState(seededState)
+          setSessionModeState(seededState)
+          setSessionMode(progress.sessionMode)
+          setSessionModeSeed(progress.sessionMode)
+        }
 
         // Get current steps for validation (if using micro-tasks)
         const microSteps = useMicroTasks ? (data as MicroTaskScaffoldData).steps : null
@@ -1061,6 +1236,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       stepProgress,
       sanityCheckAnswer,
       currentStep,
+      sessionMode,
       reflectionAnswers: reflectionAnswers.length > 0 ? reflectionAnswers : undefined,
       timeSpentMs: Date.now() - problemStartTime,
       expectedSolveTimeMs: data.timePressure?.expectedSolveTimeSeconds
@@ -1088,7 +1264,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
 
     return progress
-  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState, skipCommitState, problemStartTime, solutionGradeResult])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, sessionMode, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState, skipCommitState, problemStartTime, solutionGradeResult])
 
   // Skip-or-Commit Gate: Handler for skip
   const handleSkipCommitSkip = useCallback(() => {
@@ -1464,6 +1640,24 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setCompletedSteps([...completedSteps, stepId])
     }
 
+    // Track hint-free wins for momentum
+    if (momentumState) {
+      const maxHintLevelUsed = stepHintLevels.get(stepId) || 0
+      const patternId = data.primaryPatternId
+      const problemId = generateProblemId(data.problem)
+
+      const { updatedState, event } = recordHintFreeWin(momentumState, {
+        maxHintLevelUsed,
+        patternId,
+        stepId,
+        problemId,
+      })
+      setMomentumState(updatedState)
+      if (event) {
+        setPendingMomentumEvent(event)
+      }
+    }
+
     // Track step completion for cognitive load and update score
     if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR && cognitiveLoadMetrics && cognitiveLoadState) {
       // Calculate time spent on this step
@@ -1663,21 +1857,23 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   }
 
   const handleHintLevelChange = (stepId: number, level: number) => {
+    if (modeConfig.maxHintLevel === 0) return
+    const cappedLevel = Math.min(level, modeConfig.maxHintLevel)
     setStepHintLevels(prev => {
       const newMap = new Map(prev)
-      newMap.set(stepId, level)
+      newMap.set(stepId, cappedLevel)
       return newMap
     })
 
     // Track hint unlock for cognitive load (before level 2 check to catch all unlocks)
     if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR && cognitiveLoadMetrics) {
-      const updatedMetrics = recordHintUnlock(cognitiveLoadMetrics, stepId, level)
+      const updatedMetrics = recordHintUnlock(cognitiveLoadMetrics, stepId, cappedLevel)
       setCognitiveLoadMetrics(updatedMetrics)
       saveSessionLoadMetrics(updatedMetrics)
     }
 
     // Create mistake card when user needs significant help (level >= 2)
-    if (level >= 2 && FEATURE_FLAGS.MISTAKE_NOTEBOOK) {
+    if (cappedLevel >= 2 && FEATURE_FLAGS.MISTAKE_NOTEBOOK) {
       const step = data.steps[stepId]
       if (step) {
         const cardInput: CreateCardInput = {
@@ -1690,7 +1886,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           domain: data.domain,
           subdomain: data.subdomain,
           trigger: 'hint_requested' as MistakeTrigger,
-          hintLevelReached: level,
+          hintLevelReached: cappedLevel,
         }
 
         const newCard = createCardIfNotExists(cardInput)
@@ -2079,6 +2275,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       recordGradingErrors(result.detailedAnalysis.errors, currentStep)
     }
 
+    if (result.status !== 'SUCCESS') {
+      registerSessionError()
+    }
+
     // Trigger Socratic Rewind for CONCEPTUAL_GAP
     if (result.status === 'CONCEPTUAL_GAP') {
       const rewindContext = buildContextFromGradeResult(
@@ -2137,7 +2337,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         }
       }
     }
-  }, [recordGradingErrors, currentStep, data, stepAnswers, completedSteps, showSocraticRewind])
+  }, [recordGradingErrors, currentStep, data, stepAnswers, completedSteps, showSocraticRewind, registerSessionError])
 
   // Handle highlighting problem text from constraint feedback
   const handleHighlightProblem = useCallback((startIndex: number, endIndex: number) => {
@@ -2175,9 +2375,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 mb-6 border border-transparent dark:border-dark-border">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4">
           <div>
-            <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-accent/20 text-primary-700 dark:text-accent rounded-full text-sm font-medium mb-2">
-              {data.domain} → {data.subdomain}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-accent/20 text-primary-700 dark:text-accent rounded-full text-sm font-medium">
+                {data.domain} → {data.subdomain}
+              </span>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${modeConfig.badge.className}`}
+                title={modeConfig.badge.description}
+              >
+                Mode: {modeConfig.badge.label}
+              </span>
+            </div>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-dark-text-primary">Problem Statement</h2>
           </div>
           <button
@@ -2275,7 +2483,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {reverseSolveEnabled && (
+        {reverseSolveEnabled && modeConfig.showSteps && (
           <div className="lg:col-span-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 sm:p-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
@@ -2303,6 +2511,36 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         )}
         {/* Main solving area - Steps */}
         <div className="lg:col-span-3 space-y-4">
+          {modeConfig.submissionVisibility === 'always' && (
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-200">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    Exam Submission
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-dark-text-muted">
+                    Submit your full solution for grading when ready.
+                  </p>
+                </div>
+              </div>
+              <SubmissionCanvas
+                problemText={data.problem}
+                domain={data.domain}
+                subdomain={data.subdomain}
+                concepts={data.concepts}
+                variant={modeConfig.submissionVariant}
+                onGradeComplete={handleGradeComplete}
+                onHighlightProblem={handleHighlightProblem}
+              />
+            </div>
+          )}
+          {modeConfig.showSteps && (
+          <>
           {/* Mistake Warnings */}
           {showWarnings && mistakeWarnings.length > 0 && (
             <MistakeWarning
@@ -2441,7 +2679,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             </p>
 
             {/* Step Confidence Heatmap - show when heatmap feature is enabled and has data */}
-            {FEATURE_FLAGS.STEP_HEATMAP && FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS && stepConfidenceRatings.size > 0 && (
+            {FEATURE_FLAGS.STEP_HEATMAP && FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS && modeConfig.stepVisibility.mode === 'all' && stepConfidenceRatings.size > 0 && (
               <div className="mb-4">
                 <StepHeatmap
                   stepConfidenceRatings={stepConfidenceRatings}
@@ -2462,7 +2700,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             )}
 
             <div className="space-y-3">
-              {data.steps.map((step, index) => (
+              {data.steps.map((step, index) => {
+                if (!visibleStepIndexes.includes(index)) return null
+
+                return (
                 <div
                   key={step.id}
                   ref={(el) => {
@@ -2510,6 +2751,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       onRecordDecisionGateAttempt={handleRecordDecisionGateAttempt}
                       requiresDecisionGate={stepRequiresDecisionGate(step.id, step.stepType, (step as MicroTaskStep).tasks?.length > 0)}
                       requiredMicroTaskCount={getDecisionGateRequiredCount()}
+                      maxTaskLevel={modeConfig.maxTaskLevel}
+                      onSessionError={registerSessionError}
                     />
                   ) : (
                     <StepAccordion
@@ -2538,6 +2781,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       requiredMicroTaskCount={getDecisionGateRequiredCount()}
                       maxDecisionGateAttempts={gatingPolicy?.decisionGateConfig.maxAttempts ?? 2}
                       cognitiveLoadUIConfig={cognitiveLoadUIConfig}
+                      maxHintLevel={modeConfig.maxHintLevel}
+                      professorVisibility={modeConfig.professorVisibility}
+                      hasStepErrors={Boolean(stepErrorCounts.get(step.id))}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => handleStepActivation(index)}
@@ -2545,12 +2791,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                     />
                   )}
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
+          </>
+          )}
 
           {/* Submit Solution Section - always visible after first step */}
-          {completedSteps.length > 0 && !showExplainToFriend && !showReflection && (
+          {modeConfig.submissionVisibility === 'after_steps' && completedSteps.length > 0 && !showExplainToFriend && !showReflection && (
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
               <button
                 onClick={() => setShowSubmissionCanvas(!showSubmissionCanvas)}
@@ -2604,6 +2853,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                     domain={data.domain}
                     subdomain={data.subdomain}
                     concepts={data.concepts}
+                    variant={modeConfig.submissionVariant}
                     onGradeComplete={handleGradeComplete}
                     onHighlightProblem={handleHighlightProblem}
                   />
@@ -2613,7 +2863,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           )}
 
           {/* Sanity Check / Verify via Logic - only show after all steps completed (or in skip mode) */}
-          {allStepsComplete && !showExplainToFriend && !showReflection && (
+          {modeConfig.showSteps && allStepsComplete && !showExplainToFriend && !showReflection && (
             <div className="demo-step-sanity">
               {data.sanityCheckMatrix ? (
                 <SanityCheckMatrix
@@ -2737,9 +2987,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         </div>
 
         {/* Right sidebar - Concept panel */}
-        <div className="demo-step-concepts lg:col-span-1">
-          <ConceptPanel concepts={data.concepts} />
-        </div>
+        {modeConfig.showSidebar && (
+          <div className="demo-step-concepts lg:col-span-1">
+            <ConceptPanel concepts={data.concepts} />
+          </div>
+        )}
       </div>
 
       {/* Post-Solve Activity Popup */}
@@ -2953,6 +3205,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
 
       {/* Skip Toast */}
       <SkipToast isVisible={showSkipToast} />
+
+      {/* Momentum Feedback */}
+      <MomentumFeedback
+        event={pendingMomentumEvent}
+        onDismiss={() => {
+          setPendingMomentumEvent(null)
+          if (momentumState) {
+            const { updatedState } = consumePendingEvent(momentumState)
+            setMomentumState(updatedState)
+          }
+        }}
+      />
 
       {/* Scaffold Locked Overlay (Pattern-First) */}
       {isScaffoldLocked && !showPatternFirst && (

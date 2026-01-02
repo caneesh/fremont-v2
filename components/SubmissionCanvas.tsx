@@ -10,8 +10,10 @@ import type {
   PHYSICS_AUTOCOMPLETE
 } from '@/types/gradeSolution'
 import { PHYSICS_AUTOCOMPLETE as AUTOCOMPLETE_DATA } from '@/types/gradeSolution'
+import type { SubmissionVariant } from '@/types/sessionMode'
 import { mockTranscribeImage, validateImageFile } from '@/lib/mockTranscribe'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
+import { useToast } from '@/components/ui/ToastProvider'
 import { getValidationFeedback, getMathErrorMessage, getPhysicsErrorMessage } from '@/lib/hintEngine'
 import MathRenderer from './MathRenderer'
 import ConstraintFeedback from './ConstraintFeedback'
@@ -26,6 +28,7 @@ interface SubmissionCanvasProps {
   keyEquations?: string[]
   onGradeComplete?: (result: GradeSolutionResponse) => void
   onHighlightProblem?: (startIndex: number, endIndex: number) => void
+  variant?: SubmissionVariant
 }
 
 export default function SubmissionCanvas({
@@ -36,8 +39,10 @@ export default function SubmissionCanvas({
   expectedApproach,
   keyEquations,
   onGradeComplete,
-  onHighlightProblem
+  onHighlightProblem,
+  variant = 'standard'
 }: SubmissionCanvasProps) {
+  const { pushToast } = useToast()
   // Tab state
   const [activeTab, setActiveTab] = useState<SubmissionTab>('text')
 
@@ -74,11 +79,30 @@ export default function SubmissionCanvas({
   const [gradeResult, setGradeResult] = useState<GradeSolutionResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showMisconceptions, setShowMisconceptions] = useState(true)
+  const isExamVariant = variant === 'exam'
+
+  useEffect(() => {
+    if (!isExamVariant) return
+    if (activeTab !== 'text') {
+      setActiveTab('text')
+    }
+    if (showPreview) {
+      setShowPreview(false)
+    }
+    if (autocompleteVisible) {
+      setAutocompleteVisible(false)
+    }
+  }, [isExamVariant, activeTab, showPreview, autocompleteVisible])
 
   // Handle text input with autocomplete detection
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setSolutionText(value)
+
+    if (isExamVariant) {
+      setAutocompleteVisible(false)
+      return
+    }
 
     // Check for autocomplete triggers
     const cursorPosition = e.target.selectionStart
@@ -133,6 +157,7 @@ export default function SubmissionCanvas({
 
   // Handle keyboard navigation for autocomplete
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isExamVariant) return
     if (!autocompleteVisible) return
 
     if (e.key === 'ArrowDown') {
@@ -409,7 +434,13 @@ export default function SubmissionCanvas({
         body: JSON.stringify(request)
       })
 
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setIsGrading(false)
         setScanState(activeTab === 'scan' ? 'transcribed' : 'idle')
         return
@@ -471,35 +502,37 @@ export default function SubmissionCanvas({
   return (
     <div className="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
       {/* Tab Header */}
-      <div className="flex border-b border-slate-700">
-        <button
-          onClick={() => setActiveTab('text')}
-          className={`flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-            activeTab === 'text'
-              ? 'bg-slate-800 text-indigo-400 border-b-2 border-indigo-500'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Type Solution
-        </button>
-        <button
-          onClick={() => setActiveTab('scan')}
-          className={`flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-            activeTab === 'scan'
-              ? 'bg-slate-800 text-indigo-400 border-b-2 border-indigo-500'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Scan Handwriting
-        </button>
-      </div>
+      {!isExamVariant && (
+        <div className="flex border-b border-slate-700">
+          <button
+            onClick={() => setActiveTab('text')}
+            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'text'
+                ? 'bg-slate-800 text-indigo-400 border-b-2 border-indigo-500'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Type Solution
+          </button>
+          <button
+            onClick={() => setActiveTab('scan')}
+            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'scan'
+                ? 'bg-slate-800 text-indigo-400 border-b-2 border-indigo-500'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Scan Handwriting
+          </button>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div className="p-6">
@@ -551,24 +584,26 @@ export default function SubmissionCanvas({
             </div>
 
             {/* Preview Toggle */}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-2"
-              >
-                <svg className={`w-4 h-4 transition-transform ${showPreview ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-                {showPreview ? 'Hide Preview' : 'Show Preview'}
-              </button>
+            {!isExamVariant && (
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-2"
+                >
+                  <svg className={`w-4 h-4 transition-transform ${showPreview ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  {showPreview ? 'Hide Preview' : 'Show Preview'}
+                </button>
 
-              <div className="text-xs text-slate-500">
-                Tip: Type <code className="bg-slate-800 px-1 rounded">\sum</code> for autocomplete suggestions
+                <div className="text-xs text-slate-500">
+                  Tip: Type <code className="bg-slate-800 px-1 rounded">\sum</code> for autocomplete suggestions
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Preview Panel */}
-            {showPreview && solutionText && (
+            {showPreview && solutionText && !isExamVariant && (
               <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
                 <div className="text-xs text-slate-500 mb-2">Preview:</div>
                 <div className="prose prose-invert prose-sm max-w-none">
@@ -606,7 +641,7 @@ export default function SubmissionCanvas({
         )}
 
         {/* Scan Handwriting Tab */}
-        {activeTab === 'scan' && (
+        {activeTab === 'scan' && !isExamVariant && (
           <div className="space-y-4">
             {/* Upload Zone - Idle State */}
             {scanState === 'idle' && (

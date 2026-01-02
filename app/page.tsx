@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import ProblemInput from '@/components/ProblemInput'
 import SolutionScaffold from '@/components/SolutionScaffold'
@@ -19,19 +19,21 @@ import type { DailyDebrief } from '@/types/mistakeNotebook'
 import { problemHistoryService } from '@/lib/problemHistory'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
 import { getTodayDebrief, isDebriefDue } from '@/lib/dailyDebrief'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
 import ThemeToggle from '@/components/ThemeToggle'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import { useToast } from '@/components/ui/ToastProvider'
 
 const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
 
 function HomeContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { pushToast } = useToast()
   const [scaffoldData, setScaffoldData] = useState<ScaffoldData | MicroTaskScaffoldData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,6 +50,7 @@ function HomeContent() {
     diagramImage?: string
     density?: number
   } | null>(null)
+  const submitProblemRef = useRef<null | (() => void)>(null)
   // Active learning mode is the default (Duolingo approach)
   const useMicroTasks = true
   // Use phased scaffold loading for faster initial response
@@ -105,8 +108,14 @@ function HomeContent() {
         }),
       })
 
-      // Check for quota exceeded
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
+        setError(quota.message)
         setIsLoading(false)
         return
       }
@@ -134,12 +143,12 @@ function HomeContent() {
     setPrerequisitesPassed(result.passed)
 
     if (!result.passed && result.weakConcepts.length > 0) {
-      // Show failure message with weak concepts
-      alert(
-        `You got ${result.correctAnswers}/${result.totalQuestions} correct.\n\n` +
-        `Weak areas: ${result.weakConcepts.join(', ')}\n\n` +
-        `Consider reviewing these concepts before attempting this problem. You can still proceed, but it might be challenging.`
-      )
+      pushToast({
+        title: 'Prerequisites not passed',
+        message: `Weak areas: ${result.weakConcepts.join(', ')}. You can proceed, but expect this to be challenging.`,
+        variant: 'warning',
+        durationMs: 7000,
+      })
     }
   }
 
@@ -227,13 +236,14 @@ function HomeContent() {
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
+    { key: 'Enter', ctrlKey: true, action: () => submitProblemRef.current?.(), description: 'Submit problem' },
     { key: 'n', action: handleReset, description: 'New problem' },
     { key: 'h', action: () => router.push('/history'), description: 'Go to history' },
     { key: 's', action: () => router.push('/study-path'), description: 'Go to study path' },
     { key: 'c', action: () => router.push('/concept-network'), description: 'Go to concept network' },
     { key: '?', shiftKey: true, action: () => setShowShortcutsHelp(true), description: 'Show shortcuts' },
     { key: 'Escape', action: () => setShowShortcutsHelp(false), description: 'Close dialogs' },
-  ], !isLoading)
+  ], !isLoading && !scaffoldData && !phasedProblemData)
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
@@ -253,6 +263,18 @@ function HomeContent() {
                 <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-card-soft border border-gray-300 dark:border-dark-border rounded text-[10px]">?</kbd>
                 <span>Shortcuts</span>
               </button>
+              {!isLoading && !scaffoldData && !phasedProblemData && (
+                <button
+                  onClick={() => setIsDemoMode(true)}
+                  className="text-xs text-gray-400 hover:text-gray-600 dark:text-dark-text-muted dark:hover:text-dark-text-secondary flex items-center gap-1 transition-colors"
+                  title="Quick tour"
+                >
+                  <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-card-soft border border-gray-300 dark:border-dark-border rounded text-[10px]">
+                    ▶
+                  </span>
+                  <span>Tour</span>
+                </button>
+              )}
               <ThemeToggle />
             </div>
             <div className="flex-1 text-center md:text-center">
@@ -326,6 +348,22 @@ function HomeContent() {
             <p className="text-xs md:text-sm text-gray-500 dark:text-dark-text-muted mt-2">
               Active Decomposition: We don&apos;t give answers; we give the framework for the answer.
             </p>
+            {!isLoading && !scaffoldData && !phasedProblemData && (
+              <div className="md:hidden flex items-center justify-center gap-3 mt-4">
+                <button
+                  onClick={() => router.push('/study-path')}
+                  className="px-4 py-2 bg-white dark:bg-dark-card border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-sm font-medium"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => setIsDemoMode(true)}
+                  className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-strong transition-colors text-sm font-medium"
+                >
+                  Take Tour
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
@@ -360,6 +398,9 @@ function HomeContent() {
               isLoading={isLoading}
               error={error}
               initialProblem={currentProblemText}
+              onRegisterSubmit={(submit) => {
+                submitProblemRef.current = submit
+              }}
             />
           </>
         ) : showPrerequisiteCheck ? (

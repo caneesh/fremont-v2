@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth/authService'
 import { quotaService } from '@/lib/auth/quotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
@@ -12,6 +13,7 @@ interface AuthGateProps {
 }
 
 export default function AuthGate({ children }: AuthGateProps) {
+  const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [accessCode, setAccessCode] = useState('')
@@ -210,12 +212,26 @@ export default function AuthGate({ children }: AuthGateProps) {
               </a>
             </div>
 
-            <button
-              onClick={() => setShowWelcome(false)}
-              className="w-full px-6 py-4 bg-blue-600 dark:bg-accent text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-accent-strong active:scale-98 transition-all min-h-[48px] text-base"
-            >
-              Start Learning
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowWelcome(false)
+                  router.push('/study-path')
+                }}
+                className="w-full px-6 py-4 bg-blue-600 dark:bg-accent text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-accent-strong active:scale-98 transition-all min-h-[48px] text-base"
+              >
+                Go to Study Dashboard
+              </button>
+              <button
+                onClick={() => {
+                  setShowWelcome(false)
+                  router.push('/')
+                }}
+                className="w-full px-6 py-4 bg-white dark:bg-dark-card border-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-dark-card-soft active:scale-98 transition-all min-h-[48px] text-base"
+              >
+                Solve a Custom Problem
+              </button>
+            </div>
           </div>
         </div>
       </div>

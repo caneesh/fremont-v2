@@ -41,10 +41,9 @@ export const FEATURE_FLAGS = {
    * 3. VALIDATE: Confidence-weighted feedback (solid/partial/mismatch)
    *
    * When disabled, falls back to the original one-liner reveal behavior.
-   * Default: ON in development, OFF in production unless configured.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE=false)
    */
-  REVEAL_RECONSTRUCT_VALIDATE: process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE !== 'false'),
+  REVEAL_RECONSTRUCT_VALIDATE: process.env.NEXT_PUBLIC_FEATURE_REVEAL_RECONSTRUCT_VALIDATE !== 'false',
 
   /**
    * Confidence-Weighted SRS
@@ -53,27 +52,27 @@ export const FEATURE_FLAGS = {
    * - Correct + High confidence = accelerated review (mastery)
    * - Correct + Low confidence = sooner review (lucky guess)
    * - Wrong + High confidence = aggressive review (dangerous misconception)
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS=false)
    */
-  CONFIDENCE_WEIGHTED_SRS: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false'),
+  CONFIDENCE_WEIGHTED_SRS: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS !== 'false',
 
   /**
    * Boundary-Case Builder
    * When enabled, shows an interactive tool for students to "stress test"
    * their equations by examining limiting cases (e.g., θ → 0°, m → ∞).
    * Teaches physical intuition and validates mathematical understanding.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_BOUNDARY_CASE=false)
    */
-  BOUNDARY_CASE_BUILDER: process.env.NEXT_PUBLIC_FEATURE_BOUNDARY_CASE === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_BOUNDARY_CASE !== 'false'),
+  BOUNDARY_CASE_BUILDER: process.env.NEXT_PUBLIC_FEATURE_BOUNDARY_CASE !== 'false',
 
   /**
    * Equationless Path
    * When enabled, certain steps (typically Strategy level) require a verbal
    * plan before algebra entry is allowed. Forces students to articulate
    * their approach in words before jumping to equations.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH=false)
    */
-  EQUATIONLESS_PATH: process.env.NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH !== 'false'),
+  EQUATIONLESS_PATH: process.env.NEXT_PUBLIC_FEATURE_EQUATIONLESS_PATH !== 'false',
 
   /**
    * Concept Contrast Challenge
@@ -81,9 +80,9 @@ export const FEATURE_FLAGS = {
    * concepts before applying their chosen principle. Forces deep understanding
    * by requiring students to articulate why similar-but-inapplicable laws don't work.
    * Triggers on steps with key physics concepts like Conservation of Momentum, etc.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST=false)
    */
-  CONCEPT_CONTRAST: process.env.NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST !== 'false'),
+  CONCEPT_CONTRAST: process.env.NEXT_PUBLIC_FEATURE_CONCEPT_CONTRAST !== 'false',
 
   /**
    * Dev: Skip Steps Mode
@@ -112,9 +111,9 @@ export const FEATURE_FLAGS = {
    * This ensures students truly understand the "why" before getting computational help.
    * Dynamically generates a Feynman prompt based on step concepts if no explicit
    * feynmanPrompt config is provided.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS=false)
    */
-  FEYNMAN_HINT_PROMPTS: process.env.NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS !== 'false'),
+  FEYNMAN_HINT_PROMPTS: process.env.NEXT_PUBLIC_FEATURE_FEYNMAN_HINT_PROMPTS !== 'false',
 
   /**
    * Constraint Collision Detection
@@ -122,9 +121,9 @@ export const FEATURE_FLAGS = {
    * constraints (e.g., ignoring friction on a rough surface, using energy
    * conservation with friction). Shows Socratic dialogue to guide correction.
    * Triggers before wrong answers compound into bigger errors.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION=false)
    */
-  CONSTRAINT_COLLISION: process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION !== 'false'),
+  CONSTRAINT_COLLISION: process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION !== 'false',
 
   /**
    * Paper Solution Upload
@@ -132,9 +131,9 @@ export const FEATURE_FLAGS = {
    * Uses Claude Vision for OCR extraction, then analyzes the solution against
    * step rubrics. Provides Socratic feedback on handwritten work.
    * Useful for students who prefer to work on paper first.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_PAPER_SOLUTION=false)
    */
-  PAPER_SOLUTION_UPLOAD: process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION !== 'false'),
+  PAPER_SOLUTION_UPLOAD: process.env.NEXT_PUBLIC_FEATURE_PAPER_SOLUTION !== 'false',
 
   /**
    * Socratic Tutor Chat
@@ -171,27 +170,27 @@ export const FEATURE_FLAGS = {
    * A risk score is calculated for each step, and steps above the threshold
    * (default 0.55) trigger a preflight check requiring students to verify
    * their understanding before proceeding.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT=false)
    */
-  ADAPTIVE_PREFLIGHT: process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT !== 'false'),
+  ADAPTIVE_PREFLIGHT: process.env.NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT !== 'false',
 
   /**
    * Why This Step Explainer
    * When enabled, shows a "Why?" button on each step that generates an
    * on-demand explanation of why that step is important in the solution process.
    * Uses Claude to explain the pedagogical purpose of the step.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_WHY_THIS_STEP=false)
    */
-  WHY_THIS_STEP: process.env.NEXT_PUBLIC_FEATURE_WHY_THIS_STEP === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_WHY_THIS_STEP !== 'false'),
+  WHY_THIS_STEP: process.env.NEXT_PUBLIC_FEATURE_WHY_THIS_STEP !== 'false',
 
   /**
    * Step Confidence Heatmap
    * When enabled, displays a visual heatmap of confidence ratings across steps.
    * Shows at-a-glance understanding of where the student is confident vs uncertain.
    * Works in conjunction with CONFIDENCE_WEIGHTED_SRS for rating collection.
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_STEP_HEATMAP=false)
    */
-  STEP_HEATMAP: process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP !== 'false'),
+  STEP_HEATMAP: process.env.NEXT_PUBLIC_FEATURE_STEP_HEATMAP !== 'false',
 
   /**
    * Pattern-First Mode
@@ -204,9 +203,9 @@ export const FEATURE_FLAGS = {
    * - Tracks decision accuracy and speed
    * - Locks scaffold until selection or timeout
    * - Analytics for pattern identification performance
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_PATTERN_FIRST=false)
    */
-  PATTERN_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST !== 'false'),
+  PATTERN_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST !== 'false',
 
   /**
    * Skip-or-Commit Gate
@@ -220,9 +219,9 @@ export const FEATURE_FLAGS = {
    * - Auto-commit after 8 seconds if user ignores
    * - Session analytics for skip/commit patterns
    * - "Should have skipped" flagging for problems where user spent >2x expected time AND got wrong
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_SKIP_COMMIT=false)
    */
-  SKIP_COMMIT_GATE: process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT !== 'false'),
+  SKIP_COMMIT_GATE: process.env.NEXT_PUBLIC_FEATURE_SKIP_COMMIT !== 'false',
 
   /**
    * P0 Decision Gates
@@ -251,6 +250,53 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES=false)
    */
   P0_REBUILD_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES !== 'false',
+
+  /**
+   * Cognitive Load Governor
+   * When enabled, dynamically reduces UI complexity for struggling students.
+   *
+   * Monitors session metrics:
+   * - timeSpentPerStep: Average time on each step
+   * - wrongAttempts: Count of incorrect submissions
+   * - hintEscalationSpeed: How fast hints are being unlocked
+   * - revealUsed: Whether level 5 (full solution) was revealed
+   * - circuitBreakerState: Current state of the error circuit breaker
+   *
+   * When cognitiveLoadScore = 'high':
+   * - Show only ONE active step at a time
+   * - Collapse future steps (read-only)
+   * - Reduce MCQs to binary where possible
+   * - Shorten hint text (first sentence only)
+   * - Disable optional hints temporarily
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_COGNITIVE_LOAD_GOVERNOR=false)
+   */
+  COGNITIVE_LOAD_GOVERNOR: process.env.NEXT_PUBLIC_FEATURE_COGNITIVE_LOAD_GOVERNOR !== 'false',
+
+  /**
+   * Confidence Repair System
+   * When enabled, detects frustrating sessions and auto-recovers students.
+   *
+   * Detection Criteria (any 2 triggers):
+   * - Reveal used more than N times (default: 2)
+   * - Circuit breaker tripped
+   * - Average step time > threshold (default: 5 min)
+   * - Session ended mid-problem
+   *
+   * On Next Session Start:
+   * - Activates Recovery Mode automatically
+   * - Presents 1 warm-up problem from previously mastered pattern
+   * - Disables Reveal during recovery
+   * - Enables extra micro-tasks for confidence
+   * - Professor Check-In uses supportive tone only
+   *
+   * Completion:
+   * - After 1 successful warm-up, exits Recovery Mode
+   * - Resumes normal study path
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONFIDENCE_REPAIR=false)
+   */
+  CONFIDENCE_REPAIR: process.env.NEXT_PUBLIC_FEATURE_CONFIDENCE_REPAIR !== 'false',
 }
 
 /**

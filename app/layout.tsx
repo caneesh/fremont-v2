@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import AuthGate from '@/components/AuthGate'
 import { ThemeProvider } from '@/lib/ThemeContext'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 
 export const metadata: Metadata = {
   title: 'PhysiScaffold - The Socratic Physics Engine',
@@ -29,7 +30,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <ThemeProvider>
-          <AuthGate>{children}</AuthGate>
+          <ToastProvider>
+            <AuthGate>{children}</AuthGate>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

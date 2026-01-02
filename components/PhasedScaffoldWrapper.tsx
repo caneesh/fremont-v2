@@ -13,6 +13,7 @@ import SolutionScaffold from './SolutionScaffold'
 import PrerequisiteCheck from './PrerequisiteCheck'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
 import type { PrerequisiteResult } from '@/types/prerequisites'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface PhasedScaffoldWrapperProps {
   problem: string
@@ -33,6 +34,7 @@ export default function PhasedScaffoldWrapper({
   onError,
   onOutlineReady,
 }: PhasedScaffoldWrapperProps) {
+  const { pushToast } = useToast()
   const {
     state,
     loadOutline,
@@ -101,14 +103,14 @@ export default function PhasedScaffoldWrapper({
     setPrerequisitesPassed(true)
 
     if (!result.passed && result.weakConcepts.length > 0) {
-      // Show failure message with weak concepts
-      alert(
-        `You got ${result.correctAnswers}/${result.totalQuestions} correct.\n\n` +
-        `Weak areas: ${result.weakConcepts.join(', ')}\n\n` +
-        `Consider reviewing these concepts before attempting this problem. You can still proceed, but it might be challenging.`
-      )
+      pushToast({
+        title: 'Prerequisites not passed',
+        message: `Weak areas: ${result.weakConcepts.join(', ')}. You can proceed, but expect this to be challenging.`,
+        variant: 'warning',
+        durationMs: 7000,
+      })
     }
-  }, [])
+  }, [pushToast])
 
   // Handle prerequisite skip
   const handlePrerequisiteSkip = useCallback(() => {

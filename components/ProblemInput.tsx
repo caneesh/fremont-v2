@@ -25,6 +25,8 @@ interface ProblemInputProps {
   error: string | null
   initialProblem?: string
   initialDensity?: ScaffoldDensity
+  /** Optional: registers a function Home can call to submit the current input (e.g., Ctrl+Enter). */
+  onRegisterSubmit?: (submit: () => void) => void
 }
 
 type InputMode = 'text' | 'voice' | 'scan'
@@ -54,7 +56,7 @@ const SAMPLE_PROBLEMS = [
   }
 ]
 
-export default function ProblemInput({ onSubmit, isLoading, error, initialProblem, initialDensity }: ProblemInputProps) {
+export default function ProblemInput({ onSubmit, isLoading, error, initialProblem, initialDensity, onRegisterSubmit }: ProblemInputProps) {
   const [problemText, setProblemText] = useState(initialProblem || '')
   const [currentStage, setCurrentStage] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -220,6 +222,17 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
       onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
     }
   }
+
+  // Allow parent to trigger submission (e.g., keyboard shortcut)
+  useEffect(() => {
+    if (!onRegisterSubmit) return
+    onRegisterSubmit(() => {
+      if (isLoading) return
+      if (problemText.trim()) {
+        onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
+      }
+    })
+  }, [onRegisterSubmit, isLoading, problemText, onSubmit, scaffoldDensity, includeFinalAnswer])
 
   const loadSample = (sampleText: string) => {
     setProblemText(sampleText)

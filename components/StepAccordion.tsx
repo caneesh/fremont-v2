@@ -10,7 +10,8 @@ import VerbalPlanRenderer from './micro-tasks/VerbalPlanRenderer'
 import { PaperSolutionUploader } from './paper-solution'
 import SocraticTutorChat from './SocraticTutorChat'
 import type { AnalyzeSolutionResponse } from '@/types/paperSolution'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
+import { useToast } from '@/components/ui/ToastProvider'
 import { getStepTypeBadge, getHintStyle } from '@/lib/hintEngine'
 import { onHintRequested, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 import { detectMisconceptionFlag, type MisconceptionFlag } from '@/lib/misconceptionFlags'
@@ -21,6 +22,7 @@ import type { FeynmanPromptConfig } from '@/types/feynman'
 import type { StepRebuildGateState, StepDecisionGateState } from '@/types/gatingPolicy'
 import type { MicroTask } from '@/types/microTask'
 import type { HighLoadUIConfig } from '@/types/cognitiveLoad'
+import type { ProfessorVisibility } from '@/types/sessionMode'
 import RebuildGate from './RebuildGate'
 import DecisionGate from './DecisionGate'
 import { shortenHintForHighLoad } from '@/lib/cognitiveLoadService'
@@ -55,6 +57,9 @@ interface StepAccordionProps {
   maxDecisionGateAttempts?: number
   // Cognitive Load Governor props
   cognitiveLoadUIConfig?: HighLoadUIConfig | null
+  maxHintLevel?: number
+  professorVisibility?: ProfessorVisibility
+  hasStepErrors?: boolean
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -87,16 +92,27 @@ export default function StepAccordion({
   requiredMicroTaskCount = 1,
   maxDecisionGateAttempts = 2,
   cognitiveLoadUIConfig,
+  maxHintLevel,
+  professorVisibility = 'always',
+  hasStepErrors = false,
   onAnswerChange,
   onComplete,
   onActivate,
   onHintLevelChange,
 }: StepAccordionProps) {
+  const { pushToast } = useToast()
   // Cognitive Load UI simplification flags
   const isHighLoad = cognitiveLoadUIConfig?.singleActiveStep ?? false
   const shouldShortenHints = cognitiveLoadUIConfig?.shortenHintText ?? false
   const shouldHideWatchOuts = cognitiveLoadUIConfig?.hideErrorWatchOuts ?? false
   const shouldDisableOptionalHints = cognitiveLoadUIConfig?.disableOptionalHints ?? false
+  const resolvedMaxHintLevel = Math.max(0, Math.min(maxHintLevel ?? step.hints.length, step.hints.length))
+  const effectiveHintLevel = Math.min(currentHintLevel, resolvedMaxHintLevel)
+  const hintLevels = Array.from({ length: resolvedMaxHintLevel }, (_, idx) => idx + 1)
+  const shouldShowHints = resolvedMaxHintLevel > 0
+  const shouldShowProfessor = professorVisibility === 'always' ||
+    (professorVisibility === 'on_error' && hasStepErrors)
+  const hintProgressDenominator = Math.max(1, resolvedMaxHintLevel - 1)
   const [isExpanded, setIsExpanded] = useState(false)
   const [feynmanScript, setFeynmanScript] = useState<FeynmanScript | null>(null)
   const [isLoadingAudio, setIsLoadingAudio] = useState(false)
@@ -131,6 +147,12 @@ export default function StepAccordion({
 
   // Socratic Tutor Chat state
   const [showSocraticTutor, setShowSocraticTutor] = useState(false)
+
+  useEffect(() => {
+    if (!shouldShowProfessor && showSocraticTutor) {
+      setShowSocraticTutor(false)
+    }
+  }, [shouldShowProfessor, showSocraticTutor])
 
   // P0 Decision Gate state
   const [decisionGateTaskIndex, setDecisionGateTaskIndex] = useState(0)
@@ -188,7 +210,7 @@ export default function StepAccordion({
     }
 
     // Show Socratic tutor chat if enabled (triggers professor check-in)
-    if (FEATURE_FLAGS.SOCRATIC_TUTOR_CHAT && !showSocraticTutor) {
+    if (FEATURE_FLAGS.SOCRATIC_TUTOR_CHAT && shouldShowProfessor && !showSocraticTutor) {
       setShowSocraticTutor(true)
       return  // Wait for tutor to resolve before marking complete
     }
@@ -233,8 +255,8 @@ export default function StepAccordion({
   // P0 Decision Gate: Handle auto-unlock hint
   const handleDecisionGateAutoUnlockHint = () => {
     // Unlock the next hint level when max attempts reached
-    if (currentHintLevel < step.hints.length) {
-      onHintLevelChange(currentHintLevel + 1)
+    if (effectiveHintLevel < resolvedMaxHintLevel) {
+      onHintLevelChange(effectiveHintLevel + 1)
     }
   }
 
@@ -247,7 +269,7 @@ export default function StepAccordion({
       const conceptNames = relatedConcepts.map(c => c.name).join(', ')
 
       // Get the current hint content for context
-      const currentHint = step.hints.find(h => h.level === currentHintLevel)
+      const currentHint = step.hints.find(h => h.level === effectiveHintLevel)
       const hintContext = currentHint?.content || step.hints[0]?.content || ''
 
       const response = await fetch('/api/feynman', {
@@ -308,8 +330,8 @@ export default function StepAccordion({
   }
 
   const handleUnlockNextHint = async () => {
-    const nextLevel = currentHintLevel + 1
-    if (nextLevel > 5) return
+    const nextLevel = effectiveHintLevel + 1
+    if (!shouldShowHints || nextLevel > resolvedMaxHintLevel) return
 
     // Check if we need a verbal plan first (Equationless Path)
     // This comes BEFORE Feynman - first articulate strategy, then explain concepts
@@ -363,8 +385,13 @@ export default function StepAccordion({
           }),
         })
 
-        // Check for quota exceeded
-        if (await handleQuotaExceeded(response)) {
+        const quota = await parseQuotaExceeded(response)
+        if (quota) {
+          pushToast({
+            title: 'Daily limit reached',
+            message: `${quota.message} Your limits reset at midnight.`,
+            variant: 'warning',
+          })
           setIsGeneratingHint(null)
           return
         }
@@ -875,7 +902,7 @@ export default function StepAccordion({
             )}
 
             {/* Progressive Hint Ladder */}
-            {showStepContent && (
+            {showStepContent && shouldShowHints && (
             <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
               {/* Equationless Path - Verbal Plan Before Algebra */}
               {pendingVerbalPlan && (
@@ -942,7 +969,7 @@ export default function StepAccordion({
 
               {/* Professor Explains - Prominent Dialogue Button */}
               {/* Hidden when cognitive load is high (optional hints disabled) */}
-              {!shouldDisableOptionalHints && (
+              {shouldShowProfessor && !shouldDisableOptionalHints && (
               <button
                 onClick={handleAudioHint}
                 disabled={isLoadingAudio}
@@ -1014,14 +1041,14 @@ export default function StepAccordion({
                   {/* Progress Line Filled */}
                   <div
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.max(0, (currentHintLevel - 1) / 4) * 100}%` }}
+                    style={{ width: `${Math.max(0, (effectiveHintLevel - 1) / hintProgressDenominator) * 100}%` }}
                   />
 
                   {/* Stepper Nodes */}
-                  {[1, 2, 3, 4, 5].map((level) => {
-                    const isUnlocked = level <= currentHintLevel
-                    const isCurrent = level === currentHintLevel
-                    const isNext = level === currentHintLevel + 1
+                  {hintLevels.map((level) => {
+                    const isUnlocked = level <= effectiveHintLevel
+                    const isCurrent = level === effectiveHintLevel
+                    const isNext = level === effectiveHintLevel + 1
                     const labels = ['Concept', 'Visual', 'Strategy', 'Equation', 'Solution']
 
                     return (
@@ -1050,34 +1077,39 @@ export default function StepAccordion({
                 </div>
 
                 {/* Current Position Indicator */}
-                {currentHintLevel > 0 && currentHintLevel < 5 && (
+                {effectiveHintLevel > 0 && effectiveHintLevel < resolvedMaxHintLevel && (
                   <p className="text-center text-xs text-gray-500 dark:text-dark-text-muted mt-3">
-                    Level {currentHintLevel} of 5 unlocked
+                    Level {effectiveHintLevel} of {resolvedMaxHintLevel} unlocked
                   </p>
                 )}
-                {currentHintLevel === 0 && (
+                {effectiveHintLevel === 0 && (
                   <p className="text-center text-xs text-gray-500 dark:text-dark-text-muted mt-3">
                     Start by unlocking Level 1
                   </p>
                 )}
-                {currentHintLevel === 5 && (
+                {effectiveHintLevel === resolvedMaxHintLevel && resolvedMaxHintLevel === 5 && (
                   <p className="text-center text-xs text-red-600 dark:text-red-400 font-medium mt-3">
                     Full solution revealed
+                  </p>
+                )}
+                {effectiveHintLevel === resolvedMaxHintLevel && resolvedMaxHintLevel > 0 && resolvedMaxHintLevel < 5 && (
+                  <p className="text-center text-xs text-amber-700 dark:text-amber-300 font-medium mt-3">
+                    Highest hint level unlocked
                   </p>
                 )}
               </div>
 
               {/* Hint Ladder Steps */}
               <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((level) => {
+                {hintLevels.map((level) => {
                   // Get hint from either original hints or generated hints
                   const originalHint = step.hints.find(h => h.level === level)
                   const generatedHint = generatedHints.get(level)
                   const hint = originalHint || generatedHint
 
-                  const isUnlocked = level <= currentHintLevel
-                  const isNextHint = level === currentHintLevel + 1
-                  const isFutureHint = level > currentHintLevel + 1
+                  const isUnlocked = level <= effectiveHintLevel
+                  const isNextHint = level === effectiveHintLevel + 1
+                  const isFutureHint = level > effectiveHintLevel + 1
                   const isGenerating = isGeneratingHint === level
 
                   return (
@@ -1199,7 +1231,7 @@ export default function StepAccordion({
                 })}
               </div>
 
-              {currentHintLevel === 5 && (
+              {resolvedMaxHintLevel === 5 && effectiveHintLevel === 5 && (
                 <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
                   <p className="text-xs text-red-800 dark:text-red-300 font-medium">
                     ⚠️ You&apos;ve unlocked the full solution. Make sure you understand each step before moving forward.
@@ -1352,12 +1384,12 @@ export default function StepAccordion({
             )}
 
             {/* Socratic Tutor Chat - Live professor check-in */}
-            {showSocraticTutor && (
+            {showSocraticTutor && shouldShowProfessor && (
               <div className="mt-4">
                 <SocraticTutorChat
                   problemText={problemStatement || ''}
                   stepTitle={step.title}
-                  stepContent={step.hints.map(h => h.content).join('\n')}
+                  stepContent={step.hints.filter(h => h.level <= resolvedMaxHintLevel).map(h => h.content).join('\n')}
                   requiredConcepts={step.requiredConcepts || []}
                   onResolved={handleSocraticResolved}
                   onSkip={handleSocraticSkip}

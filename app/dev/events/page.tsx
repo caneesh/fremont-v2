@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { eventLogger, localStorageProvider } from '@/lib/storage'
 import type { StoredEvent, EventType } from '@/lib/storage'
+import { useToast } from '@/components/ui/ToastProvider'
 
 // Only show in development
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -16,6 +17,7 @@ interface EventStats {
 }
 
 export default function EventsDebugPage() {
+  const { confirm, pushToast } = useToast()
   const [events, setEvents] = useState<StoredEvent[]>([])
   const [stats, setStats] = useState<EventStats | null>(null)
   const [filterType, setFilterType] = useState<EventType | 'all'>('all')
@@ -86,17 +88,27 @@ export default function EventsDebugPage() {
     }
   }, [autoRefresh])
 
-  const handleClearEvents = () => {
-    if (confirm('Are you sure you want to clear all events?')) {
-      eventLogger.clearEvents()
-      loadEvents()
-    }
+  const handleClearEvents = async () => {
+    const ok = await confirm({
+      title: 'Clear all events?',
+      message: 'Are you sure you want to clear all events? This cannot be undone.',
+      confirmText: 'Clear',
+      cancelText: 'Cancel',
+      destructive: true,
+    })
+    if (!ok) return
+    eventLogger.clearEvents()
+    loadEvents()
   }
 
   const handlePruneEvents = () => {
     const result = eventLogger.pruneEvents()
     if (result.success) {
-      alert(`Pruned ${result.data} old events`)
+      pushToast({
+        title: 'Events pruned',
+        message: `Pruned ${result.data} old events.`,
+        variant: 'success',
+      })
       loadEvents()
     }
   }

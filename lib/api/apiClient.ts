@@ -19,13 +19,23 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
   })
 }
 
-export async function handleQuotaExceeded(response: Response): Promise<boolean> {
-  if (response.status === 429) {
+export interface QuotaExceededInfo {
+  message: string
+  quotaType?: string
+  limit?: number
+}
+
+export async function parseQuotaExceeded(response: Response): Promise<QuotaExceededInfo | null> {
+  if (response.status !== 429) return null
+
+  try {
     const data = await response.json()
-    alert(
-      `Daily Limit Reached\n\n${data.message}\n\nYour limits will reset tomorrow at midnight.`
-    )
-    return true
+    return {
+      message: data?.message || 'Daily limit reached.',
+      quotaType: data?.quotaType,
+      limit: data?.limit,
+    }
+  } catch {
+    return { message: 'Daily limit reached.' }
   }
-  return false
 }

@@ -1,5 +1,6 @@
 import type { PatternSelectionProgress } from './patternFirst'
 import type { SkipCommitPersistence } from './skipCommitGate'
+import type { SessionMode } from './sessionMode'
 
 export type ProblemStatus = 'IN_PROGRESS' | 'SOLVED' | 'SKIPPED'
 
@@ -53,6 +54,7 @@ export interface ProblemProgress {
   sanityCheckAnswer?: string
   currentStep: number
   reflectionAnswers?: ReflectionAnswer[]
+  sessionMode?: SessionMode
   // Timing / evaluation metadata (optional)
   timeSpentMs?: number
   expectedSolveTimeMs?: number

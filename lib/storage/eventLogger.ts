@@ -255,6 +255,71 @@ class EventLoggerService {
   }
 
   // ============================================
+  // Momentum Engine Events
+  // ============================================
+
+  /**
+   * Log a momentum win (decision, hint-free, or rebuild)
+   */
+  momentumWin(
+    streakType: 'decision' | 'hintFree' | 'rebuild',
+    streakCount: number,
+    isRecovery: boolean,
+    context?: {
+      problemId?: string
+      stepId?: number
+      patternId?: string
+    }
+  ): StorageResult<StoredEvent> {
+    const eventType = isRecovery
+      ? 'momentum_recovery'
+      : streakCount > 1
+        ? `momentum_${streakType === 'hintFree' ? 'hint_free' : streakType}_streak`
+        : `momentum_${streakType === 'hintFree' ? 'hint_free' : streakType}_win`
+
+    return this.log(eventType as Parameters<typeof this.log>[0], {
+      streakType,
+      streakCount,
+      isRecovery,
+      ...context
+    })
+  }
+
+  /**
+   * Log when a streak is reset
+   */
+  momentumStreakReset(
+    streakType: 'decision' | 'hintFree' | 'rebuild',
+    previousStreak: number,
+    context?: {
+      problemId?: string
+      stepId?: number
+      patternId?: string
+    }
+  ): StorageResult<StoredEvent> {
+    return this.log('momentum_streak_reset', {
+      streakType,
+      streakCount: previousStreak,
+      ...context
+    })
+  }
+
+  /**
+   * Log when momentum feedback is shown to user
+   */
+  momentumFeedbackShown(
+    streakType: 'decision' | 'hintFree' | 'rebuild',
+    streakCount: number,
+    message: string
+  ): StorageResult<StoredEvent> {
+    return this.log('momentum_feedback_shown', {
+      streakType,
+      streakCount,
+      momentumEventType: message
+    })
+  }
+
+  // ============================================
   // Query Methods
   // ============================================
 

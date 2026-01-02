@@ -185,6 +185,11 @@ export function createInitialRebuildGateState(stepId: number): StepRebuildGateSt
 export type GatingIntensity = 'low' | 'normal' | 'high'
 
 /**
+ * Cognitive load level for UI simplification
+ */
+export type CognitiveLoadLevel = 'low' | 'medium' | 'high'
+
+/**
  * Session-level gating policy state
  */
 export interface SessionGatingPolicy {
@@ -200,6 +205,8 @@ export interface SessionGatingPolicy {
   stepDecisionGates: Map<number, StepDecisionGateState>
   /** Per-step rebuild gate states */
   stepRebuildGates: Map<number, StepRebuildGateState>
+  /** Cognitive load level for UI simplification (optional for backward compat) */
+  cognitiveLoadLevel?: CognitiveLoadLevel
 }
 
 /**

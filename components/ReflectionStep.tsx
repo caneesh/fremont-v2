@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import type { ReflectionAnswer } from '@/types/history'
-import { authenticatedFetch, handleQuotaExceeded } from '@/lib/api/apiClient'
+import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface ReflectionStepProps {
   problemText: string
@@ -19,6 +20,7 @@ export default function ReflectionStep({
   savedReflections,
   onReflectionComplete,
 }: ReflectionStepProps) {
+  const { pushToast } = useToast()
   const [questions, setQuestions] = useState<string[]>([])
   const [answers, setAnswers] = useState<string[]>(['', ''])
   const [isLoading, setIsLoading] = useState(false)
@@ -52,8 +54,13 @@ export default function ReflectionStep({
         }),
       })
 
-      // Check for quota exceeded
-      if (await handleQuotaExceeded(response)) {
+      const quota = await parseQuotaExceeded(response)
+      if (quota) {
+        pushToast({
+          title: 'Daily limit reached',
+          message: `${quota.message} Your limits reset at midnight.`,
+          variant: 'warning',
+        })
         setIsLoading(false)
         setError('Daily reflection limit reached')
         return

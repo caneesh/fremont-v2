@@ -42,6 +42,7 @@ vi.mock('@/lib/conceptMasteryService', () => ({
   conceptMasteryService: {
     recordAttempt: vi.fn(),
     cleanup: vi.fn(),
+    getConceptMastery: vi.fn(() => null),
   },
 }))
 

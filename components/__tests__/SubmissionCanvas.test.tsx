@@ -1,15 +1,18 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
 import SubmissionCanvas from '../SubmissionCanvas'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 import type { GradeSolutionResponse } from '@/types/gradeSolution'
 import type { ConstraintCollision, SocraticDialogue } from '@/types/constraintCollision'
 import type { DetectedMisconception } from '@/types/misconception'
 
+const render = (ui: React.ReactElement) => rtlRender(<ToastProvider>{ui}</ToastProvider>)
+
 // Mock the dependencies
 vi.mock('@/lib/api/apiClient', () => ({
   authenticatedFetch: vi.fn(),
-  handleQuotaExceeded: vi.fn().mockResolvedValue(false),
+  parseQuotaExceeded: vi.fn().mockResolvedValue(null),
 }))
 
 vi.mock('../MathRenderer', () => ({
@@ -141,6 +144,16 @@ const mockMisconception: DetectedMisconception = {
 describe('SubmissionCanvas - ConstraintFeedback Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it('renders a single-input exam variant without scan or preview controls', () => {
+    render(<SubmissionCanvas {...defaultProps} variant="exam" />)
+
+    expect(screen.getByRole('textbox')).not.toBeNull()
+    expect(screen.queryByText('Scan Handwriting')).toBeNull()
+    expect(screen.queryByText('Type Solution')).toBeNull()
+    expect(screen.queryByText('Show Preview')).toBeNull()
+    expect(screen.queryByText('Hide Preview')).toBeNull()
   })
 
   describe('rendering ConstraintFeedback', () => {
