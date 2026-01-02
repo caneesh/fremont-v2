@@ -27,6 +27,7 @@ import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
 import ThemeToggle from '@/components/ThemeToggle'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { useToast } from '@/components/ui/ToastProvider'
+import { resolveWithQuestionEngine } from '@/lib/question-engine/adapter'
 import type { MiniProblem } from '@/lib/patternTrack'
 
 const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
@@ -57,6 +58,8 @@ function HomeContent() {
   const useMicroTasks = true
   // Use phased scaffold loading for faster initial response
   const usePhasedScaffold = FEATURE_FLAGS.PHASED_SCAFFOLD
+  // Use Question Engine for template-based scaffolding (faster, cached)
+  const useQuestionEngine = FEATURE_FLAGS.QUESTION_ENGINE
 
   // Load daily debrief on mount
   useEffect(() => {
@@ -82,6 +85,30 @@ function HomeContent() {
     setPhasedProblemData(null)
     setShowPrerequisiteCheck(false)
     setPrerequisitesPassed(false)
+
+    // Use Question Engine for template-based scaffolding (fastest)
+    if (useQuestionEngine) {
+      setIsLoading(true)
+      try {
+        const result = await resolveWithQuestionEngine(problemText)
+        if (result.success) {
+          setScaffoldData(result.data)
+          if (!isDemoMode) {
+            setShowPrerequisiteCheck(true)
+          }
+        } else {
+          // Fallback to legacy flow if Question Engine fails
+          console.warn('[Question Engine] Fallback to legacy:', result.error)
+          setError(result.error)
+        }
+      } catch (err) {
+        console.error('[Question Engine] Error:', err)
+        setError(err instanceof Error ? err.message : 'Question Engine error')
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
 
     // Use phased scaffold loading if enabled
     if (usePhasedScaffold) {

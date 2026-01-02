@@ -318,6 +318,26 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_LEARNING_INTEGRITY=false)
    */
   LEARNING_INTEGRITY: process.env.NEXT_PUBLIC_FEATURE_LEARNING_INTEGRITY !== 'false',
+
+  /**
+   * Question Engine v1
+   * When enabled, uses the template-based Question Scaffolding Engine for
+   * problem resolution instead of the full LLM-generated scaffolds.
+   *
+   * Benefits:
+   * - Faster response times (template reuse + caching)
+   * - Consistent step structure across similar problems
+   * - Lower LLM costs (fingerprinting + adaptation vs full generation)
+   * - 27 physics templates covering mechanics, thermo, EM, optics, waves, modern
+   *
+   * The Question Engine uses:
+   * - LLM-free fingerprinting for template selection
+   * - Content-addressed caching (SHA-256)
+   * - Template enforcement (LLM can only fill slots, not modify structure)
+   *
+   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_QUESTION_ENGINE=true)
+   */
+  QUESTION_ENGINE: process.env.NEXT_PUBLIC_FEATURE_QUESTION_ENGINE === 'true',
 }
 
 /**
