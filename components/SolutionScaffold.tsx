@@ -353,6 +353,32 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [])
 
+  // Track step activation time for cognitive load metrics
+  useEffect(() => {
+    if (!FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR || !cognitiveLoadMetrics) return
+
+    // Record activation time if not already set
+    if (!stepActivationTimesRef.current.has(currentStep)) {
+      stepActivationTimesRef.current.set(currentStep, Date.now())
+
+      // Also track step activation in metrics
+      const updatedMetrics = recordStepActivation(cognitiveLoadMetrics, currentStep)
+      setCognitiveLoadMetrics(updatedMetrics)
+      saveSessionLoadMetrics(updatedMetrics)
+    }
+  }, [currentStep, cognitiveLoadMetrics])
+
+  // Update cognitive load metrics when circuit breaker state changes
+  useEffect(() => {
+    if (!FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR || !cognitiveLoadMetrics) return
+
+    const updatedMetrics = updateCircuitBreakerState(cognitiveLoadMetrics, circuitBreakerState)
+    if (updatedMetrics.circuitBreakerState !== cognitiveLoadMetrics.circuitBreakerState) {
+      setCognitiveLoadMetrics(updatedMetrics)
+      saveSessionLoadMetrics(updatedMetrics)
+    }
+  }, [circuitBreakerState, cognitiveLoadMetrics])
+
   // P0 Rebuild Gate: Handler for when hint level 5 is used
   const handleRebuildGateTriggered = useCallback((stepId: number, stepTitle: string) => {
     if (!FEATURE_FLAGS.P0_REBUILD_GATES || !gatingPolicy) return
@@ -1438,6 +1464,48 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setCompletedSteps([...completedSteps, stepId])
     }
 
+    // Track step completion for cognitive load and update score
+    if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR && cognitiveLoadMetrics && cognitiveLoadState) {
+      // Calculate time spent on this step
+      const activationTime = stepActivationTimesRef.current.get(stepId)
+      if (activationTime) {
+        const timeSpentSeconds = Math.floor((Date.now() - activationTime) / 1000)
+        let updatedMetrics = { ...cognitiveLoadMetrics }
+
+        // Find or create step metrics
+        const stepMetrics = updatedMetrics.stepMetrics.find(s => s.stepId === stepId)
+        if (stepMetrics) {
+          stepMetrics.timeSpentSeconds = timeSpentSeconds
+          stepMetrics.isCompleted = true
+        }
+
+        // Update total time
+        updatedMetrics.totalTimeSpentSeconds = updatedMetrics.stepMetrics.reduce(
+          (sum, s) => sum + s.timeSpentSeconds, 0
+        )
+
+        // Complete the step
+        updatedMetrics = recordStepCompletion(updatedMetrics, stepId)
+        setCognitiveLoadMetrics(updatedMetrics)
+        saveSessionLoadMetrics(updatedMetrics)
+
+        // Recompute cognitive load score after step submission
+        const { state: newState, event } = updateCognitiveLoadAfterStep(cognitiveLoadState, updatedMetrics)
+        if (newState.score !== cognitiveLoadState.score) {
+          setCognitiveLoadState(newState)
+          setCognitiveLoadUIConfig(getUIConfigForLoadScore(newState.score))
+
+          // Update gating policy with new cognitive load level
+          if (gatingPolicy) {
+            const updatedPolicy = updateCognitiveLoadLevel(gatingPolicy, newState.score)
+            setGatingPolicy(updatedPolicy)
+          }
+
+          console.log(`[CognitiveLoad] Score changed: ${cognitiveLoadState.score} → ${newState.score}`)
+        }
+      }
+    }
+
     // Show confidence prompt before moving to next step
     if (FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS) {
       setPendingConfidenceStepId(stepId)
@@ -2469,6 +2537,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       requiresDecisionGate={stepRequiresDecisionGate(step.id, step.stepType, !!((step as import('@/types/scaffold').Step & { decisionGateTasks?: import('@/types/microTask').MicroTask[] }).decisionGateTasks?.length))}
                       requiredMicroTaskCount={getDecisionGateRequiredCount()}
                       maxDecisionGateAttempts={gatingPolicy?.decisionGateConfig.maxAttempts ?? 2}
+                      cognitiveLoadUIConfig={cognitiveLoadUIConfig}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => handleStepActivation(index)}

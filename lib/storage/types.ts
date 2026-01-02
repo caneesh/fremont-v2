@@ -59,6 +59,13 @@ export type EventType =
   | 'pattern_first_timeout'
   | 'pattern_first_unlock'
   | 'pattern_correctness'
+  // Confidence Repair events
+  | 'bad_session_detected'
+  | 'recovery_mode_activated'
+  | 'recovery_warmup_started'
+  | 'recovery_warmup_completed'
+  | 'recovery_mode_completed'
+  | 'recovery_mode_abandoned'
 
 export interface EventMetadata {
   problemId?: string
@@ -91,6 +98,16 @@ export interface EventMetadata {
   lockSeconds?: number
   hadSelection?: boolean
   wasCorrect?: boolean
+  // Confidence Repair metadata
+  recoveryTriggers?: string[]
+  warmUpProblemId?: string
+  warmUpPatternId?: string
+  recoveryDurationMs?: number
+  recoveryWasSuccessful?: boolean
+  revealCount?: number
+  circuitBreakerTripped?: boolean
+  averageStepTimeMs?: number
+  sessionEndedMidProblem?: boolean
   [key: string]: unknown // Allow additional metadata
 }
 
@@ -158,6 +175,10 @@ export const STORAGE_KEYS = {
   // Cognitive Load Governor
   COGNITIVE_LOAD_STATE: 'physiscaffold_cognitive_load_state',
   COGNITIVE_LOAD_METRICS: 'physiscaffold_cognitive_load_metrics',
+
+  // Confidence Repair System
+  RECOVERY_DATA: 'physiscaffold_recovery_data',
+  SESSION_METRICS: 'physiscaffold_session_metrics',
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]

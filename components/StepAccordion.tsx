@@ -20,8 +20,10 @@ import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import type { FeynmanPromptConfig } from '@/types/feynman'
 import type { StepRebuildGateState, StepDecisionGateState } from '@/types/gatingPolicy'
 import type { MicroTask } from '@/types/microTask'
+import type { HighLoadUIConfig } from '@/types/cognitiveLoad'
 import RebuildGate from './RebuildGate'
 import DecisionGate from './DecisionGate'
+import { shortenHintForHighLoad } from '@/lib/cognitiveLoadService'
 
 interface StepAccordionProps {
   step: Step
@@ -51,6 +53,8 @@ interface StepAccordionProps {
   requiresDecisionGate?: boolean
   requiredMicroTaskCount?: number
   maxDecisionGateAttempts?: number
+  // Cognitive Load Governor props
+  cognitiveLoadUIConfig?: HighLoadUIConfig | null
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -82,11 +86,17 @@ export default function StepAccordion({
   requiresDecisionGate = false,
   requiredMicroTaskCount = 1,
   maxDecisionGateAttempts = 2,
+  cognitiveLoadUIConfig,
   onAnswerChange,
   onComplete,
   onActivate,
   onHintLevelChange,
 }: StepAccordionProps) {
+  // Cognitive Load UI simplification flags
+  const isHighLoad = cognitiveLoadUIConfig?.singleActiveStep ?? false
+  const shouldShortenHints = cognitiveLoadUIConfig?.shortenHintText ?? false
+  const shouldHideWatchOuts = cognitiveLoadUIConfig?.hideErrorWatchOuts ?? false
+  const shouldDisableOptionalHints = cognitiveLoadUIConfig?.disableOptionalHints ?? false
   const [isExpanded, setIsExpanded] = useState(false)
   const [feynmanScript, setFeynmanScript] = useState<FeynmanScript | null>(null)
   const [isLoadingAudio, setIsLoadingAudio] = useState(false)
@@ -703,6 +713,25 @@ export default function StepAccordion({
       {isExpanded && !isLocked && (
         <div className="px-6 pb-6 border-t border-gray-200 dark:border-dark-border">
           <div className="pt-4 space-y-4">
+            {/* Cognitive Load Indicator - Show simplified mode notice */}
+            {isHighLoad && FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR && (
+              <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700 rounded-lg p-3 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-sky-100 dark:bg-sky-800/40 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-sky-800 dark:text-sky-200 font-medium">
+                    Focus Mode Active
+                  </p>
+                  <p className="text-xs text-sky-600 dark:text-sky-400">
+                    UI simplified to help you focus on this step
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Feynman Micro-Prompt - Show before step content if configured */}
             {requiresFeynmanCheck && !feynmanPassed && step.feynmanPrompt && (
               <FeynmanMicroPrompt
@@ -752,7 +781,8 @@ export default function StepAccordion({
             )}
 
             {/* Error Pattern Watch-Outs - Personalized warnings from student's error history */}
-            {showStepContent && errorWatchOuts.length > 0 && (
+            {/* Hidden when cognitive load is high to reduce visual complexity */}
+            {showStepContent && errorWatchOuts.length > 0 && !shouldHideWatchOuts && (
               <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-300 dark:border-rose-700 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-800/40 flex items-center justify-center">
@@ -911,6 +941,8 @@ export default function StepAccordion({
               )}
 
               {/* Professor Explains - Prominent Dialogue Button */}
+              {/* Hidden when cognitive load is high (optional hints disabled) */}
+              {!shouldDisableOptionalHints && (
               <button
                 onClick={handleAudioHint}
                 disabled={isLoadingAudio}
@@ -943,6 +975,7 @@ export default function StepAccordion({
                   )}
                 </div>
               </button>
+              )}
 
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -1131,7 +1164,13 @@ export default function StepAccordion({
 
                         {isUnlocked && hint ? (
                           <div className="mt-2 text-sm text-gray-800 dark:text-dark-text-secondary">
-                            <MathRenderer text={hint.content} />
+                            {/* Shorten hint text when cognitive load is high */}
+                            <MathRenderer text={shouldShortenHints ? shortenHintForHighLoad(hint.content) : hint.content} />
+                            {shouldShortenHints && hint.content.length > 100 && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
+                                (Simplified view - tap hint for full content)
+                              </p>
+                            )}
                           </div>
                         ) : isFutureHint ? (
                           <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">
