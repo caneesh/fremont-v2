@@ -10,7 +10,7 @@
  * - Extracts "asked" quantities and diagram types heuristically
  */
 
-import type { Fingerprint } from './schemas'
+import type { Fingerprint, NumericalParams } from './schemas'
 import * as crypto from 'crypto'
 
 // =============================================================================
@@ -192,6 +192,53 @@ const DIAGRAM_PATTERNS: Record<string, RegExp[]> = {
   optics: [/lens/i, /mirror/i, /ray diagram/i],
 }
 
+/**
+ * Patterns to extract numerical parameters from problem statements
+ */
+const NUMERICAL_PATTERNS = {
+  // Angles: "30 degrees", "30°", "angle of 30", "inclined at 45"
+  angles: [
+    /(\d+(?:\.\d+)?)\s*(?:degrees?|°|deg)/gi,
+    /angle\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+    /inclined?\s+(?:at\s+)?(\d+(?:\.\d+)?)/gi,
+    /(\d+(?:\.\d+)?)\s*(?:degree|°)\s*(?:incline|angle|slope)/gi,
+  ],
+  // Masses: "5 kg", "5-kg", "mass of 5"
+  masses: [
+    /(\d+(?:\.\d+)?)\s*(?:kg|kilogram|gram|g\b)/gi,
+    /mass\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+    /(\d+(?:\.\d+)?)\s*-?\s*kg/gi,
+  ],
+  // Distances: "10 m", "10 meters", "distance of 10"
+  distances: [
+    /(\d+(?:\.\d+)?)\s*(?:m\b|meter|metre|cm|km)/gi,
+    /distance\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+    /(\d+(?:\.\d+)?)\s*(?:m|meter)\s+(?:away|from|long)/gi,
+  ],
+  // Velocities: "15 m/s", "velocity of 15", "speed of 20"
+  velocities: [
+    /(\d+(?:\.\d+)?)\s*(?:m\/s|m\s*s\^?-1|meters?\s*per\s*second)/gi,
+    /(?:velocity|speed)\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+    /(\d+(?:\.\d+)?)\s*(?:km\/h|kmph|mph)/gi,
+  ],
+  // Forces: "100 N", "force of 50"
+  forces: [
+    /(\d+(?:\.\d+)?)\s*(?:N\b|newton)/gi,
+    /force\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+  ],
+  // Times: "5 s", "5 seconds", "after 3"
+  times: [
+    /(\d+(?:\.\d+)?)\s*(?:s\b|sec|second)/gi,
+    /(?:after|for|in)\s+(\d+(?:\.\d+)?)\s*(?:s\b|sec|second)/gi,
+  ],
+  // Heights: "80 m high", "height of 50", "80 meters tall"
+  heights: [
+    /(\d+(?:\.\d+)?)\s*(?:m|meter|metre)\s*(?:high|tall|above)/gi,
+    /height\s+(?:of\s+)?(\d+(?:\.\d+)?)/gi,
+    /(\d+(?:\.\d+)?)\s*(?:m|meter)\s+(?:cliff|tower|building)/gi,
+  ],
+}
+
 // =============================================================================
 // Fingerprinting Functions
 // =============================================================================
@@ -245,12 +292,16 @@ export function extractFingerprint(
   // Detect diagram type
   const diagramType = detectDiagramType(statement)
 
+  // Extract numerical parameters for similarity matching
+  const numericalParams = extractNumericalParams(statement)
+
   return {
     topic,
     subtopic,
     asked,
     keywords,
     diagramType,
+    numericalParams: Object.keys(numericalParams).length > 0 ? numericalParams : undefined,
   }
 }
 
@@ -428,6 +479,38 @@ function detectDiagramType(statement: string): Fingerprint['diagramType'] {
   return 'none'
 }
 
+/**
+ * Extract numerical parameters from problem statement
+ * Used to distinguish questions with same concepts but different values
+ */
+function extractNumericalParams(statement: string): NumericalParams {
+  const params: NumericalParams = {}
+
+  for (const [paramType, patterns] of Object.entries(NUMERICAL_PATTERNS)) {
+    const values: number[] = []
+
+    for (const pattern of patterns) {
+      // Reset regex lastIndex for global patterns
+      pattern.lastIndex = 0
+      let match
+      while ((match = pattern.exec(statement)) !== null) {
+        const value = parseFloat(match[1])
+        if (!isNaN(value) && !values.includes(value)) {
+          values.push(value)
+        }
+      }
+    }
+
+    if (values.length > 0) {
+      // Sort values for consistent comparison
+      values.sort((a, b) => a - b)
+      params[paramType as keyof NumericalParams] = values
+    }
+  }
+
+  return params
+}
+
 // =============================================================================
 // Similarity Calculation
 // =============================================================================
@@ -435,29 +518,42 @@ function detectDiagramType(statement: string): Fingerprint['diagramType'] {
 /**
  * Compute similarity between two fingerprints
  * Returns 0-1 score
+ *
+ * Weights (total 100):
+ * - Topic: 30%
+ * - Subtopic: 20%
+ * - Numerical params: 25% (critical for distinguishing similar problems)
+ * - Asked quantities: 10%
+ * - Keywords: 10%
+ * - Diagram type: 5%
  */
 export function computeSimilarity(a: Fingerprint, b: Fingerprint): number {
   let score = 0
   let maxScore = 0
 
-  // Topic match (40% weight)
-  maxScore += 40
-  if (a.topic === b.topic) {
-    score += 40
-  }
-
-  // Subtopic match (30% weight)
+  // Topic match (30% weight)
   maxScore += 30
-  if (a.subtopic === b.subtopic) {
+  if (a.topic === b.topic) {
     score += 30
-  } else if (a.subtopic.includes(b.subtopic) || b.subtopic.includes(a.subtopic)) {
-    score += 15
   }
 
-  // Asked quantities overlap (15% weight)
-  maxScore += 15
+  // Subtopic match (20% weight)
+  maxScore += 20
+  if (a.subtopic === b.subtopic) {
+    score += 20
+  } else if (a.subtopic.includes(b.subtopic) || b.subtopic.includes(a.subtopic)) {
+    score += 10
+  }
+
+  // Numerical parameters similarity (25% weight - critical for value differences)
+  maxScore += 25
+  const numericalSimilarity = computeNumericalSimilarity(a.numericalParams, b.numericalParams)
+  score += 25 * numericalSimilarity
+
+  // Asked quantities overlap (10% weight)
+  maxScore += 10
   const askedOverlap = setOverlap(new Set(a.asked), new Set(b.asked))
-  score += 15 * askedOverlap
+  score += 10 * askedOverlap
 
   // Keywords overlap (10% weight)
   maxScore += 10
@@ -471,6 +567,93 @@ export function computeSimilarity(a: Fingerprint, b: Fingerprint): number {
   }
 
   return score / maxScore
+}
+
+/**
+ * Compute similarity between numerical parameters
+ * Returns 0-1 score where 1 means identical values
+ */
+function computeNumericalSimilarity(
+  a: NumericalParams | undefined,
+  b: NumericalParams | undefined
+): number {
+  // If both are undefined, consider them similar (conceptual match)
+  if (!a && !b) return 0.8
+
+  // If only one has numerical params, low similarity
+  if (!a || !b) return 0.3
+
+  const paramTypes: (keyof NumericalParams)[] = [
+    'angles', 'masses', 'distances', 'velocities', 'forces', 'times', 'heights'
+  ]
+
+  let totalScore = 0
+  let totalWeight = 0
+
+  for (const paramType of paramTypes) {
+    const aVals = a[paramType]
+    const bVals = b[paramType]
+
+    // Both have this parameter type
+    if (aVals && bVals) {
+      totalWeight += 1
+      // Compare values - exact match or close enough?
+      const similarity = compareNumberArrays(aVals, bVals)
+      totalScore += similarity
+    }
+    // Only one has this parameter type
+    else if (aVals || bVals) {
+      totalWeight += 1
+      totalScore += 0.2 // Penalty for missing parameter
+    }
+    // Neither has this parameter - no contribution
+  }
+
+  if (totalWeight === 0) return 0.8 // No params to compare
+  return totalScore / totalWeight
+}
+
+/**
+ * Compare two arrays of numbers for similarity
+ * Returns 1 for exact match, decreases based on differences
+ */
+function compareNumberArrays(a: number[], b: number[]): number {
+  if (a.length !== b.length) {
+    // Different number of values - partial match at best
+    const minLen = Math.min(a.length, b.length)
+    const maxLen = Math.max(a.length, b.length)
+    let matchScore = 0
+
+    for (let i = 0; i < minLen; i++) {
+      if (a[i] === b[i]) {
+        matchScore += 1
+      } else {
+        // Check relative difference
+        const relDiff = Math.abs(a[i] - b[i]) / Math.max(Math.abs(a[i]), Math.abs(b[i]), 1)
+        if (relDiff < 0.1) matchScore += 0.8
+        else if (relDiff < 0.2) matchScore += 0.5
+      }
+    }
+
+    return (matchScore / maxLen) * 0.8 // Penalty for length mismatch
+  }
+
+  // Same length - compare element by element
+  let matchScore = 0
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] === b[i]) {
+      matchScore += 1
+    } else {
+      // Check relative difference
+      const relDiff = Math.abs(a[i] - b[i]) / Math.max(Math.abs(a[i]), Math.abs(b[i]), 1)
+      if (relDiff < 0.05) matchScore += 0.9  // Very close (5%)
+      else if (relDiff < 0.1) matchScore += 0.7  // Close (10%)
+      else if (relDiff < 0.2) matchScore += 0.4  // Somewhat close (20%)
+      else matchScore += 0  // Different values
+    }
+  }
+
+  return matchScore / a.length
 }
 
 /**

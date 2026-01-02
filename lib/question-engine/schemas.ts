@@ -51,6 +51,21 @@ export type Step = z.infer<typeof StepSchema>
 // =============================================================================
 
 /**
+ * Numerical parameters extracted from problem statement
+ * Used to distinguish questions with same concepts but different values
+ */
+export const NumericalParamsSchema = z.object({
+  angles: z.array(z.number()).optional(),      // e.g., [30, 45] degrees
+  masses: z.array(z.number()).optional(),      // e.g., [5, 10] kg
+  distances: z.array(z.number()).optional(),   // e.g., [10, 20] m
+  velocities: z.array(z.number()).optional(),  // e.g., [15] m/s
+  forces: z.array(z.number()).optional(),      // e.g., [100] N
+  times: z.array(z.number()).optional(),       // e.g., [5] s
+  heights: z.array(z.number()).optional(),     // e.g., [80] m
+})
+export type NumericalParams = z.infer<typeof NumericalParamsSchema>
+
+/**
  * Fingerprint for similarity matching
  * Used to find similar questions without LLM
  */
@@ -60,6 +75,7 @@ export const FingerprintSchema = z.object({
   asked: z.array(z.string()), // What the problem asks for (acceleration, force, etc.)
   keywords: z.array(z.string()), // Key physics terms
   diagramType: z.enum(['none', 'fbd', 'incline', 'pulley', 'circuit', 'optics', 'other']).optional(),
+  numericalParams: NumericalParamsSchema.optional(), // Numerical values for similarity
 })
 export type Fingerprint = z.infer<typeof FingerprintSchema>
 
