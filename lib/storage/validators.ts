@@ -81,7 +81,13 @@ const VALID_EVENT_TYPES: EventType[] = [
   'reflection_started',
   'reflection_completed',
   'preference_changed',
-  'error_occurred'
+  'error_occurred',
+  // Pattern-First Mode
+  'pattern_first_shown',
+  'pattern_selected',
+  'pattern_first_timeout',
+  'pattern_first_unlock',
+  'pattern_correctness'
 ]
 
 export function validateEvent(data: unknown): ValidationResult<StoredEvent> {

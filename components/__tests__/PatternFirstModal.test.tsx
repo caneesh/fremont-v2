@@ -11,24 +11,24 @@ describe('PatternFirstModal', () => {
   const mockPatterns: PatternOption[] = [
     {
       id: 'momentum',
-      name: 'Conservation of Momentum',
+      label: 'Conservation of Momentum',
       description: 'Collision and explosion problems',
       triggers: ['collision', 'explosion'],
     },
     {
       id: 'energy',
-      name: 'Conservation of Energy',
+      label: 'Conservation of Energy',
       description: 'Height, speed, and work problems',
       triggers: ['height', 'speed'],
     },
     {
       id: 'kinematics',
-      name: 'Kinematics',
+      label: 'Kinematics',
       description: 'Motion with constant acceleration',
     },
     {
       id: 'forces',
-      name: 'Newton\'s Laws',
+      label: "Newton's Laws",
       description: 'Force analysis and equilibrium',
     },
   ]
@@ -53,7 +53,7 @@ describe('PatternFirstModal', () => {
   describe('rendering', () => {
     it('renders the modal with title', () => {
       render(<PatternFirstModal {...defaultProps} />)
-      expect(screen.getByText('Identify the Pattern')).toBeInTheDocument()
+      expect(screen.getByText('Identify the pattern (10–15s)')).toBeInTheDocument()
     })
 
     it('renders all pattern options', () => {
@@ -169,7 +169,7 @@ describe('PatternFirstModal', () => {
       })
 
       // Check for the warning message (more specific)
-      expect(screen.getByText(/Pick a pattern to continue/)).toBeInTheDocument()
+      expect(screen.getByText(/Continue, but pick a pattern soon/)).toBeInTheDocument()
     })
 
     it('stops timer after selection', () => {

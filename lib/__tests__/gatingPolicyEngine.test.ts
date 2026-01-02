@@ -233,8 +233,8 @@ describe('GatingPolicyEngine', () => {
 
   describe('Rebuild Gate Logic', () => {
     const mockPatterns: PatternOption[] = [
-      { id: 'p1', name: 'Conservation of Momentum', description: 'Momentum is conserved' },
-      { id: 'p2', name: 'Conservation of Energy', description: 'Energy is conserved' },
+      { id: 'p1', label: 'Conservation of Momentum', description: 'Momentum is conserved' },
+      { id: 'p2', label: 'Conservation of Energy', description: 'Energy is conserved' },
     ]
 
     it('triggers rebuild gate with generated questions', () => {

@@ -1,4 +1,5 @@
 import type { PatternSelectionProgress } from './patternFirst'
+import type { SkipCommitPersistence } from './skipCommitGate'
 
 export type ProblemStatus = 'IN_PROGRESS' | 'SOLVED' | 'SKIPPED'
 
@@ -52,11 +53,17 @@ export interface ProblemProgress {
   sanityCheckAnswer?: string
   currentStep: number
   reflectionAnswers?: ReflectionAnswer[]
+  // Timing / evaluation metadata (optional)
+  timeSpentMs?: number
+  expectedSolveTimeMs?: number
+  wasCorrect?: boolean
   // Micro-task mode fields (optional for backwards compatibility)
   useMicroTasks?: boolean
   microTaskProgress?: MicroTaskStepProgress[]
   // Pattern-First Mode (pattern identification before solving)
   patternSelection?: PatternSelectionProgress
+  // Skip-or-Commit Gate (decision training)
+  skipCommit?: SkipCommitPersistence
 }
 
 export interface HistoryFilters {

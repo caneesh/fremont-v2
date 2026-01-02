@@ -63,7 +63,7 @@ export default function PatternFirstModal({
       if (selectedPatternId) return // Already selected
 
       const elapsedTime = Date.now() - startTimeRef.current
-      const isCorrect = pattern.id === primaryPatternId
+      const isCorrect = primaryPatternId ? pattern.id === primaryPatternId : null
 
       setSelectedPatternId(pattern.id)
       onSelect(pattern.id, elapsedTime, isCorrect)
@@ -143,10 +143,10 @@ export default function PatternFirstModal({
                 id="pattern-first-title"
                 className="text-xl font-bold text-white"
               >
-                Identify the Pattern
+                Identify the pattern (10–15s)
               </h2>
               <p className="text-indigo-100 text-sm mt-1">
-                What type of problem is this?
+                Fast recognition before equations.
               </p>
             </div>
             {showCountdown && !selectedPatternId && !hasTimedOut && (
@@ -212,11 +212,13 @@ export default function PatternFirstModal({
                 `}
               >
                 <div className="font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                  {pattern.name}
+                  {pattern.label || pattern.name || pattern.id}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  {pattern.description}
-                </div>
+                {pattern.description && (
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    {pattern.description}
+                  </div>
+                )}
                 {pattern.triggers && pattern.triggers.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {pattern.triggers.slice(0, 2).map((trigger, i) => (
@@ -242,7 +244,7 @@ export default function PatternFirstModal({
                 </svg>
                 <div>
                   <p className="font-medium text-amber-800 dark:text-amber-200">
-                    Time&apos;s up! Pick a pattern to continue.
+                    Time&apos;s up! Continue, but pick a pattern soon.
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                     Selecting a pattern helps build recognition speed for exams.

@@ -50,11 +50,15 @@ export type EventType =
   | 'drill_started'
   | 'drill_completed'
   | 'drill_skipped'
+  // Micro-Pattern Drill events
+  | 'drill_item_completed'
+  | 'drill_abandoned'
   // Pattern-First Mode events
   | 'pattern_first_shown'
   | 'pattern_selected'
   | 'pattern_first_timeout'
   | 'pattern_first_unlock'
+  | 'pattern_correctness'
 
 export interface EventMetadata {
   problemId?: string
@@ -150,6 +154,10 @@ export const STORAGE_KEYS = {
 
   // Circuit Breaker
   CIRCUIT_BREAKER: 'physiscaffold_circuit_breaker',
+
+  // Cognitive Load Governor
+  COGNITIVE_LOAD_STATE: 'physiscaffold_cognitive_load_state',
+  COGNITIVE_LOAD_METRICS: 'physiscaffold_cognitive_load_metrics',
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]

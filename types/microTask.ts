@@ -8,7 +8,8 @@
 
 import type { Concept, SanityCheck, SanityCheckMatrix, ConceptualTrap, WarningBeacon, StepType } from './scaffold'
 import type { FeynmanPromptConfig } from './feynman'
-import type { PatternOption, TimePressureConfig } from './patternFirst'
+import type { PatternOption } from './patternFirst'
+import type { TimePressureConfig } from './timePressure'
 
 // Supported micro-task types
 export type MicroTaskType = 'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'VERBAL_PLAN'

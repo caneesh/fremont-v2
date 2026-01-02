@@ -16,6 +16,7 @@ import {
   type RebuildQuestion,
   type GatingIntensity,
   type PatternConfidence,
+  type CognitiveLoadLevel,
   createInitialSessionPolicy,
   createInitialRebuildGateState,
   DEFAULT_DECISION_GATE_CONFIG,
@@ -318,7 +319,7 @@ function generateRebuildQuestions(
 
   // Q1: Pattern identification (if patterns available)
   if (patterns && patterns.length > 0 && primaryPatternId) {
-    const patternNames = patterns.map(p => p.name)
+    const patternNames = patterns.map(p => p.label || p.name || p.id)
     const correctIndex = patterns.findIndex(p => p.id === primaryPatternId)
     const correctPattern = patterns.find(p => p.id === primaryPatternId)
 
@@ -329,7 +330,7 @@ function generateRebuildQuestions(
         question: 'Which physics pattern was used in this step?',
         options: patternNames,
         correctIndex,
-        explanation: `This step uses the "${correctPattern?.name}" pattern. ${correctPattern?.description || ''}`,
+        explanation: `This step uses the "${(correctPattern?.label || correctPattern?.name || correctPattern?.id) ?? 'Unknown'}" pattern. ${correctPattern?.description || ''}`,
       })
     }
   }
@@ -482,4 +483,54 @@ export function hasActiveBlockingGate(
   }
 
   return { blocked: false, reason: null }
+}
+
+// ============================================
+// Cognitive Load Management
+// ============================================
+
+/**
+ * Update cognitive load level in policy
+ */
+export function updateCognitiveLoadLevel(
+  policy: SessionGatingPolicy,
+  level: CognitiveLoadLevel
+): SessionGatingPolicy {
+  const updatedPolicy = {
+    ...policy,
+    cognitiveLoadLevel: level,
+  }
+
+  saveSessionPolicy(updatedPolicy)
+  return updatedPolicy
+}
+
+/**
+ * Get current cognitive load level
+ */
+export function getCognitiveLoadLevel(
+  policy: SessionGatingPolicy
+): CognitiveLoadLevel {
+  return policy.cognitiveLoadLevel ?? 'low'
+}
+
+/**
+ * Check if simplified UI mode should be active based on cognitive load
+ */
+export function isSimplifiedUIActive(
+  policy: SessionGatingPolicy
+): boolean {
+  return policy.cognitiveLoadLevel === 'high'
+}
+
+/**
+ * Get cognitive load summary for telemetry
+ */
+export function getCognitiveLoadSummary(
+  policy: SessionGatingPolicy
+): { level: CognitiveLoadLevel; simplified: boolean } {
+  return {
+    level: getCognitiveLoadLevel(policy),
+    simplified: isSimplifiedUIActive(policy),
+  }
 }

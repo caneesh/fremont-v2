@@ -42,8 +42,8 @@ describe('patternFirstService', () => {
 
   describe('shouldShowPatternFirst', () => {
     const mockPatterns: PatternOption[] = [
-      { id: 'momentum', name: 'Conservation of Momentum', description: 'Test' },
-      { id: 'energy', name: 'Conservation of Energy', description: 'Test' },
+      { id: 'momentum', label: 'Conservation of Momentum', description: 'Test' },
+      { id: 'energy', label: 'Conservation of Energy', description: 'Test' },
     ]
 
     const enabledTimePressure: TimePressureConfig = {
@@ -54,28 +54,24 @@ describe('patternFirstService', () => {
     }
 
     it('returns true when all conditions are met', () => {
-      expect(shouldShowPatternFirst(mockPatterns, 'momentum', enabledTimePressure, undefined)).toBe(true)
+      expect(shouldShowPatternFirst(mockPatterns, enabledTimePressure, undefined)).toBe(true)
     })
 
     it('returns false when patterns array is empty', () => {
-      expect(shouldShowPatternFirst([], 'momentum', enabledTimePressure, undefined)).toBe(false)
+      expect(shouldShowPatternFirst([], enabledTimePressure, undefined)).toBe(false)
     })
 
     it('returns false when patterns is undefined', () => {
-      expect(shouldShowPatternFirst(undefined, 'momentum', enabledTimePressure, undefined)).toBe(false)
-    })
-
-    it('returns false when primaryPatternId is undefined', () => {
-      expect(shouldShowPatternFirst(mockPatterns, undefined, enabledTimePressure, undefined)).toBe(false)
+      expect(shouldShowPatternFirst(undefined, enabledTimePressure, undefined)).toBe(false)
     })
 
     it('returns false when enablePatternFirst is false', () => {
       const disabled: TimePressureConfig = { ...enabledTimePressure, enablePatternFirst: false }
-      expect(shouldShowPatternFirst(mockPatterns, 'momentum', disabled, undefined)).toBe(false)
+      expect(shouldShowPatternFirst(mockPatterns, disabled, undefined)).toBe(false)
     })
 
     it('returns false when timePressure is undefined', () => {
-      expect(shouldShowPatternFirst(mockPatterns, 'momentum', undefined, undefined)).toBe(false)
+      expect(shouldShowPatternFirst(mockPatterns, undefined, undefined)).toBe(false)
     })
 
     it('returns false when user has already selected a pattern', () => {
@@ -85,7 +81,7 @@ describe('patternFirstService', () => {
         patternDecisionCorrect: false,
         patternTimedOut: false,
       }
-      expect(shouldShowPatternFirst(mockPatterns, 'momentum', enabledTimePressure, existingSelection)).toBe(false)
+      expect(shouldShowPatternFirst(mockPatterns, enabledTimePressure, existingSelection)).toBe(false)
     })
 
     it('returns false when user has timed out', () => {
@@ -95,7 +91,7 @@ describe('patternFirstService', () => {
         patternDecisionCorrect: null,
         patternTimedOut: true,
       }
-      expect(shouldShowPatternFirst(mockPatterns, 'momentum', enabledTimePressure, timedOutSelection)).toBe(false)
+      expect(shouldShowPatternFirst(mockPatterns, enabledTimePressure, timedOutSelection)).toBe(false)
     })
   })
 

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import type { SkipCommitDecision } from '@/types/skipCommitGate'
 
 interface SkipCommitGateModalProps {
   isOpen: boolean
   autoCommitSeconds?: number
+  initialCountdownSeconds?: number | null
   onCommit: () => void
   onSkip: () => void
   onAutoCommit: () => void
@@ -24,6 +24,7 @@ interface SkipCommitGateModalProps {
 export default function SkipCommitGateModal({
   isOpen,
   autoCommitSeconds = 8,
+  initialCountdownSeconds = null,
   onCommit,
   onSkip,
   onAutoCommit,
@@ -36,11 +37,12 @@ export default function SkipCommitGateModal({
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setCountdown(autoCommitSeconds)
+      const start = initialCountdownSeconds ?? autoCommitSeconds
+      setCountdown(Math.max(1, Math.min(start, autoCommitSeconds)))
       setIsClosing(false)
       hasDecidedRef.current = false
     }
-  }, [isOpen, autoCommitSeconds])
+  }, [isOpen, autoCommitSeconds, initialCountdownSeconds])
 
   // Countdown timer
   useEffect(() => {

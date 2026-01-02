@@ -55,12 +55,11 @@ export function validateSelection(
  */
 export function shouldShowPatternFirst(
   patterns: PatternOption[] | undefined,
-  primaryPatternId: string | undefined,
   timePressure: TimePressureConfig | undefined,
   existingSelection: PatternSelectionProgress | undefined
 ): boolean {
-  // Must have patterns and primary pattern defined
-  if (!patterns?.length || !primaryPatternId) {
+  // Must have patterns
+  if (!patterns?.length) {
     return false
   }
 
@@ -102,15 +101,17 @@ export function logPatternFirstShown(
 export function logPatternSelected(
   problemId: string,
   selectedPatternId: string,
-  primaryPatternId: string,
-  isCorrect: boolean,
-  decisionTimeMs: number
+  decisionTimeMs: number,
+  beforeUnlock: boolean
 ): void {
   eventLogger.log('pattern_selected', {
     problemId,
+    // Required-ish payload for Pattern-First Mode analytics
+    patternId: selectedPatternId,
+    timeMs: decisionTimeMs,
+    beforeUnlock,
+    // Backwards-compatible keys
     selectedPatternId,
-    primaryPatternId,
-    isCorrect,
     duration: decisionTimeMs,
   })
 }
@@ -130,13 +131,18 @@ export function logPatternTimeout(problemId: string, timeMs: number): void {
  */
 export function logPatternFirstUnlock(
   problemId: string,
-  hadSelection: boolean,
-  wasCorrect: boolean | null
+  auto: boolean
 ): void {
   eventLogger.log('pattern_first_unlock', {
     problemId,
-    hadSelection,
-    wasCorrect: wasCorrect ?? undefined,
+    auto,
+  })
+}
+
+export function logPatternCorrectness(problemId: string, correct: boolean): void {
+  eventLogger.log('pattern_correctness', {
+    problemId,
+    correct,
   })
 }
 
@@ -164,7 +170,7 @@ export function createInitialSelectionState(): PatternSelectionState {
 export function createSelectionState(
   patternId: string,
   timeMs: number,
-  isCorrect: boolean
+  isCorrect: boolean | null
 ): PatternSelectionState {
   return {
     selectedPatternId: patternId,

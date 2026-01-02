@@ -22,6 +22,23 @@
     "classification": { "$ref": "#/$defs/Classification" },
     "prompt": { "$ref": "#/$defs/Prompt" },
 
+    "patterns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PatternOption" },
+      "description": "Pattern options for Pattern-First Mode (recommended: 4-8)."
+    },
+
+    "primaryPatternId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical pattern id (authoritative) for Pattern-First Mode."
+    },
+
+    "timePressure": {
+      "$ref": "#/$defs/TimePressure",
+      "description": "Per-question time-pressure training configuration."
+    },
+
     "assets": {
       "type": "array",
       "items": { "$ref": "#/$defs/AssetRef" },
@@ -146,6 +163,50 @@
           "items": { "$ref": "#/$defs/AskedItem" },
           "default": []
         }
+      }
+    },
+
+    "PatternOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable unique pattern id."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short display label."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional 1-line description for quick scanning."
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional recognition cues (keywords/triggers)."
+        }
+      }
+    },
+
+    "TimePressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enablePatternFirst": { "type": "boolean" },
+        "lockSeconds": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "showCountdown": { "type": "boolean" },
+        "allowTimeoutProceed": { "type": "boolean" },
+
+        "enableSkipCommit": { "type": "boolean" },
+        "gateSeconds": { "type": "integer", "minimum": 1, "maximum": 600 },
+        "autoCommitSeconds": { "type": "integer", "minimum": 1, "maximum": 30 },
+
+        "expectedSolveTimeSeconds": { "type": "integer", "minimum": 1, "maximum": 7200 }
       }
     },
 

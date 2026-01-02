@@ -7,40 +7,10 @@
  */
 
 // ============================================
-// Configuration Types
-// ============================================
-
-/**
- * Time pressure configuration for a problem
- */
-export interface TimePressureConfig {
-  /** Enable the skip-or-commit gate */
-  enableSkipCommit: boolean
-  /** Seconds after opening problem to show the gate (default: 25) */
-  gateSeconds: number
-  /** Seconds before auto-commit if user doesn't decide (default: 8) */
-  autoCommitSeconds?: number
-  /** Expected solve time in seconds (for analytics) */
-  expectedSolveTimeSeconds?: number
-}
-
-/**
- * Default time pressure configuration
- */
-export const DEFAULT_TIME_PRESSURE_CONFIG: TimePressureConfig = {
-  enableSkipCommit: true,
-  gateSeconds: 25,
-  autoCommitSeconds: 8,
-}
-
-// ============================================
 // Decision Types
 // ============================================
 
-/**
- * User's decision at the skip-or-commit gate
- */
-export type SkipCommitDecision = 'commit' | 'skip' | 'auto_commit'
+export type SkipCommitDecision = 'commit' | 'skip'
 
 /**
  * Skip-or-commit gate state for an attempt
@@ -130,7 +100,7 @@ export function calculateSkipCommitAnalytics(
   ).length
 
   const autoCommitted = withDecisions.filter(
-    a => a.skipCommitState?.decision === 'auto_commit'
+    a => a.skipCommitState?.wasAutoCommit === true
   ).length
 
   const decisionTimes = withDecisions
@@ -180,6 +150,8 @@ export interface SkipCommitPersistence {
   decisionTimeMs: number | null
   wasSkipped: boolean
   wasAutoCommit: boolean
+  gateShownAt: number | null
+  decisionMadeAt: number | null
 }
 
 /**
@@ -193,5 +165,7 @@ export function toSkipCommitPersistence(
     decisionTimeMs: state.decisionTimeMs,
     wasSkipped: state.wasSkipped,
     wasAutoCommit: state.wasAutoCommit,
+    gateShownAt: state.gateShownAt,
+    decisionMadeAt: state.decisionMadeAt,
   }
 }

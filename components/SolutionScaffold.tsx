@@ -110,7 +110,24 @@ import {
   getStepDecisionGateState,
   recordMicroTaskAttempt,
   getRequiredMicroTaskCount,
+  updateCognitiveLoadLevel,
 } from '@/lib/gatingPolicyEngine'
+import {
+  getOrCreateCognitiveLoadState,
+  getOrCreateSessionLoadMetrics,
+  saveSessionLoadMetrics,
+  recordStepActivation,
+  recordHintUnlock,
+  recordStepCompletion,
+  recordWrongAttempt,
+  updateCognitiveLoadAfterStep,
+  updateCircuitBreakerState,
+  getUIConfigForLoadScore,
+  clearCognitiveLoadState,
+  type CognitiveLoadState,
+  type SessionLoadMetrics,
+} from '@/lib/cognitiveLoadService'
+import type { HighLoadUIConfig } from '@/types/cognitiveLoad'
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
@@ -193,6 +210,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   // P0 Gating Policy state
   const [gatingPolicy, setGatingPolicy] = useState<SessionGatingPolicy | null>(null)
   const gatingPolicyInitRef = useRef(false)
+
+  // Cognitive Load Governor state
+  const [cognitiveLoadState, setCognitiveLoadState] = useState<CognitiveLoadState | null>(null)
+  const [cognitiveLoadMetrics, setCognitiveLoadMetrics] = useState<SessionLoadMetrics | null>(null)
+  const [cognitiveLoadUIConfig, setCognitiveLoadUIConfig] = useState<HighLoadUIConfig | null>(null)
+  const stepActivationTimesRef = useRef<Map<number, number>>(new Map())
 
   // Skip-or-Commit Gate state
   const [showSkipCommitGate, setShowSkipCommitGate] = useState(false)
@@ -303,7 +326,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [socraticRewindContext, setSocraticRewindContext] = useState<SocraticRewindContext | null>(null)
   const [socraticRewindTrigger, setSocraticRewindTrigger] = useState<RewindTriggerSource>('sanity_check_failed')
 
-  // Initialize P0 Gating Policy
+  // Initialize P0 Gating Policy and Cognitive Load Governor
   useEffect(() => {
     if (gatingPolicyInitRef.current) return
     gatingPolicyInitRef.current = true
@@ -312,9 +335,21 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     const policy = getOrCreateSessionPolicy()
     setGatingPolicy(policy)
 
-    // Clear policy on unmount (new problem = fresh policy)
+    // Initialize Cognitive Load Governor if enabled
+    if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR) {
+      const loadState = getOrCreateCognitiveLoadState()
+      const loadMetrics = getOrCreateSessionLoadMetrics()
+      setCognitiveLoadState(loadState)
+      setCognitiveLoadMetrics(loadMetrics)
+      setCognitiveLoadUIConfig(getUIConfigForLoadScore(loadState.score))
+    }
+
+    // Clear policy and cognitive load state on unmount (new problem = fresh state)
     return () => {
       clearSessionPolicy()
+      if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR) {
+        clearCognitiveLoadState()
+      }
     }
   }, [])
 
@@ -1001,6 +1036,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       sanityCheckAnswer,
       currentStep,
       reflectionAnswers: reflectionAnswers.length > 0 ? reflectionAnswers : undefined,
+      timeSpentMs: Date.now() - problemStartTime,
+      expectedSolveTimeMs: data.timePressure?.expectedSolveTimeSeconds
+        ? data.timePressure.expectedSolveTimeSeconds * 1000
+        : undefined,
+      wasCorrect: solutionGradeResult?.status
+        ? solutionGradeResult.status === 'SUCCESS'
+        : undefined,
     }
 
     // Include micro-task progress if in micro-task mode
@@ -1020,7 +1062,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
 
     return progress
-  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState, skipCommitState])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState, skipCommitState, problemStartTime, solutionGradeResult])
 
   // Skip-or-Commit Gate: Handler for skip
   const handleSkipCommitSkip = useCallback(() => {
@@ -1558,6 +1600,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       newMap.set(stepId, level)
       return newMap
     })
+
+    // Track hint unlock for cognitive load (before level 2 check to catch all unlocks)
+    if (FEATURE_FLAGS.COGNITIVE_LOAD_GOVERNOR && cognitiveLoadMetrics) {
+      const updatedMetrics = recordHintUnlock(cognitiveLoadMetrics, stepId, level)
+      setCognitiveLoadMetrics(updatedMetrics)
+      saveSessionLoadMetrics(updatedMetrics)
+    }
 
     // Create mistake card when user needs significant help (level >= 2)
     if (level >= 2 && FEATURE_FLAGS.MISTAKE_NOTEBOOK) {

@@ -1,3 +1,6 @@
+import type { PatternOption } from './patternFirst'
+import type { TimePressureConfig } from './timePressure'
+
 export interface Question {
   id: string
   title: string
@@ -9,6 +12,10 @@ export interface Question {
   expectedTime: number // in minutes
   source?: string
   year?: number
+  // Time-pressure training (optional)
+  patterns?: PatternOption[]
+  primaryPatternId?: string
+  timePressure?: TimePressureConfig
 }
 
 export interface Topic {

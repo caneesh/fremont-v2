@@ -73,6 +73,13 @@ export default function HistoryPage() {
         </span>
       )
     }
+    if (status === 'SKIPPED') {
+      return (
+        <span className="px-2 sm:px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full text-xs font-semibold">
+          ⇢ Skipped
+        </span>
+      )
+    }
     return (
       <span className="px-2 sm:px-3 py-1 bg-blue-100 dark:bg-accent/20 text-blue-800 dark:text-accent rounded-full text-xs font-semibold">
         ⏳ In Progress
