@@ -10,29 +10,8 @@
 // Configuration Types
 // ============================================
 
-/**
- * Time pressure configuration for Pattern-First mode
- */
-export interface TimePressureConfig {
-  /** Enable pattern-first prompt before starting problem */
-  enablePatternFirst: boolean
-  /** Seconds to lock scaffold during pattern selection (default: 12) */
-  lockSeconds: number
-  /** Show countdown timer UI */
-  showCountdown: boolean
-  /** Allow proceeding without selection after timeout */
-  allowTimeoutProceed: boolean
-}
-
-/**
- * Default time pressure configuration
- */
-export const DEFAULT_TIME_PRESSURE: TimePressureConfig = {
-  enablePatternFirst: false,
-  lockSeconds: 12,
-  showCountdown: true,
-  allowTimeoutProceed: true,
-}
+import type { TimePressureConfig } from './timePressure'
+export type { TimePressureConfig } from './timePressure'
 
 // ============================================
 // Pattern Option Types
@@ -45,10 +24,12 @@ export const DEFAULT_TIME_PRESSURE: TimePressureConfig = {
 export interface PatternOption {
   /** Unique identifier for the pattern */
   id: string
-  /** Display name (e.g., "Conservation of Momentum") */
-  name: string
+  /** Display label (e.g., "Conservation of Momentum") */
+  label: string
+  /** Legacy alias for label (kept for backwards compatibility) */
+  name?: string
   /** Brief description for quick scanning */
-  description: string
+  description?: string
   /** Optional recognition cues/triggers */
   triggers?: string[]
 }
@@ -61,7 +42,7 @@ export interface PatternScaffoldExtension {
   /** Available patterns for this problem (4-8 options) */
   patterns: PatternOption[]
   /** The canonical/correct primary pattern for this problem */
-  primaryPatternId: string
+  primaryPatternId?: string
   /** Secondary patterns that also apply (optional) */
   secondaryPatternIds?: string[]
   /** Time pressure configuration */
@@ -128,8 +109,8 @@ export interface PatternSelectionProgress {
 export interface PatternFirstModalProps {
   /** Available pattern options */
   patterns: PatternOption[]
-  /** The correct pattern ID (for validation) */
-  primaryPatternId: string
+  /** The correct pattern ID (for validation, optional) */
+  primaryPatternId?: string
   /** Time limit in seconds */
   lockSeconds: number
   /** Show countdown timer */
@@ -137,7 +118,7 @@ export interface PatternFirstModalProps {
   /** Problem text for context */
   problemText: string
   /** Callback when pattern is selected */
-  onSelect: (patternId: string, timeMs: number, isCorrect: boolean) => void
+  onSelect: (patternId: string, timeMs: number, isCorrect: boolean | null) => void
   /** Callback when timeout occurs */
   onTimeout: (timeMs: number) => void
   /** Callback to skip/close modal (only if allowTimeoutProceed is true) */

@@ -1,7 +1,9 @@
 import type { DiagramStepData } from './diagram'
 import type { FeynmanPromptConfig } from './feynman'
 import type { PreFlightCheck } from './preFlightCheck'
-import type { PatternOption, TimePressureConfig } from './patternFirst'
+import type { PatternOption } from './patternFirst'
+import type { TimePressureConfig } from './timePressure'
+import type { MicroTask } from './microTask'
 
 /**
  * Scaffold Density Level
@@ -40,6 +42,7 @@ export interface Step {
   validationPrompt?: string // How to validate user's answer
   diagramData?: DiagramStepData // FBD canvas data for diagram steps
   feynmanPrompt?: FeynmanPromptConfig // Feynman micro-prompt for conceptual check
+  decisionGateTasks?: MicroTask[] // Optional decision gate tasks for P0 gating
 }
 
 export interface SanityCheck {

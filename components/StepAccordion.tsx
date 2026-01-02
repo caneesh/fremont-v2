@@ -18,8 +18,10 @@ import { errorPatternService } from '@/lib/errorPatternService'
 import type { ErrorPatternSummary } from '@/types/errorPatterns'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import type { FeynmanPromptConfig } from '@/types/feynman'
-import type { StepRebuildGateState } from '@/types/gatingPolicy'
+import type { StepRebuildGateState, StepDecisionGateState } from '@/types/gatingPolicy'
+import type { MicroTask } from '@/types/microTask'
 import RebuildGate from './RebuildGate'
+import DecisionGate from './DecisionGate'
 
 interface StepAccordionProps {
   step: Step
@@ -42,6 +44,13 @@ interface StepAccordionProps {
   onRebuildGateTriggered?: (stepId: number, stepTitle: string) => void
   onRebuildGateAnswer?: (stepId: number, questionIndex: number, selectedIndex: number) => { isCorrect: boolean; allPassed: boolean }
   canProceed?: boolean
+  // P0 Decision Gate props
+  decisionGateState?: StepDecisionGateState | null
+  decisionGateTasks?: MicroTask[]
+  onDecisionGateAnswer?: (stepId: number, isCorrect: boolean) => { shouldAutoUnlockHint: boolean }
+  requiresDecisionGate?: boolean
+  requiredMicroTaskCount?: number
+  maxDecisionGateAttempts?: number
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -67,6 +76,12 @@ export default function StepAccordion({
   onRebuildGateTriggered,
   onRebuildGateAnswer,
   canProceed = true,
+  decisionGateState,
+  decisionGateTasks,
+  onDecisionGateAnswer,
+  requiresDecisionGate = false,
+  requiredMicroTaskCount = 1,
+  maxDecisionGateAttempts = 2,
   onAnswerChange,
   onComplete,
   onActivate,
@@ -107,6 +122,9 @@ export default function StepAccordion({
   // Socratic Tutor Chat state
   const [showSocraticTutor, setShowSocraticTutor] = useState(false)
 
+  // P0 Decision Gate state
+  const [decisionGateTaskIndex, setDecisionGateTaskIndex] = useState(0)
+
   // Track step activation time for timeout detection
   const stepActivationTimeRef = useRef<number | null>(null)
 
@@ -134,6 +152,11 @@ export default function StepAccordion({
     // P0 Rebuild Gate: Block completion if rebuild gate is active and not passed
     if (FEATURE_FLAGS.P0_REBUILD_GATES && rebuildGateState?.isActive && !rebuildGateState.gatePassed) {
       return // Cannot complete until rebuild gate is passed
+    }
+
+    // P0 Decision Gate: Block completion if decision gate required and not passed
+    if (FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState && !decisionGateState.gatePassed) {
+      return // Cannot complete until decision gate is passed
     }
 
     // Track timeout if step took too long
@@ -176,6 +199,33 @@ export default function StepAccordion({
     setShowSocraticTutor(false)
     onComplete()
     setIsExpanded(false)
+  }
+
+  // P0 Decision Gate: Handle answer from DecisionGate component
+  const handleDecisionGateAnswer = (isCorrect: boolean, _explanation: string) => {
+    if (!onDecisionGateAnswer) return
+
+    const { shouldAutoUnlockHint } = onDecisionGateAnswer(step.id, isCorrect)
+
+    if (isCorrect) {
+      // Move to next task if available
+      if (decisionGateTasks && decisionGateTaskIndex < decisionGateTasks.length - 1) {
+        setDecisionGateTaskIndex(prev => prev + 1)
+      }
+    }
+
+    if (shouldAutoUnlockHint) {
+      // Auto-unlock hint after max attempts
+      console.log('[DecisionGate] Auto-unlocking hint for step', step.id)
+    }
+  }
+
+  // P0 Decision Gate: Handle auto-unlock hint
+  const handleDecisionGateAutoUnlockHint = () => {
+    // Unlock the next hint level when max attempts reached
+    if (currentHintLevel < step.hints.length) {
+      onHintLevelChange(currentHintLevel + 1)
+    }
   }
 
   const handleAudioHint = async () => {
@@ -1210,12 +1260,52 @@ export default function StepAccordion({
               </div>
             )}
 
+            {/* P0 Decision Gate - Required before completing step */}
+            {FEATURE_FLAGS.P0_DECISION_GATES &&
+              showStepContent &&
+              requiresDecisionGate &&
+              decisionGateTasks &&
+              decisionGateTasks.length > 0 &&
+              decisionGateState &&
+              !decisionGateState.gatePassed && (
+              <div className="mt-4">
+                <DecisionGate
+                  gateState={decisionGateState}
+                  task={decisionGateTasks[decisionGateTaskIndex]}
+                  requiredCount={requiredMicroTaskCount}
+                  maxAttempts={maxDecisionGateAttempts}
+                  onAnswer={handleDecisionGateAnswer}
+                  onAutoUnlockHint={handleDecisionGateAutoUnlockHint}
+                />
+              </div>
+            )}
+
+            {/* Decision Gate Passed Indicator */}
+            {FEATURE_FLAGS.P0_DECISION_GATES &&
+              showStepContent &&
+              requiresDecisionGate &&
+              decisionGateState?.gatePassed && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                  Decision Gate Passed - You can complete this step
+                </span>
+              </div>
+            )}
+
             {/* Action Button */}
             {showStepContent && !showSocraticTutor && (
             <div className="flex justify-end pt-2">
               <button
                 onClick={handleComplete}
-                className="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
+                disabled={!!(FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState && !decisionGateState.gatePassed)}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  FEATURE_FLAGS.P0_DECISION_GATES && requiresDecisionGate && decisionGateState && !decisionGateState.gatePassed
+                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                    : 'bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-600'
+                }`}
               >
                 Mark as Complete →
               </button>

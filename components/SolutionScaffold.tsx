@@ -77,8 +77,13 @@ import {
 import PatternFirstModal from './PatternFirstModal'
 import type { PatternSelectionState, PatternSelectionProgress } from '@/types/patternFirst'
 import SkipCommitGateModal, { SkipToast } from './SkipCommitGateModal'
-import type { SkipCommitState, SkipCommitDecision } from '@/types/skipCommitGate'
-import { INITIAL_SKIP_COMMIT_STATE, DEFAULT_TIME_PRESSURE_CONFIG } from '@/types/skipCommitGate'
+import SkipCommitAnalyticsPanel from './SkipCommitAnalytics'
+import type { SkipCommitState, SkipCommitAnalytics } from '@/types/skipCommitGate'
+import { INITIAL_SKIP_COMMIT_STATE, toSkipCommitPersistence } from '@/types/skipCommitGate'
+import { getPatternFirstTimePressure, getSkipCommitTimePressure } from '@/types/timePressure'
+import PatternSelectionChip from './PatternSelectionChip'
+import PatternPickerModal from './PatternPickerModal'
+import { getSkipCommitAnalyticsForCurrentSession } from '@/lib/skipCommitSessionAnalytics'
 import {
   shouldShowPatternFirst,
   validateSelection,
@@ -87,9 +92,9 @@ import {
   toProgressFormat,
   logPatternFirstShown,
   logPatternSelected,
+  logPatternCorrectness,
   logPatternTimeout,
   logPatternFirstUnlock,
-  defaultTimePressure,
 } from '@/lib/patternFirstService'
 import type { SessionGatingPolicy, StepRebuildGateState, StepDecisionGateState } from '@/types/gatingPolicy'
 import {
@@ -177,6 +182,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showPatternFirst, setShowPatternFirst] = useState(false)
   const [patternSelectionState, setPatternSelectionState] = useState<PatternSelectionState | null>(null)
   const [isScaffoldLocked, setIsScaffoldLocked] = useState(false)
+  const [showPatternPicker, setShowPatternPicker] = useState(false)
+  const [patternPickerTitle, setPatternPickerTitle] = useState<string | undefined>(undefined)
+  const [showPatternPickWarning, setShowPatternPickWarning] = useState(false)
+  const patternGateStartedAtRef = useRef<number | null>(null)
+  const patternGateLockedRef = useRef(false)
+  const patternUnlockLoggedRef = useRef(false)
+  const pendingFinalizeAfterPatternPickRef = useRef(false)
 
   // P0 Gating Policy state
   const [gatingPolicy, setGatingPolicy] = useState<SessionGatingPolicy | null>(null)
@@ -186,6 +198,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
   const [showSkipCommitGate, setShowSkipCommitGate] = useState(false)
   const [skipCommitState, setSkipCommitState] = useState<SkipCommitState>(INITIAL_SKIP_COMMIT_STATE)
   const [showSkipToast, setShowSkipToast] = useState(false)
+  const [showSkipCommitAnalytics, setShowSkipCommitAnalytics] = useState(false)
+  const [sessionSkipCommitAnalytics, setSessionSkipCommitAnalytics] = useState<SkipCommitAnalytics | null>(null)
+  const [skipCommitCountdownStartSeconds, setSkipCommitCountdownStartSeconds] = useState<number | null>(null)
   const skipCommitGateShownRef = useRef(false)
   const skipCommitTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -205,6 +220,26 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (!FEATURE_FLAGS.DEV_SKIP_STEPS) return false
     return searchParams.get('skipSteps') === 'true'
   }, [searchParams])
+
+  const patternFirstCfg = useMemo(
+    () => getPatternFirstTimePressure(data.timePressure),
+    [data.timePressure]
+  )
+
+  const skipCommitCfg = useMemo(
+    () => getSkipCommitTimePressure(data.timePressure),
+    [data.timePressure]
+  )
+
+  useEffect(() => {
+    if (!showSkipCommitAnalytics) return
+    try {
+      setSessionSkipCommitAnalytics(getSkipCommitAnalyticsForCurrentSession())
+    } catch (error) {
+      console.error('Failed to compute skip/commit analytics:', error)
+      setSessionSkipCommitAnalytics(null)
+    }
+  }, [showSkipCommitAnalytics])
 
   // Phased scaffold context for on-demand step loading
   const phasedScaffoldContext = usePhasedScaffoldContext()
@@ -688,6 +723,23 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             timestamp: '',
           })
         }
+
+        // Load skip/commit decision if it exists
+        if (progress.skipCommit) {
+          setSkipCommitState(prev => ({
+            ...prev,
+            decision: progress.skipCommit?.decision ?? null,
+            decisionTimeMs: progress.skipCommit?.decisionTimeMs ?? null,
+            wasSkipped: progress.skipCommit?.wasSkipped ?? false,
+            wasAutoCommit: progress.skipCommit?.wasAutoCommit ?? false,
+            gateShownAt: progress.skipCommit?.gateShownAt ?? null,
+            decisionMadeAt: progress.skipCommit?.decisionMadeAt ?? null,
+          }))
+
+          if (progress.skipCommit.gateShownAt || progress.skipCommit.decision) {
+            skipCommitGateShownRef.current = true
+          }
+        }
       }
     }
 
@@ -728,14 +780,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     if (patternFirstShownRef.current) return
 
     // Check if pattern-first mode should show
-    const timePressure = data.timePressure || defaultTimePressure
+    const timePressure = patternFirstCfg
     const existingSelection = patternSelectionState ? toProgressFormat(patternSelectionState) : undefined
 
     if (FEATURE_FLAGS.PATTERN_FIRST_MODE &&
-        shouldShowPatternFirst(data.patterns, data.primaryPatternId, timePressure, existingSelection)) {
+        shouldShowPatternFirst(data.patterns, timePressure, existingSelection)) {
       patternFirstShownRef.current = true
       setShowPatternFirst(true)
       setIsScaffoldLocked(true)
+      setShowPatternPickWarning(false)
+      patternGateStartedAtRef.current = Date.now()
+      patternGateLockedRef.current = true
+      patternUnlockLoggedRef.current = false
 
       // Log analytics
       logPatternFirstShown(
@@ -744,19 +800,26 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         timePressure.lockSeconds
       )
     }
-  }, [data.patterns, data.primaryPatternId, data.timePressure, patternSelectionState, currentProblemId])
+  }, [data.patterns, patternFirstCfg, patternSelectionState, currentProblemId])
 
   // Pattern-First Mode: Handler for pattern selection
-  const handlePatternSelect = useCallback((patternId: string, elapsedTimeMs: number, isCorrect: boolean) => {
+  const handlePatternSelect = useCallback((patternId: string, elapsedTimeMs: number) => {
+    const beforeUnlock = patternGateLockedRef.current === true
+    const primaryPatternId = data.primaryPatternId
+    const isCorrect = primaryPatternId
+      ? validateSelection(patternId, primaryPatternId, data.secondaryPatternIds).isCorrect
+      : null
+
     const state = createSelectionState(patternId, elapsedTimeMs, isCorrect)
     setPatternSelectionState(state)
+    setShowPatternPickWarning(false)
 
-    // Update P0 gating policy with pattern gate result
-    if (gatingPolicy) {
+    // Update P0 gating policy with pattern gate result (only if canonical is defined)
+    if (gatingPolicy && primaryPatternId) {
       const updatedPolicy = processPatternGateSelection(
         gatingPolicy,
         patternId,
-        data.primaryPatternId || '',
+        primaryPatternId,
         data.secondaryPatternIds,
         elapsedTimeMs
       )
@@ -764,20 +827,23 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
 
     // Log analytics
-    logPatternSelected(
-      currentProblemId,
-      patternId,
-      data.primaryPatternId || '',
-      isCorrect,
-      elapsedTimeMs
-    )
+    logPatternSelected(currentProblemId, patternId, elapsedTimeMs, beforeUnlock)
+    if (isCorrect !== null) {
+      logPatternCorrectness(currentProblemId, isCorrect)
+    }
 
-    // Unlock scaffold after short delay for visual feedback
-    setTimeout(() => {
-      setShowPatternFirst(false)
-      setIsScaffoldLocked(false)
-      logPatternFirstUnlock(currentProblemId, true, isCorrect)
-    }, 800)
+    // Unlock scaffold after short delay for visual feedback (only once)
+    if (beforeUnlock) {
+      setTimeout(() => {
+        setShowPatternFirst(false)
+        setIsScaffoldLocked(false)
+        patternGateLockedRef.current = false
+        if (!patternUnlockLoggedRef.current) {
+          patternUnlockLoggedRef.current = true
+          logPatternFirstUnlock(currentProblemId, false)
+        }
+      }, 800)
+    }
   }, [currentProblemId, data.primaryPatternId, data.secondaryPatternIds, gatingPolicy])
 
   // Pattern-First Mode: Handler for timeout
@@ -794,33 +860,62 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     // Log timeout
     logPatternTimeout(currentProblemId, elapsedTimeMs)
 
-    // Check if we allow proceeding after timeout
-    const timePressure = data.timePressure || defaultTimePressure
-    if (timePressure.allowTimeoutProceed) {
-      // Keep modal open but allow skip - handled by onSkip
+    // Auto-unlock after timeout (non-blocking warning stays)
+    setShowPatternFirst(false)
+    setIsScaffoldLocked(false)
+    setShowPatternPickWarning(true)
+    patternGateLockedRef.current = false
+    if (!patternUnlockLoggedRef.current) {
+      patternUnlockLoggedRef.current = true
+      logPatternFirstUnlock(currentProblemId, true)
     }
-  }, [currentProblemId, data.timePressure, gatingPolicy])
+  }, [currentProblemId, gatingPolicy])
 
   // Pattern-First Mode: Handler for skip (after timeout)
   const handlePatternSkip = useCallback(() => {
     setShowPatternFirst(false)
     setIsScaffoldLocked(false)
-    logPatternFirstUnlock(currentProblemId, false, null)
+    patternGateLockedRef.current = false
+    if (!patternUnlockLoggedRef.current) {
+      patternUnlockLoggedRef.current = true
+      logPatternFirstUnlock(currentProblemId, true)
+    }
   }, [currentProblemId])
+
+  // Begin the finalize flow (Explain to Friend, then Reflection, then Mark Solved)
+  const beginFinalizeFlow = useCallback(() => {
+    // Show Explain to a Friend first (Feynman Technique)
+    setShowExplainToFriend(true)
+    setSaveMessage('Explain the solution to proceed')
+    setTimeout(() => setSaveMessage(''), 3000)
+  }, [])
+
+  const handlePatternPickerSelect = useCallback((patternId: string) => {
+    const startedAt = patternGateStartedAtRef.current
+    const timeMs = startedAt ? Date.now() - startedAt : 0
+    handlePatternSelect(patternId, timeMs)
+
+    if (pendingFinalizeAfterPatternPickRef.current) {
+      pendingFinalizeAfterPatternPickRef.current = false
+      beginFinalizeFlow()
+    }
+  }, [handlePatternSelect, beginFinalizeFlow])
 
   // Skip-or-Commit Gate: Timer to show the gate
   useEffect(() => {
     // Only run once
     if (skipCommitGateShownRef.current) return
     if (!FEATURE_FLAGS.SKIP_COMMIT_GATE) return
+    if (!skipCommitCfg.enableSkipCommit) return
     if (isProblemSolved || skipCommitState.decision) return
 
-    const gateSeconds = DEFAULT_TIME_PRESSURE_CONFIG.gateSeconds
+    const gateSeconds = skipCommitCfg.gateSeconds
 
     skipCommitTimerRef.current = setTimeout(() => {
       if (!skipCommitGateShownRef.current && !isProblemSolved) {
         skipCommitGateShownRef.current = true
         setShowSkipCommitGate(true)
+        setSkipCommitCountdownStartSeconds(skipCommitCfg.autoCommitSeconds)
         setSkipCommitState(prev => ({
           ...prev,
           gateShownAt: Date.now(),
@@ -833,7 +928,39 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
         clearTimeout(skipCommitTimerRef.current)
       }
     }
-  }, [isProblemSolved, skipCommitState.decision])
+  }, [skipCommitCfg, isProblemSolved, skipCommitState.decision])
+
+  // Skip-or-Commit Gate: Resume behavior (gate already shown in this attempt)
+  useEffect(() => {
+    if (!FEATURE_FLAGS.SKIP_COMMIT_GATE) return
+    if (!skipCommitCfg.enableSkipCommit) return
+    if (isProblemSolved) return
+    if (skipCommitState.decision) return
+    if (!skipCommitState.gateShownAt) return
+
+    // If the gate was already shown, either re-show it (with remaining time)
+    // or auto-commit if its countdown has already elapsed.
+    const elapsedMs = Date.now() - skipCommitState.gateShownAt
+    const autoCommitMs = skipCommitCfg.autoCommitSeconds * 1000
+    if (elapsedMs >= autoCommitMs) {
+      const now = Date.now()
+      setSkipCommitState({
+        decision: 'commit',
+        decisionTimeMs: elapsedMs,
+        wasSkipped: false,
+        wasAutoCommit: true,
+        gateShownAt: skipCommitState.gateShownAt,
+        decisionMadeAt: now,
+      })
+      setShowSkipCommitGate(false)
+      setSkipCommitCountdownStartSeconds(null)
+      return
+    }
+
+    const remainingSeconds = Math.max(1, Math.ceil((autoCommitMs - elapsedMs) / 1000))
+    setSkipCommitCountdownStartSeconds(remainingSeconds)
+    setShowSkipCommitGate(true)
+  }, [isProblemSolved, skipCommitCfg, skipCommitState.decision, skipCommitState.gateShownAt])
 
   // Skip-or-Commit Gate: Handler for commit
   const handleSkipCommitCommit = useCallback(() => {
@@ -851,55 +978,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       decisionMadeAt: now,
     })
     setShowSkipCommitGate(false)
+    setSkipCommitCountdownStartSeconds(null)
   }, [skipCommitState.gateShownAt])
 
-  // Skip-or-Commit Gate: Handler for skip
-  const handleSkipCommitSkip = useCallback(() => {
-    const now = Date.now()
-    const decisionTimeMs = skipCommitState.gateShownAt
-      ? now - skipCommitState.gateShownAt
-      : null
-
-    setSkipCommitState({
-      decision: 'skip',
-      decisionTimeMs,
-      wasSkipped: true,
-      wasAutoCommit: false,
-      gateShownAt: skipCommitState.gateShownAt,
-      decisionMadeAt: now,
-    })
-    setShowSkipCommitGate(false)
-
-    // Save attempt as skipped
-    problemHistoryService.markAttemptSkipped(problemId())
-
-    // Show toast
-    setShowSkipToast(true)
-    setTimeout(() => {
-      setShowSkipToast(false)
-      // Navigate to next problem / reset
-      onReset()
-    }, 2000)
-  }, [skipCommitState.gateShownAt, onReset])
-
-  // Skip-or-Commit Gate: Handler for auto-commit
-  const handleSkipCommitAutoCommit = useCallback(() => {
-    const now = Date.now()
-    const decisionTimeMs = skipCommitState.gateShownAt
-      ? now - skipCommitState.gateShownAt
-      : null
-
-    setSkipCommitState({
-      decision: 'auto_commit',
-      decisionTimeMs,
-      wasSkipped: false,
-      wasAutoCommit: true,
-      gateShownAt: skipCommitState.gateShownAt,
-      decisionMadeAt: now,
-    })
-    setShowSkipCommitGate(false)
-  }, [skipCommitState.gateShownAt])
-
+  // Get current problem progress for saving
   const getCurrentProgress = useCallback((): ProblemProgress => {
     const stepProgress: StepProgress[] = data.steps.map((step, index) => {
       // For micro-task mode, use step.id; for hint-based mode, use index
@@ -932,8 +1014,68 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       progress.patternSelection = toProgressFormat(patternSelectionState)
     }
 
+    // Include skip/commit decision if available
+    if (skipCommitState.gateShownAt || skipCommitState.decision) {
+      progress.skipCommit = toSkipCommitPersistence(skipCommitState)
+    }
+
     return progress
-  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState])
+  }, [data, completedSteps, stepAnswers, stepHintLevels, stepConfidenceRatings, sanityCheckAnswer, currentStep, reflectionAnswers, useMicroTasks, microTaskProgress, patternSelectionState, skipCommitState])
+
+  // Skip-or-Commit Gate: Handler for skip
+  const handleSkipCommitSkip = useCallback(() => {
+    const now = Date.now()
+    const decisionTimeMs = skipCommitState.gateShownAt
+      ? now - skipCommitState.gateShownAt
+      : null
+
+    setSkipCommitState({
+      decision: 'skip',
+      decisionTimeMs,
+      wasSkipped: true,
+      wasAutoCommit: false,
+      gateShownAt: skipCommitState.gateShownAt,
+      decisionMadeAt: now,
+    })
+    setShowSkipCommitGate(false)
+    setSkipCommitCountdownStartSeconds(null)
+
+    // Save attempt as skipped
+    try {
+      const progress = getCurrentProgress()
+      problemHistoryService.saveDraft(problemId(), problemTitle(), progress)
+      problemHistoryService.markAttemptSkipped(problemId())
+    } catch (error) {
+      console.error('Failed to persist skipped attempt:', error)
+    }
+
+    // Show toast
+    setShowSkipToast(true)
+    setTimeout(() => {
+      setShowSkipToast(false)
+      // Navigate to next problem / reset
+      onReset()
+    }, 2000)
+  }, [skipCommitState.gateShownAt, onReset, getCurrentProgress, problemId, problemTitle])
+
+  // Skip-or-Commit Gate: Handler for auto-commit
+  const handleSkipCommitAutoCommit = useCallback(() => {
+    const now = Date.now()
+    const decisionTimeMs = skipCommitState.gateShownAt
+      ? now - skipCommitState.gateShownAt
+      : null
+
+    setSkipCommitState({
+      decision: 'commit',
+      decisionTimeMs,
+      wasSkipped: false,
+      wasAutoCommit: true,
+      gateShownAt: skipCommitState.gateShownAt,
+      decisionMadeAt: now,
+    })
+    setShowSkipCommitGate(false)
+    setSkipCommitCountdownStartSeconds(null)
+  }, [skipCommitState.gateShownAt])
 
   const handleSaveDraft = useCallback((silent = false) => {
     if (!silent) setIsSaving(true)
@@ -958,12 +1100,39 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
     }
   }, [getCurrentProgress, problemId, problemTitle])
 
+  // Persist decision-gate state promptly (Pattern-First + Skip/Commit)
+  useEffect(() => {
+    if (!patternSelectionState) return
+    handleSaveDraft(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patternSelectionState?.selectedPatternId, patternSelectionState?.timedOut])
+
+  useEffect(() => {
+    if (!skipCommitState.decision && !skipCommitState.gateShownAt) return
+    handleSaveDraft(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skipCommitState.decision, skipCommitState.wasAutoCommit, skipCommitState.wasSkipped, skipCommitState.decisionTimeMs, skipCommitState.gateShownAt])
+
   const handleMarkSolved = useCallback(() => {
-    // Show Explain to a Friend first (Feynman Technique)
-    setShowExplainToFriend(true)
-    setSaveMessage('Explain the solution to proceed')
-    setTimeout(() => setSaveMessage(''), 3000)
-  }, [])
+    const requiresPatternSelection =
+      FEATURE_FLAGS.PATTERN_FIRST_MODE &&
+      patternFirstCfg.enablePatternFirst &&
+      data.patterns &&
+      data.patterns.length > 0
+
+    if (requiresPatternSelection && !(patternSelectionState?.selectedPatternId)) {
+      pendingFinalizeAfterPatternPickRef.current = true
+      setPatternPickerTitle('Pick a pattern to finalize scoring')
+      setShowPatternPicker(true)
+      setShowPatternPickWarning(true)
+      setSaveMessage('Pick a pattern to finalize scoring')
+      setTimeout(() => setSaveMessage(''), 3000)
+      return
+    }
+
+    pendingFinalizeAfterPatternPickRef.current = false
+    beginFinalizeFlow()
+  }, [beginFinalizeFlow, data.patterns, patternFirstCfg.enablePatternFirst, patternSelectionState?.selectedPatternId])
 
   const handleExplainToFriendComplete = useCallback((explanation: string, quality: string) => {
     setFriendExplanation(explanation)
@@ -1949,12 +2118,43 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
             <span className="sm:hidden">{isReviewFlagged ? 'Review' : 'Review'}</span>
           </button>
 
-          {saveMessage && (
-            <span className="text-sm text-green-600 dark:text-green-400 font-medium ml-auto animate-fade-in">
-              {saveMessage}
-            </span>
+          {(saveMessage || (FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0)) && (
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0 && (
+                <PatternSelectionChip
+                  patterns={data.patterns}
+                  selectedPatternId={patternSelectionState?.selectedPatternId ?? null}
+                  showWarning={showPatternPickWarning && !(patternSelectionState?.selectedPatternId)}
+                  disabled={isSaving}
+                  onClick={() => {
+                    setPatternPickerTitle('Pick a pattern')
+                    setShowPatternPicker(true)
+                  }}
+                />
+              )}
+
+              {saveMessage && (
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-fade-in">
+                  {saveMessage}
+                </span>
+              )}
+            </div>
           )}
         </div>
+
+        {FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0 && showPatternPickWarning && !(patternSelectionState?.selectedPatternId) && (
+          <div className="mt-3 text-sm text-amber-700 dark:text-amber-300">
+            Pick a pattern to improve speed training.
+          </div>
+        )}
+
+        {FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0 && isProblemSolved && isReflectionComplete && data.primaryPatternId && (
+          <div className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+            Canonical pattern: <span className="font-medium text-slate-800 dark:text-slate-100">
+              {(data.patterns.find(p => p.id === data.primaryPatternId)?.label || data.patterns.find(p => p.id === data.primaryPatternId)?.name || data.primaryPatternId)}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -2214,6 +2414,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
                       onRebuildGateTriggered={handleRebuildGateTriggered}
                       onRebuildGateAnswer={handleRebuildGateAnswer}
                       canProceed={canStepProceed(step.id)}
+                      decisionGateState={getDecisionGateState(step.id)}
+                      decisionGateTasks={(step as import('@/types/scaffold').Step & { decisionGateTasks?: import('@/types/microTask').MicroTask[] }).decisionGateTasks}
+                      onDecisionGateAnswer={handleRecordDecisionGateAttempt}
+                      requiresDecisionGate={stepRequiresDecisionGate(step.id, step.stepType, !!((step as import('@/types/scaffold').Step & { decisionGateTasks?: import('@/types/microTask').MicroTask[] }).decisionGateTasks?.length))}
+                      requiredMicroTaskCount={getDecisionGateRequiredCount()}
+                      maxDecisionGateAttempts={gatingPolicy?.decisionGateConfig.maxAttempts ?? 2}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => handleStepActivation(index)}
@@ -2357,6 +2563,29 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
           {/* What-If Simulation - show after problem is solved */}
           {isProblemSolved && isReflectionComplete && isHintScaffold(data) && (
             <WhatIfSimulation scaffoldData={data} />
+          )}
+
+          {/* Skip/Commit Session Summary - minimal analytics */}
+          {FEATURE_FLAGS.SKIP_COMMIT_GATE && skipCommitCfg.enableSkipCommit && isProblemSolved && isReflectionComplete && (
+            <div className="mt-4">
+              {!showSkipCommitAnalytics ? (
+                <button
+                  onClick={() => setShowSkipCommitAnalytics(true)}
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm font-medium"
+                >
+                  View decision training stats
+                </button>
+              ) : (
+                <div className="flex justify-center">
+                  {sessionSkipCommitAnalytics && (
+                    <SkipCommitAnalyticsPanel
+                      analytics={sessionSkipCommitAnalytics}
+                      onClose={() => setShowSkipCommitAnalytics(false)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Practice Options - show after reflection is complete */}
@@ -2568,24 +2797,37 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       )}
 
       {/* Pattern-First Mode Modal */}
-      {showPatternFirst && data.patterns && data.primaryPatternId && (
+      {showPatternFirst && data.patterns && (
         <PatternFirstModal
           patterns={data.patterns}
           primaryPatternId={data.primaryPatternId}
-          lockSeconds={(data.timePressure || defaultTimePressure).lockSeconds}
-          showCountdown={(data.timePressure || defaultTimePressure).showCountdown}
+          lockSeconds={patternFirstCfg.lockSeconds}
+          showCountdown={patternFirstCfg.showCountdown}
           problemText={data.problem}
           onSelect={handlePatternSelect}
           onTimeout={handlePatternTimeout}
           onSkip={handlePatternSkip}
-          canDismiss={(data.timePressure || defaultTimePressure).allowTimeoutProceed}
+          canDismiss={patternFirstCfg.allowTimeoutProceed}
+        />
+      )}
+
+      {/* Pattern picker (after unlock / change selection) */}
+      {data.patterns && data.patterns.length > 0 && (
+        <PatternPickerModal
+          isOpen={showPatternPicker}
+          title={patternPickerTitle}
+          patterns={data.patterns}
+          selectedPatternId={patternSelectionState?.selectedPatternId ?? null}
+          onSelect={handlePatternPickerSelect}
+          onClose={() => setShowPatternPicker(false)}
         />
       )}
 
       {/* Skip-or-Commit Gate Modal */}
       <SkipCommitGateModal
         isOpen={showSkipCommitGate}
-        autoCommitSeconds={DEFAULT_TIME_PRESSURE_CONFIG.autoCommitSeconds}
+        autoCommitSeconds={skipCommitCfg.autoCommitSeconds}
+        initialCountdownSeconds={skipCommitCountdownStartSeconds}
         onCommit={handleSkipCommitCommit}
         onSkip={handleSkipCommitSkip}
         onAutoCommit={handleSkipCommitAutoCommit}
