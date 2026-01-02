@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 interface PageHeaderProps {
   showBackButton?: boolean
@@ -12,16 +13,20 @@ interface PageHeaderProps {
 
 export default function PageHeader({
   showBackButton = true,
-  backButtonText = 'Back to Home',
-  backButtonPath = '/'
+  backButtonText = 'Back to Dashboard',
+  backButtonPath
 }: PageHeaderProps) {
   const router = useRouter()
 
+  // Default to dashboard when v3 is enabled, otherwise legacy home
+  const defaultPath = FEATURE_FLAGS.DASHBOARD_V3 ? '/study-path' : '/'
+  const resolvedPath = backButtonPath ?? defaultPath
+
   return (
     <div className="mb-4">
-      {/* PhysiScaffold Branding - Links to Home */}
+      {/* PhysiScaffold Branding - Links to Dashboard */}
       <Link
-        href="/"
+        href={defaultPath}
         className="inline-flex items-center gap-2 group mb-3"
       >
         <Image
@@ -45,7 +50,7 @@ export default function PageHeader({
       {/* Back Button */}
       {showBackButton && (
         <button
-          onClick={() => router.push(backButtonPath)}
+          onClick={() => router.push(resolvedPath)}
           className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-card-soft rounded-lg active:scale-95 transition-all min-h-[44px]"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

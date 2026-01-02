@@ -24,6 +24,7 @@ interface PhasedScaffoldWrapperProps {
   onLoadNewProblem?: (problemText: string) => void
   onError?: (error: string) => void
   onOutlineReady?: () => void
+  onSolved?: () => void
 }
 
 export default function PhasedScaffoldWrapper({
@@ -34,6 +35,7 @@ export default function PhasedScaffoldWrapper({
   onLoadNewProblem,
   onError,
   onOutlineReady,
+  onSolved,
 }: PhasedScaffoldWrapperProps) {
   const { pushToast } = useToast()
   const {
@@ -225,6 +227,7 @@ export default function PhasedScaffoldWrapper({
         data={adaptedData}
         onReset={handleReset}
         onLoadNewProblem={onLoadNewProblem}
+        onSolved={onSolved}
       />
       {/* Loading indicator when fetching step expansion */}
       {state.loadingState === 'loading_step' && (

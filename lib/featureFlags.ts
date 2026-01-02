@@ -334,10 +334,29 @@ export const FEATURE_FLAGS = {
    * - LLM-free fingerprinting for template selection
    * - Content-addressed caching (SHA-256)
    * - Template enforcement (LLM can only fill slots, not modify structure)
+   * - Local scaffold cache for known questions (instant response)
    *
-   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_QUESTION_ENGINE=true)
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_QUESTION_ENGINE=false)
    */
-  QUESTION_ENGINE: process.env.NEXT_PUBLIC_FEATURE_QUESTION_ENGINE === 'true',
+  QUESTION_ENGINE: process.env.NEXT_PUBLIC_FEATURE_QUESTION_ENGINE !== 'false',
+
+  /**
+   * Dashboard v3
+   * When enabled, uses the new unified AppShell layout with:
+   * - Desktop: Sidebar + TopBar navigation
+   * - Mobile: Bottom nav (4 items + More menu)
+   * - Dashboard as default landing page
+   * - /solve as dedicated solver route
+   *
+   * Features:
+   * - Planning-control first dashboard
+   * - Hero metrics (days practiced, problems solved, independence)
+   * - Today's plan editor with task reordering
+   * - Session runner for guided daily practice
+   *
+   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_DASHBOARD_V3=true)
+   */
+  DASHBOARD_V3: process.env.NEXT_PUBLIC_FEATURE_DASHBOARD_V3 === 'true',
 }
 
 /**

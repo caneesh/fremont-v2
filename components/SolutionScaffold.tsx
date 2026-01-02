@@ -154,9 +154,10 @@ interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
   onReset: () => void
   onLoadNewProblem?: (problemText: string) => void
+  onSolved?: () => void
 }
 
-export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: SolutionScaffoldProps) {
+export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSolved }: SolutionScaffoldProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const [stepAnswers, setStepAnswers] = useState<Map<number, string>>(new Map())
@@ -1575,6 +1576,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setShowCelebration(true) // Trigger celebration animation
       setTimeout(() => setSaveMessage(''), 3000)
       setIsSaving(false)
+
+      // Notify parent that problem is solved (for plan session tracking)
+      onSolved?.()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save'
       console.error('Save error:', error)
@@ -1582,7 +1586,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem }: So
       setTimeout(() => setSaveMessage(''), 4000)
       setIsSaving(false)
     }
-  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern, useMicroTasks])
+  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern, useMicroTasks, onSolved])
 
   // Show post-solve activity popup RANDOMLY after problem is solved
   useEffect(() => {

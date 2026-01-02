@@ -173,6 +173,20 @@
   animation: bounce-in 0.6s ease-out forwards;
 }
 
+/* Slide up animation for bottom sheets */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
 /* ============================================
    DARK MODE DESIGN SYSTEM
    A layered, premium dark theme

@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth/authService'
 import { quotaService } from '@/lib/auth/quotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import BottomNav from './BottomNav'
+import { AppShell } from './shell'
 
 interface AuthGateProps {
   children: React.ReactNode
@@ -225,7 +227,7 @@ export default function AuthGate({ children }: AuthGateProps) {
               <button
                 onClick={() => {
                   setShowWelcome(false)
-                  router.push('/')
+                  router.push('/solve')
                 }}
                 className="w-full px-6 py-4 bg-white dark:bg-dark-card border-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-dark-card-soft active:scale-98 transition-all min-h-[48px] text-base"
               >
@@ -239,6 +241,21 @@ export default function AuthGate({ children }: AuthGateProps) {
   }
 
   // Render children with logout option
+  const user = authService.getUser()
+
+  // Use AppShell when Dashboard v3 is enabled
+  if (FEATURE_FLAGS.DASHBOARD_V3) {
+    return (
+      <AppShell
+        userName={user?.name}
+        onLogout={handleLogout}
+      >
+        {children}
+      </AppShell>
+    )
+  }
+
+  // Legacy layout
   return (
     <div className="pb-16 md:pb-0">
       {/* Logout button - positioned to not interfere with mobile menu */}

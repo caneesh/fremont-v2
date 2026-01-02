@@ -32,7 +32,7 @@ export default function ConceptNetworkPage() {
     },
     onSwipeRight: () => {
       if (window.innerWidth < 768) {
-        router.push('/')
+        router.push('/solve')
       }
     },
   })
