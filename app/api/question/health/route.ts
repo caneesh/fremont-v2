@@ -8,6 +8,8 @@
 
 import { NextResponse } from 'next/server'
 import { getKVStatus } from '@/lib/question-engine/kv-store'
+
+export const runtime = 'nodejs' // ioredis requires Node.js runtime
 import { getBlobStatus } from '@/lib/question-engine/blob-store'
 import { getAnthropicStatus } from '@/lib/question-engine/anthropic-adapter'
 import { getAllTemplateIds } from '@/lib/question-engine/templates'

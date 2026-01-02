@@ -5,19 +5,18 @@ import { useRouter } from 'next/navigation'
 import MobileNav from '@/components/MobileNav'
 import PageHeader from '@/components/PageHeader'
 import type { LessonWithProgress } from '@/lib/patternTrack'
-
-// Temporary user ID
-const USER_ID = 'local_user'
+import { authService } from '@/lib/auth/authService'
 
 export default function LessonsPage() {
   const router = useRouter()
+  const userId = authService.getUserId() || authService.getUserCode() || 'anonymous'
   const [lessons, setLessons] = useState<LessonWithProgress[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadLessons = async () => {
       try {
-        const res = await fetch(`/api/pattern-track/lessons?user_id=${USER_ID}`)
+        const res = await fetch(`/api/pattern-track/lessons?user_id=${userId}`)
         if (res.ok) {
           const data = await res.json()
           setLessons(data.lessons || [])

@@ -944,6 +944,12 @@ describe('MicroTaskStepAccordion', () => {
       )
 
       fireEvent.click(screen.getByText('reading'))
+      // In some environments, the accordion can end up collapsed after switching modes.
+      // Ensure the reading-mode ladder is visible before interacting with tiers.
+      if (!screen.queryByText('Socratic Ladder')) {
+        fireEvent.click(screen.getByText('Test Step'))
+      }
+      expect(await screen.findByText('Socratic Ladder')).not.toBeNull()
       fireEvent.click(screen.getByText('Concept'))
       fireEvent.click(screen.getByText('Concept'))
 

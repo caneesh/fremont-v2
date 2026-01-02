@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import MobileNav from '@/components/MobileNav'
 import type { Question, Pattern } from '@/lib/patternTrack'
 import LatexRenderer from '@/components/LatexRenderer'
-
-// Temporary user ID
-const USER_ID = 'local_user'
+import { authService } from '@/lib/auth/authService'
 
 interface QuestionWithPatterns extends Question {
   patterns: Pattern[]
@@ -16,6 +14,7 @@ interface QuestionWithPatterns extends Question {
 function PracticeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const userId = authService.getUserId() || authService.getUserCode() || 'anonymous'
 
   const [questions, setQuestions] = useState<QuestionWithPatterns[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -108,7 +107,7 @@ function PracticeContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: USER_ID,
+          user_id: userId,
           question_id: currentQuestion.id,
           identified_pattern_ids: selectedPatterns,
           is_correct: isAnswerCorrect,

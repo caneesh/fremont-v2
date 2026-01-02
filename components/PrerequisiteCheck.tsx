@@ -89,12 +89,75 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSele
     })
   }
 
+  const normalizeShortAnswer = (value: string): string => {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/[(){}\[\],.;:!?]/g, '')
+      .replace(/−/g, '-') // unicode minus
+      .replace(/ω/g, 'omega')
+      .replace(/θ/g, 'theta')
+      .replace(/φ/g, 'phi')
+      .replace(/π/g, 'pi')
+  }
+
+  const tryParseNumber = (value: string): number | null => {
+    const cleaned = value.trim().replace(/,/g, '')
+    const num = Number(cleaned)
+    return Number.isFinite(num) ? num : null
+  }
+
+  const isShortAnswerCorrect = (user: string, expected: string): boolean => {
+    const userRaw = user.trim()
+    const expectedRaw = expected.trim()
+    if (!userRaw || !expectedRaw) return false
+
+    const userNum = tryParseNumber(userRaw)
+    const expectedNum = tryParseNumber(expectedRaw)
+    if (userNum !== null && expectedNum !== null) {
+      const diff = Math.abs(userNum - expectedNum)
+      const scale = Math.max(1, Math.abs(expectedNum))
+      return diff <= 1e-3 * scale
+    }
+
+    const u = normalizeShortAnswer(userRaw)
+    const e = normalizeShortAnswer(expectedRaw)
+
+    if (u === e) return true
+    if (u.includes(e) || e.includes(u)) return true
+
+    // Word-overlap check for multi-word concepts ("centripetal force" vs "centripetal")
+    const eWords = e.split(' ').filter(Boolean)
+    if (eWords.length >= 2) {
+      const matched = eWords.filter(w => u.includes(w)).length
+      if (matched / eWords.length >= 0.7) return true
+    }
+
+    // Simple synonyms
+    const synonymPairs: Array<[string, string]> = [
+      ['acceleration due to gravity', 'g'],
+      ['coefficient of friction', 'mu'],
+      ['angular velocity', 'omega'],
+      ['angle', 'theta'],
+    ]
+    for (const [a, b] of synonymPairs) {
+      const ua = u.includes(a) || u.includes(b)
+      const ea = e.includes(a) || e.includes(b)
+      if (ua && ea) return true
+    }
+
+    return false
+  }
+
   const handleSubmit = () => {
     // Check answers
     const checkedAnswers = answers.map((ans, idx) => {
       const question = questions[idx]
       const isCorrect = question.expectedAnswer
-        ? ans.answer.toLowerCase().trim() === question.expectedAnswer.toLowerCase().trim()
+        ? question.type === 'short-answer'
+          ? isShortAnswerCorrect(ans.answer, question.expectedAnswer)
+          : ans.answer.toLowerCase().trim() === question.expectedAnswer.toLowerCase().trim()
         : false
 
       return {
@@ -106,10 +169,12 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSele
     const correctCount = checkedAnswers.filter(a => a.isCorrect).length
     const passed = correctCount >= passingScore
 
-    const weakConcepts = checkedAnswers
-      .filter(a => !a.isCorrect)
-      .map(a => questions.find(q => q.conceptId === a.conceptId)?.conceptName || '')
-      .filter(name => name !== '')
+    const weakConcepts = Array.from(new Set(
+      checkedAnswers
+        .filter(a => !a.isCorrect)
+        .map(a => questions.find(q => q.conceptId === a.conceptId)?.conceptName || '')
+        .filter(name => name !== '')
+    ))
 
     const result: PrerequisiteResult = {
       totalQuestions: questions.length,
@@ -119,9 +184,8 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSele
       answers: checkedAnswers,
     }
 
-    // If there are weak concepts and a mini-problem handler is provided,
-    // show the mini-problem suggestion before completing
-    if (weakConcepts.length > 0 && onSelectMiniProblem) {
+    // If there are weak concepts, offer quick practice before continuing.
+    if (weakConcepts.length > 0) {
       setCheckResult(result)
       setShowMiniProblems(true)
     } else {
@@ -132,6 +196,12 @@ export default function PrerequisiteCheck({ concepts, onComplete, onSkip, onSele
   const handleMiniProblemSelect = (problem: MiniProblem) => {
     if (checkResult && onSelectMiniProblem) {
       onSelectMiniProblem(problem, checkResult)
+    } else {
+      pushToast({
+        title: 'Quick practice not available',
+        message: 'Continue to the problem, or ask to enable mini-practice routing in this view.',
+        variant: 'info',
+      })
     }
   }
 

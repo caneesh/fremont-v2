@@ -6,6 +6,18 @@ import SolutionScaffold from '../SolutionScaffold'
 import type { ScaffoldData } from '@/types/scaffold'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
 
+vi.mock('@/lib/featureFlags', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/featureFlags')>('@/lib/featureFlags')
+  return {
+    FEATURE_FLAGS: {
+      ...actual.FEATURE_FLAGS,
+      // Keep these off in unit tests to avoid gating UI blocking step activation/advancement.
+      ADAPTIVE_PREFLIGHT: false,
+      CONFIDENCE_WEIGHTED_SRS: false,
+    },
+  }
+})
+
 vi.mock('@/lib/problemHistory', () => ({
   problemHistoryService: {
     getAttempt: vi.fn(),
@@ -22,6 +34,7 @@ vi.mock('@/lib/problemHistory', () => ({
 vi.mock('@/lib/mistakeTracking', () => ({
   mistakeTrackingService: {
     generateWarnings: vi.fn(() => []),
+    getConceptStats: vi.fn(() => null),
     recordPattern: vi.fn(),
   },
 }))

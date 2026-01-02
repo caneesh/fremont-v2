@@ -14,6 +14,7 @@ import PrerequisiteCheck from './PrerequisiteCheck'
 import type { MicroTaskScaffoldData } from '@/types/microTask'
 import type { PrerequisiteResult } from '@/types/prerequisites'
 import { useToast } from '@/components/ui/ToastProvider'
+import type { MiniProblem } from '@/lib/patternTrack'
 
 interface PhasedScaffoldWrapperProps {
   problem: string
@@ -197,6 +198,15 @@ export default function PhasedScaffoldWrapper({
         concepts={adaptedData.concepts}
         onComplete={handlePrerequisiteComplete}
         onSkip={handlePrerequisiteSkip}
+        onSelectMiniProblem={(miniProblem: MiniProblem) => {
+          if (!onLoadNewProblem) return
+          pushToast({
+            title: 'Quick practice',
+            message: 'Loading a focused mini-problem…',
+            variant: 'info',
+          })
+          onLoadNewProblem(miniProblem.question.problem_text)
+        }}
       />
     )
   }

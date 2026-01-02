@@ -13,6 +13,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStatus } from '@/lib/question-engine/kv-store'
 
+export const runtime = 'nodejs' // ioredis requires Node.js runtime
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const statusId = searchParams.get('id')

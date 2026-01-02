@@ -27,6 +27,7 @@ import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp'
 import ThemeToggle from '@/components/ThemeToggle'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import { useToast } from '@/components/ui/ToastProvider'
+import type { MiniProblem } from '@/lib/patternTrack'
 
 const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
 
@@ -44,6 +45,7 @@ function HomeContent() {
   const [isDemoMode, setIsDemoMode] = useState(false)
   const [dailyDebrief, setDailyDebrief] = useState<DailyDebrief | null>(null)
   const [showDebrief, setShowDebrief] = useState(false)
+  const [returnProblemText, setReturnProblemText] = useState<string | null>(null)
   // Track problem input for phased loading
   const [phasedProblemData, setPhasedProblemData] = useState<{
     problem: string
@@ -208,6 +210,7 @@ function HomeContent() {
     setCurrentProblemText('')
     setShowPrerequisiteCheck(false)
     setPrerequisitesPassed(false)
+    setReturnProblemText(null)
   }
 
   // Pull to refresh
@@ -255,6 +258,22 @@ function HomeContent() {
           <div className="flex items-center justify-between mb-4 md:mb-6">
             {/* Keyboard Shortcut Hint & Theme Toggle - Desktop only */}
             <div className="hidden md:flex flex-1 justify-start items-center gap-3">
+              {returnProblemText && currentProblemText && currentProblemText !== returnProblemText && (
+                <button
+                  onClick={() => {
+                    const original = returnProblemText
+                    setReturnProblemText(null)
+                    handleProblemSubmit(original)
+                  }}
+                  className="text-xs text-gray-400 hover:text-gray-600 dark:text-dark-text-muted dark:hover:text-dark-text-secondary flex items-center gap-1 transition-colors"
+                  title="Return to your original problem"
+                >
+                  <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-card-soft border border-gray-300 dark:border-dark-border rounded text-[10px]">
+                    ↩
+                  </span>
+                  <span>Return</span>
+                </button>
+              )}
               <button
                 onClick={() => setShowShortcutsHelp(true)}
                 className="text-xs text-gray-400 hover:text-gray-600 dark:text-dark-text-muted dark:hover:text-dark-text-secondary flex items-center gap-1 transition-colors"
@@ -349,7 +368,7 @@ function HomeContent() {
               Active Decomposition: We don&apos;t give answers; we give the framework for the answer.
             </p>
             {!isLoading && !scaffoldData && !phasedProblemData && (
-              <div className="md:hidden flex items-center justify-center gap-3 mt-4">
+              <div className="mt-4 grid grid-cols-2 gap-3 max-w-md mx-auto md:flex md:max-w-none md:justify-center md:flex-wrap">
                 <button
                   onClick={() => router.push('/study-path')}
                   className="px-4 py-2 bg-white dark:bg-dark-card border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-sm font-medium"
@@ -357,8 +376,21 @@ function HomeContent() {
                   Dashboard
                 </button>
                 <button
+                  onClick={() => {
+                    const anchor = document.getElementById('custom-problem')
+                    anchor?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    window.setTimeout(() => {
+                      const input = document.getElementById('problem') as HTMLTextAreaElement | null
+                      input?.focus()
+                    }, 50)
+                  }}
+                  className="px-4 py-2 bg-white dark:bg-dark-card border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-sm font-medium"
+                >
+                  Custom Problem
+                </button>
+                <button
                   onClick={() => setIsDemoMode(true)}
-                  className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-strong transition-colors text-sm font-medium"
+                  className="col-span-2 md:col-span-1 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-strong transition-colors text-sm font-medium"
                 >
                   Take Tour
                 </button>
@@ -393,21 +425,35 @@ function HomeContent() {
             {!isLoading && (
               <ContinueBanner onContinue={handleProblemSubmit} />
             )}
-            <ProblemInput
-              onSubmit={handleProblemSubmit}
-              isLoading={isLoading}
-              error={error}
-              initialProblem={currentProblemText}
-              onRegisterSubmit={(submit) => {
-                submitProblemRef.current = submit
-              }}
-            />
+            <div id="custom-problem">
+              <ProblemInput
+                onSubmit={handleProblemSubmit}
+                isLoading={isLoading}
+                error={error}
+                initialProblem={currentProblemText}
+                onRegisterSubmit={(submit) => {
+                  submitProblemRef.current = submit
+                }}
+              />
+            </div>
           </>
         ) : showPrerequisiteCheck ? (
           <PrerequisiteCheck
             concepts={scaffoldData.concepts}
             onComplete={handlePrerequisiteComplete}
             onSkip={handlePrerequisiteSkip}
+            onSelectMiniProblem={(miniProblem: MiniProblem) => {
+              if (!returnProblemText && currentProblemText) {
+                setReturnProblemText(currentProblemText)
+              }
+              pushToast({
+                title: 'Quick practice',
+                message: 'Solving a focused mini-problem. Use “Return” to go back to your original problem anytime.',
+                variant: 'info',
+                durationMs: 7000,
+              })
+              handleProblemSubmit(miniProblem.question.problem_text)
+            }}
           />
         ) : (
           <SolutionScaffold

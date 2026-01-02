@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation'
 import MobileNav from '@/components/MobileNav'
 import PageHeader from '@/components/PageHeader'
 import type { Pattern, TrackProgress, PatternWithProgress } from '@/lib/patternTrack'
-
-// Temporary user ID - in production, use auth
-const USER_ID = 'local_user'
+import { authService } from '@/lib/auth/authService'
 
 export default function PatternTrackPage() {
   const router = useRouter()
+  const userId = authService.getUserId() || authService.getUserCode() || 'anonymous'
   const [patterns, setPatterns] = useState<Pattern[]>([])
   const [trackProgress, setTrackProgress] = useState<TrackProgress | null>(null)
   const [weakPatterns, setWeakPatterns] = useState<PatternWithProgress[]>([])
@@ -22,7 +21,7 @@ export default function PatternTrackPage() {
       try {
         const [patternsRes, progressRes] = await Promise.all([
           fetch('/api/pattern-track/patterns'),
-          fetch(`/api/pattern-track/progress?user_id=${USER_ID}`),
+          fetch(`/api/pattern-track/progress?user_id=${userId}`),
         ])
 
         if (patternsRes.ok) {
