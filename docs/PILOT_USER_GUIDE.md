@@ -11,13 +11,14 @@ Welcome to PhysiScaffold - The Socratic Physics Engine. This guide walks you thr
 3. [Learning a Pattern](#3-learning-a-pattern)
 4. [Solving Problems](#4-solving-problems)
 5. [Professor Check-In (Socratic Tutor)](#5-professor-check-in-socratic-tutor)
-6. [Using Hints Effectively](#6-using-hints-effectively)
-7. [Practice and Drills](#7-practice-and-drills)
-8. [Tracking Your Progress](#8-tracking-your-progress)
-9. [Error Recovery and Review](#9-error-recovery-and-review)
-10. [Daily Limits and Quotas](#10-daily-limits-and-quotas)
-11. [Tips for Success](#11-tips-for-success)
-12. [Appendix: Test Scenarios and Sample Data](#appendix-test-scenarios-and-sample-data)
+6. [Decision Gates (Understanding Checkpoints)](#6-decision-gates-understanding-checkpoints)
+7. [Using Hints Effectively](#7-using-hints-effectively)
+8. [Practice and Drills](#8-practice-and-drills)
+9. [Tracking Your Progress](#9-tracking-your-progress)
+10. [Error Recovery and Review](#10-error-recovery-and-review)
+11. [Daily Limits and Quotas](#11-daily-limits-and-quotas)
+12. [Tips for Success](#12-tips-for-success)
+13. [Appendix: Test Scenarios and Sample Data](#appendix-test-scenarios-and-sample-data)
 
 ---
 
@@ -217,7 +218,111 @@ The Professor Check-In ensures you're not just following steps mechanically. By 
 
 ---
 
-## 6. Using Hints Effectively
+## 6. Decision Gates (Understanding Checkpoints)
+
+PhysiScaffold uses **Decision Gates** to ensure you truly understand each step before moving forward. These checkpoints adapt to your performance and help build genuine mastery.
+
+### What Are Decision Gates?
+
+Decision Gates are quick micro-tasks that appear before you can submit a step. They verify you understand the concept, not just the mechanics of clicking through.
+
+### When They Appear
+
+Decision Gates appear on these step types:
+- **Concept** steps - Understanding the physics principle
+- **Setup** steps - Identifying variables and conditions
+- **Equation** steps - Selecting the right formula
+
+### How They Work
+
+1. **Complete the step** - Work through the problem as usual
+2. **Gate appears** - A quick question or fill-in-the-blank
+3. **Answer correctly** - Submit button unlocks
+4. **If incorrect** - Get targeted feedback and try again
+
+### Example Decision Gate
+
+```
+┌─────────────────────────────────────────────────┐
+│  🔒 Quick Check Before Submitting               │
+│                                                 │
+│  Which component of weight acts parallel        │
+│  to the incline?                                │
+│                                                 │
+│  ○ mg                                           │
+│  ○ mg cos(θ)                                    │
+│  ● mg sin(θ)  ✓                                 │
+│  ○ mg tan(θ)                                    │
+│                                                 │
+│  [Submit Unlocked ✓]                            │
+└─────────────────────────────────────────────────┘
+```
+
+### Adaptive Difficulty
+
+The system adjusts based on your performance:
+
+| Your Performance | Gate Difficulty |
+|------------------|-----------------|
+| **Strong pattern recognition** | 1 micro-task required |
+| **Weak pattern recognition** | 2 micro-tasks required |
+| **Consecutive wrong answers** | Stricter gating |
+
+### What Happens If You Struggle
+
+1. **First wrong attempt** - Targeted feedback explains the error
+2. **Second wrong attempt** - Hint Level 2 auto-unlocks to help
+3. **After hint** - You can proceed with better understanding
+
+### Rebuild Gates (After Using Reveal)
+
+If you use **Hint Level 5 (Reveal/Full Solution)**, a special **Rebuild Gate** appears:
+
+1. **Pattern Question** - "Which physics pattern was used?"
+2. **Decision Question** - "What was the first key decision?"
+
+You must answer both correctly before proceeding. This ensures you learned from the reveal, not just copied it.
+
+### Example Rebuild Gate
+
+```
+┌─────────────────────────────────────────────────┐
+│  📚 Understanding Check                         │
+│                                                 │
+│  You used the full solution. Let's make sure   │
+│  you understood it!                             │
+│                                                 │
+│  Q1: Which pattern was used in this step?       │
+│  ○ Energy Conservation                          │
+│  ● Force Decomposition  ✓                       │
+│  ○ Constraint Analysis                          │
+│                                                 │
+│  Q2: What's the first key decision?             │
+│  ● Identify physical quantities  ✓              │
+│  ○ Apply equation directly                      │
+│                                                 │
+│  [Continue to Next Step]                        │
+└─────────────────────────────────────────────────┘
+```
+
+### Tips for Decision Gates
+
+1. **Read carefully** - The question tests understanding, not speed
+2. **Think before selecting** - Don't guess randomly
+3. **Learn from feedback** - Wrong answers show targeted explanations
+4. **Don't fear mistakes** - They're learning opportunities
+5. **Use hints wisely** - If you need Reveal, expect a Rebuild Gate
+
+### Why Decision Gates Help
+
+- **Prevent shallow learning** - Can't just click through without thinking
+- **Catch misconceptions early** - Before they compound into bigger errors
+- **Build exam confidence** - You'll recognize patterns under pressure
+- **Adaptive support** - More help when you need it, less when you don't
+
+---
+
+## 7. Using Hints Effectively
 
 PhysiScaffold provides **5 levels of progressive hints**. Use them strategically!
 
@@ -247,7 +352,7 @@ PhysiScaffold provides **5 levels of progressive hints**. Use them strategically
 
 ---
 
-## 7. Practice and Drills
+## 8. Practice and Drills
 
 ### Practice Mode
 
@@ -288,7 +393,7 @@ Your mastery for each pattern is tracked:
 
 ---
 
-## 8. Tracking Your Progress
+## 9. Tracking Your Progress
 
 ### Pattern Progress Badges
 
@@ -315,7 +420,7 @@ A pattern is mastered when:
 
 ---
 
-## 9. Error Recovery and Review
+## 10. Error Recovery and Review
 
 ### Common Mistakes
 
@@ -346,7 +451,7 @@ Access via the **Errors** tab in Study Path:
 
 ---
 
-## 10. Daily Limits and Quotas
+## 11. Daily Limits and Quotas
 
 As a pilot user, you have daily limits:
 
@@ -373,7 +478,7 @@ All limits reset at **midnight** (your local time).
 
 ---
 
-## 11. Tips for Success
+## 12. Tips for Success
 
 ### Before Starting a Problem
 
