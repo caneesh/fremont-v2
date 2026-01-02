@@ -220,7 +220,7 @@ export function recordSignal(
   // Log for analytics (silent)
   eventLogger.log('integrity_signal_detected' as Parameters<typeof eventLogger.log>[0], {
     signalType: signal.type,
-    confidence: signal.confidence,
+    signalConfidence: signal.confidence,
     currentScore: state.accumulator.score,
     problemId: signal.problemId,
     stepId: signal.stepId,

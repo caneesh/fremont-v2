@@ -11,6 +11,7 @@ import CollectedInsights from './micro-tasks/CollectedInsights'
 import RevealReconstructValidate from './micro-tasks/RevealReconstructValidate'
 import ConfidencePrompt from './micro-tasks/ConfidencePrompt'
 import FeynmanMicroPrompt from './FeynmanMicroPrompt'
+import SocraticTutorChat from './SocraticTutorChat'
 import MathRenderer from './MathRenderer'
 import { getStepTypeBadge } from '@/lib/hintEngine'
 import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
@@ -137,9 +138,14 @@ export default function MicroTaskStepAccordion({
   const [isLoadingWhyStep, setIsLoadingWhyStep] = useState(false)
   const [showWhyStep, setShowWhyStep] = useState(false)
 
+  // Socratic Tutor (Professor Check-In) state
+  const [showSocraticTutor, setShowSocraticTutor] = useState(false)
+  const [pendingStepCompletion, setPendingStepCompletion] = useState(false)
+
   // Feature flag checks
   const useRevealFlow = FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE
   const useConfidenceSRS = FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS
+  const useSocraticTutor = FEATURE_FLAGS.SOCRATIC_TUTOR_CHAT
 
   // Sync with active state and track activation time
   useEffect(() => {
@@ -165,6 +171,35 @@ export default function MicroTaskStepAccordion({
     }
     setIsExpanded(!isExpanded)
   }
+
+  // Trigger step completion - shows Socratic Tutor if enabled
+  const triggerStepCompletion = useCallback(() => {
+    if (useSocraticTutor && !showSocraticTutor) {
+      // Show professor check-in before completing
+      setPendingStepCompletion(true)
+      setShowSocraticTutor(true)
+    } else {
+      // Complete immediately
+      onComplete(step.id)
+      setIsExpanded(false)
+    }
+  }, [useSocraticTutor, showSocraticTutor, onComplete, step.id])
+
+  // Called when Socratic tutor confirms understanding
+  const handleSocraticResolved = useCallback(() => {
+    setShowSocraticTutor(false)
+    setPendingStepCompletion(false)
+    onComplete(step.id)
+    setIsExpanded(false)
+  }, [onComplete, step.id])
+
+  // Skip Socratic tutor
+  const handleSocraticSkip = useCallback(() => {
+    setShowSocraticTutor(false)
+    setPendingStepCompletion(false)
+    onComplete(step.id)
+    setIsExpanded(false)
+  }, [onComplete, step.id])
 
   // Process task completion (called after confidence is rated or directly if disabled)
   const processTaskCompletion = useCallback((isCorrect: boolean, explanation: string, confidence?: Confidence) => {
@@ -214,14 +249,14 @@ export default function MicroTaskStepAccordion({
           }
           onStepTimeout(problemContext, stepContext, durationMs)
         }
-        onComplete(step.id)
+        triggerStepCompletion()
       }
     }
 
     // Clear pending state
     setPendingTaskResult(null)
     setShowConfidencePrompt(false)
-  }, [step.id, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
+  }, [step.id, step.title, step.stepType, step.requiredConcepts, currentLevel, problemId, problemTitle, domain, subdomain, onTaskComplete, triggerStepCompletion, availableTasks, resolvedMaxTaskLevel])
 
   const handleTaskCorrect = (explanation: string) => {
     // Record attempt for difficulty tuning (correct answer)
@@ -400,7 +435,7 @@ export default function MicroTaskStepAccordion({
     if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
     } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
-      onComplete(step.id)
+      triggerStepCompletion()
     }
   }
 
