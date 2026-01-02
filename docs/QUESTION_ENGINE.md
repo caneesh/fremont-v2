@@ -60,11 +60,78 @@ BLOB_READ_WRITE_TOKEN=your_blob_read_write_token
 ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-### Getting the Environment Variables
+## Vercel KV Setup (Step-by-Step)
 
-1. **Vercel KV**: Create a KV store in your Vercel dashboard → Settings → Environment Variables
-2. **Vercel Blob**: Enable Blob storage in your project → Settings → Blob → Create token
-3. **Anthropic**: Get from [console.anthropic.com](https://console.anthropic.com/)
+Vercel KV is required for caching, rate limiting, and quota tracking.
+
+### 1. Create a KV Database
+
+1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
+2. Select your project
+3. Navigate to **Storage** tab
+4. Click **Create Database** → Select **KV**
+5. Choose a name (e.g., `question-engine-kv`)
+6. Select a region close to your deployment
+7. Click **Create**
+
+### 2. Connect to Your Project
+
+1. After creation, click **Connect to Project**
+2. Select your project from the dropdown
+3. Choose the environments (Production, Preview, Development)
+4. Click **Connect**
+
+### 3. Get Environment Variables
+
+After connecting, Vercel automatically adds these to your project:
+
+```bash
+KV_URL=redis://...
+KV_REST_API_URL=https://...
+KV_REST_API_TOKEN=...
+KV_REST_API_READ_ONLY_TOKEN=...
+```
+
+### 4. Local Development Setup
+
+Pull the environment variables to your local `.env.local`:
+
+```bash
+vercel env pull .env.local
+```
+
+Or manually copy from Vercel Dashboard → Settings → Environment Variables.
+
+### 5. Verify Connection
+
+```bash
+# Start dev server
+npm run dev
+
+# Check health endpoint
+curl http://localhost:3000/api/question/health | jq '.services.kv'
+```
+
+Expected output:
+```json
+{
+  "available": true,
+  "message": "Vercel KV is connected and operational"
+}
+```
+
+## Vercel Blob Setup
+
+1. Go to your project → **Storage** tab
+2. Click **Create Database** → Select **Blob**
+3. Create a read-write token
+4. Add `BLOB_READ_WRITE_TOKEN` to your environment
+
+## Anthropic API Setup
+
+1. Go to [console.anthropic.com](https://console.anthropic.com/)
+2. Create an API key
+3. Add `ANTHROPIC_API_KEY` to your environment
 
 ## Running Locally
 
@@ -105,13 +172,58 @@ Templates define the **fixed structure** that all scaffolds must follow. The LLM
 - ❌ CANNOT add, remove, or reorder steps
 - ❌ CANNOT change step IDs or types
 
-### Current Templates
+### Current Templates (27 total)
 
-| Template ID | Topic | Steps | Description |
-|-------------|-------|-------|-------------|
-| `mechanics/incline_frictionless` | Mechanics | 5 | Block on frictionless incline |
-| `mechanics/incline_with_friction` | Mechanics | 7 | Block on incline with friction |
-| `mechanics/newton_2d_block` | Mechanics | 8 | Generic 2D Newton's laws problem |
+**Mechanics (9 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `mechanics/incline_frictionless` | 5 | Block on frictionless incline |
+| `mechanics/incline_with_friction` | 6 | Block on incline with friction |
+| `mechanics/newton_2d_block` | 5 | Generic 2D Newton's laws problem |
+| `mechanics/projectile_motion` | 6 | Projectile motion problems |
+| `mechanics/circular_motion` | 5 | Circular motion and centripetal force |
+| `mechanics/work_energy` | 5 | Work-energy theorem problems |
+| `mechanics/momentum_collision` | 5 | Momentum and collision problems |
+| `mechanics/pulley_system` | 5 | Pulley and rope tension problems |
+| `mechanics/simple_harmonic_motion` | 7 | SHM and oscillation problems |
+
+**Thermodynamics (4 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `thermodynamics/ideal_gas` | 5 | Ideal gas law problems |
+| `thermodynamics/first_law` | 5 | First law of thermodynamics |
+| `thermodynamics/heat_engine` | 5 | Heat engine and Carnot cycle |
+| `thermodynamics/calorimetry` | 5 | Heat transfer and mixing |
+
+**Electromagnetism (6 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `electromagnetism/coulomb_field` | 5 | Coulomb's law and electric fields |
+| `electromagnetism/gauss_law` | 5 | Gauss's law applications |
+| `electromagnetism/capacitors` | 5 | Capacitor problems |
+| `electromagnetism/dc_circuits` | 5 | DC circuit analysis |
+| `electromagnetism/magnetic_force` | 5 | Magnetic force on charges/wires |
+| `electromagnetism/em_induction` | 5 | Electromagnetic induction |
+
+**Optics (3 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `optics/mirrors` | 5 | Mirror problems |
+| `optics/lenses` | 5 | Lens problems |
+| `optics/interference` | 5 | Wave interference |
+
+**Waves (2 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `waves/standing_waves` | 5 | Standing waves and resonance |
+| `waves/doppler` | 5 | Doppler effect |
+
+**Modern Physics (3 templates):**
+| Template ID | Steps | Description |
+|-------------|-------|-------------|
+| `modern/photoelectric` | 5 | Photoelectric effect |
+| `modern/bohr_model` | 5 | Bohr model and atomic spectra |
+| `modern/nuclear_decay` | 5 | Radioactive decay |
 
 ### Validation
 
