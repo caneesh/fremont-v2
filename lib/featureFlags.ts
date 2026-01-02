@@ -234,9 +234,9 @@ export const FEATURE_FLAGS = {
    * - Wrong answers show targeted feedback from micro_task.reasoning
    * - Retry up to maxAttempts (default: 2); after that, auto-unlock Hint Level 2
    * - Gating intensity increases if pattern gate was wrong or consecutive wrong submissions
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_P0_DECISION_GATES=false)
    */
-  P0_DECISION_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_DECISION_GATES === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_P0_DECISION_GATES !== 'false'),
+  P0_DECISION_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_DECISION_GATES !== 'false',
 
   /**
    * P0 Rebuild Gates
@@ -248,9 +248,9 @@ export const FEATURE_FLAGS = {
    * - 2 questions: "Which pattern was used?" + "What was the first decision?"
    * - Must answer correctly to unlock "Continue" / next step
    * - Tracks: hint_used(level=5), rebuild_gate_shown, rebuild_gate_passed/failed
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES=false)
    */
-  P0_REBUILD_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES === 'true'
-    || (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES !== 'false'),
+  P0_REBUILD_GATES: process.env.NEXT_PUBLIC_FEATURE_P0_REBUILD_GATES !== 'false',
 }
 
 /**
