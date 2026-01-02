@@ -1,8 +1,8 @@
 /**
  * Question Scaffolding Engine v1 - KV Store
  *
- * Handles all Vercel KV (Redis) operations with atomic guarantees.
- * Uses @vercel/kv for Edge runtime compatibility.
+ * Handles all Redis operations with atomic guarantees.
+ * Uses ioredis for TCP connection to Redis.
  *
  * KV Key Design (documented here as required):
  * ============================================
@@ -35,8 +35,35 @@
  *                                   Tracks generation progress for UI polling
  */
 
-import { kv } from '@vercel/kv'
+import Redis from 'ioredis'
 import type { Fingerprint, StatusUpdate, GenerationStatus } from './schemas'
+
+// =============================================================================
+// Redis Client Setup
+// =============================================================================
+
+let redis: Redis | null = null
+
+function getRedisClient(): Redis {
+  if (!redis) {
+    const redisUrl = process.env.REDIS_URL
+    if (!redisUrl) {
+      throw new Error('REDIS_URL environment variable is not set')
+    }
+    redis = new Redis(redisUrl, {
+      maxRetriesPerRequest: 3,
+      retryDelayOnFailover: 100,
+      lazyConnect: true,
+    })
+  }
+  return redis
+}
+
+// Check if Redis is configured
+const isRedisConfigured = () => Boolean(process.env.REDIS_URL)
+
+// Development mode allows bypass when Redis is not configured
+const isDevelopment = process.env.NODE_ENV === 'development'
 
 // =============================================================================
 // Configuration
@@ -48,13 +75,6 @@ const QUOTA_WINDOW_SECONDS = 86400 // 24 hours
 const MAX_DAILY_GENERATIONS_UNAUTH = 3
 const MAX_DAILY_GENERATIONS_AUTH = 50
 const STATUS_TTL_SECONDS = 300 // 5 minutes
-
-// Check if KV is configured
-const isKvConfigured = () =>
-  Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
-
-// Development mode allows bypass when KV is not configured
-const isDevelopment = process.env.NODE_ENV === 'development'
 
 // =============================================================================
 // Types
@@ -102,10 +122,11 @@ const keys = {
  */
 export async function hasQuestion(hash: string): Promise<boolean> {
   try {
-    const blobUrl = await kv.get<string>(keys.questionHash(hash))
+    const client = getRedisClient()
+    const blobUrl = await client.get(keys.questionHash(hash))
     return blobUrl !== null
   } catch (error) {
-    console.error('[KV] hasQuestion error:', error)
+    console.error('[Redis] hasQuestion error:', error)
     return false
   }
 }
@@ -115,9 +136,10 @@ export async function hasQuestion(hash: string): Promise<boolean> {
  */
 export async function getQuestionBlobUrl(hash: string): Promise<string | null> {
   try {
-    return await kv.get<string>(keys.questionHash(hash))
+    const client = getRedisClient()
+    return await client.get(keys.questionHash(hash))
   } catch (error) {
-    console.error('[KV] getQuestionBlobUrl error:', error)
+    console.error('[Redis] getQuestionBlobUrl error:', error)
     return null
   }
 }
@@ -134,8 +156,9 @@ export async function saveQuestionIndex(
   summary: QuestionSummary
 ): Promise<boolean> {
   try {
+    const client = getRedisClient()
     // Use pipeline for atomic operations
-    const pipeline = kv.pipeline()
+    const pipeline = client.pipeline()
 
     // Save hash -> blobUrl
     pipeline.set(keys.questionHash(hash), blobUrl)
@@ -152,7 +175,7 @@ export async function saveQuestionIndex(
     await pipeline.exec()
     return true
   } catch (error) {
-    console.error('[KV] saveQuestionIndex error:', error)
+    console.error('[Redis] saveQuestionIndex error:', error)
     return false
   }
 }
@@ -162,10 +185,11 @@ export async function saveQuestionIndex(
  */
 export async function getTopicHashes(topic: string): Promise<string[]> {
   try {
-    const hashes = await kv.smembers(keys.topicSet(topic))
+    const client = getRedisClient()
+    const hashes = await client.smembers(keys.topicSet(topic))
     return hashes ?? []
   } catch (error) {
-    console.error('[KV] getTopicHashes error:', error)
+    console.error('[Redis] getTopicHashes error:', error)
     return []
   }
 }
@@ -175,10 +199,11 @@ export async function getTopicHashes(topic: string): Promise<string[]> {
  */
 export async function getSubtopicHashes(topic: string, subtopic: string): Promise<string[]> {
   try {
-    const hashes = await kv.smembers(keys.subtopicSet(topic, subtopic))
+    const client = getRedisClient()
+    const hashes = await client.smembers(keys.subtopicSet(topic, subtopic))
     return hashes ?? []
   } catch (error) {
-    console.error('[KV] getSubtopicHashes error:', error)
+    console.error('[Redis] getSubtopicHashes error:', error)
     return []
   }
 }
@@ -190,9 +215,10 @@ export async function getQuestionSummaries(hashes: string[]): Promise<QuestionSu
   if (hashes.length === 0) return []
 
   try {
+    const client = getRedisClient()
     // Batch get summaries
     const keysToFetch = hashes.map(h => keys.summary(h))
-    const results = await kv.mget<string[]>(...keysToFetch)
+    const results = await client.mget(...keysToFetch)
 
     const summaries: QuestionSummary[] = []
     for (const result of results) {
@@ -206,7 +232,7 @@ export async function getQuestionSummaries(hashes: string[]): Promise<QuestionSu
     }
     return summaries
   } catch (error) {
-    console.error('[KV] getQuestionSummaries error:', error)
+    console.error('[Redis] getQuestionSummaries error:', error)
     return []
   }
 }
@@ -224,18 +250,19 @@ export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
   const now = Math.floor(Date.now() / 1000)
 
   try {
-    // Increment counter atomically
-    const pipeline = kv.pipeline()
+    const client = getRedisClient()
+    // Increment counter and get TTL atomically
+    const pipeline = client.pipeline()
     pipeline.incr(key)
     pipeline.ttl(key)
     const results = await pipeline.exec()
 
-    const count = (results[0] as number) ?? 1
-    const ttl = (results[1] as number) ?? -1
+    const count = results?.[0]?.[1] as number ?? 1
+    const ttl = results?.[1]?.[1] as number ?? -1
 
     // If this is a new key, set TTL
     if (ttl === -1) {
-      await kv.expire(key, RATE_LIMIT_WINDOW_SECONDS)
+      await client.expire(key, RATE_LIMIT_WINDOW_SECONDS)
     }
 
     const allowed = count <= RATE_LIMIT_MAX_REQUESTS
@@ -244,8 +271,8 @@ export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
 
     return { allowed, remaining, resetAt }
   } catch (error) {
-    console.error('[KV] checkRateLimit error:', error)
-    // Fail open - allow request if KV is unavailable
+    console.error('[Redis] checkRateLimit error:', error)
+    // Fail open - allow request if Redis is unavailable
     return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS, resetAt: now + RATE_LIMIT_WINDOW_SECONDS }
   }
 }
@@ -264,15 +291,17 @@ export async function checkQuota(userId: string | null): Promise<QuotaResult> {
   const key = keys.quota(effectiveUserId)
   const maxGenerations = isAuthenticated ? MAX_DAILY_GENERATIONS_AUTH : MAX_DAILY_GENERATIONS_UNAUTH
 
-  // Development bypass when KV is not configured
-  if (isDevelopment && !isKvConfigured()) {
-    console.warn('[KV] Development mode: quota check bypassed (KV not configured)')
+  // Development bypass when Redis is not configured
+  if (isDevelopment && !isRedisConfigured()) {
+    console.warn('[Redis] Development mode: quota check bypassed (Redis not configured)')
     return { allowed: true, remaining: 999, isAuthenticated }
   }
 
   try {
+    const client = getRedisClient()
     // Get current count
-    const currentCount = await kv.get<number>(key) ?? 0
+    const currentCountStr = await client.get(key)
+    const currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0
 
     if (currentCount >= maxGenerations) {
       return {
@@ -282,14 +311,15 @@ export async function checkQuota(userId: string | null): Promise<QuotaResult> {
       }
     }
 
-    // Increment and set TTL
-    const pipeline = kv.pipeline()
+    // Increment and get TTL
+    const pipeline = client.pipeline()
     pipeline.incr(key)
     pipeline.ttl(key)
-    const [_, ttl] = await pipeline.exec() as [number, number]
+    const results = await pipeline.exec()
+    const ttl = results?.[1]?.[1] as number ?? -1
 
     if (ttl === -1) {
-      await kv.expire(key, QUOTA_WINDOW_SECONDS)
+      await client.expire(key, QUOTA_WINDOW_SECONDS)
     }
 
     return {
@@ -298,8 +328,8 @@ export async function checkQuota(userId: string | null): Promise<QuotaResult> {
       isAuthenticated,
     }
   } catch (error) {
-    console.error('[KV] checkQuota error:', error)
-    // Fail closed for quota - don't allow free generations if KV fails
+    console.error('[Redis] checkQuota error:', error)
+    // Fail closed for quota - don't allow free generations if Redis fails
     return { allowed: false, remaining: 0, isAuthenticated }
   }
 }
@@ -313,16 +343,18 @@ export async function getQuotaRemaining(userId: string | null): Promise<number> 
   const key = keys.quota(effectiveUserId)
   const maxGenerations = isAuthenticated ? MAX_DAILY_GENERATIONS_AUTH : MAX_DAILY_GENERATIONS_UNAUTH
 
-  // Development bypass when KV is not configured
-  if (isDevelopment && !isKvConfigured()) {
+  // Development bypass when Redis is not configured
+  if (isDevelopment && !isRedisConfigured()) {
     return 999
   }
 
   try {
-    const currentCount = await kv.get<number>(key) ?? 0
+    const client = getRedisClient()
+    const currentCountStr = await client.get(key)
+    const currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0
     return Math.max(0, maxGenerations - currentCount)
   } catch (error) {
-    console.error('[KV] getQuotaRemaining error:', error)
+    console.error('[Redis] getQuotaRemaining error:', error)
     return 0
   }
 }
@@ -349,12 +381,11 @@ export async function updateStatus(
   }
 
   try {
-    await kv.set(keys.status(statusId), JSON.stringify(update), {
-      ex: STATUS_TTL_SECONDS,
-    })
+    const client = getRedisClient()
+    await client.set(keys.status(statusId), JSON.stringify(update), 'EX', STATUS_TTL_SECONDS)
     return true
   } catch (error) {
-    console.error('[KV] updateStatus error:', error)
+    console.error('[Redis] updateStatus error:', error)
     return false
   }
 }
@@ -364,54 +395,66 @@ export async function updateStatus(
  */
 export async function getStatus(statusId: string): Promise<StatusUpdate | null> {
   try {
-    const data = await kv.get<string>(keys.status(statusId))
+    const client = getRedisClient()
+    const data = await client.get(keys.status(statusId))
     if (!data) return null
     return JSON.parse(data)
   } catch (error) {
-    console.error('[KV] getStatus error:', error)
+    console.error('[Redis] getStatus error:', error)
     return null
   }
 }
 
 // =============================================================================
-// KV Health Check
+// Redis Health Check
 // =============================================================================
 
 /**
- * Check if KV is available and working
+ * Check if Redis is available and working
  */
 export async function isKVAvailable(): Promise<boolean> {
-  if (!isKvConfigured()) return false
+  if (!isRedisConfigured()) return false
 
   try {
+    const client = getRedisClient()
     const testKey = 'health:check'
-    await kv.set(testKey, 'ok', { ex: 10 })
-    const result = await kv.get<string>(testKey)
+    await client.set(testKey, 'ok', 'EX', 10)
+    const result = await client.get(testKey)
     return result === 'ok'
   } catch (error) {
-    console.error('[KV] Health check failed:', error)
+    console.error('[Redis] Health check failed:', error)
     return false
   }
 }
 
 /**
- * Get KV connection status message
+ * Get Redis connection status message
  */
 export async function getKVStatus(): Promise<{ available: boolean; message: string }> {
-  if (!isKvConfigured()) {
+  if (!isRedisConfigured()) {
     return {
       available: false,
-      message: 'Vercel KV not configured. Set KV_REST_API_URL and KV_REST_API_TOKEN environment variables.',
+      message: 'Redis not configured. Set REDIS_URL environment variable.',
     }
   }
 
   const available = await isKVAvailable()
   if (available) {
-    return { available: true, message: 'Vercel KV is connected and operational' }
+    return { available: true, message: 'Redis is connected and operational' }
   }
 
   return {
     available: false,
-    message: 'Vercel KV is configured but connection failed. Check credentials.',
+    message: 'Redis is configured but connection failed. Check credentials.',
+  }
+}
+
+/**
+ * Gracefully close Redis connection
+ */
+export async function closeRedisConnection(): Promise<void> {
+  if (redis) {
+    await redis.quit()
+    redis = null
   }
 }
