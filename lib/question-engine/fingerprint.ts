@@ -73,8 +73,12 @@ const TOPIC_KEYWORDS: Record<string, { keywords: string[]; weight: number }> = {
       'wave', 'frequency', 'amplitude', 'oscillation', 'harmonic',
       'resonance', 'standing wave', 'sound', 'doppler', 'beat',
       'superposition', 'node', 'antinode', 'wavelength',
+      'siren', 'horn', 'ambulance', 'train whistle', 'approaching',
+      'receding', 'observer', 'source frequency', 'apparent frequency',
+      'speed of sound', 'Hz', 'heard', 'emits', 'moving toward',
+      'moving away', 'passes', 'stationary observer',
     ],
-    weight: 1,
+    weight: 1.3,  // Higher weight to overcome mechanics velocity keywords
   },
   modern: {
     keywords: [
