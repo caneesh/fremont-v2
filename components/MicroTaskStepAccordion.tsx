@@ -181,7 +181,6 @@ export default function MicroTaskStepAccordion({
     } else {
       // Complete immediately
       onComplete(step.id)
-      setIsExpanded(false)
     }
   }, [useSocraticTutor, showSocraticTutor, onComplete, step.id])
 
@@ -190,7 +189,6 @@ export default function MicroTaskStepAccordion({
     setShowSocraticTutor(false)
     setPendingStepCompletion(false)
     onComplete(step.id)
-    setIsExpanded(false)
   }, [onComplete, step.id])
 
   // Skip Socratic tutor
@@ -198,7 +196,6 @@ export default function MicroTaskStepAccordion({
     setShowSocraticTutor(false)
     setPendingStepCompletion(false)
     onComplete(step.id)
-    setIsExpanded(false)
   }, [onComplete, step.id])
 
   // Process task completion (called after confidence is rated or directly if disabled)
@@ -476,12 +473,12 @@ export default function MicroTaskStepAccordion({
     if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
     } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
-      onComplete(step.id)
+      triggerStepCompletion()
     }
 
     // Close the modal
     setRevealFlowTask(null)
-  }, [step.id, collectedInsights, currentLevel, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
+  }, [step.id, collectedInsights, currentLevel, onTaskComplete, triggerStepCompletion, availableTasks, resolvedMaxTaskLevel])
 
   // Handle reveal flow skip (user skipped comprehension check)
   const handleRevealFlowSkip = useCallback((level: number) => {
@@ -510,12 +507,12 @@ export default function MicroTaskStepAccordion({
     if (level === currentLevel && currentLevel < resolvedMaxTaskLevel) {
       setCurrentLevel(currentLevel + 1)
     } else if (level === currentLevel && currentLevel >= resolvedMaxTaskLevel) {
-      onComplete(step.id)
+      triggerStepCompletion()
     }
 
     // Close the modal
     setRevealFlowTask(null)
-  }, [step.id, collectedInsights, currentLevel, onTaskComplete, onComplete, availableTasks, resolvedMaxTaskLevel])
+  }, [step.id, collectedInsights, currentLevel, onTaskComplete, triggerStepCompletion, availableTasks, resolvedMaxTaskLevel])
 
   // Handle opening reveal flow for a specific task level
   const handleOpenRevealFlow = useCallback((taskLevel: number) => {
@@ -608,7 +605,12 @@ export default function MicroTaskStepAccordion({
       <div
         role="button"
         tabIndex={isLocked ? -1 : 0}
-        onClick={isLocked ? undefined : handleToggle}
+        onClick={(e) => {
+          if (isLocked) return
+          const target = e.target as HTMLElement | null
+          if (target?.closest('button, a, input, textarea, select')) return
+          handleToggle()
+        }}
         onKeyDown={(e) => {
           if (!isLocked && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault()
@@ -781,7 +783,13 @@ export default function MicroTaskStepAccordion({
 
       {/* Expanded Content */}
       {isExpanded && !isLocked && (
-        <div className="px-4 pb-4 space-y-4">
+        <div
+          className="px-4 pb-4 space-y-4"
+          onClick={(e) => {
+            // Guard against accidental accordion toggles when interacting with inner controls.
+            e.stopPropagation()
+          }}
+        >
           {/* Feynman Micro-Prompt - Show before step content if configured */}
           {requiresFeynmanCheck && !feynmanPassed && step.feynmanPrompt && (
             <FeynmanMicroPrompt
@@ -1091,6 +1099,20 @@ export default function MicroTaskStepAccordion({
               <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                 All {totalTaskLevels} insights earned for this step.
               </p>
+            </div>
+          )}
+
+          {/* Socratic Tutor Chat - Professor Check-In after step completion */}
+          {showSocraticTutor && (
+            <div className="mt-4">
+              <SocraticTutorChat
+                problemText={problemStatement || ''}
+                stepTitle={step.title}
+                stepContent={collectedInsights.map(i => i.explanation).join('\n')}
+                requiredConcepts={step.requiredConcepts || []}
+                onResolved={handleSocraticResolved}
+                onSkip={handleSocraticSkip}
+              />
             </div>
           )}
         </div>
