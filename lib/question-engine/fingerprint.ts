@@ -577,8 +577,8 @@ function computeNumericalSimilarity(
   a: NumericalParams | undefined,
   b: NumericalParams | undefined
 ): number {
-  // If both are undefined, consider them similar (conceptual match)
-  if (!a && !b) return 0.8
+  // If both are undefined, they are identical (100% similarity)
+  if (!a && !b) return 1.0
 
   // If only one has numerical params, low similarity
   if (!a || !b) return 0.3

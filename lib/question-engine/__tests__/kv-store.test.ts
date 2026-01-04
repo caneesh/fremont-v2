@@ -1,53 +1,86 @@
 /**
  * Unit tests for Question Engine KV Store
  *
- * These tests mock @vercel/kv to test the KV store logic without
+ * These tests mock ioredis to test the KV store logic without
  * requiring a real Redis connection.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// Mock @vercel/kv before importing the module
-vi.mock('@vercel/kv', () => {
-  const mockPipeline = {
-    incr: vi.fn().mockReturnThis(),
-    ttl: vi.fn().mockReturnThis(),
-    set: vi.fn().mockReturnThis(),
-    sadd: vi.fn().mockReturnThis(),
-    exec: vi.fn().mockResolvedValue([1, 60]),
-  }
+// Create mock functions for Redis methods
+const mockGet = vi.fn()
+const mockSet = vi.fn()
+const mockExpire = vi.fn()
+const mockIncr = vi.fn()
+const mockSmembers = vi.fn()
+const mockMget = vi.fn()
+const mockSadd = vi.fn()
+const mockTtl = vi.fn()
+const mockQuit = vi.fn()
 
+// Create mock pipeline
+const mockPipelineExec = vi.fn()
+const mockPipeline = {
+  set: vi.fn().mockReturnThis(),
+  sadd: vi.fn().mockReturnThis(),
+  incr: vi.fn().mockReturnThis(),
+  ttl: vi.fn().mockReturnThis(),
+  exec: mockPipelineExec,
+}
+
+// Mock ioredis with a proper class before importing the module
+vi.mock('ioredis', () => {
+  // Create a mock Redis class
+  class MockRedis {
+    get = mockGet
+    set = mockSet
+    expire = mockExpire
+    incr = mockIncr
+    smembers = mockSmembers
+    mget = mockMget
+    sadd = mockSadd
+    ttl = mockTtl
+    quit = mockQuit
+    pipeline = vi.fn(() => mockPipeline)
+  }
   return {
-    kv: {
-      get: vi.fn(),
-      set: vi.fn(),
-      expire: vi.fn(),
-      incr: vi.fn(),
-      ttl: vi.fn(),
-      sadd: vi.fn(),
-      smembers: vi.fn(),
-      mget: vi.fn(),
-      pipeline: vi.fn(() => mockPipeline),
-    },
+    default: MockRedis,
   }
 })
 
-import { kv } from '@vercel/kv'
-import {
-  hasQuestion,
-  getQuestionBlobUrl,
-  saveQuestionIndex,
-  getTopicHashes,
-  getSubtopicHashes,
-  getQuestionSummaries,
-  checkRateLimit,
-  checkQuota,
-  getQuotaRemaining,
-  updateStatus,
-  getStatus,
-  type QuestionSummary,
-} from '../kv-store'
-import type { Fingerprint } from '../schemas'
+// Set REDIS_URL before importing to avoid the error
+process.env.REDIS_URL = 'redis://localhost:6379'
+
+// Dynamic import to ensure mock is applied first
+let hasQuestion: typeof import('../kv-store').hasQuestion
+let getQuestionBlobUrl: typeof import('../kv-store').getQuestionBlobUrl
+let saveQuestionIndex: typeof import('../kv-store').saveQuestionIndex
+let getTopicHashes: typeof import('../kv-store').getTopicHashes
+let getSubtopicHashes: typeof import('../kv-store').getSubtopicHashes
+let getQuestionSummaries: typeof import('../kv-store').getQuestionSummaries
+let checkRateLimit: typeof import('../kv-store').checkRateLimit
+let checkQuota: typeof import('../kv-store').checkQuota
+let getQuotaRemaining: typeof import('../kv-store').getQuotaRemaining
+let updateStatus: typeof import('../kv-store').updateStatus
+let getStatus: typeof import('../kv-store').getStatus
+let closeRedisConnection: typeof import('../kv-store').closeRedisConnection
+type QuestionSummary = import('../kv-store').QuestionSummary
+
+beforeAll(async () => {
+  const module = await import('../kv-store')
+  hasQuestion = module.hasQuestion
+  getQuestionBlobUrl = module.getQuestionBlobUrl
+  saveQuestionIndex = module.saveQuestionIndex
+  getTopicHashes = module.getTopicHashes
+  getSubtopicHashes = module.getSubtopicHashes
+  getQuestionSummaries = module.getQuestionSummaries
+  checkRateLimit = module.checkRateLimit
+  checkQuota = module.checkQuota
+  getQuotaRemaining = module.getQuotaRemaining
+  updateStatus = module.updateStatus
+  getStatus = module.getStatus
+  closeRedisConnection = module.closeRedisConnection
+})
 
 // =============================================================================
 // Test Setup
@@ -55,6 +88,20 @@ import type { Fingerprint } from '../schemas'
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // Reset all mock implementations
+  mockGet.mockReset()
+  mockSet.mockReset()
+  mockExpire.mockReset()
+  mockIncr.mockReset()
+  mockSmembers.mockReset()
+  mockMget.mockReset()
+  mockSadd.mockReset()
+  mockTtl.mockReset()
+  mockPipelineExec.mockReset()
+  mockPipeline.set.mockReturnThis()
+  mockPipeline.sadd.mockReturnThis()
+  mockPipeline.incr.mockReturnThis()
+  mockPipeline.ttl.mockReturnThis()
 })
 
 afterEach(() => {
@@ -67,16 +114,16 @@ afterEach(() => {
 
 describe('hasQuestion', () => {
   it('returns true when hash exists', async () => {
-    vi.mocked(kv.get).mockResolvedValue('https://blob.vercel.com/question.json')
+    mockGet.mockResolvedValue('https://blob.vercel.com/question.json')
 
     const result = await hasQuestion('abc123')
 
     expect(result).toBe(true)
-    expect(kv.get).toHaveBeenCalledWith('q:hash:abc123')
+    expect(mockGet).toHaveBeenCalledWith('q:hash:abc123')
   })
 
   it('returns false when hash does not exist', async () => {
-    vi.mocked(kv.get).mockResolvedValue(null)
+    mockGet.mockResolvedValue(null)
 
     const result = await hasQuestion('nonexistent')
 
@@ -84,7 +131,7 @@ describe('hasQuestion', () => {
   })
 
   it('returns false on error', async () => {
-    vi.mocked(kv.get).mockRejectedValue(new Error('Connection failed'))
+    mockGet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await hasQuestion('abc123')
 
@@ -99,16 +146,16 @@ describe('hasQuestion', () => {
 describe('getQuestionBlobUrl', () => {
   it('returns blob URL when hash exists', async () => {
     const expectedUrl = 'https://blob.vercel.com/question.json'
-    vi.mocked(kv.get).mockResolvedValue(expectedUrl)
+    mockGet.mockResolvedValue(expectedUrl)
 
     const result = await getQuestionBlobUrl('abc123')
 
     expect(result).toBe(expectedUrl)
-    expect(kv.get).toHaveBeenCalledWith('q:hash:abc123')
+    expect(mockGet).toHaveBeenCalledWith('q:hash:abc123')
   })
 
   it('returns null when hash does not exist', async () => {
-    vi.mocked(kv.get).mockResolvedValue(null)
+    mockGet.mockResolvedValue(null)
 
     const result = await getQuestionBlobUrl('nonexistent')
 
@@ -116,7 +163,7 @@ describe('getQuestionBlobUrl', () => {
   })
 
   it('returns null on error', async () => {
-    vi.mocked(kv.get).mockRejectedValue(new Error('Connection failed'))
+    mockGet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await getQuestionBlobUrl('abc123')
 
@@ -142,8 +189,12 @@ describe('saveQuestionIndex', () => {
   }
 
   it('saves index to KV with correct keys', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([])
+    mockPipelineExec.mockResolvedValue([
+      [null, 'OK'],
+      [null, 1],
+      [null, 1],
+      [null, 'OK'],
+    ])
 
     const result = await saveQuestionIndex(
       'abc123',
@@ -154,12 +205,12 @@ describe('saveQuestionIndex', () => {
     )
 
     expect(result).toBe(true)
-    expect(kv.pipeline).toHaveBeenCalled()
+    expect(mockPipeline.set).toHaveBeenCalled()
+    expect(mockPipeline.sadd).toHaveBeenCalled()
   })
 
   it('returns false on error', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockRejectedValue(new Error('Pipeline failed'))
+    mockPipelineExec.mockRejectedValue(new Error('Pipeline failed'))
 
     const result = await saveQuestionIndex(
       'abc123',
@@ -180,16 +231,16 @@ describe('saveQuestionIndex', () => {
 describe('getTopicHashes', () => {
   it('returns array of hashes for topic', async () => {
     const expectedHashes = ['hash1', 'hash2', 'hash3']
-    vi.mocked(kv.smembers).mockResolvedValue(expectedHashes)
+    mockSmembers.mockResolvedValue(expectedHashes)
 
     const result = await getTopicHashes('mechanics')
 
     expect(result).toEqual(expectedHashes)
-    expect(kv.smembers).toHaveBeenCalledWith('q:topic:mechanics')
+    expect(mockSmembers).toHaveBeenCalledWith('q:topic:mechanics')
   })
 
   it('returns empty array when no hashes exist', async () => {
-    vi.mocked(kv.smembers).mockResolvedValue(null)
+    mockSmembers.mockResolvedValue(null)
 
     const result = await getTopicHashes('mechanics')
 
@@ -197,7 +248,7 @@ describe('getTopicHashes', () => {
   })
 
   it('returns empty array on error', async () => {
-    vi.mocked(kv.smembers).mockRejectedValue(new Error('Connection failed'))
+    mockSmembers.mockRejectedValue(new Error('Connection failed'))
 
     const result = await getTopicHashes('mechanics')
 
@@ -212,16 +263,16 @@ describe('getTopicHashes', () => {
 describe('getSubtopicHashes', () => {
   it('returns array of hashes for topic/subtopic', async () => {
     const expectedHashes = ['hash1', 'hash2']
-    vi.mocked(kv.smembers).mockResolvedValue(expectedHashes)
+    mockSmembers.mockResolvedValue(expectedHashes)
 
     const result = await getSubtopicHashes('mechanics', 'inclined_plane')
 
     expect(result).toEqual(expectedHashes)
-    expect(kv.smembers).toHaveBeenCalledWith('q:topic:mechanics:sub:inclined_plane')
+    expect(mockSmembers).toHaveBeenCalledWith('q:topic:mechanics:sub:inclined_plane')
   })
 
   it('returns empty array when no hashes exist', async () => {
-    vi.mocked(kv.smembers).mockResolvedValue(null)
+    mockSmembers.mockResolvedValue(null)
 
     const result = await getSubtopicHashes('mechanics', 'inclined_plane')
 
@@ -238,7 +289,7 @@ describe('getQuestionSummaries', () => {
     const result = await getQuestionSummaries([])
 
     expect(result).toEqual([])
-    expect(kv.mget).not.toHaveBeenCalled()
+    expect(mockMget).not.toHaveBeenCalled()
   })
 
   it('returns parsed summaries', async () => {
@@ -265,7 +316,7 @@ describe('getQuestionSummaries', () => {
       createdAt: '2025-01-01T00:00:00.000Z',
     }
 
-    vi.mocked(kv.mget).mockResolvedValue([
+    mockMget.mockResolvedValue([
       JSON.stringify(summary1),
       JSON.stringify(summary2),
     ])
@@ -278,7 +329,7 @@ describe('getQuestionSummaries', () => {
   })
 
   it('skips invalid JSON entries', async () => {
-    vi.mocked(kv.mget).mockResolvedValue([
+    mockMget.mockResolvedValue([
       'invalid json',
       JSON.stringify({
         hash: 'valid',
@@ -295,7 +346,7 @@ describe('getQuestionSummaries', () => {
   })
 
   it('returns empty array on error', async () => {
-    vi.mocked(kv.mget).mockRejectedValue(new Error('Connection failed'))
+    mockMget.mockRejectedValue(new Error('Connection failed'))
 
     const result = await getQuestionSummaries(['hash1'])
 
@@ -309,8 +360,11 @@ describe('getQuestionSummaries', () => {
 
 describe('checkRateLimit', () => {
   it('allows request when under limit', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([5, 30]) // count=5, ttl=30
+    // Pipeline returns [error, result] tuples
+    mockPipelineExec.mockResolvedValue([
+      [null, 5],  // count=5
+      [null, 30], // ttl=30
+    ])
 
     const result = await checkRateLimit('192.168.1.1')
 
@@ -320,8 +374,10 @@ describe('checkRateLimit', () => {
   })
 
   it('denies request when at limit', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([21, 30]) // count=21, over limit
+    mockPipelineExec.mockResolvedValue([
+      [null, 21], // count=21, over limit
+      [null, 30],
+    ])
 
     const result = await checkRateLimit('192.168.1.1')
 
@@ -330,17 +386,19 @@ describe('checkRateLimit', () => {
   })
 
   it('sets TTL for new keys', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([1, -1]) // count=1, no TTL (new key)
+    mockPipelineExec.mockResolvedValue([
+      [null, 1],  // count=1
+      [null, -1], // no TTL (new key)
+    ])
+    mockExpire.mockResolvedValue(1)
 
     await checkRateLimit('192.168.1.1')
 
-    expect(kv.expire).toHaveBeenCalled()
+    expect(mockExpire).toHaveBeenCalled()
   })
 
   it('fails open on error (allows request)', async () => {
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockRejectedValue(new Error('Connection failed'))
+    mockPipelineExec.mockRejectedValue(new Error('Connection failed'))
 
     const result = await checkRateLimit('192.168.1.1')
 
@@ -354,20 +412,21 @@ describe('checkRateLimit', () => {
 
 describe('checkQuota', () => {
   it('allows request for unauthenticated user under limit', async () => {
-    vi.mocked(kv.get).mockResolvedValue(1) // 1 generation used
-
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([2, 3600])
+    mockGet.mockResolvedValue('1') // 1 generation used (string from Redis)
+    mockPipelineExec.mockResolvedValue([
+      [null, 2],
+      [null, 3600],
+    ])
 
     const result = await checkQuota(null)
 
     expect(result.allowed).toBe(true)
     expect(result.isAuthenticated).toBe(false)
-    expect(result.remaining).toBe(1) // 3 - 1 - 1 = 1
+    expect(result.remaining).toBe(48) // 50 - 1 - 1 = 48
   })
 
   it('denies unauthenticated user at limit', async () => {
-    vi.mocked(kv.get).mockResolvedValue(3) // 3 generations used (at limit)
+    mockGet.mockResolvedValue('50') // 50 generations used (at limit)
 
     const result = await checkQuota(null)
 
@@ -377,20 +436,21 @@ describe('checkQuota', () => {
   })
 
   it('allows higher limit for authenticated user', async () => {
-    vi.mocked(kv.get).mockResolvedValue(10) // 10 generations used
-
-    const mockPipeline = kv.pipeline()
-    vi.mocked(mockPipeline.exec).mockResolvedValue([11, 3600])
+    mockGet.mockResolvedValue('10') // 10 generations used
+    mockPipelineExec.mockResolvedValue([
+      [null, 11],
+      [null, 3600],
+    ])
 
     const result = await checkQuota('user-123')
 
     expect(result.allowed).toBe(true)
     expect(result.isAuthenticated).toBe(true)
-    expect(result.remaining).toBe(39) // 50 - 10 - 1 = 39
+    expect(result.remaining).toBe(189) // 200 - 10 - 1 = 189
   })
 
   it('denies authenticated user at limit', async () => {
-    vi.mocked(kv.get).mockResolvedValue(50) // at limit
+    mockGet.mockResolvedValue('200') // at limit
 
     const result = await checkQuota('user-123')
 
@@ -399,7 +459,7 @@ describe('checkQuota', () => {
   })
 
   it('fails closed on error (denies request)', async () => {
-    vi.mocked(kv.get).mockRejectedValue(new Error('Connection failed'))
+    mockGet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await checkQuota('user-123')
 
@@ -413,23 +473,23 @@ describe('checkQuota', () => {
 
 describe('getQuotaRemaining', () => {
   it('returns remaining quota for unauthenticated user', async () => {
-    vi.mocked(kv.get).mockResolvedValue(1)
+    mockGet.mockResolvedValue('1')
 
     const result = await getQuotaRemaining(null)
 
-    expect(result).toBe(2) // 3 - 1 = 2
+    expect(result).toBe(49) // 50 - 1 = 49
   })
 
   it('returns remaining quota for authenticated user', async () => {
-    vi.mocked(kv.get).mockResolvedValue(10)
+    mockGet.mockResolvedValue('10')
 
     const result = await getQuotaRemaining('user-123')
 
-    expect(result).toBe(40) // 50 - 10 = 40
+    expect(result).toBe(190) // 200 - 10 = 190
   })
 
   it('returns 0 when over quota', async () => {
-    vi.mocked(kv.get).mockResolvedValue(100)
+    mockGet.mockResolvedValue('100')
 
     const result = await getQuotaRemaining(null)
 
@@ -437,7 +497,7 @@ describe('getQuotaRemaining', () => {
   })
 
   it('returns 0 on error', async () => {
-    vi.mocked(kv.get).mockRejectedValue(new Error('Connection failed'))
+    mockGet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await getQuotaRemaining('user-123')
 
@@ -451,24 +511,25 @@ describe('getQuotaRemaining', () => {
 
 describe('updateStatus', () => {
   it('saves status to KV with TTL', async () => {
-    vi.mocked(kv.set).mockResolvedValue('OK')
+    mockSet.mockResolvedValue('OK')
 
     const result = await updateStatus('status-123', 'generating', 'Generating...', 50)
 
     expect(result).toBe(true)
-    expect(kv.set).toHaveBeenCalledWith(
+    expect(mockSet).toHaveBeenCalledWith(
       'status:status-123',
       expect.any(String),
-      { ex: 300 }
+      'EX',
+      300
     )
   })
 
   it('includes all status fields in saved data', async () => {
-    vi.mocked(kv.set).mockResolvedValue('OK')
+    mockSet.mockResolvedValue('OK')
 
     await updateStatus('status-123', 'completed', 'Done!', 100)
 
-    const savedData = JSON.parse(vi.mocked(kv.set).mock.calls[0][1] as string)
+    const savedData = JSON.parse(mockSet.mock.calls[0][1] as string)
     expect(savedData.statusId).toBe('status-123')
     expect(savedData.status).toBe('completed')
     expect(savedData.message).toBe('Done!')
@@ -477,7 +538,7 @@ describe('updateStatus', () => {
   })
 
   it('returns false on error', async () => {
-    vi.mocked(kv.set).mockRejectedValue(new Error('Connection failed'))
+    mockSet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await updateStatus('status-123', 'error', 'Failed', 0)
 
@@ -498,16 +559,16 @@ describe('getStatus', () => {
       progress: 50,
       timestamp: '2025-01-01T00:00:00.000Z',
     }
-    vi.mocked(kv.get).mockResolvedValue(JSON.stringify(status))
+    mockGet.mockResolvedValue(JSON.stringify(status))
 
     const result = await getStatus('status-123')
 
     expect(result).toEqual(status)
-    expect(kv.get).toHaveBeenCalledWith('status:status-123')
+    expect(mockGet).toHaveBeenCalledWith('status:status-123')
   })
 
   it('returns null when status does not exist', async () => {
-    vi.mocked(kv.get).mockResolvedValue(null)
+    mockGet.mockResolvedValue(null)
 
     const result = await getStatus('nonexistent')
 
@@ -515,7 +576,7 @@ describe('getStatus', () => {
   })
 
   it('returns null on error', async () => {
-    vi.mocked(kv.get).mockRejectedValue(new Error('Connection failed'))
+    mockGet.mockRejectedValue(new Error('Connection failed'))
 
     const result = await getStatus('status-123')
 
