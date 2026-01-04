@@ -12,7 +12,9 @@ import RevealReconstructValidate from './micro-tasks/RevealReconstructValidate'
 import ConfidencePrompt from './micro-tasks/ConfidencePrompt'
 import FeynmanMicroPrompt from './FeynmanMicroPrompt'
 import SocraticTutorChat from './SocraticTutorChat'
+import SocraticStepDialogue from './SocraticStepDialogue'
 import MathRenderer from './MathRenderer'
+import type { SocraticMasteryResult } from '@/types/socraticFirst'
 import { getStepTypeBadge } from '@/lib/hintEngine'
 import { onTaskIncorrect, onStepTimeout, type ProblemContext, type StepContext } from '@/lib/mistakeTriggers'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
@@ -146,6 +148,10 @@ export default function MicroTaskStepAccordion({
   const useRevealFlow = FEATURE_FLAGS.REVEAL_RECONSTRUCT_VALIDATE
   const useConfidenceSRS = FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS
   const useSocraticTutor = FEATURE_FLAGS.SOCRATIC_TUTOR_CHAT
+  const useSocraticFirst = FEATURE_FLAGS.SOCRATIC_FIRST_MODE
+
+  // Socratic-first mode state
+  const [isSocraticFirstMode, setIsSocraticFirstMode] = useState(useSocraticFirst && !isCompleted)
 
   // Sync with active state and track activation time
   useEffect(() => {
@@ -197,6 +203,48 @@ export default function MicroTaskStepAccordion({
     setPendingStepCompletion(false)
     onComplete(step.id)
   }, [onComplete, step.id])
+
+  // Handle Socratic-first mode completion
+  const handleSocraticFirstComplete = useCallback((result: SocraticMasteryResult) => {
+    // Log the mastery result
+    if (problemId) {
+      eventLogger.log('socratic_step_complete', {
+        problemId,
+        stepId: step.id,
+        socraticExchanges: result.socraticExchanges,
+        hintLevelReached: result.hintLevelReached,
+        calibrationPattern: result.calibrationPattern,
+        misconceptionsDetected: result.misconceptionsDetected.length,
+        finalUnderstanding: result.finalUnderstanding,
+        timeSpentSeconds: result.timeSpentSeconds,
+      })
+    }
+
+    // Mark all tasks as collected since Socratic mode covers the whole step
+    availableTasks.forEach((task, index) => {
+      if (!collectedInsights.some(i => i.level === task.level)) {
+        setCollectedInsights(prev => [...prev, {
+          level: task.level,
+          levelTitle: task.levelTitle,
+          explanation: task.explanation
+        }])
+        onTaskComplete(step.id, task.level, task.explanation)
+      }
+    })
+
+    // Exit Socratic-first mode and complete the step
+    setIsSocraticFirstMode(false)
+    onComplete(step.id)
+  }, [step.id, problemId, availableTasks, collectedInsights, onTaskComplete, onComplete])
+
+  // Handle switching from Socratic-first to traditional hint mode
+  const handleSocraticFirstSwitchToHints = useCallback(() => {
+    setIsSocraticFirstMode(false)
+    setIsReadingMode(true)
+    // Expand the first non-completed level
+    const firstUncompletedLevel = availableTasks.find(t => t.level >= currentLevel)?.level || 1
+    setExpandedHintLevel(firstUncompletedLevel)
+  }, [availableTasks, currentLevel])
 
   // Process task completion (called after confidence is rated or directly if disabled)
   const processTaskCompletion = useCallback((isCorrect: boolean, explanation: string, confidence?: Confidence) => {
@@ -819,6 +867,19 @@ export default function MicroTaskStepAccordion({
             </div>
           )}
 
+          {/* Socratic-First Mode: Discovery-based step interaction */}
+          {showStepContent && isSocraticFirstMode && !allTasksCompleted && !hasNoTasks && (
+            <SocraticStepDialogue
+              stepIndex={step.id}
+              stepTitle={step.title}
+              stepContent={step.tasks.map(t => t.explanation).join('\n')}
+              problemStatement={problemStatement || ''}
+              concepts={step.requiredConcepts || []}
+              onComplete={handleSocraticFirstComplete}
+              onSwitchToHints={handleSocraticFirstSwitchToHints}
+            />
+          )}
+
           {/* Warning Beacon - Non-spoilery hint about common mistakes */}
           {showStepContent && warningBeacon && (
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
@@ -852,8 +913,8 @@ export default function MicroTaskStepAccordion({
             </div>
           )}
 
-          {/* Collected Insights */}
-          {showStepContent && collectedInsights.length > 0 && !isReadingMode && (
+          {/* Collected Insights (hidden in Socratic-first mode) */}
+          {showStepContent && collectedInsights.length > 0 && !isReadingMode && !isSocraticFirstMode && (
             <CollectedInsights
               insights={collectedInsights}
               totalLevels={totalTaskLevels}
@@ -872,8 +933,8 @@ export default function MicroTaskStepAccordion({
             </div>
           )}
 
-          {/* Quiz Mode: Current Task Card */}
-          {showStepContent && !isReadingMode && currentTask && !allTasksCompleted && !showConfidencePrompt && !hasNoTasks && (
+          {/* Quiz Mode: Current Task Card (hidden when Socratic-first mode is active) */}
+          {showStepContent && !isReadingMode && !isSocraticFirstMode && currentTask && !allTasksCompleted && !showConfidencePrompt && !hasNoTasks && (
             <InsightCard
               key={`step-${step.id}-level-${currentLevel}`}
               task={currentTask}
@@ -886,7 +947,7 @@ export default function MicroTaskStepAccordion({
           )}
 
           {/* Confidence Prompt - shown after correct answer when feature is enabled */}
-          {showStepContent && !isReadingMode && showConfidencePrompt && pendingTaskResult && (
+          {showStepContent && !isReadingMode && !isSocraticFirstMode && showConfidencePrompt && pendingTaskResult && (
             <div className="p-4 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">

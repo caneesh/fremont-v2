@@ -222,6 +222,13 @@ class ProblemHistoryService {
   }
 
   /**
+   * Get all problem attempts (public accessor for dashboard metrics)
+   */
+  listAllAttempts(): ProblemAttempt[] {
+    return this.getAllAttempts()
+  }
+
+  /**
    * Get problem history with filters
    */
   getHistory(filters: HistoryFilters = {}): {

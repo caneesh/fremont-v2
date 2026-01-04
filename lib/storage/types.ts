@@ -82,6 +82,12 @@ export type EventType =
   | 'integrity_check_triggered'
   | 'integrity_check_passed'
   | 'integrity_check_failed'
+  // Socratic-First Mode events
+  | 'socratic_step_complete'
+  | 'socratic_exchange'
+  | 'socratic_misconception_detected'
+  | 'socratic_stuck_mode_entered'
+  | 'socratic_hint_viewed'
 
 export interface EventMetadata {
   problemId?: string

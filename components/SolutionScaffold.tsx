@@ -53,6 +53,7 @@ import {
   buildContextFromSanityCheckFailure,
 } from '@/lib/socraticRewindService'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
+import type { SocraticMasteryResult } from '@/types/socraticFirst'
 import { usePhasedScaffoldContext } from './PhasedScaffoldWrapper'
 import ConfidenceRating from './ConfidenceRating'
 import StepHeatmap from './StepHeatmap'
@@ -1715,6 +1716,55 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     }
   }
 
+  // Handle Socratic-first mode step completion
+  const handleSocraticStepComplete = (stepId: number, result: SocraticMasteryResult) => {
+    console.log('[Socratic-First] Step completed:', {
+      stepId,
+      exchanges: result.socraticExchanges,
+      hintLevel: result.hintLevelReached,
+      calibration: result.calibrationPattern,
+      understanding: result.finalUnderstanding,
+    })
+
+    // Log event for analytics
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = 'physiscaffold_socratic_log'
+        const existing = localStorage.getItem(storageKey)
+        const logs: Array<{
+          timestamp: string
+          problemId: string
+          stepId: number
+          result: SocraticMasteryResult
+        }> = existing ? JSON.parse(existing) : []
+
+        logs.push({
+          timestamp: new Date().toISOString(),
+          problemId: problemId(),
+          stepId,
+          result,
+        })
+
+        // Keep only last 50 entries
+        if (logs.length > 50) {
+          logs.splice(0, logs.length - 50)
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(logs))
+      } catch (error) {
+        console.error('Failed to log Socratic result:', error)
+      }
+    }
+
+    // If there were misconceptions detected, potentially add to review
+    if (result.misconceptionsDetected.length > 0 && result.finalUnderstanding !== 'mastered') {
+      console.log('[Socratic-First] Misconceptions detected:', result.misconceptionsDetected)
+      // TODO: Integrate with mistake notebook to add for review
+    }
+
+    // handleStepComplete will be called by StepAccordion after this
+  }
+
   // Handle confidence rating submission
   const handleConfidenceRated = useCallback((stepId: number, confidence: Confidence) => {
     // Store the confidence rating
@@ -2788,6 +2838,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       maxHintLevel={modeConfig.maxHintLevel}
                       professorVisibility={modeConfig.professorVisibility}
                       hasStepErrors={Boolean(stepErrorCounts.get(step.id))}
+                      useSocraticFirst={FEATURE_FLAGS.SOCRATIC_FIRST_MODE}
+                      onSocraticComplete={(result) => handleSocraticStepComplete(index, result)}
                       onAnswerChange={(answer) => handleStepAnswerChange(index, answer)}
                       onComplete={() => handleStepComplete(index)}
                       onActivate={() => handleStepActivation(index)}

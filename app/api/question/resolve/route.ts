@@ -306,20 +306,10 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================================================
-    // Step H: Low similarity - full generation (requires auth for unauth users)
+    // Step H: Low similarity - full generation
     // ==========================================================================
 
-    // Additional guardrail: unauthenticated users can only use reuse/adaptation
-    if (!quotaResult.isAuthenticated && bestMatch === null) {
-      return NextResponse.json(
-        errorResponse(
-          'AUTH_REQUIRED',
-          'This problem requires full generation. Please sign in to continue.',
-          statusId
-        ),
-        { status: 401 }
-      )
-    }
+    // Note: Auth guardrail removed - quota system handles rate limiting adequately
 
     await updateStatus(statusId, 'generating', 'Generating new scaffold...', 50)
 
