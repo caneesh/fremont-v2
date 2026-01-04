@@ -1,20 +1,49 @@
 {
-  "currentVersion": "question.v1",
-  "supportedVersions": ["question.v1"],
+  "currentVersion": "question.v2",
+  "supportedVersions": ["question.v1", "question.v2"],
   "deprecatedVersions": [],
 
   "versions": {
     "question.v1": {
       "releaseDate": "2025-01-15",
-      "status": "current",
+      "status": "supported",
       "schemaFile": "question.v1.fixed.schema.json",
       "changelog": "Initial version with full scaffolding support"
+    },
+    "question.v2": {
+      "releaseDate": "2026-01-03",
+      "status": "current",
+      "schemaFile": "question.v2.schema.json",
+      "changelog": "Backward-compatible additions: provenance tracking, lifecycle state, secondary patterns, cognitive stages, related questions by difficulty, AI metadata"
     }
   },
 
   "migrationPaths": {
+    "question.v1->question.v2": {
+      "automatic": true,
+      "notes": "v1 documents validate under v2 without modification. New fields are optional."
+    }
   },
 
   "fieldDeprecations": {
+  },
+
+  "v2Additions": {
+    "topLevel": [
+      "secondaryPatternIds",
+      "provenance",
+      "lifecycle",
+      "relatedQuestions",
+      "aiMetadata"
+    ],
+    "step": [
+      "cognitiveStage"
+    ],
+    "newDefs": [
+      "Provenance",
+      "Lifecycle",
+      "RelatedQuestions",
+      "AIMetadata"
+    ]
   }
 }

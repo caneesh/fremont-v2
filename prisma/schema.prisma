@@ -1,0 +1,378 @@
+// =============================================================================
+// PhysiScaffold Question Bank Schema
+// Database: PostgreSQL (Neon)
+// Runtime: Serverless
+// =============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum QuestionLifecycleState {
+  draft
+  review
+  approved
+  retired
+}
+
+enum QuestionProvenance {
+  mathpix
+  ai_generated
+  manual
+  imported
+  hybrid
+}
+
+enum EdgeType {
+  same_difficulty
+  harder
+  easier
+  same_pattern
+  prerequisite
+  variation
+}
+
+enum AttemptOutcome {
+  completed
+  abandoned
+  revealed
+  skipped
+}
+
+enum AIFeatureType {
+  hint_generation
+  explanation_generation
+  question_generation
+  socratic_dialogue
+  step_feedback
+}
+
+// =============================================================================
+// QUESTIONS
+// =============================================================================
+
+model Question {
+  id            String @id @default(cuid())
+  questionId    String @unique @map("question_id")
+  schemaVersion String @default("question.v2") @map("schema_version")
+
+  // Denormalized fields for fast filtering (extracted from JSONB)
+  primaryPatternId String?                @map("primary_pattern_id")
+  difficulty       Int                    @db.SmallInt
+  topicTags        String[]               @map("topic_tags")
+  lifecycleState   QuestionLifecycleState @default(draft) @map("lifecycle_state")
+  provenance       QuestionProvenance     @default(manual)
+
+  // Full question payload as JSONB
+  payload Json @db.JsonB
+
+  // AI metadata (extracted for quota/audit)
+  isAiGenerated   Boolean   @default(false) @map("is_ai_generated")
+  aiModel         String?   @map("ai_model")
+  aiGeneratedAt   DateTime? @map("ai_generated_at")
+  aiHumanReviewed Boolean   @default(false) @map("ai_human_reviewed")
+
+  // Timestamps
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  approvedAt DateTime? @map("approved_at")
+  retiredAt  DateTime? @map("retired_at")
+
+  // Relations
+  tags          QuestionTag[]
+  outgoingEdges QuestionEdge[]        @relation("FromQuestion")
+  incomingEdges QuestionEdge[]        @relation("ToQuestion")
+  attempts      UserQuestionHistory[]
+
+  // Indexes for fast lookup
+  @@index([primaryPatternId, difficulty])
+  @@index([difficulty])
+  @@index([lifecycleState])
+  @@index([provenance])
+  @@index([topicTags], type: Gin)
+  @@index([isAiGenerated])
+  @@index([createdAt])
+  @@index([payload], type: Gin)
+  @@map("questions")
+}
+
+// =============================================================================
+// QUESTION EDGES (Relationships)
+// =============================================================================
+
+model QuestionEdge {
+  id String @id @default(cuid())
+
+  fromQuestionId String   @map("from_question_id")
+  toQuestionId   String   @map("to_question_id")
+  edgeType       EdgeType @map("edge_type")
+
+  // Optional weight for ranking (e.g., similarity score)
+  weight Float? @default(1.0)
+
+  // Metadata
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String?  @map("created_by")
+
+  // Relations
+  fromQuestion Question @relation("FromQuestion", fields: [fromQuestionId], references: [id], onDelete: Cascade)
+  toQuestion   Question @relation("ToQuestion", fields: [toQuestionId], references: [id], onDelete: Cascade)
+
+  // Unique constraint: one edge type per direction between two questions
+  @@unique([fromQuestionId, toQuestionId, edgeType])
+  // Indexes for traversal
+  @@index([fromQuestionId, edgeType])
+  @@index([toQuestionId, edgeType])
+  @@index([edgeType])
+  @@map("question_edges")
+}
+
+// =============================================================================
+// QUESTION TAGS (Normalized for fast filtering)
+// =============================================================================
+
+model QuestionTag {
+  id String @id @default(cuid())
+
+  questionId String @map("question_id")
+  tagType    String @map("tag_type") // "topic", "pattern", "meta_skill", "trap", "error"
+  tagValue   String @map("tag_value")
+
+  // Relations
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // Unique constraint
+  @@unique([questionId, tagType, tagValue])
+  // Indexes for lookup
+  @@index([tagType, tagValue])
+  @@index([tagValue])
+  @@index([questionId])
+  @@map("question_tags")
+}
+
+// =============================================================================
+// USER QUESTION HISTORY
+// =============================================================================
+
+model UserQuestionHistory {
+  id String @id @default(cuid())
+
+  userId     String @map("user_id")
+  questionId String @map("question_id")
+
+  // Attempt metadata
+  attemptNumber Int            @default(1) @map("attempt_number")
+  outcome       AttemptOutcome
+  score         Float?         @db.Real
+
+  // Timing
+  startedAt   DateTime  @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  durationSec Int?      @map("duration_sec")
+
+  // Progress snapshot
+  stepsCompleted Int @default(0) @map("steps_completed")
+  stepsTotal     Int @map("steps_total")
+  hintsUsed      Int @default(0) @map("hints_used")
+
+  // Denormalized for fast exclusion queries
+  patternId  String? @map("pattern_id")
+  difficulty Int?    @db.SmallInt
+
+  // Relations
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // Unique: one active attempt per user per question per attempt number
+  @@unique([userId, questionId, attemptNumber])
+  // Indexes for history queries and exclusion
+  @@index([userId, completedAt])
+  @@index([userId, outcome])
+  @@index([userId, patternId])
+  @@index([userId, questionId])
+  @@index([questionId])
+  @@map("user_question_history")
+}
+
+// =============================================================================
+// USER AI QUOTA
+// =============================================================================
+
+model UserAiQuota {
+  id String @id @default(cuid())
+
+  userId      String        @map("user_id")
+  featureType AIFeatureType @map("feature_type")
+  quotaDate   DateTime      @map("quota_date") @db.Date
+
+  // Usage tracking
+  usedCount  Int @default(0) @map("used_count")
+  maxAllowed Int @map("max_allowed")
+
+  // Cost tracking (for billing/analytics)
+  tokensUsed       Int   @default(0) @map("tokens_used")
+  estimatedCostUsd Float @default(0) @map("estimated_cost_usd") @db.Real
+
+  // Timestamps
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // One quota record per user per feature per day
+  @@unique([userId, featureType, quotaDate])
+  // Indexes for quota checks
+  @@index([userId, quotaDate])
+  @@index([userId, featureType, quotaDate])
+  @@index([quotaDate])
+  @@map("user_ai_quota")
+}
+
+// =============================================================================
+// SUPPORTING TABLES
+// =============================================================================
+
+// Pattern registry for validation and autocomplete
+model Pattern {
+  id        String @id @default(cuid())
+  patternId String @unique @map("pattern_id")
+
+  label           String
+  description     String?
+  parentPatternId String? @map("parent_pattern_id")
+
+  // Hierarchy support
+  level Int      @default(0)
+  path  String[] @default([])
+
+  // Metadata
+  questionCount Int     @default(0) @map("question_count")
+  isActive      Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([parentPatternId])
+  @@index([isActive])
+  @@map("patterns")
+}
+
+// Topic registry
+model Topic {
+  id      String @id @default(cuid())
+  topicId String @unique @map("topic_id")
+
+  label         String
+  description   String?
+  parentTopicId String? @map("parent_topic_id")
+
+  // Hierarchy
+  level Int      @default(0)
+  path  String[] @default([])
+
+  // Metadata
+  questionCount Int     @default(0) @map("question_count")
+  isActive      Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([parentTopicId])
+  @@index([isActive])
+  @@map("topics")
+}
+
+// AI generation audit log
+model AiGenerationLog {
+  id String @id @default(cuid())
+
+  userId      String        @map("user_id")
+  featureType AIFeatureType @map("feature_type")
+
+  // Request context
+  questionId String? @map("question_id")
+  stepId     String? @map("step_id")
+
+  // Model details
+  model             String
+  promptTemplateId  String? @map("prompt_template_id")
+  promptTemplateVer Int?    @map("prompt_template_version")
+
+  // Usage
+  inputTokens      Int   @map("input_tokens")
+  outputTokens     Int   @map("output_tokens")
+  latencyMs        Int   @map("latency_ms")
+  estimatedCostUsd Float @map("estimated_cost_usd") @db.Real
+
+  // Result
+  success      Boolean
+  errorMessage String? @map("error_message")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([featureType, createdAt])
+  @@index([questionId])
+  @@index([createdAt])
+  @@map("ai_generation_log")
+}
+
+// =============================================================================
+// RAW EXTRACTIONS (MathPix Pipeline Audit)
+// =============================================================================
+
+enum ExtractionStatus {
+  accepted
+  rejected
+  processing
+  completed
+  needs_review
+  failed
+}
+
+model RawExtraction {
+  id               String           @id @default(cuid())
+  mathpixJobId     String           @unique @map("mathpix_job_id")
+
+  // Source tracking
+  sourceUri        String           @map("source_uri")
+  sourcePageNumber Int?             @map("source_page_number")
+
+  // Raw content (immutable after creation)
+  rawLatex         String           @map("raw_latex")
+  rawText          String?          @map("raw_text")
+  confidence       Float            @db.Real
+
+  // Extraction metadata
+  extractedAt      DateTime         @map("extracted_at")
+  extractedBy      String           @map("extracted_by")
+
+  // Pipeline status
+  status           ExtractionStatus @default(accepted)
+  rejectionReason  String?          @map("rejection_reason")
+  pipelineVersion  String?          @map("pipeline_version")
+  currentStage     Int              @default(1) @map("current_stage")
+  stageOutputs     Json?            @map("stage_outputs") @db.JsonB
+
+  // Linkage to generated question
+  questionId       String?          @map("question_id")
+
+  // Timestamps
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([mathpixJobId])
+  @@index([questionId])
+  @@index([createdAt])
+  @@map("raw_extractions")
+}

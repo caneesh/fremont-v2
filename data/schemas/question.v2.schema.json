@@ -1,0 +1,1143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://physiscaffold.app/schemas/question.v2.schema.json",
+  "title": "PhysiScaffold Question Schema v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "questionId", "metadata", "classification", "prompt", "steps", "solutions"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["question.v1", "question.v2"],
+      "description": "Schema version. v1 documents validate under v2 for backward compatibility."
+    },
+
+    "questionId": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$",
+      "description": "Stable unique id (slug-like)."
+    },
+
+    "metadata": { "$ref": "#/$defs/Metadata" },
+    "classification": { "$ref": "#/$defs/Classification" },
+    "prompt": { "$ref": "#/$defs/Prompt" },
+
+    "patterns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PatternOption" },
+      "description": "Pattern options for Pattern-First Mode (recommended: 4-8)."
+    },
+
+    "primaryPatternId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical pattern id (authoritative) for Pattern-First Mode."
+    },
+
+    "secondaryPatternIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+      },
+      "uniqueItems": true,
+      "default": [],
+      "description": "[v2] Additional applicable pattern IDs beyond the primary pattern."
+    },
+
+    "timePressure": {
+      "$ref": "#/$defs/TimePressure",
+      "description": "Per-question time-pressure training configuration."
+    },
+
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/AssetRef" },
+      "default": []
+    },
+
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Step" },
+      "description": "Ordered steps; branching can be represented via next pointers."
+    },
+
+    "flow": {
+      "$ref": "#/$defs/Flow",
+      "description": "Optional explicit flow graph. If omitted, steps are linear in array order."
+    },
+
+    "solutions": { "$ref": "#/$defs/Solutions" },
+
+    "authoring": {
+      "$ref": "#/$defs/Authoring",
+      "description": "Optional authoring hints, not shown to learners by default."
+    },
+
+    "questionBank": {
+      "$ref": "#/$defs/QuestionBank",
+      "description": "Fields for RAG, pattern matching, and question bank retrieval."
+    },
+
+    "prerequisites": {
+      "$ref": "#/$defs/Prerequisites",
+      "description": "What students should know/complete before attempting this question."
+    },
+
+    "analytics": {
+      "$ref": "#/$defs/Analytics",
+      "description": "Usage statistics, populated by the application."
+    },
+
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "[v2] Tracks how this question was created and ingested."
+    },
+
+    "lifecycle": {
+      "$ref": "#/$defs/Lifecycle",
+      "description": "[v2] Question lifecycle state management."
+    },
+
+    "relatedQuestions": {
+      "$ref": "#/$defs/RelatedQuestions",
+      "description": "[v2] ID-based links to related questions by difficulty."
+    },
+
+    "aiMetadata": {
+      "$ref": "#/$defs/AIMetadata",
+      "description": "[v2] Metadata for AI-generated content. Required when provenance.origin includes AI."
+    }
+  },
+
+  "$defs": {
+    "Metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "difficulty", "estimatedTimeSec"],
+      "properties": {
+        "title": { "type": "string", "minLength": 3 },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "estimatedTimeSec": { "type": "integer", "minimum": 30, "maximum": 7200 },
+        "language": { "type": "string", "default": "en" },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["original", "jee", "neet", "cbse", "ncert", "book", "other"]
+            },
+            "reference": { "type": "string" },
+            "year": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 }
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Increment when content changes materially."
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "Classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topicTags", "patternTags"],
+      "properties": {
+        "topicTags": { "$ref": "#/$defs/Tags" },
+        "patternTags": { "$ref": "#/$defs/Tags" },
+        "metaSkillTags": { "$ref": "#/$defs/Tags", "default": [] },
+        "trapTags": { "$ref": "#/$defs/Tags", "default": [] },
+        "learningObjectives": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 },
+          "default": []
+        }
+      }
+    },
+
+    "Tags": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+      },
+      "uniqueItems": true
+    },
+
+    "Prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 10 },
+        "context": {
+          "type": "string",
+          "description": "Optional extra context (e.g., assumptions, coordinate choice)."
+        },
+        "diagram": { "$ref": "#/$defs/DiagramRef" },
+        "given": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GivenItem" },
+          "default": []
+        },
+        "asked": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AskedItem" },
+          "default": []
+        }
+      }
+    },
+
+    "PatternOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable unique pattern id."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short display label."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional 1-line description for quick scanning."
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional recognition cues (keywords/triggers)."
+        }
+      }
+    },
+
+    "TimePressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enablePatternFirst": { "type": "boolean" },
+        "lockSeconds": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "showCountdown": { "type": "boolean" },
+        "allowTimeoutProceed": { "type": "boolean" },
+
+        "enableSkipCommit": { "type": "boolean" },
+        "gateSeconds": { "type": "integer", "minimum": 1, "maximum": 600 },
+        "autoCommitSeconds": { "type": "integer", "minimum": 1, "maximum": 30 },
+
+        "expectedSolveTimeSeconds": { "type": "integer", "minimum": 1, "maximum": 7200 }
+      }
+    },
+
+    "GivenItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string" }
+      }
+    },
+
+    "AskedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "expectedForm": {
+          "type": "string",
+          "description": "e.g., 'a = g sin(θ)' or 'numeric'."
+        }
+      }
+    },
+
+    "DiagramRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["none", "static", "interactive"] },
+        "assetId": { "type": "string" },
+        "annotations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "none" } } },
+          "then": { "not": { "required": ["assetId"] } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["static", "interactive"] } } },
+          "then": { "required": ["assetId"] }
+        }
+      ]
+    },
+
+    "AssetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assetId", "kind"],
+      "properties": {
+        "assetId": { "type": "string", "minLength": 2 },
+        "kind": { "type": "string", "enum": ["image", "svg", "json", "video", "other"] },
+        "uri": { "type": "string", "description": "Optional external/relative location." },
+        "alt": { "type": "string" }
+      }
+    },
+
+    "Choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "text"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Option identifier, e.g., 'A', 'B', 'C', 'D'"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Option display text, can include LaTeX"
+        },
+        "isDistractor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Marks this as a distractor (wrong answer)"
+        }
+      }
+    },
+
+    "Step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepId", "type", "prompt"],
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 2,
+          "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+        },
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "INFO",
+            "MCQ_SINGLE",
+            "MCQ_MULTI",
+            "FILL_BLANK",
+            "NUMERIC",
+            "SHORT_TEXT",
+            "DERIVATION",
+            "DIAGRAM_FBD",
+            "CHECKPOINT"
+          ]
+        },
+
+        "prompt": { "type": "string", "minLength": 3 },
+
+        "pattern": { "type": "string", "minLength": 2, "pattern": "^[a-z0-9][a-z0-9\\-_.]*$" },
+        "metaSkill": { "type": "string", "minLength": 2, "pattern": "^[a-z0-9][a-z0-9\\-_.]*$" },
+        "topic": { "type": "string", "minLength": 2, "pattern": "^[a-z0-9][a-z0-9\\-_.]*$" },
+
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+
+        "cognitiveStage": {
+          "type": "string",
+          "enum": ["recall", "understand", "apply", "analyze", "evaluate", "create"],
+          "description": "[v2] Bloom's taxonomy cognitive level for this step."
+        },
+
+        "prerequisites": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Step IDs that must be completed before this step"
+        },
+
+        "requiredConcepts": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9\\-_.]*$" },
+          "default": [],
+          "description": "Concept IDs needed to complete this step"
+        },
+
+        "choices": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Choice" },
+          "minItems": 2,
+          "maxItems": 6,
+          "description": "Required for MCQ_SINGLE and MCQ_MULTI step types"
+        },
+
+        "correct": {
+          "oneOf": [
+            { "type": "string", "description": "Single correct answer key for MCQ_SINGLE or FILL_BLANK" },
+            { "type": "array", "items": { "type": "string" }, "description": "Multiple correct keys for MCQ_MULTI" }
+          ],
+          "description": "The correct answer(s)"
+        },
+
+        "correctNumeric": {
+          "type": "number",
+          "description": "Required for NUMERIC step type - the expected numeric answer"
+        },
+
+        "diagramValidator": {
+          "$ref": "#/$defs/DiagramValidator",
+          "description": "Required for DIAGRAM_FBD step type"
+        },
+
+        "ui": { "$ref": "#/$defs/StepUI" },
+        "validation": { "$ref": "#/$defs/StepValidation" },
+        "explanations": { "$ref": "#/$defs/Explanations" },
+
+        "mistakeMapping": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MistakeRule" },
+          "default": [],
+          "description": "Rule-based mapping from wrong attempts to mistake types."
+        },
+
+        "next": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/NextEdge" },
+          "default": [],
+          "description": "Optional branching. If omitted and Flow is omitted, steps are linear."
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "MCQ_SINGLE" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["choices", "correct"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "MCQ_MULTI" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["choices", "correct"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "FILL_BLANK" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["correct"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "NUMERIC" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["correctNumeric"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "DIAGRAM_FBD" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["diagramValidator"] }
+        }
+      ]
+    },
+
+    "StepUI": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "showTimer": { "type": "boolean", "default": false },
+        "allowHint": { "type": "boolean", "default": true },
+        "allowReveal": { "type": "boolean", "default": true },
+        "hintCost": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.2 },
+        "revealCost": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.5 }
+      }
+    },
+
+    "StepValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requiredBeforeProceed": { "type": "boolean", "default": true },
+        "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 10, "default": 2 },
+        "acceptCaseInsensitive": { "type": "boolean", "default": true },
+        "numericTolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0.01,
+          "description": "Absolute tolerance for numeric answers."
+        },
+        "units": {
+          "type": "string",
+          "description": "Optional expected units."
+        }
+      }
+    },
+
+    "Explanations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "micro": { "type": "string" },
+        "conceptual": { "type": "string" },
+        "deep": { "type": "string" },
+        "contrast": { "type": "string" },
+        "hint": { "type": "string", "description": "Short step hint (not the full answer)." }
+      }
+    },
+
+    "MistakeRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["when", "mistakeTypeId"],
+      "properties": {
+        "when": { "$ref": "#/$defs/MistakeCondition" },
+        "mistakeTypeId": {
+          "type": "string",
+          "minLength": 2,
+          "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+        },
+        "severity": { "type": "integer", "minimum": 1, "maximum": 5, "default": 3 },
+        "message": { "type": "string", "description": "Optional user-facing message." }
+      }
+    },
+
+    "MistakeCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "onChoice": {
+          "type": "string",
+          "description": "For MCQ: the option key or option text that indicates the mistake."
+        },
+        "onRegex": {
+          "type": "string",
+          "description": "For text/numeric: regex match against user input."
+        },
+        "onRevealUsed": { "type": "boolean" },
+        "onHintCountGte": { "type": "integer", "minimum": 1 },
+        "onTimeSpentSecGte": { "type": "integer", "minimum": 1 }
+      },
+      "anyOf": [
+        { "required": ["onChoice"] },
+        { "required": ["onRegex"] },
+        { "required": ["onRevealUsed"] },
+        { "required": ["onHintCountGte"] },
+        { "required": ["onTimeSpentSecGte"] }
+      ]
+    },
+
+    "NextEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["to"],
+      "properties": {
+        "to": { "type": "string" },
+        "when": {
+          "type": "string",
+          "enum": ["ALWAYS", "ON_CORRECT", "ON_INCORRECT", "ON_REVEAL", "CUSTOM"],
+          "default": "ALWAYS"
+        },
+        "customWhen": {
+          "type": "string",
+          "description": "If when=CUSTOM, a simple expression evaluated by app (optional)."
+        }
+      }
+    },
+
+    "Flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startStepId"],
+      "properties": {
+        "startStepId": { "type": "string" },
+        "endStepIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "Solutions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finalAnswer"],
+      "properties": {
+        "finalAnswer": { "$ref": "#/$defs/AnswerSpec" },
+
+        "synthesis": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "High-level recap steps (Reveal-Reconstruct-Validate)."
+        },
+
+        "limitingCases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/LimitingCase" },
+          "default": []
+        },
+
+        "alternativePaths": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AlternativePath" },
+          "default": []
+        },
+
+        "fullDerivation": {
+          "type": "string",
+          "description": "Optional full derivation text/LaTeX."
+        },
+
+        "answerKey": {
+          "type": "object",
+          "description": "Optional canonical key-value fields for graders/analytics.",
+          "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+        }
+      }
+    },
+
+    "AnswerSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["EXPRESSION", "NUMERIC", "MCQ_SINGLE", "MCQ_MULTI", "TEXT"] },
+        "value": {
+          "description": "Answer value; meaning depends on type.",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "units": { "type": "string" },
+        "tolerance": { "type": "number", "minimum": 0 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "LimitingCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["condition", "expected"],
+      "properties": {
+        "condition": { "type": "string", "minLength": 1 },
+        "expected": { "type": "string", "minLength": 1 },
+        "why": { "type": "string" }
+      }
+    },
+
+    "AlternativePath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "outline"],
+      "properties": {
+        "label": { "type": "string", "minLength": 2, "description": "e.g., 'Energy method'." },
+        "outline": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "finalAnswer": { "$ref": "#/$defs/AnswerSpec" }
+      }
+    },
+
+    "Authoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reviewStatus": { "type": "string", "enum": ["draft", "review", "approved"], "default": "draft" },
+        "notes": { "type": "string" },
+        "canonicalPatterns": { "$ref": "#/$defs/Tags", "default": [] }
+      }
+    },
+
+    "DiagramValidator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenarioId"],
+      "properties": {
+        "scenarioId": { "type": "string" },
+        "requiredForces": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["mg", "N", "friction", "tension", "spring", "pseudo", "drag", "other"] },
+          "default": []
+        },
+        "directionRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DirectionRule" },
+          "default": []
+        }
+      }
+    },
+
+    "DirectionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["force", "rule"],
+      "properties": {
+        "force": { "type": "string" },
+        "rule": {
+          "type": "string",
+          "enum": [
+            "DOWN_GLOBAL",
+            "PERP_TO_SURFACE",
+            "ALONG_SURFACE_OPPOSE_MOTION",
+            "ALONG_ROPE",
+            "RADIAL_OUTWARD",
+            "CUSTOM"
+          ]
+        },
+        "customRule": { "type": "string" }
+      }
+    },
+
+    "Prerequisites": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Comprehensive prerequisite requirements for the question",
+      "properties": {
+        "concepts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ConceptPrerequisite" },
+          "default": [],
+          "description": "Concepts student should understand before attempting"
+        },
+        "questions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QuestionPrerequisite" },
+          "default": [],
+          "description": "Recommended questions to complete first"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+          },
+          "default": [],
+          "description": "Meta-skills needed (e.g., fbd-drawing, vector-decomposition)"
+        },
+        "minimumMastery": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.7,
+          "description": "Minimum mastery level (0-1) on prerequisites before attempting"
+        }
+      }
+    },
+
+    "ConceptPrerequisite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conceptId"],
+      "properties": {
+        "conceptId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable concept name"
+        },
+        "importance": {
+          "type": "string",
+          "enum": ["critical", "important", "helpful"],
+          "default": "important",
+          "description": "How essential this prerequisite is"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this concept is needed"
+        }
+      }
+    },
+
+    "QuestionPrerequisite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["questionId"],
+      "properties": {
+        "questionId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Question title for display"
+        },
+        "relationship": {
+          "type": "string",
+          "enum": ["simpler-version", "builds-foundation", "teaches-technique", "same-pattern"],
+          "default": "builds-foundation"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, must complete before this question"
+        }
+      }
+    },
+
+    "QuestionBank": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "embedding": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Vector embedding for semantic search (e.g., 1536 dimensions for OpenAI)"
+        },
+        "templateFingerprint": {
+          "type": "string",
+          "description": "Structural fingerprint: given:x,y|asked:a,b|scenario:type"
+        },
+        "sourcePatternId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9\\-_.]*$",
+          "description": "ID of the pattern this question was generated from"
+        },
+        "isOriginal": {
+          "type": "boolean",
+          "default": true,
+          "description": "True if this is original content (not directly copied)"
+        },
+        "similarQuestionIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "IDs of similar questions for 'try another' feature"
+        },
+        "variationOf": {
+          "type": ["string", "null"],
+          "description": "Parent question ID if this is a variation"
+        },
+        "searchKeywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Keywords for text-based search"
+        },
+        "conceptIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+          },
+          "default": [],
+          "description": "Concept IDs from your ConceptNetwork"
+        },
+        "prerequisiteConceptIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+          },
+          "default": [],
+          "description": "Concepts student should know before attempting"
+        },
+        "errorTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.]*$"
+          },
+          "default": [],
+          "description": "Error types this question helps remediate (for circuit breaker drills)"
+        }
+      }
+    },
+
+    "Analytics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Runtime analytics - populated by the application, not during authoring",
+      "properties": {
+        "timesAttempted": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "timesCompleted": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "avgCompletionRate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "0.0 to 1.0"
+        },
+        "avgTimeToCompleteSec": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "avgHintsUsed": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "avgScore": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "commonMistakes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "mistakeTypeId": { "type": "string" },
+              "frequency": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          },
+          "default": [],
+          "description": "Most frequent mistakes made on this question"
+        },
+        "lastUpdated": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "[v2] Tracks how this question was created and ingested into the system.",
+      "required": ["origin"],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": ["mathpix", "ai-generated", "manual", "imported", "hybrid"],
+          "description": "Primary source of this question content."
+        },
+        "sourceUri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI to original source document (e.g., PDF path, URL)."
+        },
+        "sourcePageNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Page number in source document if applicable."
+        },
+        "mathpixJobId": {
+          "type": "string",
+          "description": "MathPix processing job ID for traceability."
+        },
+        "ingestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this question was ingested into the system."
+        },
+        "ingestedBy": {
+          "type": "string",
+          "description": "User ID or system identifier that ingested this question."
+        },
+        "originalText": {
+          "type": "string",
+          "description": "Verbatim original text before any processing. For audit trail only."
+        },
+        "processingNotes": {
+          "type": "string",
+          "description": "Notes about any transformations applied during ingestion."
+        }
+      }
+    },
+
+    "Lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "[v2] Question lifecycle state management.",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["draft", "review", "approved", "retired"],
+          "description": "Current lifecycle state of the question."
+        },
+        "stateChangedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the state was last changed."
+        },
+        "stateChangedBy": {
+          "type": "string",
+          "description": "User ID who changed the state."
+        },
+        "retiredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this question was retired (if state=retired)."
+        },
+        "retiredReason": {
+          "type": "string",
+          "enum": ["deprecated", "superseded", "incorrect", "duplicate", "other"],
+          "description": "Reason for retirement."
+        },
+        "supersededBy": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$",
+          "description": "Question ID that supersedes this one (if retired due to supersession)."
+        },
+        "approvedBy": {
+          "type": "string",
+          "description": "User ID who approved this question."
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this question was approved."
+        }
+      }
+    },
+
+    "RelatedQuestions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "[v2] ID-based links to related questions by difficulty level.",
+      "properties": {
+        "sameDifficulty": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Question IDs with same difficulty and similar pattern."
+        },
+        "easier": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Question IDs that are easier versions or prerequisites."
+        },
+        "harder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Question IDs that are harder follow-ups or extensions."
+        },
+        "samePattern": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9\\-_.:]*$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Question IDs using the same primary pattern."
+        }
+      }
+    },
+
+    "AIMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "[v2] Metadata for AI-generated content. Required transparency for AI origins.",
+      "required": ["model", "generatedAt"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "AI model identifier used for generation (e.g., 'gpt-4', 'claude-3-opus')."
+        },
+        "modelVersion": {
+          "type": "string",
+          "description": "Specific model version or checkpoint."
+        },
+        "promptTemplateId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9\\-_.]*$",
+          "description": "ID of the prompt template used for generation."
+        },
+        "promptTemplateVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version of the prompt template."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the AI generated this content."
+        },
+        "generationParams": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Model parameters used (temperature, top_p, etc.)."
+        },
+        "confidenceScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "AI self-reported confidence in generation quality (0-1)."
+        },
+        "humanReviewed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether a human has reviewed this AI-generated content."
+        },
+        "humanReviewedBy": {
+          "type": "string",
+          "description": "User ID of the human reviewer."
+        },
+        "humanReviewedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the human review was completed."
+        },
+        "reviewNotes": {
+          "type": "string",
+          "description": "Notes from human review."
+        },
+        "aiGeneratedFields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "JSON paths of fields that were AI-generated (e.g., 'steps[0].explanations.deep')."
+        },
+        "manualOverrides": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "JSON paths of AI-generated fields that were manually edited."
+        }
+      }
+    }
+  }
+}
