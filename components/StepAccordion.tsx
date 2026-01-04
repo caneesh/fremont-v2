@@ -9,6 +9,9 @@ import FeynmanMicroPrompt from './FeynmanMicroPrompt'
 import VerbalPlanRenderer from './micro-tasks/VerbalPlanRenderer'
 import { PaperSolutionUploader } from './paper-solution'
 import SocraticTutorChat from './SocraticTutorChat'
+import SocraticStepDialogue from './SocraticStepDialogue'
+import ReadOnlyExplanationPopup from './ReadOnlyExplanationPopup'
+import type { SocraticMasteryResult } from '@/types/socraticFirst'
 import type { AnalyzeSolutionResponse } from '@/types/paperSolution'
 import { authenticatedFetch, parseQuotaExceeded } from '@/lib/api/apiClient'
 import { useToast } from '@/components/ui/ToastProvider'
@@ -60,6 +63,9 @@ interface StepAccordionProps {
   maxHintLevel?: number
   professorVisibility?: ProfessorVisibility
   hasStepErrors?: boolean
+  // Socratic-First Mode props
+  useSocraticFirst?: boolean
+  onSocraticComplete?: (result: SocraticMasteryResult) => void
   onAnswerChange: (answer: string) => void
   onComplete: () => void
   onActivate: () => void
@@ -95,6 +101,8 @@ export default function StepAccordion({
   maxHintLevel,
   professorVisibility = 'always',
   hasStepErrors = false,
+  useSocraticFirst = false,
+  onSocraticComplete,
   onAnswerChange,
   onComplete,
   onActivate,
@@ -147,6 +155,12 @@ export default function StepAccordion({
 
   // Socratic Tutor Chat state
   const [showSocraticTutor, setShowSocraticTutor] = useState(false)
+
+  // Socratic-First Mode state
+  const [isSocraticMode, setIsSocraticMode] = useState(
+    FEATURE_FLAGS.SOCRATIC_FIRST_MODE && useSocraticFirst
+  )
+  const [showReadOnlyPopup, setShowReadOnlyPopup] = useState(false)
 
   useEffect(() => {
     if (!shouldShowProfessor && showSocraticTutor) {
@@ -231,6 +245,34 @@ export default function StepAccordion({
     setShowSocraticTutor(false)
     onComplete()
     setIsExpanded(false)
+  }
+
+  // Socratic-First Mode: Handle completion
+  const handleSocraticFirstComplete = (result: SocraticMasteryResult) => {
+    if (onSocraticComplete) {
+      onSocraticComplete(result)
+    }
+    onComplete()
+    setIsExpanded(false)
+  }
+
+  // Socratic-First Mode: Switch to traditional hint mode
+  const handleSwitchToHints = () => {
+    setIsSocraticMode(false)
+  }
+
+  // Read-Only Mode: Open popup with explanation
+  const handleReadOnlyMode = () => {
+    setShowReadOnlyPopup(true)
+  }
+
+  // Read-Only Mode: Close popup and optionally complete step
+  const handleReadOnlyComplete = (understood: boolean) => {
+    setShowReadOnlyPopup(false)
+    if (understood) {
+      onComplete()
+      setIsExpanded(false)
+    }
   }
 
   // P0 Decision Gate: Handle answer from DecisionGate component
@@ -901,11 +943,67 @@ export default function StepAccordion({
               </div>
             )}
 
-            {/* Progressive Hint Ladder */}
+            {/* Socratic-First Mode OR Progressive Hint Ladder */}
             {showStepContent && shouldShowHints && (
-            <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
-              {/* Equationless Path - Verbal Plan Before Algebra */}
-              {pendingVerbalPlan && (
+            <>
+              {/* Socratic-First Mode */}
+              {isSocraticMode && FEATURE_FLAGS.SOCRATIC_FIRST_MODE ? (
+                <div className="space-y-4">
+                  <SocraticStepDialogue
+                    stepIndex={step.id}
+                    stepTitle={step.title}
+                    stepContent={step.hints.map(h => h.content).join('\n')}
+                    problemStatement={problemStatement || ''}
+                    concepts={step.requiredConcepts || []}
+                    onComplete={handleSocraticFirstComplete}
+                    onSwitchToHints={handleSwitchToHints}
+                    onProfessorExplains={handleAudioHint}
+                    isProfessorLoading={isLoadingAudio}
+                  />
+
+                  {/* Mode toggle options */}
+                  <div className="flex flex-col items-center gap-2 pt-2">
+                    <button
+                      onClick={handleReadOnlyMode}
+                      className="text-sm text-gray-500 dark:text-dark-text-muted hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      Switch to Read Mode (show me the solution)
+                    </button>
+                    <button
+                      onClick={handleSwitchToHints}
+                      className="text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    >
+                      Prefer traditional hints? Switch to hint ladder
+                    </button>
+                  </div>
+                </div>
+              ) : (
+              /* Traditional Progressive Hint Ladder */
+              <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
+                {/* Mode switch to Socratic */}
+                {FEATURE_FLAGS.SOCRATIC_FIRST_MODE && !isSocraticMode && (
+                  <button
+                    onClick={() => setIsSocraticMode(true)}
+                    className="w-full mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <span className="text-xl">🤔</span>
+                    </div>
+                    <div className="text-left flex-1">
+                      <h6 className="font-semibold text-indigo-900 dark:text-indigo-200 text-sm">Try Guided Discovery</h6>
+                      <p className="text-xs text-indigo-700 dark:text-indigo-300">Answer questions instead of reading hints</p>
+                    </div>
+                    <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Equationless Path - Verbal Plan Before Algebra */}
+                {pendingVerbalPlan && (
                 <div className="mb-5 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
@@ -1257,7 +1355,22 @@ export default function StepAccordion({
               {audioError && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-2">{audioError}</p>
               )}
-            </div>
+              </div>
+              )}
+            </>
+            )}
+
+            {/* Read-Only Explanation Popup */}
+            {showReadOnlyPopup && (
+              <ReadOnlyExplanationPopup
+                isOpen={showReadOnlyPopup}
+                stepTitle={step.title}
+                stepContent={step.hints.map(h => `**${h.title}**\n${h.content}`).join('\n\n')}
+                problemStatement={problemStatement || ''}
+                concepts={relatedConcepts}
+                onClose={() => setShowReadOnlyPopup(false)}
+                onComplete={handleReadOnlyComplete}
+              />
             )}
 
             {/* Socratic Question */}

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { validateExplanation, countLines, countWords } from '@/types/explainToFriend'
 import type { ExplainToFriendResponse, StudyBuddyResponse } from '@/types/explainToFriend'
-import { authenticatedFetch } from '@/lib/api/apiClient'
+import { authService } from '@/lib/auth/authService'
 
 interface ExplainToFriendProps {
   problemText: string
@@ -47,9 +47,18 @@ export default function ExplainToFriend({
     setIsSubmitting(true)
 
     try {
-      // Get AI assessment
-      const response = await authenticatedFetch('/api/explain-to-friend', {
+      // Get AI assessment (auth optional)
+      const userCode = authService.getUserCode()
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userCode) {
+        headers['Authorization'] = `Bearer ${userCode}`
+      }
+
+      const response = await fetch('/api/explain-to-friend', {
         method: 'POST',
+        headers,
         body: JSON.stringify({
           problemText,
           explanation,
@@ -75,11 +84,7 @@ export default function ExplainToFriend({
     } catch (error) {
       console.error('Error assessing explanation:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      if (errorMessage === 'Not authenticated') {
-        setValidationErrors(['Please sign in to submit your explanation.'])
-      } else {
-        setValidationErrors([`Failed to assess explanation: ${errorMessage}`])
-      }
+      setValidationErrors([`Failed to assess explanation. Please try again.`])
     } finally {
       setIsSubmitting(false)
     }
@@ -94,8 +99,17 @@ export default function ExplainToFriend({
     setBuddyLoading(true)
 
     try {
-      const response = await authenticatedFetch('/api/study-buddy', {
+      const userCode = authService.getUserCode()
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (userCode) {
+        headers['Authorization'] = `Bearer ${userCode}`
+      }
+
+      const response = await fetch('/api/study-buddy', {
         method: 'POST',
+        headers,
         body: JSON.stringify({
           problemText,
           explanation,

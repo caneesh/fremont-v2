@@ -7,6 +7,12 @@ import type {
   GenerateQuestionsResponse,
   ChatMessage,
 } from '@/types/socraticTutor'
+import type {
+  SocraticModeRequest,
+  SocraticModeResponse,
+  SocraticExchangeRecord,
+  SelfReportConfidence,
+} from '@/types/socraticFirst'
 
 // Create client lazily to ensure env vars are available in serverless context
 function getAnthropicClient() {
@@ -96,7 +102,14 @@ Rules:
 // Analyze student answer and generate follow-up if needed
 export async function POST(request: NextRequest) {
   try {
-    const body: SocraticAnalyzeRequest = await request.json()
+    const body = await request.json()
+
+    // Check if this is a Socratic-first mode request
+    if (body.mode === 'verification' || body.mode === 'hint_check') {
+      return handleSocraticFirstMode(body as SocraticModeRequest)
+    }
+
+    // Legacy mode: original Socratic tutor flow
     const {
       problemText,
       stepTitle,
@@ -105,7 +118,7 @@ export async function POST(request: NextRequest) {
       question,
       studentAnswer,
       chatHistory = [],
-    } = body
+    } = body as SocraticAnalyzeRequest
 
     // Format chat history for context
     const historyText = chatHistory.length > 0
@@ -189,6 +202,148 @@ Respond with ONLY valid JSON.`
         error: 'Failed to analyze answer',
         details: errorMessage.substring(0, 100),
         hasApiKey
+      },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Handle Socratic-first mode requests (verification, hint_check)
+ */
+async function handleSocraticFirstMode(body: SocraticModeRequest): Promise<NextResponse> {
+  const {
+    mode,
+    problemText,
+    stepTitle,
+    stepContent,
+    concepts,
+    question,
+    studentAnswer,
+    selfReportedConfidence,
+    previousExchanges = [],
+    hintLevelJustViewed,
+  } = body
+
+  // Format previous exchanges for context
+  const exchangeHistory = previousExchanges.length > 0
+    ? `\n## Previous Exchanges\n${previousExchanges.map(e =>
+        `Q: ${e.question}\nA: ${e.studentAnswer} (confidence: ${e.selfReport})\nFeedback: ${e.aiVerification.feedback}`
+      ).join('\n\n')}\n`
+    : ''
+
+  // Determine context based on mode
+  const modeContext = mode === 'hint_check'
+    ? `\n## Context\nThe student just viewed a Level ${hintLevelJustViewed} hint. We need to verify they understood it.\n`
+    : ''
+
+  const prompt = `You are a warm, encouraging Socratic guide helping a physics student think through a problem. Your role is to verify their understanding and guide discovery.
+
+## Problem
+${problemText}
+
+## Step: ${stepTitle}
+${stepContent}
+
+## Key Concepts
+${concepts.join(', ')}
+${exchangeHistory}${modeContext}
+## Current Question
+${question || "What's your approach to this step?"}
+
+## Student's Answer
+${studentAnswer}
+
+## Student's Self-Reported Confidence
+${selfReportedConfidence} (guess = not sure at all, okay = somewhat confident, solid = pretty confident)
+
+## Your Task
+1. Assess the quality of the student's answer (excellent, good, partial, or misconception)
+2. Compare their self-reported confidence to actual performance
+3. Provide warm, encouraging feedback
+4. If not complete, generate a follow-up question to guide them deeper
+5. Identify any concept gaps
+
+### Answer Quality Guidelines:
+- "excellent": Shows deep understanding, could teach this to others
+- "good": Solid understanding, may miss minor nuances
+- "partial": Has the right idea but incomplete or unclear
+- "misconception": Fundamental misunderstanding that needs gentle correction
+
+### Calibration Assessment:
+- "overconfident": Said "solid" but answer was partial/misconception
+- "underconfident": Said "guess" but answer was good/excellent
+- "calibrated": Self-assessment matches actual performance
+
+### Response Requirements:
+1. ALWAYS provide a detailed explanation (3-5 sentences) that teaches, not just validates
+2. ALWAYS ask a follow-up question if:
+   - Answer is "partial" or "misconception"
+   - Student said "guess" (even if answer is okay)
+   - There are concept gaps
+3. Only mark as complete if answer is "excellent" or "good" AND student was confident
+
+### Respond with JSON:
+{
+  "verification": {
+    "answerQuality": "excellent" | "good" | "partial" | "misconception",
+    "matchesSelfReport": true/false,
+    "calibrationAdjustment": "overconfident" | "underconfident" | "calibrated",
+    "feedback": "Detailed educational feedback explaining WHY (3-5 sentences). Explain the physics concept, not just whether they're right.",
+    "explanation": "A clear explanation of the correct approach/answer for this step (2-4 sentences). Always include this!",
+    "followUpQuestion": "A Socratic question to deepen understanding. REQUIRED if not excellent/good with solid confidence.",
+    "conceptGaps": ["List specific concepts they're missing, if any"]
+  },
+  "misconceptionDetails": [
+    {
+      "conceptId": "concept name",
+      "description": "What they misunderstand",
+      "severity": "minor" | "moderate" | "major"
+    }
+  ],
+  "isComplete": true/false,
+  "encouragement": "If complete, a celebratory message"
+}
+
+## Personality Rules (CRITICAL)
+- NEVER say "wrong", "incorrect", or "mistake"
+- Use: "Let's think about this...", "Almost there!", "Good thinking!", "You're getting warmer!"
+- For misconceptions: "Interesting approach! Let's explore that a bit more..."
+- For overconfidence: "You have good instincts! Let's double-check our reasoning together."
+- For underconfidence: "You know more than you think! That's actually quite good."
+- Celebrate early when they show real understanding
+- Mark as complete after 2-3 successful exchanges OR excellent first answer
+
+Respond with ONLY valid JSON.`
+
+  try {
+    const client = getAnthropicClient()
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      temperature: 0.4,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const textContent = response.content[0]
+    if (textContent.type !== 'text') {
+      throw new Error('Unexpected response type')
+    }
+
+    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error('Failed to parse JSON')
+    }
+
+    const result: SocraticModeResponse = JSON.parse(jsonMatch[0])
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error('Error in Socratic-first mode:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json(
+      {
+        error: 'Failed to verify answer',
+        details: errorMessage.substring(0, 100),
       },
       { status: 500 }
     )

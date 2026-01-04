@@ -334,10 +334,54 @@ export const FEATURE_FLAGS = {
    * - LLM-free fingerprinting for template selection
    * - Content-addressed caching (SHA-256)
    * - Template enforcement (LLM can only fill slots, not modify structure)
+   * - Local scaffold cache for known questions (instant response)
    *
-   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_QUESTION_ENGINE=true)
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_QUESTION_ENGINE=false)
    */
-  QUESTION_ENGINE: process.env.NEXT_PUBLIC_FEATURE_QUESTION_ENGINE === 'true',
+  QUESTION_ENGINE: process.env.NEXT_PUBLIC_FEATURE_QUESTION_ENGINE !== 'false',
+
+  /**
+   * Dashboard v3
+   * When enabled, uses the new unified AppShell layout with:
+   * - Desktop: Sidebar + TopBar navigation
+   * - Mobile: Bottom nav (4 items + More menu)
+   * - Dashboard as default landing page
+   * - /solve as dedicated solver route
+   *
+   * Features:
+   * - Planning-control first dashboard
+   * - Hero metrics (days practiced, problems solved, independence)
+   * - Today's plan editor with task reordering
+   * - Session runner for guided daily practice
+   *
+   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_DASHBOARD_V3=true)
+   */
+  DASHBOARD_V3: process.env.NEXT_PUBLIC_FEATURE_DASHBOARD_V3 === 'true',
+
+  /**
+   * Socratic-First Step Interaction
+   * When enabled, transforms step interaction from hint-reveal to Socratic questioning.
+   *
+   * Key features:
+   * - Hybrid entry: "thinking prompt" first, then Socratic guidance
+   * - Self-report + AI verify: User rates confidence (guess/okay/solid), AI verifies
+   * - Stuck mode: Free choice with embedded Socratic questions per hint
+   * - Warm tone: System never uses "wrong" or condescending language
+   *
+   * Flow:
+   * 1. Step opens with thinking prompt: "What's your approach?"
+   * 2. Student answers + rates confidence
+   * 3. AI verifies → guides with follow-up questions OR celebrates mastery
+   * 4. If stuck: Hint ladder with Socratic verification per hint
+   *
+   * Integrates with:
+   * - Concept Mastery Service (records Socratic attempts)
+   * - Mistake Notebook (triggers on misconceptions, overconfidence)
+   * - Error Pattern Service (records Socratic errors)
+   *
+   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_SOCRATIC_FIRST=true)
+   */
+  SOCRATIC_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_FIRST === 'true',
 }
 
 /**

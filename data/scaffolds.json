@@ -1,0 +1,688 @@
+{
+  "scaffolds": {
+    "mech-rot-001": {
+      "id": "mech-rot-001",
+      "topic": "mechanics",
+      "subtopic": "rotational_motion",
+      "statement": "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "rotational_motion",
+        "keywords": ["rotating", "hoop", "equilibrium", "centrifugal", "bead"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw a free body diagram of the bead in the rotating reference frame, showing all forces including the pseudo force.",
+          "hint": "In the rotating frame, the bead experiences: weight (mg downward), normal force (perpendicular to hoop surface), and centrifugal force (outward from rotation axis).",
+          "trap": "Don't forget that centrifugal force acts horizontally outward from the rotation axis, not along the hoop radius.",
+          "solution": "The FBD shows: mg pointing down, N perpendicular to the hoop at angle θ, and mω²r pointing horizontally outward where r = R sin θ is the distance from rotation axis.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Write the equilibrium equations by decomposing forces along and perpendicular to the hoop surface.",
+          "hint": "The bead is in equilibrium in the rotating frame, so sum of forces along and perpendicular to the hoop surface must be zero.",
+          "trap": "Be careful with the geometry - the centrifugal force has both radial and tangential components relative to the hoop.",
+          "solution": "Along hoop: mω²R sin θ cos θ = mg sin θ. Perpendicular: N = mg cos θ + mω²R sin²θ.",
+          "expected": { "type": "equation", "value": "mω²R sin θ cos θ = mg sin θ" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Solve for the equilibrium angle θ.",
+          "hint": "From the tangential equation, either sin θ = 0, or you can divide by sin θ to get another condition.",
+          "trap": "θ = 0 is always a solution, but it may not be stable for all values of ω.",
+          "solution": "Dividing by sin θ: ω²R cos θ = g, so cos θ = g/(ω²R). Valid only when ω² > g/R.",
+          "expected": { "type": "equation", "value": "cos θ = g/(ω²R)" }
+        },
+        {
+          "type": "mcq",
+          "prompt": "For what condition does a non-zero equilibrium angle exist?",
+          "hint": "The cosine must be between 0 and 1 for a valid angle.",
+          "trap": "Remember cos θ ≤ 1, so we need g/(ω²R) ≤ 1.",
+          "solution": "We need cos θ = g/(ω²R) ≤ 1, which means ω² ≥ g/R, or ω ≥ √(g/R).",
+          "expected": { "type": "choice", "value": "ω ≥ √(g/R)" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify your answer using limiting cases. What happens when ω → √(g/R) and when ω → ∞?",
+          "hint": "Check the behavior at the threshold angular velocity and at very high rotation speeds.",
+          "trap": "Make sure both limits give physically sensible results.",
+          "solution": "When ω = √(g/R): cos θ = 1, so θ = 0. When ω → ∞: cos θ → 0, so θ → 90°. Both make physical sense.",
+          "expected": { "type": "text", "value": "θ → 0° at threshold, θ → 90° at high ω" }
+        }
+      ],
+      "finalAnswer": "θ = cos⁻¹(g/(ω²R)) for ω ≥ √(g/R), otherwise θ = 0"
+    },
+    "mech-rot-002": {
+      "id": "mech-rot-002",
+      "topic": "mechanics",
+      "subtopic": "rotational_motion",
+      "statement": "A uniform rod of length L rotates in a horizontal plane with constant angular velocity ω about a vertical axis passing through one of its ends. A bead of mass m can slide without friction along the rod. At what distance r from the axis will the bead be in equilibrium?",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "rotational_motion",
+        "keywords": ["rotating", "rod", "bead", "equilibrium", "centrifugal"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw a free body diagram of the bead on the rotating rod in the rotating reference frame.",
+          "hint": "In the rotating frame, the bead experiences centrifugal force pointing radially outward.",
+          "trap": "The bead can only move along the rod, so only forces along the rod direction matter for equilibrium.",
+          "solution": "The FBD shows: Normal force from rod (perpendicular to rod), weight mg (down), and centrifugal force mω²r (radially outward along the rod).",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Write the condition for equilibrium along the rod.",
+          "hint": "Since the rod is horizontal and frictionless, what forces act along the rod?",
+          "trap": "There's no friction to balance the centrifugal force!",
+          "solution": "Along the rod, the only force is the centrifugal force mω²r pointing outward. There's nothing to balance it.",
+          "expected": { "type": "equation", "value": "F_along = mω²r" }
+        },
+        {
+          "type": "mcq",
+          "prompt": "Can the bead be in stable equilibrium at any point on the rod?",
+          "hint": "For equilibrium, the net force must be zero. Is there any position where the centrifugal force is balanced?",
+          "trap": "Don't assume equilibrium exists just because the problem asks for it.",
+          "solution": "No stable equilibrium exists. The centrifugal force always pushes the bead outward, and there's no restoring force.",
+          "expected": { "type": "choice", "value": "No, the bead will slide to the end of the rod" }
+        },
+        {
+          "type": "short",
+          "prompt": "What would be needed for equilibrium to exist?",
+          "hint": "Think about what could provide a restoring force toward the axis.",
+          "trap": "The problem states frictionless, so friction cannot help.",
+          "solution": "A spring attached to the axis, or friction, or inclination of the rod could provide a restoring force to balance the centrifugal force.",
+          "expected": { "type": "text", "value": "A restoring force like a spring or friction" }
+        }
+      ],
+      "finalAnswer": "No equilibrium position exists - the bead slides to r = L (end of rod)"
+    },
+    "mech-rot-003": {
+      "id": "mech-rot-003",
+      "topic": "mechanics",
+      "subtopic": "rotational_motion",
+      "statement": "A disc of mass M and radius R rolls without slipping down an inclined plane of angle α. Find the acceleration of the disc and the minimum coefficient of friction required to prevent slipping.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "rotational_motion",
+        "keywords": ["rolling", "disc", "incline", "friction", "acceleration"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw a free body diagram of the disc on the incline showing all forces.",
+          "hint": "Include weight, normal force, and friction. Note the direction of friction for rolling without slipping.",
+          "trap": "Friction acts up the incline for a rolling object going down - it provides the torque needed for rotation.",
+          "solution": "FBD shows: Mg at center pointing down, N perpendicular to incline at contact point, friction f up the incline at contact point.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Apply Newton's second law for translation along the incline.",
+          "hint": "The disc accelerates down the incline with acceleration a.",
+          "trap": "Don't forget the friction force opposes the motion direction.",
+          "solution": "Mg sin α - f = Ma, where f is the friction force acting up the incline.",
+          "expected": { "type": "equation", "value": "Mg sin α - f = Ma" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Apply Newton's second law for rotation about the center of mass.",
+          "hint": "The torque equation relates friction to angular acceleration.",
+          "trap": "Use the correct moment of inertia for a disc: I = ½MR².",
+          "solution": "τ = Iα → fR = (½MR²)(a/R) = ½Ma, so f = ½Ma.",
+          "expected": { "type": "equation", "value": "fR = ½MR² × (a/R)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Solve for the acceleration by combining the equations.",
+          "hint": "Substitute the expression for f into the translational equation.",
+          "trap": "Make sure to use the rolling condition a = αR.",
+          "solution": "Mg sin α - ½Ma = Ma → Mg sin α = (3/2)Ma → a = (2/3)g sin α.",
+          "expected": { "type": "equation", "value": "a = (2/3)g sin α" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Find the friction force and the minimum coefficient of friction.",
+          "hint": "Use f ≤ μN where N = Mg cos α.",
+          "trap": "The minimum μ is when f equals μN at the verge of slipping.",
+          "solution": "f = ½Ma = ⅓Mg sin α. For no slip: ⅓Mg sin α ≤ μMg cos α → μ ≥ ⅓ tan α.",
+          "expected": { "type": "equation", "value": "μ_min = (1/3) tan α" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify: What happens to the acceleration as α → 0° and α → 90°?",
+          "hint": "Check if the limiting cases make physical sense.",
+          "trap": "At α = 90°, pure rolling is impossible without infinite friction.",
+          "solution": "At α → 0: a → 0 (flat surface, no acceleration). At α → 90: a → (2/3)g, but would require μ → ∞ to maintain rolling.",
+          "expected": { "type": "text", "value": "a → 0 at α = 0, a → (2/3)g at α = 90°" }
+        }
+      ],
+      "finalAnswer": "a = (2/3)g sin α, μ_min = (1/3) tan α"
+    },
+    "mech-lom-001": {
+      "id": "mech-lom-001",
+      "topic": "mechanics",
+      "subtopic": "newton_laws_2d",
+      "statement": "A wedge of mass M and angle α rests on a frictionless horizontal surface. A block of mass m is placed on the wedge. What horizontal acceleration must be given to the wedge so that the block does not slide down? Assume all surfaces are frictionless.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "newton_laws_2d",
+        "keywords": ["wedge", "block", "acceleration", "frictionless", "no sliding"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw free body diagrams for both the block and the wedge.",
+          "hint": "For the block, consider it from the wedge's (accelerating) reference frame - you'll need a pseudo force.",
+          "trap": "In the ground frame, the block must accelerate horizontally with the wedge if it doesn't slide.",
+          "solution": "Block: mg down, N perpendicular to wedge surface. In wedge frame, add pseudo force ma backward. Wedge: Mg down, N' from ground up, N from block.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "For no sliding, write the equilibrium conditions for the block in the wedge's frame.",
+          "hint": "In the accelerating frame, the pseudo force ma acts backward on the block.",
+          "trap": "The block is in equilibrium relative to the wedge, not the ground.",
+          "solution": "Perpendicular to wedge: N = mg cos α + ma sin α. Along wedge: mg sin α = ma cos α.",
+          "expected": { "type": "equation", "value": "mg sin α = ma cos α" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Solve for the required acceleration a.",
+          "hint": "The tangential equation gives a directly.",
+          "trap": "Make sure the direction of the pseudo force is correct.",
+          "solution": "From mg sin α = ma cos α: a = g tan α.",
+          "expected": { "type": "equation", "value": "a = g tan α" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify using limiting cases. What happens when α → 0° and α → 90°?",
+          "hint": "Think about what acceleration would be needed for a nearly flat or nearly vertical wedge.",
+          "trap": "Both limits should give physically sensible answers.",
+          "solution": "α → 0°: a → 0 (flat wedge, no acceleration needed). α → 90°: a → ∞ (vertical wedge, impossible to prevent sliding).",
+          "expected": { "type": "text", "value": "a → 0 for α → 0, a → ∞ for α → 90°" }
+        }
+      ],
+      "finalAnswer": "a = g tan α"
+    },
+    "mech-lom-002": {
+      "id": "mech-lom-002",
+      "topic": "mechanics",
+      "subtopic": "newton_laws_2d",
+      "statement": "Three blocks of masses m₁ = 1 kg, m₂ = 2 kg, and m₃ = 3 kg are connected by strings and placed on a horizontal frictionless surface. A force F = 12 N is applied on m₃. Find the tension in the string connecting m₁ and m₂.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "newton_laws_2d",
+        "keywords": ["blocks", "string", "tension", "frictionless", "force"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw free body diagrams for each of the three blocks.",
+          "hint": "Each block has tension forces from connecting strings and m₃ has the applied force.",
+          "trap": "String tensions at connected blocks have equal magnitudes but opposite directions.",
+          "solution": "m₁: T₁ pulls right. m₂: T₁ pulls left, T₂ pulls right. m₃: T₂ pulls left, F = 12 N pulls right.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Find the common acceleration of all three blocks.",
+          "hint": "Since they're connected by strings, all blocks have the same acceleration.",
+          "trap": "Apply F = ma to the whole system first to find acceleration.",
+          "solution": "Total mass = 1 + 2 + 3 = 6 kg. F = (m₁ + m₂ + m₃)a → 12 = 6a → a = 2 m/s².",
+          "expected": { "type": "equation", "value": "a = 2 m/s²" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Apply Newton's second law to m₁ to find T₁.",
+          "hint": "m₁ is pulled only by T₁ (the tension between m₁ and m₂).",
+          "trap": "T₁ is the only horizontal force on m₁.",
+          "solution": "For m₁: T₁ = m₁a = 1 × 2 = 2 N.",
+          "expected": { "type": "equation", "value": "T₁ = 2 N" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify by checking T₂ and the equations for m₂ and m₃.",
+          "hint": "Calculate T₂ and verify all equations are consistent.",
+          "trap": "Make sure your tension values satisfy Newton's law for each block.",
+          "solution": "For m₂: T₂ - T₁ = m₂a → T₂ = 2 + 4 = 6 N. For m₃: F - T₂ = m₃a → 12 - 6 = 6 ✓. All consistent.",
+          "expected": { "type": "text", "value": "T₂ = 6 N, equations verified" }
+        }
+      ],
+      "finalAnswer": "T₁ = 2 N (tension between m₁ and m₂)"
+    },
+    "mech-lom-003": {
+      "id": "mech-lom-003",
+      "topic": "mechanics",
+      "subtopic": "circular_motion",
+      "statement": "A car moves on a horizontal circular road of radius r with speed v. The coefficient of friction between the tires and road is μ. What is the maximum speed at which the car can take the turn without skidding?",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "circular_motion",
+        "keywords": ["circular", "friction", "car", "skidding", "maximum speed"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw a free body diagram of the car showing all forces.",
+          "hint": "The car needs a centripetal force to move in a circle. What provides this force?",
+          "trap": "There's no banking - friction alone provides the centripetal force.",
+          "solution": "FBD shows: mg down, N up (equal to mg on horizontal road), friction f toward the center of the circle.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Write the equation for centripetal force.",
+          "hint": "Friction provides the centripetal force needed for circular motion.",
+          "trap": "The centripetal force is provided by static friction, not kinetic.",
+          "solution": "f = mv²/r, where f is the friction force pointing toward the center.",
+          "expected": { "type": "equation", "value": "f = mv²/r" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Apply the maximum friction condition and solve for v_max.",
+          "hint": "Maximum static friction is f_max = μN = μmg.",
+          "trap": "At maximum speed, friction is at its maximum value μmg.",
+          "solution": "μmg = mv²_max/r → v²_max = μgr → v_max = √(μgr).",
+          "expected": { "type": "equation", "value": "v_max = √(μgr)" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify: How does v_max depend on the mass of the car?",
+          "hint": "Look at the final formula - does m appear?",
+          "trap": "The mass cancels out in the derivation.",
+          "solution": "v_max = √(μgr) is independent of mass. A heavier car has more weight but also more normal force, giving proportionally more friction.",
+          "expected": { "type": "text", "value": "v_max is independent of mass" }
+        }
+      ],
+      "finalAnswer": "v_max = √(μgr)"
+    },
+    "mech-wen-001": {
+      "id": "mech-wen-001",
+      "topic": "mechanics",
+      "subtopic": "work_energy",
+      "statement": "A block of mass m is attached to a spring of spring constant k. The block is pulled a distance A from equilibrium and released. Find (a) the maximum velocity of the block, (b) the velocity when the block is at distance A/2 from equilibrium.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "work_energy",
+        "keywords": ["spring", "block", "velocity", "amplitude", "SHM"]
+      },
+      "steps": [
+        {
+          "type": "short",
+          "prompt": "Identify the type of motion and the relevant energy forms.",
+          "hint": "A spring-mass system undergoes simple harmonic motion.",
+          "trap": "Both kinetic and potential energies change during the motion.",
+          "solution": "This is SHM. Energy forms: Kinetic energy KE = ½mv², Spring potential energy PE = ½kx².",
+          "expected": { "type": "text", "value": "SHM with KE and spring PE" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Write the energy conservation equation.",
+          "hint": "Total mechanical energy is conserved in an ideal spring-mass system.",
+          "trap": "Choose the reference point: at equilibrium, PE = 0.",
+          "solution": "E_total = ½kA² (initial, all PE) = ½mv² + ½kx² (at position x).",
+          "expected": { "type": "equation", "value": "½kA² = ½mv² + ½kx²" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(a) Find the maximum velocity. Where does it occur?",
+          "hint": "Maximum velocity occurs when all energy is kinetic (PE = 0).",
+          "trap": "At equilibrium (x = 0), all energy is kinetic.",
+          "solution": "At x = 0: ½kA² = ½mv²_max → v_max = A√(k/m) = Aω where ω = √(k/m).",
+          "expected": { "type": "equation", "value": "v_max = A√(k/m)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(b) Find the velocity at x = A/2.",
+          "hint": "Substitute x = A/2 into the energy equation and solve for v.",
+          "trap": "Don't forget to take the square root at the end.",
+          "solution": "½kA² = ½mv² + ½k(A/2)² → kA² = mv² + kA²/4 → v² = (3kA²)/(4m) → v = (√3/2)A√(k/m).",
+          "expected": { "type": "equation", "value": "v = (√3/2)A√(k/m)" }
+        },
+        {
+          "type": "short",
+          "prompt": "Express part (b) as a fraction of v_max.",
+          "hint": "Compare v at x = A/2 with v_max.",
+          "trap": "The ratio should be a simple number.",
+          "solution": "v = (√3/2)v_max ≈ 0.866 v_max. At half the amplitude, the block has about 87% of its maximum velocity.",
+          "expected": { "type": "text", "value": "v = (√3/2)v_max ≈ 0.87 v_max" }
+        }
+      ],
+      "finalAnswer": "(a) v_max = A√(k/m), (b) v = (√3/2)A√(k/m) at x = A/2"
+    },
+    "mech-wen-002": {
+      "id": "mech-wen-002",
+      "topic": "mechanics",
+      "subtopic": "work_energy",
+      "statement": "A particle moves along the x-axis under the action of a force F = (6x² - 4x) N, where x is in meters. Calculate the work done by the force as the particle moves from x = 0 to x = 2 m.",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "work_energy",
+        "keywords": ["variable force", "work", "integration", "x-axis"]
+      },
+      "steps": [
+        {
+          "type": "equation",
+          "prompt": "Write the general formula for work done by a variable force.",
+          "hint": "Work is the integral of force over displacement.",
+          "trap": "For variable force, you cannot simply use W = Fd.",
+          "solution": "W = ∫F dx from x₁ to x₂.",
+          "expected": { "type": "equation", "value": "W = ∫F dx" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Set up the integral for this specific force function.",
+          "hint": "Substitute F = 6x² - 4x into the work integral.",
+          "trap": "Make sure to use the correct limits of integration.",
+          "solution": "W = ∫₀² (6x² - 4x) dx.",
+          "expected": { "type": "equation", "value": "W = ∫₀² (6x² - 4x) dx" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Evaluate the integral.",
+          "hint": "Integrate term by term: ∫x² dx = x³/3, ∫x dx = x²/2.",
+          "trap": "Don't forget to apply the limits of integration after finding the antiderivative.",
+          "solution": "W = [2x³ - 2x²]₀² = (2×8 - 2×4) - (0) = 16 - 8 = 8 J.",
+          "expected": { "type": "equation", "value": "W = 8 J" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify: Is the net force positive or negative over most of this interval?",
+          "hint": "Check where F = 6x² - 4x is positive and negative.",
+          "trap": "Factor the force to find where it changes sign.",
+          "solution": "F = 2x(3x - 2). F = 0 at x = 0 and x = 2/3. F < 0 for 0 < x < 2/3, F > 0 for x > 2/3. Positive work dominates.",
+          "expected": { "type": "text", "value": "F changes sign at x = 2/3, positive work dominates" }
+        }
+      ],
+      "finalAnswer": "W = 8 J"
+    },
+    "mech-wen-003": {
+      "id": "mech-wen-003",
+      "topic": "mechanics",
+      "subtopic": "work_energy",
+      "statement": "A small block slides down a frictionless track from height h and enters a circular loop of radius R. What is the minimum height h such that the block completes the loop without losing contact with the track?",
+      "fingerprint": {
+        "topic": "mechanics",
+        "subtopic": "work_energy",
+        "keywords": ["loop", "circular", "minimum height", "normal force", "energy"]
+      },
+      "steps": [
+        {
+          "type": "short",
+          "prompt": "Where is the critical point where the block might lose contact with the loop?",
+          "hint": "Think about where the normal force is most likely to become zero.",
+          "trap": "It's not at the bottom - it's at the top where gravity assists the centripetal force requirement.",
+          "solution": "The critical point is at the top of the loop. If the block can maintain contact there, it will complete the loop.",
+          "expected": { "type": "text", "value": "Top of the loop" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Write the condition for minimum speed at the top of the loop.",
+          "hint": "At minimum speed, normal force N = 0, so gravity alone provides centripetal force.",
+          "trap": "The centripetal force points downward at the top of the loop.",
+          "solution": "At top: mg = mv²_top/R → v²_top = gR (minimum speed).",
+          "expected": { "type": "equation", "value": "v_top = √(gR)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Apply energy conservation from start to top of loop.",
+          "hint": "The height of the top of the loop above the bottom is 2R.",
+          "trap": "Take potential energy reference at the bottom of the loop.",
+          "solution": "mgh = mg(2R) + ½mv²_top → gh = 2gR + ½gR → h = 2.5R.",
+          "expected": { "type": "equation", "value": "h = 2.5R = (5/2)R" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify: What is the normal force at the bottom of the loop?",
+          "hint": "At the bottom, normal force and weight together provide centripetal force.",
+          "trap": "Use energy conservation to find v at the bottom first.",
+          "solution": "At bottom: mgh = ½mv²_bottom → v²_bottom = 5gR. N - mg = mv²/R → N = mg + 5mg = 6mg.",
+          "expected": { "type": "text", "value": "N = 6mg at the bottom" }
+        }
+      ],
+      "finalAnswer": "h_min = (5/2)R = 2.5R"
+    },
+    "em-elec-001": {
+      "id": "em-elec-001",
+      "topic": "electromagnetism",
+      "subtopic": "coulomb_field",
+      "statement": "A uniform ring of charge Q and radius R lies in the xy-plane centered at the origin. Find the electric field at a point P on the z-axis at distance z from the center. At what value of z is the field maximum?",
+      "fingerprint": {
+        "topic": "electromagnetism",
+        "subtopic": "coulomb_field",
+        "keywords": ["ring", "charge", "electric field", "axis", "maximum"]
+      },
+      "steps": [
+        {
+          "type": "diagram",
+          "prompt": "Draw the setup and identify the field contribution from a small element of the ring.",
+          "hint": "By symmetry, only the z-component of the field survives when you integrate around the ring.",
+          "trap": "The perpendicular components from opposite sides of the ring cancel out.",
+          "solution": "A small element dQ contributes dE = k dQ/r² where r = √(R² + z²). The z-component is dE_z = dE × z/r = k dQ z/r³.",
+          "expected": { "type": "fbd", "value": "correct" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Integrate to find the total electric field at point P.",
+          "hint": "Since all elements are at the same distance from P, the integration is straightforward.",
+          "trap": "The factor z/(R² + z²)^(3/2) is constant for all elements.",
+          "solution": "E_z = ∫ k z dQ/(R² + z²)^(3/2) = kQz/(R² + z²)^(3/2).",
+          "expected": { "type": "equation", "value": "E = kQz/(R² + z²)^(3/2)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "Find where the field is maximum by taking dE/dz = 0.",
+          "hint": "Use the quotient rule or product rule for differentiation.",
+          "trap": "The expression involves (R² + z²) to a fractional power.",
+          "solution": "dE/dz = kQ[(R² + z²)^(3/2) - z × (3/2)(R² + z²)^(1/2) × 2z]/(R² + z²)³ = 0. Simplifying: R² + z² - 3z² = 0 → z = R/√2.",
+          "expected": { "type": "equation", "value": "z = R/√2" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify the result using limiting cases: z → 0 and z → ∞.",
+          "hint": "The field should be zero at z = 0 (by symmetry) and approach a point charge field far away.",
+          "trap": "At z = 0, symmetry makes the field zero, not undefined.",
+          "solution": "At z = 0: E = 0 (field from opposite sides cancel). At z >> R: E ≈ kQ/z² (point charge behavior). Both make physical sense.",
+          "expected": { "type": "text", "value": "E = 0 at z = 0, E → kQ/z² as z → ∞" }
+        }
+      ],
+      "finalAnswer": "E = kQz/(R² + z²)^(3/2), maximum at z = R/√2"
+    },
+    "em-elec-002": {
+      "id": "em-elec-002",
+      "topic": "electromagnetism",
+      "subtopic": "capacitors",
+      "statement": "Four capacitors of capacitance 2 μF, 3 μF, 4 μF, and 6 μF are connected in a network. Find the equivalent capacitance between points A and B when: (a) all are in series, (b) all are in parallel, (c) 2 μF and 3 μF in series, then parallel with 4 μF and 6 μF in series.",
+      "fingerprint": {
+        "topic": "electromagnetism",
+        "subtopic": "capacitors",
+        "keywords": ["capacitor", "series", "parallel", "equivalent", "network"]
+      },
+      "steps": [
+        {
+          "type": "equation",
+          "prompt": "(a) Find the equivalent capacitance when all four are in series.",
+          "hint": "For capacitors in series: 1/C_eq = 1/C₁ + 1/C₂ + 1/C₃ + 1/C₄.",
+          "trap": "In series, the equivalent capacitance is less than the smallest individual capacitance.",
+          "solution": "1/C_eq = 1/2 + 1/3 + 1/4 + 1/6 = 6/12 + 4/12 + 3/12 + 2/12 = 15/12. C_eq = 12/15 = 0.8 μF.",
+          "expected": { "type": "equation", "value": "C_eq = 0.8 μF (series)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(b) Find the equivalent capacitance when all four are in parallel.",
+          "hint": "For capacitors in parallel: C_eq = C₁ + C₂ + C₃ + C₄.",
+          "trap": "In parallel, the equivalent capacitance is greater than the largest individual capacitance.",
+          "solution": "C_eq = 2 + 3 + 4 + 6 = 15 μF.",
+          "expected": { "type": "equation", "value": "C_eq = 15 μF (parallel)" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(c) Find C₁₂ (2 μF and 3 μF in series).",
+          "hint": "Apply series formula for just two capacitors.",
+          "trap": "For two capacitors in series: C_eq = C₁C₂/(C₁ + C₂).",
+          "solution": "C₁₂ = (2 × 3)/(2 + 3) = 6/5 = 1.2 μF.",
+          "expected": { "type": "equation", "value": "C₁₂ = 1.2 μF" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(c continued) Find C₃₄ (4 μF and 6 μF in series), then combine C₁₂ and C₃₄ in parallel.",
+          "hint": "First find C₃₄, then add in parallel with C₁₂.",
+          "trap": "The two series combinations are then connected in parallel.",
+          "solution": "C₃₄ = (4 × 6)/(4 + 6) = 24/10 = 2.4 μF. C_eq = C₁₂ + C₃₄ = 1.2 + 2.4 = 3.6 μF.",
+          "expected": { "type": "equation", "value": "C_eq = 3.6 μF (mixed)" }
+        }
+      ],
+      "finalAnswer": "(a) 0.8 μF, (b) 15 μF, (c) 3.6 μF"
+    },
+    "therm-law-001": {
+      "id": "therm-law-001",
+      "topic": "thermodynamics",
+      "subtopic": "heat_engine",
+      "statement": "A Carnot engine operates between temperatures T₁ = 600 K and T₂ = 300 K. Calculate (a) the efficiency of the engine, (b) the work output if 1000 J of heat is absorbed from the hot reservoir, (c) the heat rejected to the cold reservoir.",
+      "fingerprint": {
+        "topic": "thermodynamics",
+        "subtopic": "heat_engine",
+        "keywords": ["Carnot", "efficiency", "heat", "work", "reservoir"]
+      },
+      "steps": [
+        {
+          "type": "equation",
+          "prompt": "(a) Calculate the Carnot efficiency.",
+          "hint": "Carnot efficiency depends only on the reservoir temperatures.",
+          "trap": "Use absolute temperatures (Kelvin), and remember η = 1 - T_cold/T_hot.",
+          "solution": "η = 1 - T₂/T₁ = 1 - 300/600 = 1 - 0.5 = 0.5 = 50%.",
+          "expected": { "type": "equation", "value": "η = 50%" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(b) Calculate the work output.",
+          "hint": "Efficiency is defined as work output divided by heat input.",
+          "trap": "W = η × Q_H, not W = Q_H - Q_C (though both give the same result).",
+          "solution": "W = η × Q_H = 0.5 × 1000 = 500 J.",
+          "expected": { "type": "equation", "value": "W = 500 J" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(c) Calculate the heat rejected to the cold reservoir.",
+          "hint": "Energy conservation: Q_H = W + Q_C.",
+          "trap": "Q_C is the heat rejected, which is positive in magnitude.",
+          "solution": "Q_C = Q_H - W = 1000 - 500 = 500 J.",
+          "expected": { "type": "equation", "value": "Q_C = 500 J" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify using the temperature ratio: Q_C/Q_H = T_C/T_H.",
+          "hint": "For a Carnot engine, heat transfers are proportional to absolute temperatures.",
+          "trap": "This is a property specific to Carnot cycles.",
+          "solution": "Q_C/Q_H = 500/1000 = 0.5 = 300/600 = T_C/T_H. ✓ Verified.",
+          "expected": { "type": "text", "value": "Q_C/Q_H = T_C/T_H = 0.5 ✓" }
+        }
+      ],
+      "finalAnswer": "(a) η = 50%, (b) W = 500 J, (c) Q_C = 500 J"
+    },
+    "opt-wave-001": {
+      "id": "opt-wave-001",
+      "topic": "optics",
+      "subtopic": "interference",
+      "statement": "In Young's double slit experiment, the slits are separated by 0.5 mm and the screen is 1 m away. Light of wavelength 600 nm is used. Calculate (a) the fringe width, (b) the position of the 5th bright fringe from the center.",
+      "fingerprint": {
+        "topic": "optics",
+        "subtopic": "interference",
+        "keywords": ["double slit", "fringe", "wavelength", "interference", "Young"]
+      },
+      "steps": [
+        {
+          "type": "short",
+          "prompt": "List the given quantities and convert to SI units.",
+          "hint": "Be careful with unit conversions: mm to m, nm to m.",
+          "trap": "1 nm = 10⁻⁹ m, 1 mm = 10⁻³ m.",
+          "solution": "d = 0.5 mm = 5 × 10⁻⁴ m, D = 1 m, λ = 600 nm = 6 × 10⁻⁷ m.",
+          "expected": { "type": "text", "value": "d = 5×10⁻⁴ m, D = 1 m, λ = 6×10⁻⁷ m" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(a) Calculate the fringe width using the formula β = λD/d.",
+          "hint": "Fringe width is the distance between consecutive bright (or dark) fringes.",
+          "trap": "Make sure all units are consistent (all in meters).",
+          "solution": "β = λD/d = (6 × 10⁻⁷ × 1)/(5 × 10⁻⁴) = 1.2 × 10⁻³ m = 1.2 mm.",
+          "expected": { "type": "equation", "value": "β = 1.2 mm" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(b) Calculate the position of the 5th bright fringe.",
+          "hint": "The nth bright fringe is at y_n = nβ from the center.",
+          "trap": "The central maximum is n = 0, so the 5th bright fringe is n = 5.",
+          "solution": "y₅ = 5β = 5 × 1.2 mm = 6 mm.",
+          "expected": { "type": "equation", "value": "y₅ = 6 mm" }
+        },
+        {
+          "type": "short",
+          "prompt": "What happens to the fringe width if the wavelength is doubled?",
+          "hint": "Look at how β depends on λ.",
+          "trap": "β is directly proportional to λ.",
+          "solution": "Since β = λD/d, if λ doubles, β doubles. The fringes spread out with longer wavelength light.",
+          "expected": { "type": "text", "value": "β doubles when λ doubles" }
+        }
+      ],
+      "finalAnswer": "(a) β = 1.2 mm, (b) y₅ = 6 mm"
+    },
+    "mod-dual-001": {
+      "id": "mod-dual-001",
+      "topic": "modern-physics",
+      "subtopic": "photoelectric",
+      "statement": "Light of wavelength 400 nm is incident on a metal surface with work function 2.0 eV. Calculate (a) the maximum kinetic energy of ejected electrons, (b) the stopping potential, (c) the threshold wavelength.",
+      "fingerprint": {
+        "topic": "modern-physics",
+        "subtopic": "photoelectric",
+        "keywords": ["photoelectric", "wavelength", "work function", "stopping potential", "threshold"]
+      },
+      "steps": [
+        {
+          "type": "equation",
+          "prompt": "Calculate the energy of the incident photons.",
+          "hint": "Use E = hc/λ. Remember: hc ≈ 1240 eV·nm is a useful constant.",
+          "trap": "Convert wavelength to nm if using hc = 1240 eV·nm.",
+          "solution": "E = hc/λ = 1240 eV·nm / 400 nm = 3.1 eV.",
+          "expected": { "type": "equation", "value": "E = 3.1 eV" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(a) Use Einstein's photoelectric equation to find maximum KE.",
+          "hint": "KE_max = hf - φ = E - φ.",
+          "trap": "KE is positive only if E > φ.",
+          "solution": "KE_max = E - φ = 3.1 - 2.0 = 1.1 eV.",
+          "expected": { "type": "equation", "value": "KE_max = 1.1 eV" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(b) Find the stopping potential.",
+          "hint": "The stopping potential V_s relates to KE_max by eV_s = KE_max.",
+          "trap": "Since KE_max is in eV and e is the electron charge, V_s has the same numerical value.",
+          "solution": "eV_s = KE_max → V_s = KE_max/e = 1.1 V.",
+          "expected": { "type": "equation", "value": "V_s = 1.1 V" }
+        },
+        {
+          "type": "equation",
+          "prompt": "(c) Find the threshold wavelength.",
+          "hint": "At threshold, photon energy equals work function: hc/λ₀ = φ.",
+          "trap": "Threshold wavelength is the maximum wavelength that can cause emission.",
+          "solution": "λ₀ = hc/φ = 1240 eV·nm / 2.0 eV = 620 nm.",
+          "expected": { "type": "equation", "value": "λ₀ = 620 nm" }
+        },
+        {
+          "type": "short",
+          "prompt": "Verify: Is the incident wavelength less than the threshold wavelength?",
+          "hint": "Emission occurs only when λ < λ₀.",
+          "trap": "Shorter wavelength means higher energy photons.",
+          "solution": "λ = 400 nm < λ₀ = 620 nm. ✓ Yes, so photoelectric emission occurs as expected.",
+          "expected": { "type": "text", "value": "400 nm < 620 nm ✓ emission occurs" }
+        }
+      ],
+      "finalAnswer": "(a) KE_max = 1.1 eV, (b) V_s = 1.1 V, (c) λ₀ = 620 nm"
+    }
+  }
+}

@@ -2,232 +2,383 @@
 
 **Active Decomposition: We don't give answers; we give the framework for the answer.**
 
-PhysiScaffold is an AI-powered physics tutoring tool that uses a unique "Socratic Engine" approach. Instead of providing solutions, it generates structured solution scaffolds that guide students through the reasoning process.
+PhysiScaffold is an AI-powered physics tutoring platform that uses a unique "Socratic Engine" approach. Instead of providing solutions, it generates structured solution scaffolds that guide students through the reasoning process with adaptive learning features.
 
-## Core Philosophy
+## Quick Start (30 seconds)
 
-Most AI tutors are "Answer Engines." We built a "Reasoning Engine."
+```bash
+# Clone and install
+git clone https://github.com/caneesh/fremont-v2.git
+cd fremont-v2
+npm install
 
-- **Input**: A raw physics problem (text or image)
-- **Output**: A structured "Solution Skeleton" (The Irodov Recipe)
-- **Interaction**: The student fills in the reasoning; the AI validates the logic, not just the final number
+# Add your API key
+echo "ANTHROPIC_API_KEY=your_key_here" > .env
 
-## Architecture: The Two-Pass System
+# Run
+npm run dev
+```
 
-### Pass 1: The Solver (Hidden)
-- **Role**: Expert Professor
-- **Task**: Solve the problem completely with all mathematical steps
-- **Output**: A verified, complete solution (kept hidden from the student)
+Open [http://localhost:3000](http://localhost:3000) and paste any physics problem!
 
-### Pass 2: The Scaffolder (Visible)
-- **Role**: Teaching Assistant
-- **Input**: Problem + Complete solution from Pass 1
-- **Task**: Break down the solution into logical milestones without revealing the answer
-- **Output**: A structured JSON scaffold with concepts, steps, and sanity checks
+---
 
 ## Features
 
-### 1. Concept Inventory
-A right-side panel showing all physics concepts needed for the problem:
-- Clear definitions
-- Relevant formulas (rendered with LaTeX)
-- Clickable/expandable for quick reference
+### Core Learning System
 
-### 2. Solution Roadmap
-An accordion-style interface with logical steps:
-- Each step unlocks after completing the previous one
-- Guiding hints (not full solutions)
-- Socratic questions to prompt reasoning
-- Required concepts tagged for each step
+| Feature | Description |
+|---------|-------------|
+| **Two-Pass AI Architecture** | Hidden solver + visible scaffolder ensures accurate guidance |
+| **Socratic Questioning** | Guides reasoning without revealing answers |
+| **Concept Inventory** | Right-panel with formulas, definitions, and explanations |
+| **Solution Roadmap** | Step-by-step accordion with progressive unlocking |
+| **Sanity Check Module** | Limiting cases, dimensional analysis, symmetry checks |
 
-### 3. Sanity Check Module
-Every problem ends with a mandatory "Reality Check":
-- Limiting case analysis (e.g., "What if ω → 0?")
-- Dimensional analysis
-- Symmetry checks
+### Adaptive Learning Features
 
-### 4. Problem History & Progress Tracking
-Track your learning journey with comprehensive history management:
-- **Save Draft**: Store in-progress solutions with all your step-by-step work
-- **Mark as Solved**: Mark completed problems with final solution
-- **Mark for Review**: Flag problems you want to revisit later
-- **Autosave**: Automatic draft saving every 30 seconds
-- **History Page**: View, filter, and search all problem attempts
-- **Progress Restoration**: Resume problems exactly where you left off
-- **Guest Mode**: Works offline using localStorage (no account required)
+| Feature | Description |
+|---------|-------------|
+| **Micro-Task Mode** | MCQs and fill-in-blanks instead of open hints |
+| **Reveal-Reconstruct-Validate** | 3-stage reading mode for passive learners |
+| **Confidence-Weighted SRS** | Spaced repetition adjusted by self-reported confidence |
+| **Mistake Notebook** | Tracks errors for targeted review |
+| **Error Anticipator** | Predicts common mistakes with warning beacons |
+| **Adaptive Preflight** | Auto-inserts checks on high-risk steps |
 
-## Tech Stack
+### Exam Strategy Training
 
-- **Frontend**: Next.js 15 with React 18
-- **Styling**: Tailwind CSS
-- **Math Rendering**: KaTeX (via react-katex)
-- **AI**: Anthropic Claude 3.5 Sonnet
-- **Language**: TypeScript
+| Feature | Description |
+|---------|-------------|
+| **Pattern-First Mode** | Timed pattern identification before solving |
+| **Skip-or-Commit Gate** | Forces triage decisions at T=25s (exam strategy) |
+| **Study Plan v2** | Pattern-driven curriculum with meta-skills |
 
-## Getting Started
+### Interactive Features
+
+| Feature | Description |
+|---------|-------------|
+| **Socratic Tutor Chat** | Live chat with AI professor after each step |
+| **Socratic Rewind** | "I'm stuck" button triggers guided recovery |
+| **Why This Step** | On-demand explanation of step importance |
+| **Step Confidence Heatmap** | Visual overview of understanding gaps |
+| **Boundary Case Builder** | Interactive equation stress-testing |
+
+### Problem Management
+
+| Feature | Description |
+|---------|-------------|
+| **Problem History** | Track all attempts with status (in-progress/solved/skipped) |
+| **Draft Autosave** | Auto-saves every 30 seconds |
+| **Progress Restoration** | Resume exactly where you left off |
+| **Review Flagging** | Mark problems for later review |
+| **PDF Import** | Extract questions from PDF files using Claude Vision |
+
+---
+
+## Detailed Setup Guide
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- An Anthropic API key ([Get one here](https://console.anthropic.com/))
+- **Node.js 18+** ([Download](https://nodejs.org/))
+- **npm** (comes with Node.js)
+- **Anthropic API Key** ([Get one here](https://console.anthropic.com/))
 
-### Installation
+### Step 1: Clone Repository
 
-1. Clone the repository:
-   ```bash
-   cd fremont-v2
-   ```
+```bash
+git clone https://github.com/caneesh/fremont-v2.git
+cd fremont-v2
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Step 2: Install Dependencies
 
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+```bash
+npm install
+```
 
-   Edit `.env` and add your Anthropic API key:
-   ```
-   ANTHROPIC_API_KEY=your_api_key_here
-   ```
+### Step 3: Configure Environment
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+Create a `.env` file in the project root:
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+```bash
+# Required
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
 
-## Usage
+# Optional - Feature Flags
+NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR=true
+NEXT_PUBLIC_FEATURE_PATTERN_FIRST=true
+NEXT_PUBLIC_FEATURE_SKIP_COMMIT=true
+NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2=true
+```
 
-1. **Enter a Problem**: Paste any physics problem text or click one of the sample problems
-2. **Generate Scaffold**: The AI analyzes the problem and creates a solution framework
-3. **Work Through Steps**: Expand each step, read the hints, and answer Socratic questions
-4. **Complete the Sanity Check**: Verify your solution makes physical sense
+### Step 4: Run Development Server
 
-## Data Import (PDF → Questions)
+```bash
+npm run dev
+```
 
-The repo includes import scripts under `scripts/` for extracting question JSON from PDFs.
+Visit [http://localhost:3000](http://localhost:3000)
 
-- Claude PDF extraction: `npx ts-node scripts/pdf-to-questions.ts --batch ./pdfs -o ./out/questions.json`
-- MathPix OCR → question JSON: `node scripts/mathpix-pdf-to-questions.mjs --batch ./pdfs --output-dir ./out`
-  - Requires `MATHPIX_APP_ID` and `MATHPIX_APP_KEY` in `.env` (and `ANTHROPIC_API_KEY` only if `--structure claude`)
+### Step 5: Build for Production
 
-### Sample Problems Included
+```bash
+npm run build
+npm start
+```
 
-- Bead on a Rotating Hoop (Non-inertial frames, effective potential)
-- Block on Accelerating Wedge (Non-inertial reference frames)
-- Rotating Rod with Bead (Equilibrium in rotating frames)
+---
+
+## Usage Guide
+
+### Basic Workflow
+
+1. **Enter a Problem**: Paste physics problem text or select a sample
+2. **Generate Scaffold**: AI creates a step-by-step solution framework
+3. **Work Through Steps**: Expand each step, answer questions, use hints if needed
+4. **Complete Sanity Check**: Verify your solution with limiting cases
+5. **Review & Save**: Mark as solved or flag for review
+
+### Learning Modes
+
+| Mode | Best For | How to Use |
+|------|----------|------------|
+| **Active (Micro-Tasks)** | Building skills | Answer MCQs/fill-blanks for each step |
+| **Reading (Reveal)** | Understanding solutions | Click "Reveal" then answer comprehension questions |
+| **Exam Practice** | Timed drills | Enable Pattern-First + Skip-Commit gates |
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Submit answer |
+| `Tab` | Next step |
+| `Shift+Tab` | Previous step |
+| `H` | Show hint (when focused on step) |
+
+---
+
+## Feature Flags
+
+Enable/disable features via environment variables:
+
+```bash
+# Core Features
+NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR=true    # Live chat after steps
+NEXT_PUBLIC_FEATURE_PATTERN_FIRST=true      # Pattern identification gate
+NEXT_PUBLIC_FEATURE_SKIP_COMMIT=true        # Triage decision training
+NEXT_PUBLIC_FEATURE_STUDY_PLAN_V2=true      # Pattern-driven study plan
+
+# Learning Enhancements
+NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS=true     # Confidence-weighted review
+NEXT_PUBLIC_FEATURE_BOUNDARY_CASE=true      # Equation stress-testing
+NEXT_PUBLIC_FEATURE_ADAPTIVE_PREFLIGHT=true # Auto-inserted checks
+NEXT_PUBLIC_FEATURE_WHY_THIS_STEP=true      # Step importance explanations
+
+# Experimental
+NEXT_PUBLIC_FEATURE_PAPER_SOLUTION=true     # Upload handwritten solutions
+NEXT_PUBLIC_FEATURE_CONSTRAINT_COLLISION=true # Real-time constraint checking
+```
+
+---
+
+## PDF Question Import
+
+Extract questions from PDF files (JEE, NEET, textbooks):
+
+### CLI Usage
+
+```bash
+# Single PDF
+npx ts-node scripts/pdf-to-questions.ts problems.pdf -o questions.json
+
+# With source metadata
+npx ts-node scripts/pdf-to-questions.ts jee-2023.pdf \
+  --source jee-2023 \
+  --source-kind jee \
+  -o output.json
+
+# Batch process folder
+npx ts-node scripts/pdf-to-questions.ts --batch ./pdfs -o ./questions.json
+```
+
+### API Usage
+
+```typescript
+const formData = new FormData()
+formData.append('file', pdfFile)
+formData.append('sourceType', 'jee')
+
+const response = await fetch('/api/questions/extract', {
+  method: 'POST',
+  body: formData
+})
+```
+
+---
 
 ## Project Structure
 
 ```
 fremont-v2/
 ├── app/
-│   ├── api/solve/          # API route for problem solving
-│   ├── history/            # Problem history page
-│   ├── layout.tsx          # Root layout with KaTeX
-│   ├── page.tsx            # Main application page
-│   └── globals.css         # Global styles
+│   ├── api/
+│   │   ├── scaffold/           # Scaffold generation APIs
+│   │   ├── socratic-tutor/     # Chat API
+│   │   ├── questions/extract/  # PDF extraction API
+│   │   └── solve/              # Legacy solve API
+│   ├── history/                # Problem history page
+│   ├── study-plan/             # Study plan pages
+│   └── page.tsx                # Main app
 ├── components/
-│   ├── ConceptPanel.tsx    # Right sidebar with concepts
-│   ├── MathRenderer.tsx    # LaTeX rendering component
-│   ├── ProblemInput.tsx    # Problem input form
-│   ├── SanityCheckStep.tsx # Final reality check step
-│   ├── SolutionScaffold.tsx # Main scaffold container
-│   └── StepAccordion.tsx   # Individual step component
+│   ├── SolutionScaffold.tsx    # Main scaffold UI
+│   ├── StepAccordion.tsx       # Step component
+│   ├── SocraticTutorChat.tsx   # AI chat component
+│   ├── PatternFirstModal.tsx   # Pattern selection
+│   ├── SkipCommitGateModal.tsx # Triage decision modal
+│   └── ...
 ├── lib/
-│   ├── anthropic.ts        # Two-pass LLM logic
-│   ├── problemHistory.ts   # localStorage history service
-│   └── utils.ts            # Utility functions (hashing, storage checks)
+│   ├── featureFlags.ts         # Feature flag configuration
+│   ├── problemHistory.ts       # LocalStorage service
+│   ├── prompts/                # AI prompt templates
+│   └── ...
 ├── types/
-│   ├── history.ts          # History data interfaces
-│   └── scaffold.ts         # Scaffold data interfaces
-└── README.md
+│   ├── scaffold.ts             # Scaffold interfaces
+│   ├── history.ts              # History interfaces
+│   └── ...
+├── data/
+│   ├── schemas/                # JSON schemas
+│   ├── questions.json          # Sample questions
+│   └── studyPlanV2/            # Pattern/skill definitions
+└── scripts/
+    └── pdf-to-questions.ts     # PDF extraction script
 ```
 
-## How It Works
+---
 
-### The Prompt Engineering
+## API Reference
 
-The system uses carefully crafted prompts to ensure:
-1. The Solver provides complete, verified solutions
-2. The Scaffolder breaks down reasoning without revealing answers
-3. Hints guide WHAT to think about, not HOW to calculate
-4. Sanity checks teach physics intuition
+### POST /api/scaffold/outline
+Generate scaffold outline from problem text.
 
-### Example Scaffold Structure
+```typescript
+// Request
+{ "problem": "A 5kg block slides down..." }
 
-```json
-{
-  "problem": "A bead on a rotating hoop...",
-  "domain": "Classical Mechanics",
-  "subdomain": "Non-Inertial Frames",
-  "concepts": [
-    {
-      "id": "centrifugal-force",
-      "name": "Centrifugal Force",
-      "definition": "...",
-      "formula": "$F_{cf} = m\\omega^2 r$"
-    }
-  ],
-  "steps": [
-    {
-      "id": 1,
-      "title": "Choose Reference Frame",
-      "hint": "Consider which frame simplifies the problem...",
-      "requiredConcepts": ["non-inertial-frames"],
-      "question": "Which frame makes the velocity zero?"
-    }
-  ],
-  "sanityCheck": {
-    "question": "What happens when $\\omega \\to 0$?",
-    "expectedBehavior": "The bead should behave like a simple pendulum...",
-    "type": "limit"
-  }
-}
+// Response
+{ "steps": [...], "concepts": [...] }
 ```
+
+### POST /api/scaffold/step
+Expand a single step with detailed content.
+
+```typescript
+// Request
+{ "scaffold_id": "xxx", "step_id": "s1", "problem": "..." }
+
+// Response
+{ "tasks": [...], "explanations": {...} }
+```
+
+### POST /api/socratic-tutor/chat
+Chat with AI tutor about a step.
+
+```typescript
+// Request
+{ "stepContext": {...}, "messages": [...], "userMessage": "..." }
+
+// Response
+{ "response": "...", "isComplete": false }
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 15, React 19, TypeScript |
+| Styling | Tailwind CSS |
+| Math Rendering | KaTeX |
+| AI | Anthropic Claude (Sonnet 4) |
+| Storage | LocalStorage (client), Vercel KV (optional) |
+| Deployment | Vercel |
+
+---
+
+## Development
+
+### Run Tests
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+```
+
+### Lint & Format
+
+```bash
+npm run lint          # ESLint
+npm run lint:fix      # Auto-fix
+```
+
+### Type Check
+
+```bash
+npx tsc --noEmit
+```
+
+---
 
 ## Roadmap
 
-### MVP (Current)
-- ✅ Two-pass LLM architecture
-- ✅ Accordion UI with step-by-step solving
-- ✅ Concept panel with definitions
-- ✅ LaTeX math rendering
-- ✅ Sanity check module
-- ✅ Problem history and progress tracking
-- ✅ Save/restore drafts with autosave
-- ✅ Mark problems as solved or for review
+### Completed
+- Two-pass AI architecture
+- Micro-task learning mode
+- Socratic Tutor chat
+- Pattern-First mode
+- Skip-or-Commit gate
+- Study Plan v2
+- PDF question extraction
+- Mistake tracking
+- Confidence-weighted SRS
 
-### V2 (Planned)
-- Image upload with OCR for problem ingestion
-- Handwriting recognition for student answers
-- Step validation with AI feedback
-- Server-side storage with user authentication
-- Cross-device sync
-- Expanded problem library (Irodov, Kleppner, Morin)
+### In Progress
+- Handwriting recognition for paper solutions
+- Real-time constraint collision detection
+- Question bank management UI
+
+### Planned
+- User authentication & cloud sync
+- Mobile app
+- Multiplayer problem-solving
+- Teacher dashboard
+- LMS integration (Canvas, Blackboard)
+
+---
 
 ## Contributing
 
-This is a prototype/MVP. Contributions are welcome! Areas for improvement:
+Contributions welcome! Key areas:
 
-1. **Prompt Engineering**: Fine-tune the Solver and Scaffolder prompts
-2. **UI/UX**: Enhance the interactive solving experience
-3. **Validation**: Add AI-powered validation of student answers
-4. **Problem Bank**: Curate high-quality physics problems
+1. **Prompt Engineering**: Improve AI scaffolding quality
+2. **UI/UX**: Enhance learning experience
+3. **Question Bank**: Curate physics problems
+4. **Testing**: Add test coverage
+
+---
 
 ## License
 
 MIT
 
+---
+
 ## Acknowledgments
 
-Inspired by the problem-solving approach in:
+Inspired by:
 - I.E. Irodov - "Problems in General Physics"
 - Kleppner & Kolenkow - "An Introduction to Mechanics"
 - David Morin - "Introduction to Classical Mechanics"
 
-Built with Claude 3.5 Sonnet by Anthropic.
+Built with Claude by Anthropic.

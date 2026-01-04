@@ -611,3 +611,211 @@ export function getAllDomains(): string[] {
 
   return Array.from(domains).sort()
 }
+
+// ============================================
+// Socratic-First Mode Integration
+// ============================================
+
+import type {
+  SocraticMistakeTrigger,
+  SocraticExchangeRecord,
+  VerificationResult,
+} from '@/types/socraticFirst'
+
+/**
+ * Input for creating a Socratic mistake card
+ */
+export interface CreateSocraticCardInput {
+  problemId: string
+  problemTitle: string
+  stepId: number
+  stepTitle: string
+  conceptTags: string[]
+  stepType: StepType
+  domain: string
+  subdomain: string
+  trigger: SocraticMistakeTrigger
+  exchanges: SocraticExchangeRecord[]
+  misconceptionDetails?: Array<{
+    conceptId: string
+    description: string
+    severity: 'minor' | 'moderate' | 'major'
+  }>
+}
+
+/**
+ * Create a mistake card from Socratic interaction
+ */
+export function createSocraticMistakeCard(input: CreateSocraticCardInput): MistakeCard {
+  const now = new Date().toISOString()
+
+  // Determine severity based on Socratic trigger and context
+  let severity: MistakeSeverity = 'minor'
+
+  if (input.trigger === 'socratic_misconception') {
+    // Check misconception severity from AI analysis
+    const maxSeverity = input.misconceptionDetails?.reduce(
+      (max, m) => {
+        const severityOrder = { minor: 1, moderate: 2, major: 3 }
+        return severityOrder[m.severity] > severityOrder[max] ? m.severity : max
+      },
+      'minor' as 'minor' | 'moderate' | 'major'
+    )
+    severity = maxSeverity || 'moderate'
+  } else if (input.trigger === 'overconfident_answer') {
+    // Overconfidence is a moderate concern - they thought they knew but didn't
+    severity = 'moderate'
+  } else if (input.trigger === 'repeated_struggle') {
+    // Many exchanges without progress is major
+    severity = input.exchanges.length >= 5 ? 'major' : 'moderate'
+  }
+
+  // Generate misconception note from Socratic context
+  const misconceptionNote = generateSocraticMisconceptionNote(input)
+
+  // Calculate pseudo hint level from exchanges
+  // Pure Socratic with few exchanges = low level
+  // Many exchanges or misconceptions = higher level
+  let hintLevelReached = 0
+  if (input.trigger === 'socratic_misconception') {
+    hintLevelReached = severity === 'major' ? 4 : severity === 'moderate' ? 3 : 2
+  } else if (input.trigger === 'overconfident_answer') {
+    hintLevelReached = 2
+  } else if (input.trigger === 'repeated_struggle') {
+    hintLevelReached = Math.min(input.exchanges.length - 1, 4)
+  }
+
+  const card: MistakeCard = {
+    id: generateCardId(),
+    createdAt: now,
+    updatedAt: now,
+
+    problemId: input.problemId,
+    problemTitle: input.problemTitle,
+    stepId: input.stepId,
+    stepTitle: input.stepTitle,
+
+    conceptTags: input.conceptTags,
+    stepType: input.stepType,
+    domain: input.domain,
+    subdomain: input.subdomain,
+
+    trigger: input.trigger,
+    severity,
+    misconceptionNote,
+    hintLevelReached,
+
+    srs: createInitialSRS(),
+
+    reviewCount: 0,
+    correctStreak: 0
+  }
+
+  // Save to storage
+  const cards = getCards()
+  cards.push(card)
+  saveCards(cards)
+
+  console.log(
+    `[MistakeNotebook] Created Socratic card: ${input.trigger} for "${input.stepTitle}" (${severity})`
+  )
+
+  return card
+}
+
+/**
+ * Generate misconception note for Socratic interactions
+ */
+function generateSocraticMisconceptionNote(input: CreateSocraticCardInput): string {
+  const conceptStr = input.conceptTags.slice(0, 2).join(', ')
+  const lastExchange = input.exchanges[input.exchanges.length - 1]
+  const lastFeedback = lastExchange?.aiVerification?.feedback
+
+  switch (input.trigger) {
+    case 'socratic_misconception':
+      // Use misconception details if available
+      if (input.misconceptionDetails?.length) {
+        const mainMisconception = input.misconceptionDetails[0]
+        return `Misconception detected in "${input.stepTitle}": ${mainMisconception.description}. Key concepts: ${conceptStr}`
+      }
+      return `Fundamental misunderstanding identified in "${input.stepTitle}". Focus on: ${conceptStr}`
+
+    case 'overconfident_answer':
+      return `Overconfident response on "${input.stepTitle}" - reported high confidence but AI found gaps. ${lastFeedback ? `Feedback: "${lastFeedback.slice(0, 100)}..."` : `Review: ${conceptStr}`}`
+
+    case 'repeated_struggle':
+      return `Extended difficulty with "${input.stepTitle}" (${input.exchanges.length} exchanges needed). Strengthen understanding of: ${conceptStr}`
+
+    default:
+      return `Difficulty in Socratic exploration of "${input.stepTitle}". Review: ${conceptStr}`
+  }
+}
+
+/**
+ * Check if a Socratic mistake card should be created based on exchange results
+ * Returns the appropriate trigger if a card should be created, null otherwise
+ */
+export function shouldCreateSocraticCard(
+  exchanges: SocraticExchangeRecord[],
+  finalVerification?: VerificationResult
+): SocraticMistakeTrigger | null {
+  if (exchanges.length === 0) return null
+
+  // Check for misconception
+  if (finalVerification?.answerQuality === 'misconception') {
+    return 'socratic_misconception'
+  }
+
+  // Check exchanges for misconception pattern
+  const misconceptionCount = exchanges.filter(
+    e => e.aiVerification.answerQuality === 'misconception'
+  ).length
+  if (misconceptionCount >= 2) {
+    return 'socratic_misconception'
+  }
+
+  // Check for overconfidence pattern
+  const overconfidentCount = exchanges.filter(
+    e => e.selfReport === 'solid' &&
+      (e.aiVerification.answerQuality === 'partial' || e.aiVerification.answerQuality === 'misconception')
+  ).length
+  if (overconfidentCount >= 1) {
+    return 'overconfident_answer'
+  }
+
+  // Check for repeated struggle (many exchanges without reaching mastery)
+  if (exchanges.length >= 5 && finalVerification?.answerQuality !== 'excellent') {
+    return 'repeated_struggle'
+  }
+
+  return null
+}
+
+/**
+ * Create a Socratic mistake card only if conditions are met
+ */
+export function createSocraticCardIfNeeded(
+  input: Omit<CreateSocraticCardInput, 'trigger'>,
+  exchanges: SocraticExchangeRecord[],
+  finalVerification?: VerificationResult
+): MistakeCard | null {
+  // Check if we should create a card
+  const trigger = shouldCreateSocraticCard(exchanges, finalVerification)
+  if (!trigger) return null
+
+  // Check for existing card
+  if (cardExists(input.problemId, input.stepId)) {
+    return null
+  }
+
+  return createSocraticMistakeCard({
+    ...input,
+    trigger,
+    exchanges,
+    misconceptionDetails: finalVerification?.conceptGaps?.map(gap => ({
+      conceptId: gap,
+      description: `Gap in understanding: ${gap}`,
+      severity: 'moderate' as const,
+    })),
+  })
+}

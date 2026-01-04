@@ -12,11 +12,15 @@ import type { StepType } from './scaffold'
 // ============================================
 
 export type MistakeTrigger =
-  | 'hint_requested'      // User requested a hint
-  | 'step_failed'         // User failed step validation
-  | 'timeout'             // User took too long
-  | 'task_incorrect'      // Micro-task answered incorrectly
-  | 'multiple_attempts'   // Required multiple attempts
+  | 'hint_requested'            // User requested a hint
+  | 'step_failed'               // User failed step validation
+  | 'timeout'                   // User took too long
+  | 'task_incorrect'            // Micro-task answered incorrectly
+  | 'multiple_attempts'         // Required multiple attempts
+  // Socratic-first mode triggers
+  | 'socratic_misconception'    // AI detected fundamental misconception
+  | 'overconfident_answer'      // Said "solid" but AI found gaps
+  | 'repeated_struggle'         // Multiple Socratic exchanges without progress
 
 export type MistakeSeverity = 'minor' | 'moderate' | 'major'
 

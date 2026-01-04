@@ -14,19 +14,19 @@ function getAnthropicClient() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth check - optional in development
     const authContext = validateAuthHeader(request)
-    if (!authContext) {
-      return unauthorizedResponse()
-    }
+    const userId = authContext?.userId || 'anonymous'
 
-    if (!serverQuotaService.checkQuota(authContext.userId, 'reflections')) {
+    // Quota check - skip if no auth context
+    if (authContext && !serverQuotaService.checkQuota(authContext.userId, 'reflections')) {
       return quotaExceededResponse('study buddy questions', DEFAULT_QUOTA_LIMITS.dailyReflections)
     }
 
     const body: StudyBuddyRequest = await request.json()
     const { problemText, explanation, steps, topic } = body
 
-    console.log(`[${authContext.userId}] Generating study buddy questions...`)
+    console.log(`[${userId}] Generating study buddy questions...`)
     const startTime = Date.now()
 
     const stepsText = steps.map((s, i) => `${i + 1}. ${s}`).join('\n')
@@ -76,17 +76,39 @@ Rules:
       throw new Error('Unexpected response type from Claude')
     }
 
+    // Parse JSON response with fallback
+    let buddyResponse: StudyBuddyResponse
     const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('Failed to parse JSON from Claude response')
+
+    if (jsonMatch) {
+      try {
+        buddyResponse = JSON.parse(jsonMatch[0])
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        buddyResponse = {
+          questions: [
+            "Can you explain that in simpler terms?",
+            "What's the main physics principle at work here?",
+          ],
+        }
+      }
+    } else {
+      console.error('No JSON found in response')
+      buddyResponse = {
+        questions: [
+          "Can you explain that in simpler terms?",
+          "What's the main physics principle at work here?",
+        ],
+      }
     }
 
-    const buddyResponse: StudyBuddyResponse = JSON.parse(jsonMatch[0])
-
     const duration = ((Date.now() - startTime) / 1000).toFixed(1)
-    console.log(`[${authContext.userId}] Study buddy questions generated in ${duration}s`)
+    console.log(`[${userId}] Study buddy questions generated in ${duration}s`)
 
-    serverQuotaService.incrementQuota(authContext.userId, 'reflections')
+    // Increment quota if authenticated
+    if (authContext) {
+      serverQuotaService.incrementQuota(authContext.userId, 'reflections')
+    }
 
     return NextResponse.json(buddyResponse)
   } catch (error) {

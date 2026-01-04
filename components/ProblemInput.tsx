@@ -216,11 +216,35 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
     setInputMode('text')
   }, [])
 
+  // Minimum length for a valid physics problem
+  const MIN_PROBLEM_LENGTH = 30
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  const validateProblem = (text: string): { valid: boolean; error: string | null } => {
+    const trimmed = text.trim()
+    if (!trimmed) {
+      return { valid: false, error: 'Please enter a physics problem' }
+    }
+    if (trimmed.length < MIN_PROBLEM_LENGTH) {
+      return { valid: false, error: `Problem is too short. Please enter at least ${MIN_PROBLEM_LENGTH} characters (${trimmed.length}/${MIN_PROBLEM_LENGTH})` }
+    }
+    // Check for at least a few words
+    const words = trimmed.split(/\s+/).filter(w => w.length > 1)
+    if (words.length < 5) {
+      return { valid: false, error: 'Please enter a complete problem statement with at least 5 words' }
+    }
+    return { valid: true, error: null }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (problemText.trim()) {
-      onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
+    const validation = validateProblem(problemText)
+    if (!validation.valid) {
+      setValidationError(validation.error)
+      return
     }
+    setValidationError(null)
+    onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
   }
 
   // Allow parent to trigger submission (e.g., keyboard shortcut)
@@ -228,9 +252,13 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
     if (!onRegisterSubmit) return
     onRegisterSubmit(() => {
       if (isLoading) return
-      if (problemText.trim()) {
-        onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
+      const validation = validateProblem(problemText)
+      if (!validation.valid) {
+        setValidationError(validation.error)
+        return
       }
+      setValidationError(null)
+      onSubmit(problemText.trim(), null, scaffoldDensity, includeFinalAnswer)
     })
   }, [onRegisterSubmit, isLoading, problemText, onSubmit, scaffoldDensity, includeFinalAnswer])
 
@@ -311,12 +339,29 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
               <textarea
               id="problem"
               rows={6}
-              className="w-full px-3 py-3 sm:px-4 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-soft focus:ring-2 focus:ring-accent dark:focus:ring-accent focus:border-accent dark:focus:border-accent resize-none text-gray-900 dark:text-dark-text-primary text-base placeholder:text-gray-400 dark:placeholder:text-dark-text-placeholder transition-all"
+              className={`w-full px-3 py-3 sm:px-4 border rounded-lg bg-white dark:bg-dark-card-soft focus:ring-2 focus:ring-accent dark:focus:ring-accent focus:border-accent dark:focus:border-accent resize-none text-gray-900 dark:text-dark-text-primary text-base placeholder:text-gray-400 dark:placeholder:text-dark-text-placeholder transition-all ${
+                validationError
+                  ? 'border-amber-400 dark:border-amber-600'
+                  : 'border-gray-300 dark:border-dark-border'
+              }`}
               placeholder="Paste your physics problem here..."
               value={problemText}
-              onChange={(e) => setProblemText(e.target.value)}
+              onChange={(e) => {
+                setProblemText(e.target.value)
+                if (validationError) setValidationError(null)
+              }}
               disabled={isLoading}
             />
+            {validationError && (
+              <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  {validationError}
+                </p>
+              </div>
+            )}
             </div>
           )}
 

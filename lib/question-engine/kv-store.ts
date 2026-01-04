@@ -71,8 +71,8 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 const RATE_LIMIT_WINDOW_SECONDS = 60
 const RATE_LIMIT_MAX_REQUESTS = 20
 const QUOTA_WINDOW_SECONDS = 86400 // 24 hours
-const MAX_DAILY_GENERATIONS_UNAUTH = 3
-const MAX_DAILY_GENERATIONS_AUTH = 50
+const MAX_DAILY_GENERATIONS_UNAUTH = 50  // Increased from 3
+const MAX_DAILY_GENERATIONS_AUTH = 200   // Increased from 50
 const STATUS_TTL_SECONDS = 300 // 5 minutes
 
 // =============================================================================

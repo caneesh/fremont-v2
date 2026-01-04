@@ -5,6 +5,7 @@ import type {
   ErrorPatternInsight,
 } from '@/types/errorPatterns'
 import { COMMON_ERROR_PATTERNS } from '@/types/errorPatterns'
+import type { SocraticErrorData, SelfReportConfidence } from '@/types/socraticFirst'
 
 const STORAGE_KEY = 'physiscaffold_error_patterns'
 const STORAGE_VERSION = 1
@@ -296,6 +297,123 @@ class ErrorPatternService {
       improvementRate:
         uniquePatterns > 0 ? Math.round((masteredPatterns / uniquePatterns) * 100) : 0,
     }
+  }
+
+  /**
+   * Record an error from Socratic-first step interaction
+   *
+   * Attempts to match the Socratic error to a known error pattern.
+   * If no match found, records as a generic conceptual error.
+   */
+  recordSocraticError(
+    studentId: string,
+    patternId: string,
+    problemId: string,
+    data: SocraticErrorData
+  ): void {
+    // Map self-reported confidence to hints used approximation
+    const confidenceToHints: Record<SelfReportConfidence, number> = {
+      solid: 0,  // Thought they knew - didn't use hints
+      okay: 1,   // Some uncertainty
+      guess: 2,  // Guessing - would have needed hints
+    }
+
+    const hintsUsed = confidenceToHints[data.selfReportedConfidence] || 1
+
+    // Record using standard method
+    this.recordError(
+      studentId,
+      patternId,
+      problemId,
+      `Socratic interaction revealed: ${data.conceptGaps.slice(0, 2).join(', ')}`,
+      data.studentAnswer,
+      data.correctApproach,
+      {
+        topic: data.conceptGaps[0] || 'general',
+        difficulty: 'medium',
+        hintsUsed,
+        timeSpent: 0, // Not tracked in Socratic mode
+      }
+    )
+
+    console.log(
+      `[ErrorPatterns] Recorded Socratic error: pattern=${patternId}, ` +
+      `confidence=${data.selfReportedConfidence}, gaps=${data.conceptGaps.length}`
+    )
+  }
+
+  /**
+   * Find best matching error pattern from concept gaps
+   *
+   * Searches known error patterns for concepts that match the gaps.
+   * Returns the most relevant pattern ID or null.
+   */
+  findMatchingPattern(conceptGaps: string[]): string | null {
+    if (conceptGaps.length === 0) return null
+
+    const gapsLower = conceptGaps.map(g => g.toLowerCase())
+
+    // Search through patterns for concept matches
+    for (const pattern of COMMON_ERROR_PATTERNS) {
+      const relatedLower = pattern.relatedConcepts.map(c => c.toLowerCase())
+
+      // Check if any gap matches related concepts
+      for (const gap of gapsLower) {
+        if (relatedLower.some(r => r.includes(gap) || gap.includes(r))) {
+          return pattern.id
+        }
+      }
+
+      // Check pattern title/category
+      if (gapsLower.some(g =>
+        pattern.title.toLowerCase().includes(g) ||
+        pattern.category.toLowerCase().includes(g)
+      )) {
+        return pattern.id
+      }
+    }
+
+    // Default patterns based on common physics gaps
+    const gapPatternMap: Record<string, string> = {
+      'friction': 'friction_direction',
+      'force': 'forgetting_forces',
+      'newton': 'forgetting_forces',
+      'sign': 'sign_convention',
+      'direction': 'sign_convention',
+      'energy': 'energy_type_confusion',
+      'kinetic': 'energy_type_confusion',
+      'potential': 'energy_type_confusion',
+      'momentum': 'momentum_conservation',
+      'conservation': 'momentum_conservation',
+      'vector': 'vector_scalar_confusion',
+      'scalar': 'vector_scalar_confusion',
+      'units': 'unit_errors',
+      'dimension': 'unit_errors',
+    }
+
+    for (const gap of gapsLower) {
+      for (const [keyword, patternId] of Object.entries(gapPatternMap)) {
+        if (gap.includes(keyword)) {
+          return patternId
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Record Socratic error with automatic pattern matching
+   */
+  recordSocraticErrorWithMatching(
+    studentId: string,
+    problemId: string,
+    data: SocraticErrorData
+  ): void {
+    // Try to find matching pattern
+    const patternId = this.findMatchingPattern(data.conceptGaps) || 'general_conceptual_error'
+
+    this.recordSocraticError(studentId, patternId, problemId, data)
   }
 }
 

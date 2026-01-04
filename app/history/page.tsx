@@ -107,7 +107,7 @@ export default function HistoryPage() {
   useSwipeGesture({
     onSwipeLeft: () => {
       if (window.innerWidth < 768) {
-        router.push('/')
+        router.push('/solve')
       }
     },
     onSwipeRight: () => {
@@ -135,7 +135,7 @@ export default function HistoryPage() {
               </p>
             </div>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/solve')}
               className="w-full sm:w-auto px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent-strong active:scale-98 flex items-center justify-center gap-2 transition-all min-h-[48px] shadow-md hover:shadow-lg dark:hover:shadow-dark-glow"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ export default function HistoryPage() {
                 : 'Start solving problems to build your history'}
             </p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/solve')}
               className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent-strong transition-all shadow-md hover:shadow-lg dark:hover:shadow-dark-glow"
             >
               Solve a Problem

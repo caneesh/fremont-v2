@@ -11,6 +11,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import PageHeader from '@/components/PageHeader'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import StudyPlanV2Dashboard from '@/components/StudyPlanV2Dashboard'
+import { DashboardV3 } from '@/components/dashboard'
 
 export default function StudyPathPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function StudyPathPage() {
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [recommendedQuestions, setRecommendedQuestions] = useState<Question[]>([])
   const [showV2, setShowV2] = useState(FEATURE_FLAGS.STUDY_PLAN_V2)
+  const [showV3, setShowV3] = useState(FEATURE_FLAGS.DASHBOARD_V3)
 
   useEffect(() => {
     const loadData = async () => {
@@ -105,6 +107,22 @@ export default function StudyPathPage() {
     },
   })
 
+  // Show v3 dashboard if enabled (takes priority over v2)
+  if (showV3) {
+    // When v3 is enabled, AppShell handles the navigation chrome
+    // So we just render the dashboard content directly
+    const useDashboardLayout = FEATURE_FLAGS.DASHBOARD_V3
+    return (
+      <div className={useDashboardLayout ? '' : 'min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card'}>
+        {!useDashboardLayout && <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />}
+        {!useDashboardLayout && <MobileNav />}
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <DashboardV3 onSwitchToV1={() => setShowV3(false)} />
+        </div>
+      </div>
+    )
+  }
+
   // Show v2 dashboard if enabled
   if (showV2) {
     return (
@@ -161,7 +179,7 @@ export default function StudyPathPage() {
               History
             </button>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/solve')}
               className="px-5 py-2.5 bg-accent text-white rounded-lg hover:bg-accent-strong flex items-center gap-2 transition-all hover:shadow-lg dark:hover:shadow-dark-glow"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,8 +316,8 @@ export default function StudyPathPage() {
               <button
                 key={question.id}
                 onClick={() => {
-                  // Load the question into the main solver
-                  router.push(`/?question=${question.id}`)
+                  // Load the question into the solver
+                  router.push(`/solve?question=${question.id}`)
                 }}
                 className="w-full bg-gray-50 dark:bg-dark-card-soft hover:bg-gray-100 dark:hover:bg-dark-border rounded-lg p-4 text-left border-2 border-transparent dark:border-dark-border hover:border-accent dark:hover:border-accent transition-all group"
               >

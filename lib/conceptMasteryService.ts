@@ -4,6 +4,7 @@ import type {
   ConceptMasteryStorage,
   MasteryLevel,
 } from '@/types/conceptMastery'
+import type { SocraticAttemptData, FinalUnderstanding } from '@/types/socraticFirst'
 
 const STORAGE_KEY = 'physiscaffold_concept_mastery'
 const STORAGE_VERSION = 1
@@ -303,6 +304,102 @@ class ConceptMasteryService {
       this.saveStorage(storage)
       console.log(`[ConceptMastery] Cleared all data for student ${studentId}`)
     }
+  }
+
+  /**
+   * Record an attempt from Socratic-first step interaction
+   *
+   * Maps Socratic interaction data to concept mastery:
+   * - exchangeCount affects hint level proxy (more exchanges = lower hint score)
+   * - selfReportAccuracy provides calibration signal
+   * - aiVerifiedUnderstanding maps to success flag
+   * - hintsUsed directly affects hint level
+   */
+  recordSocraticAttempt(
+    studentId: string,
+    conceptId: string,
+    conceptName: string,
+    data: SocraticAttemptData
+  ): void {
+    // Map Socratic data to traditional attempt metrics
+    // exchangeCount: 1-2 is excellent, 3-4 is good, 5+ needs work
+    // This maps to a pseudo-hint level for consistency with existing scoring
+
+    // Calculate pseudo hint level based on Socratic performance
+    // Pure Socratic path with few exchanges = low hint level (good)
+    // Many exchanges or hints used = higher hint level
+    let pseudoHintLevel = 0
+
+    if (data.hintsUsed > 0) {
+      // If hints were used, start at that level
+      pseudoHintLevel = Math.min(data.hintsUsed, 5)
+    } else if (data.exchangeCount <= 2) {
+      // Quick understanding - equivalent to no hints
+      pseudoHintLevel = 0
+    } else if (data.exchangeCount <= 4) {
+      // Moderate help needed - equivalent to light hints
+      pseudoHintLevel = 1
+    } else if (data.exchangeCount <= 6) {
+      // More guidance needed
+      pseudoHintLevel = 2
+    } else {
+      // Extended dialogue - needed significant help
+      pseudoHintLevel = 3
+    }
+
+    // Map final understanding to success
+    const success = data.aiVerifiedUnderstanding === 'mastered' ||
+      data.aiVerifiedUnderstanding === 'partial'
+
+    // Apply calibration adjustment to hint level
+    // Well-calibrated students get a small bonus
+    // Overconfident students don't get penalized on mastery (handled by mistake notebook)
+    if (data.selfReportAccuracy >= 0.8) {
+      // Well-calibrated - shows self-awareness
+      pseudoHintLevel = Math.max(0, pseudoHintLevel - 0.5)
+    }
+
+    // Record using standard method
+    this.recordAttempt(studentId, conceptId, conceptName, {
+      problemId: `socratic_${Date.now()}`,
+      hintLevel: pseudoHintLevel,
+      timeSpent: 0, // Could be passed in if tracked
+      success,
+    })
+
+    console.log(
+      `[ConceptMastery] Recorded Socratic attempt for ${conceptId}: ` +
+      `exchanges=${data.exchangeCount}, hints=${data.hintsUsed}, ` +
+      `understanding=${data.aiVerifiedUnderstanding}, calibration=${data.selfReportAccuracy.toFixed(2)}`
+    )
+  }
+
+  /**
+   * Calculate effective mastery considering Socratic calibration
+   * Returns the base mastery score adjusted by calibration pattern
+   */
+  getEffectiveMastery(
+    studentId: string,
+    conceptId: string,
+    calibrationPattern?: 'overconfident' | 'underconfident' | 'calibrated' | 'well_calibrated'
+  ): number {
+    const conceptData = this.getConceptMastery(studentId, conceptId)
+    if (!conceptData) return 0
+
+    let effectiveScore = conceptData.masteryScore
+
+    // Apply calibration adjustment
+    // Underconfident students may actually know more than scores suggest
+    // Overconfident students may know less
+    if (calibrationPattern === 'underconfident') {
+      // Boost score slightly - they know more than they think
+      effectiveScore = Math.min(1, effectiveScore * 1.1)
+    } else if (calibrationPattern === 'overconfident') {
+      // Reduce score slightly - they may have blind spots
+      effectiveScore = effectiveScore * 0.9
+    }
+
+    return effectiveScore
   }
 }
 
