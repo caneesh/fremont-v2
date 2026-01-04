@@ -1,4 +1,4 @@
-import { PrismaClient, QuestionLifecycleState, QuestionProvenance, EdgeType, AIFeatureType } from '@prisma/client';
+import { PrismaClient, QuestionLifecycleState, QuestionProvenance, EdgeType, AIFeatureType, Prisma } from '@prisma/client';
 
 // =============================================================================
 // TYPES
@@ -397,7 +397,7 @@ export class QuestionSelectionService {
         topicTags: sourceQuestion.topicTags,
         lifecycleState: QuestionLifecycleState.draft,
         provenance: QuestionProvenance.ai_generated,
-        payload: aiResult.questionPayload,
+        payload: aiResult.questionPayload as Prisma.InputJsonValue,
         isAiGenerated: true,
         aiModel: aiResult.model,
         aiGeneratedAt: new Date(),

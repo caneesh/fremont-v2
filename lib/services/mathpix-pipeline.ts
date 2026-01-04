@@ -1,4 +1,4 @@
-import { PrismaClient, ExtractionStatus, QuestionLifecycleState, QuestionProvenance } from '@prisma/client';
+import { PrismaClient, ExtractionStatus, QuestionLifecycleState, QuestionProvenance, Prisma } from '@prisma/client';
 
 // =============================================================================
 // TYPES
@@ -696,7 +696,7 @@ export class MathpixPipelineService {
         topicTags: this.extractTopicTags(patternMatch.primaryPatternId),
         lifecycleState: QuestionLifecycleState.draft,
         provenance: QuestionProvenance.mathpix,
-        payload,
+        payload: payload as Prisma.InputJsonValue,
         isAiGenerated: true, // Template-based generation
         aiModel: 'template-v1',
         aiGeneratedAt: new Date(),
@@ -865,7 +865,7 @@ export class MathpixPipelineService {
       where: { id: extractionId },
       data: {
         currentStage: stage,
-        stageOutputs: currentOutputs,
+        stageOutputs: currentOutputs as Prisma.InputJsonValue,
         status: ExtractionStatus.processing,
       },
     });

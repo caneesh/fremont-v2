@@ -1,19 +1,11 @@
 import { PrismaClient } from '@prisma/client'
-import { Pool, neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
-import ws from 'ws'
 
-// Configure Neon for serverless
-neonConfig.webSocketConstructor = ws
-
-// Connection pool for Neon
+// Connection string for Neon (use pooled URL for serverless)
 const connectionString = process.env.DATABASE_URL!
 
-// Create a connection pool
-const pool = new Pool({ connectionString })
-
 // Create Prisma adapter for Neon
-const adapter = new PrismaNeon(pool)
+const adapter = new PrismaNeon({ connectionString })
 
 // Singleton pattern for Prisma Client
 const globalForPrisma = globalThis as unknown as {
@@ -34,7 +26,6 @@ if (process.env.NODE_ENV !== 'production') {
 // Helper to disconnect (useful for scripts)
 export async function disconnect() {
   await prisma.$disconnect()
-  await pool.end()
 }
 
 // Re-export types for convenience

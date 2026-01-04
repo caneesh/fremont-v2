@@ -67,19 +67,19 @@ let closeRedisConnection: typeof import('../kv-store').closeRedisConnection
 type QuestionSummary = import('../kv-store').QuestionSummary
 
 beforeAll(async () => {
-  const module = await import('../kv-store')
-  hasQuestion = module.hasQuestion
-  getQuestionBlobUrl = module.getQuestionBlobUrl
-  saveQuestionIndex = module.saveQuestionIndex
-  getTopicHashes = module.getTopicHashes
-  getSubtopicHashes = module.getSubtopicHashes
-  getQuestionSummaries = module.getQuestionSummaries
-  checkRateLimit = module.checkRateLimit
-  checkQuota = module.checkQuota
-  getQuotaRemaining = module.getQuotaRemaining
-  updateStatus = module.updateStatus
-  getStatus = module.getStatus
-  closeRedisConnection = module.closeRedisConnection
+  const kvStore = await import('../kv-store')
+  hasQuestion = kvStore.hasQuestion
+  getQuestionBlobUrl = kvStore.getQuestionBlobUrl
+  saveQuestionIndex = kvStore.saveQuestionIndex
+  getTopicHashes = kvStore.getTopicHashes
+  getSubtopicHashes = kvStore.getSubtopicHashes
+  getQuestionSummaries = kvStore.getQuestionSummaries
+  checkRateLimit = kvStore.checkRateLimit
+  checkQuota = kvStore.checkQuota
+  getQuotaRemaining = kvStore.getQuotaRemaining
+  updateStatus = kvStore.updateStatus
+  getStatus = kvStore.getStatus
+  closeRedisConnection = kvStore.closeRedisConnection
 })
 
 // =============================================================================
