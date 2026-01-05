@@ -356,7 +356,7 @@ export const FEATURE_FLAGS = {
    *
    * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_DASHBOARD_V3=true)
    */
-  DASHBOARD_V3: process.env.NEXT_PUBLIC_FEATURE_DASHBOARD_V3 === 'true',
+  DASHBOARD_V3: true,
 
   /**
    * Socratic-First Step Interaction
@@ -381,7 +381,7 @@ export const FEATURE_FLAGS = {
    *
    * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_SOCRATIC_FIRST=true)
    */
-  SOCRATIC_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_FIRST === 'true',
+  SOCRATIC_FIRST_MODE: true,
 }
 
 /**
