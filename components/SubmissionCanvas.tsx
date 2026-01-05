@@ -177,7 +177,7 @@ export default function SubmissionCanvas({
   }
 
   // Handle multiple file uploads
-  const handleFilesSelect = async (files: FileList | File[]) => {
+  const handleFilesSelect = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files)
     const validFiles: File[] = []
 
@@ -221,10 +221,10 @@ export default function SubmissionCanvas({
     if (uploadedSheets.length === 0) {
       processAllSheets([...newSheets])
     }
-  }
+  }, [uploadedSheets.length, processAllSheets])
 
   // Process all sheets sequentially
-  const processAllSheets = async (sheets: UploadedSheet[]) => {
+  const processAllSheets = useCallback(async (sheets: UploadedSheet[]) => {
     setScanState('scanning')
 
     for (let i = 0; i < sheets.length; i++) {
@@ -277,7 +277,7 @@ export default function SubmissionCanvas({
       setTranscribedText(combined)
       return prev
     })
-  }
+  }, [])
 
   // Add more sheets to existing upload
   const handleAddMoreSheets = async (files: FileList | File[]) => {
@@ -391,7 +391,7 @@ export default function SubmissionCanvas({
     if (files.length > 0) {
       handleFilesSelect(files)
     }
-  }, [])
+  }, [handleFilesSelect])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()

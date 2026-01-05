@@ -137,7 +137,7 @@ export default function DrillPlayer({
     } else {
       advanceToNextItem(result)
     }
-  }, [currentItem, session, selectedChoice, userAnswer, showFeedback, showImmediateFeedback, onItemComplete])
+  }, [currentItem, session, selectedChoice, userAnswer, showFeedback, showImmediateFeedback, onItemComplete, advanceToNextItem])
 
   // Handle timeout
   const handleTimeout = useCallback(() => {

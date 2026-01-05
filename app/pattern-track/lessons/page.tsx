@@ -29,7 +29,7 @@ export default function LessonsPage() {
     }
 
     loadLessons()
-  }, [])
+  }, [userId])
 
   const getStatusBadge = (lesson: LessonWithProgress) => {
     const status = lesson.progress?.status || 'not_started'

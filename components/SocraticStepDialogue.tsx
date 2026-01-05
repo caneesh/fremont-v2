@@ -61,12 +61,7 @@ export default function SocraticStepDialogue({
   const startTimeRef = useRef<number>(Date.now())
   const exchangeCountRef = useRef<number>(0)
 
-  // Fetch multiple questions on mount
-  useEffect(() => {
-    fetchQuestions()
-  }, [])
-
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     setState(prev => ({ ...prev, isProcessing: true }))
 
     try {
@@ -148,7 +143,12 @@ export default function SocraticStepDialogue({
         isProcessing: false,
       }))
     }
-  }
+  }, [stepTitle, stepContent, problemStatement, concepts])
+
+  // Fetch multiple questions on mount
+  useEffect(() => {
+    fetchQuestions()
+  }, [fetchQuestions])
 
   // Build mastery result helper
   const buildMasteryResultForCompletion = useCallback((): SocraticMasteryResult => {
@@ -311,7 +311,7 @@ export default function SocraticStepDialogue({
         error: 'Something went wrong. Please try again.',
       }))
     }
-  }, [state.currentQuestion, state.exchanges, state.isProcessing, problemStatement, stepTitle, stepContent, concepts, onComplete])
+  }, [state.currentQuestion, state.exchanges, state.isProcessing, problemStatement, stepTitle, stepContent, concepts, currentQuestionIndex, moveToNextQuestion])
 
   const handleMCQSelect = (optionId: string) => {
     setSelectedMCQOption(optionId)

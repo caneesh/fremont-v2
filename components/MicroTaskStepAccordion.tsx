@@ -382,7 +382,7 @@ export default function MicroTaskStepAccordion({
 
     // Default based on common physics errors
     return 'algebra_manipulation'
-  }, [step, currentLevel])
+  }, [step, currentLevel, availableTasks])
 
   const handleTaskWrong = (attempts: number) => {
     setTaskAttempts(prev => {

@@ -43,7 +43,7 @@ export default function PatternTrackPage() {
     }
 
     loadData()
-  }, [])
+  }, [userId])
 
   const getDifficultyColor = (difficulty: number) => {
     if (difficulty <= 2) return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'

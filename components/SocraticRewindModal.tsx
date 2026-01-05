@@ -51,29 +51,7 @@ export default function SocraticRewindModal({
   const [startTime] = useState<number>(Date.now())
   const [isLoadingAI, setIsLoadingAI] = useState(false)
 
-  // Generate response when modal opens
-  useEffect(() => {
-    if (isOpen && state === 'idle') {
-      // Generate quick response immediately
-      const quickResponse = generateQuickRewindResponse(context)
-      setResponse(quickResponse)
-      setState('triggered')
-
-      // Optionally fetch AI-enhanced response in background
-      fetchAIResponse()
-    }
-  }, [isOpen, context, state])
-
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setState('idle')
-      setResponse(null)
-      setShowNudge(false)
-    }
-  }, [isOpen])
-
-  const fetchAIResponse = async () => {
+  const fetchAIResponse = useCallback(async () => {
     setIsLoadingAI(true)
     try {
       const res = await fetch('/api/socratic-rewind', {
@@ -92,7 +70,29 @@ export default function SocraticRewindModal({
     } finally {
       setIsLoadingAI(false)
     }
-  }
+  }, [context])
+
+  // Generate response when modal opens
+  useEffect(() => {
+    if (isOpen && state === 'idle') {
+      // Generate quick response immediately
+      const quickResponse = generateQuickRewindResponse(context)
+      setResponse(quickResponse)
+      setState('triggered')
+
+      // Optionally fetch AI-enhanced response in background
+      fetchAIResponse()
+    }
+  }, [isOpen, context, state, fetchAIResponse])
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setState('idle')
+      setResponse(null)
+      setShowNudge(false)
+    }
+  }, [isOpen])
 
   const handleAcknowledge = useCallback(() => {
     setState('showing_rewind')

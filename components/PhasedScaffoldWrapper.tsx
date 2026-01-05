@@ -261,6 +261,23 @@ export function usePhasedScaffoldContext() {
   return useContext(PhasedScaffoldContext)
 }
 
+// Static arrays moved outside component to avoid recreating on each render
+const LOADING_MESSAGES = [
+  'Analyzing your problem...',
+  'Identifying key concepts...',
+  'Breaking down the solution...',
+  'Crafting step-by-step guidance...',
+  'Almost ready...',
+]
+
+const LOADING_TIPS = [
+  'Try to identify the given quantities before starting.',
+  'Draw a diagram to visualize the problem.',
+  'Think about which physics principles might apply.',
+  'Break complex problems into smaller parts.',
+  'Check units throughout your calculation.',
+]
+
 /**
  * Skeleton loading component for outline - Beautiful animated loading experience
  */
@@ -268,29 +285,13 @@ function OutlineLoadingSkeleton() {
   const [messageIndex, setMessageIndex] = useState(0)
   const [tipIndex, setTipIndex] = useState(0)
 
-  const loadingMessages = [
-    'Analyzing your problem...',
-    'Identifying key concepts...',
-    'Breaking down the solution...',
-    'Crafting step-by-step guidance...',
-    'Almost ready...',
-  ]
-
-  const tips = [
-    'Try to identify the given quantities before starting.',
-    'Draw a diagram to visualize the problem.',
-    'Think about which physics principles might apply.',
-    'Break complex problems into smaller parts.',
-    'Check units throughout your calculation.',
-  ]
-
   useEffect(() => {
     const messageTimer = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % loadingMessages.length)
+      setMessageIndex(prev => (prev + 1) % LOADING_MESSAGES.length)
     }, 2500)
 
     const tipTimer = setInterval(() => {
-      setTipIndex(prev => (prev + 1) % tips.length)
+      setTipIndex(prev => (prev + 1) % LOADING_TIPS.length)
     }, 5000)
 
     return () => {
@@ -324,7 +325,7 @@ function OutlineLoadingSkeleton() {
 
         {/* Animated loading message */}
         <p className="text-indigo-600 dark:text-indigo-400 font-medium mb-6 h-6 transition-opacity duration-300">
-          {loadingMessages[messageIndex]}
+          {LOADING_MESSAGES[messageIndex]}
         </p>
 
         {/* Progress dots */}
@@ -354,7 +355,7 @@ function OutlineLoadingSkeleton() {
                 Pro Tip
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-200 transition-opacity duration-500">
-                {tips[tipIndex]}
+                {LOADING_TIPS[tipIndex]}
               </p>
             </div>
           </div>

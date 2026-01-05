@@ -326,7 +326,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     )
     setSessionModeState(updatedState)
     setSessionMode(updatedState.mode)
-  }, [problemMasteryScore, sessionModeSeed])
+  }, [problemMasteryScore, sessionModeSeed, sessionModeState])
 
   useEffect(() => {
     if (!showSkipCommitAnalytics) return
@@ -590,7 +590,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     }
 
     return { shouldAutoUnlockHint }
-  }, [gatingPolicy, momentumState, data.primaryPatternId, data.problem])
+  }, [gatingPolicy, momentumState, data.primaryPatternId, data.problem, registerSessionError])
 
   // P0 Decision Gate: Get required micro-task count
   const getDecisionGateRequiredCount = useCallback((): number => {

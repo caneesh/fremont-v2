@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { eventLogger, localStorageProvider } from '@/lib/storage'
 import type { StoredEvent, EventType } from '@/lib/storage'
 import { useToast } from '@/components/ui/ToastProvider'
@@ -25,7 +25,7 @@ export default function EventsDebugPage() {
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadEvents = () => {
+  const loadEvents = useCallback(() => {
     const options: { types?: EventType[]; problemId?: string } = {}
 
     if (filterType !== 'all') {
@@ -75,18 +75,18 @@ export default function EventsDebugPage() {
     }
 
     setIsLoading(false)
-  }
+  }, [filterType, filterProblemId])
 
   useEffect(() => {
     loadEvents()
-  }, [filterType, filterProblemId])
+  }, [loadEvents])
 
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(loadEvents, 2000)
       return () => clearInterval(interval)
     }
-  }, [autoRefresh])
+  }, [autoRefresh, loadEvents])
 
   const handleClearEvents = async () => {
     const ok = await confirm({

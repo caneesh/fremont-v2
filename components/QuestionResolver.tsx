@@ -100,6 +100,34 @@ export default function QuestionResolver({
   // Status Streaming
   // ==========================================================================
 
+  const startStatusPolling = useCallback((statusId: string) => {
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/question/status?id=${statusId}`)
+        if (response.ok) {
+          const data = (await response.json()) as StatusUpdate
+          setStatus({
+            stage: data.status,
+            message: STAGE_DESCRIPTIONS[data.status] || data.message,
+            progress: data.progress,
+          })
+
+          if (data.status === 'completed' || data.status === 'error') {
+            if (statusIntervalRef.current) {
+              clearInterval(statusIntervalRef.current)
+              statusIntervalRef.current = null
+            }
+          }
+        }
+      } catch {
+        // Ignore errors, keep polling
+      }
+    }
+
+    statusIntervalRef.current = setInterval(poll, 500)
+    poll() // Initial poll
+  }, [])
+
   const startStatusStream = useCallback((statusId: string) => {
     // Try SSE first
     const eventSource = new EventSource(`/api/question/status/stream?id=${statusId}`)
@@ -129,35 +157,7 @@ export default function QuestionResolver({
       // Fallback to polling
       startStatusPolling(statusId)
     }
-  }, [])
-
-  const startStatusPolling = useCallback((statusId: string) => {
-    const poll = async () => {
-      try {
-        const response = await fetch(`/api/question/status?id=${statusId}`)
-        if (response.ok) {
-          const data = (await response.json()) as StatusUpdate
-          setStatus({
-            stage: data.status,
-            message: STAGE_DESCRIPTIONS[data.status] || data.message,
-            progress: data.progress,
-          })
-
-          if (data.status === 'completed' || data.status === 'error') {
-            if (statusIntervalRef.current) {
-              clearInterval(statusIntervalRef.current)
-              statusIntervalRef.current = null
-            }
-          }
-        }
-      } catch {
-        // Ignore errors, keep polling
-      }
-    }
-
-    statusIntervalRef.current = setInterval(poll, 500)
-    poll() // Initial poll
-  }, [])
+  }, [startStatusPolling])
 
   // ==========================================================================
   // Form Handlers

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { StuckModePanelProps, SelfReportConfidence } from '@/types/socraticFirst'
 import MathRenderer from '../MathRenderer'
 
@@ -95,6 +95,7 @@ export default function StuckModePanel({
     if (hintLevel > 0 && !hintContent[hintLevel]) {
       fetchHintContent(hintLevel)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hintLevel])
 
   // Use external verification question if provided
