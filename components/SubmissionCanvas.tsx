@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import Image from 'next/image'
 import type {
   SubmissionTab,
   ScanState,
@@ -704,10 +705,12 @@ export default function SubmissionCanvas({
                             : 'border-slate-600'
                         }`}
                       >
-                        <img
+                        <Image
                           src={sheet.preview}
                           alt={`Sheet ${idx + 1}`}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          unoptimized
                         />
                       </div>
                     ))}
@@ -765,11 +768,13 @@ export default function SubmissionCanvas({
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                       {uploadedSheets.map((sheet, idx) => (
-                        <div key={sheet.id} className="relative group">
-                          <img
+                        <div key={sheet.id} className="relative group h-20">
+                          <Image
                             src={sheet.preview}
                             alt={`Sheet ${idx + 1}`}
-                            className="w-full h-20 object-cover rounded-lg border border-slate-700"
+                            fill
+                            className="object-cover rounded-lg border border-slate-700"
+                            unoptimized
                           />
                           <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center rounded-lg text-xs font-medium text-slate-200">
                             {idx + 1}
