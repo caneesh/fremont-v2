@@ -23,6 +23,16 @@ Open [http://localhost:3000](http://localhost:3000) and paste any physics proble
 
 ---
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Features](./docs/FEATURES.md) | Complete feature inventory with UI locations and success criteria |
+| [User Guide](./docs/USER_GUIDE.md) | Step-by-step usage instructions for testers and new users |
+| [QA Happy Path](./docs/QA_HAPPY_PATH_E2E.md) | End-to-end test scenario with copy-paste inputs |
+
+---
+
 ## Features
 
 ### Core Learning System
