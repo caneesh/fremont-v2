@@ -109,6 +109,32 @@ export default function DrillPlayer({
     }
   }, [currentItem, showFeedback])
 
+  // Advance to next item
+  const advanceToNextItem = useCallback((result: DrillItemResult) => {
+    if (!session) return
+
+    setIsTransitioning(true)
+
+    const updatedSession = recordItemResult(session, result)
+    setSession(updatedSession)
+
+    if (updatedSession.isComplete) {
+      const summary = completeDrillSession(updatedSession)
+      onDrillComplete(summary)
+    } else {
+      // Move to next item
+      const nextItem = items[updatedSession.currentIndex]
+      setCurrentItem(nextItem)
+      setUserAnswer('')
+      setSelectedChoice(null)
+      setShowFeedback(false)
+      setLastResult(null)
+      setTimeRemaining(getItemTimeLimit(nextItem) * 1000)
+      startTimeRef.current = Date.now()
+      setIsTransitioning(false)
+    }
+  }, [session, items, onDrillComplete])
+
   // Handle answer submission
   const handleSubmit = useCallback(() => {
     if (!currentItem || !session || showFeedback) return
@@ -160,32 +186,6 @@ export default function DrillPlayer({
     onItemComplete(result)
     setShowFeedback(true)
   }, [currentItem, session, showFeedback, onItemComplete])
-
-  // Advance to next item
-  const advanceToNextItem = useCallback((result: DrillItemResult) => {
-    if (!session) return
-
-    setIsTransitioning(true)
-
-    const updatedSession = recordItemResult(session, result)
-    setSession(updatedSession)
-
-    if (updatedSession.isComplete) {
-      const summary = completeDrillSession(updatedSession)
-      onDrillComplete(summary)
-    } else {
-      // Move to next item
-      const nextItem = items[updatedSession.currentIndex]
-      setCurrentItem(nextItem)
-      setUserAnswer('')
-      setSelectedChoice(null)
-      setShowFeedback(false)
-      setLastResult(null)
-      setTimeRemaining(getItemTimeLimit(nextItem) * 1000)
-      startTimeRef.current = Date.now()
-      setIsTransitioning(false)
-    }
-  }, [session, items, onDrillComplete])
 
   // Handle "Next" button after feedback
   const handleNext = useCallback(() => {

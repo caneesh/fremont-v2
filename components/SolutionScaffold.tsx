@@ -562,6 +562,29 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     return getStepDecisionGateState(gatingPolicy, stepId)
   }, [gatingPolicy])
 
+  // Track step-level errors (moved here to be available for decision gate callback)
+  const recordStepError = useCallback((stepId: number) => {
+    setStepErrorCounts(prev => {
+      const next = new Map(prev)
+      next.set(stepId, (next.get(stepId) || 0) + 1)
+      return next
+    })
+  }, [])
+
+  const registerSessionError = useCallback((stepId?: number) => {
+    if (stepId !== undefined) {
+      recordStepError(stepId)
+    }
+    const seedMode = sessionModeSeed || 'guided'
+    const baseState = sessionModeState ?? getOrCreateSessionModeState(seedMode)
+    const { state: updatedState } = recordSessionModeError(
+      baseState,
+      masteryScoreRef.current
+    )
+    setSessionModeState(updatedState)
+    setSessionMode(updatedState.mode)
+  }, [recordStepError, sessionModeSeed, sessionModeState])
+
   // P0 Decision Gate: Record micro-task attempt
   const handleRecordDecisionGateAttempt = useCallback((stepId: number, isCorrect: boolean): { shouldAutoUnlockHint: boolean } => {
     if (!gatingPolicy) return { shouldAutoUnlockHint: false }
@@ -801,28 +824,6 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       }
     }
   }, [completedSteps, data])
-
-  const recordStepError = useCallback((stepId: number) => {
-    setStepErrorCounts(prev => {
-      const next = new Map(prev)
-      next.set(stepId, (next.get(stepId) || 0) + 1)
-      return next
-    })
-  }, [])
-
-  const registerSessionError = useCallback((stepId?: number) => {
-    if (stepId !== undefined) {
-      recordStepError(stepId)
-    }
-    const seedMode = sessionModeSeed || 'guided'
-    const baseState = sessionModeState ?? getOrCreateSessionModeState(seedMode)
-    const { state: updatedState } = recordSessionModeError(
-      baseState,
-      masteryScoreRef.current
-    )
-    setSessionModeState(updatedState)
-    setSessionMode(updatedState.mode)
-  }, [recordStepError, sessionModeSeed, sessionModeState])
 
   // Generate a unique problem ID based on the problem text hash
   const problemId = useCallback(() => {

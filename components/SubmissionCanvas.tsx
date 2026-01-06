@@ -177,53 +177,6 @@ export default function SubmissionCanvas({
     }
   }
 
-  // Handle multiple file uploads
-  const handleFilesSelect = useCallback(async (files: FileList | File[]) => {
-    const fileArray = Array.from(files)
-    const validFiles: File[] = []
-
-    // Validate all files first
-    for (const file of fileArray) {
-      const validation = validateImageFile(file)
-      if (!validation.valid) {
-        setError(`${file.name}: ${validation.error}`)
-        return
-      }
-      validFiles.push(file)
-    }
-
-    if (validFiles.length === 0) return
-
-    setError(null)
-
-    // Create sheet objects with previews
-    const newSheets: UploadedSheet[] = await Promise.all(
-      validFiles.map(async (file) => {
-        const preview = await new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.readAsDataURL(file)
-        })
-
-        return {
-          id: `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          file,
-          preview,
-          transcription: '',
-          isProcessing: false,
-          isComplete: false
-        }
-      })
-    )
-
-    setUploadedSheets(prev => [...prev, ...newSheets])
-
-    // If this is the first upload, start processing
-    if (uploadedSheets.length === 0) {
-      processAllSheets([...newSheets])
-    }
-  }, [uploadedSheets.length, processAllSheets])
-
   // Process all sheets sequentially
   const processAllSheets = useCallback(async (sheets: UploadedSheet[]) => {
     setScanState('scanning')
@@ -279,6 +232,53 @@ export default function SubmissionCanvas({
       return prev
     })
   }, [])
+
+  // Handle multiple file uploads
+  const handleFilesSelect = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const validFiles: File[] = []
+
+    // Validate all files first
+    for (const file of fileArray) {
+      const validation = validateImageFile(file)
+      if (!validation.valid) {
+        setError(`${file.name}: ${validation.error}`)
+        return
+      }
+      validFiles.push(file)
+    }
+
+    if (validFiles.length === 0) return
+
+    setError(null)
+
+    // Create sheet objects with previews
+    const newSheets: UploadedSheet[] = await Promise.all(
+      validFiles.map(async (file) => {
+        const preview = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        })
+
+        return {
+          id: `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview,
+          transcription: '',
+          isProcessing: false,
+          isComplete: false
+        }
+      })
+    )
+
+    setUploadedSheets(prev => [...prev, ...newSheets])
+
+    // If this is the first upload, start processing
+    if (uploadedSheets.length === 0) {
+      processAllSheets([...newSheets])
+    }
+  }, [uploadedSheets.length, processAllSheets])
 
   // Add more sheets to existing upload
   const handleAddMoreSheets = async (files: FileList | File[]) => {
