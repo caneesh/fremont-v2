@@ -2182,6 +2182,1880 @@ const questions = [
       },
     },
   },
+
+  // ============ ADDITIONAL QUESTIONS (2nd question per pattern) ============
+
+  // Mechanics - Frictionless Incline #2 (Hard)
+  {
+    questionId: 'mech-incline-002',
+    primaryPatternId: 'mechanics/incline_frictionless',
+    difficulty: 4,
+    topicTags: ['mechanics', 'dynamics', 'inclined-plane'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-incline-002',
+      metadata: {
+        title: 'Two Blocks on Frictionless Double Incline',
+        difficulty: 4,
+        estimatedTimeSec: 480,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'dynamics', 'inclined-plane'],
+        patternTags: ['incline-frictionless', 'connected-masses'],
+      },
+      prompt: {
+        text: 'Two blocks of masses 3 kg and 5 kg are connected by a light string over a frictionless pulley at the top of a double incline. The 3 kg block is on a 30° incline and the 5 kg block is on a 45° incline. Both surfaces are frictionless. Find the acceleration of the system. (g = 10 m/s², sin 30° = 0.5, sin 45° = 0.707)',
+        given: [
+          { label: 'm₁', value: '3', unit: 'kg' },
+          { label: 'm₂', value: '5', unit: 'kg' },
+          { label: 'θ₁', value: '30', unit: '°' },
+          { label: 'θ₂', value: '45', unit: '°' },
+        ],
+        asked: [{ label: 'Acceleration of the system' }],
+      },
+      primaryPatternId: 'mechanics/incline_frictionless',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'Which block will move down its incline?',
+          choices: [
+            { key: 'A', text: 'The 5 kg block (larger component of weight along incline)', isDistractor: false },
+            { key: 'B', text: 'The 3 kg block', isDistractor: true },
+            { key: 'C', text: 'Neither, they balance', isDistractor: true },
+            { key: 'D', text: 'Cannot determine without friction', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the net force driving the system (in N).',
+          correctNumeric: 20.35,
+          validation: { numericTolerance: 0.5, units: 'N' },
+          explanations: {
+            micro: 'F_net = m₂g sin 45° - m₁g sin 30° = 5(10)(0.707) - 3(10)(0.5) = 35.35 - 15 = 20.35 N',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the acceleration (in m/s²).',
+          correctNumeric: 2.54,
+          validation: { numericTolerance: 0.1, units: 'm/s²' },
+          explanations: {
+            micro: 'a = F_net/(m₁+m₂) = 20.35/8 = 2.54 m/s²',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 2.54, units: 'm/s²' },
+        synthesis: [
+          'Compare weight components: m₂g sin 45° vs m₁g sin 30°',
+          '5(10)(0.707) = 35.35 N > 3(10)(0.5) = 15 N',
+          'a = (35.35 - 15)/(3 + 5) = 2.54 m/s²',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Incline with Friction #2 (Hard)
+  {
+    questionId: 'mech-incline-friction-002',
+    primaryPatternId: 'mechanics/incline_with_friction',
+    difficulty: 4,
+    topicTags: ['mechanics', 'dynamics', 'friction'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-incline-friction-002',
+      metadata: {
+        title: 'Block Pushed Up Rough Incline',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'dynamics', 'friction'],
+        patternTags: ['incline-with-friction', 'applied-force'],
+      },
+      prompt: {
+        text: 'A 2 kg block is pushed up a rough inclined plane at 30° with a horizontal force of 20 N. If μₖ = 0.2, find the acceleration. (g = 10 m/s², sin 30° = 0.5, cos 30° = 0.866)',
+        given: [
+          { label: 'Mass', value: '2', unit: 'kg' },
+          { label: 'Angle', value: '30', unit: '°' },
+          { label: 'Horizontal force', value: '20', unit: 'N' },
+          { label: 'μₖ', value: '0.2', unit: '' },
+        ],
+        asked: [{ label: 'Acceleration up the incline' }],
+      },
+      primaryPatternId: 'mechanics/incline_with_friction',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The component of the horizontal force along the incline is:',
+          choices: [
+            { key: 'A', text: 'F cos θ (up the incline)', isDistractor: false },
+            { key: 'B', text: 'F sin θ', isDistractor: true },
+            { key: 'C', text: 'F', isDistractor: true },
+            { key: 'D', text: 'F tan θ', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the normal force (in N). Note: horizontal force has a perpendicular component.',
+          correctNumeric: 27.32,
+          validation: { numericTolerance: 0.5, units: 'N' },
+          explanations: {
+            micro: 'N = mg cos θ + F sin θ = 2(10)(0.866) + 20(0.5) = 17.32 + 10 = 27.32 N',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the acceleration (in m/s²).',
+          correctNumeric: 1.15,
+          validation: { numericTolerance: 0.2, units: 'm/s²' },
+          explanations: {
+            micro: 'ma = F cos θ - mg sin θ - μN = 20(0.866) - 2(10)(0.5) - 0.2(27.32) = 17.32 - 10 - 5.46 = 1.86 N → a = 0.93 m/s²',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1.15, units: 'm/s²' },
+        synthesis: [
+          'Resolve horizontal force into components along and perpendicular to incline',
+          'N = mg cos θ + F sin θ = 27.32 N',
+          'Net force = F cos θ - mg sin θ - μN',
+          'a = (17.32 - 10 - 5.46)/2 ≈ 1.15 m/s²',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Newton 2D Block #2 (Easy)
+  {
+    questionId: 'mech-newton2d-002',
+    primaryPatternId: 'mechanics/newton_2d_block',
+    difficulty: 2,
+    topicTags: ['mechanics', 'dynamics', 'forces'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-newton2d-002',
+      metadata: {
+        title: 'Two Forces on a Block',
+        difficulty: 2,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'dynamics'],
+        patternTags: ['newton-2d', 'vector-addition'],
+      },
+      prompt: {
+        text: 'A 4 kg block on a frictionless surface has two forces applied: 12 N to the east and 16 N to the north. Find the magnitude of the acceleration.',
+        given: [
+          { label: 'Mass', value: '4', unit: 'kg' },
+          { label: 'Force east', value: '12', unit: 'N' },
+          { label: 'Force north', value: '16', unit: 'N' },
+        ],
+        asked: [{ label: 'Magnitude of acceleration' }],
+      },
+      primaryPatternId: 'mechanics/newton_2d_block',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate the net force magnitude using Pythagorean theorem (in N).',
+          correctNumeric: 20,
+          validation: { numericTolerance: 0.5, units: 'N' },
+          explanations: {
+            micro: 'F_net = √(12² + 16²) = √(144 + 256) = √400 = 20 N',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the acceleration (in m/s²).',
+          correctNumeric: 5,
+          validation: { numericTolerance: 0.1, units: 'm/s²' },
+          explanations: {
+            micro: 'a = F_net/m = 20/4 = 5 m/s²',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 5, units: 'm/s²' },
+        synthesis: [
+          'Forces are perpendicular, use Pythagorean theorem',
+          'F_net = √(12² + 16²) = 20 N',
+          'a = F/m = 20/4 = 5 m/s²',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Projectile Motion #2 (Hard)
+  {
+    questionId: 'mech-proj-002',
+    primaryPatternId: 'mechanics/projectile_motion',
+    difficulty: 4,
+    topicTags: ['mechanics', 'kinematics', 'projectile'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-proj-002',
+      metadata: {
+        title: 'Projectile from Height',
+        difficulty: 4,
+        estimatedTimeSec: 480,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'kinematics', 'projectile'],
+        patternTags: ['projectile-motion', 'height-launch'],
+      },
+      prompt: {
+        text: 'A ball is thrown horizontally from a cliff 80 m high with speed 15 m/s. Find: (a) time to hit ground, (b) horizontal distance traveled. (g = 10 m/s²)',
+        given: [
+          { label: 'Height', value: '80', unit: 'm' },
+          { label: 'Horizontal speed', value: '15', unit: 'm/s' },
+        ],
+        asked: [
+          { label: 'Time to hit ground' },
+          { label: 'Horizontal distance' },
+        ],
+      },
+      primaryPatternId: 'mechanics/projectile_motion',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For a horizontally thrown projectile, the initial vertical velocity is:',
+          choices: [
+            { key: 'A', text: 'Zero', isDistractor: false },
+            { key: 'B', text: 'Equal to horizontal velocity', isDistractor: true },
+            { key: 'C', text: 'g', isDistractor: true },
+            { key: 'D', text: 'Cannot be determined', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate time to hit ground (in s). Use h = ½gt²',
+          correctNumeric: 4,
+          validation: { numericTolerance: 0.1, units: 's' },
+          explanations: {
+            micro: 't = √(2h/g) = √(2×80/10) = √16 = 4 s',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate horizontal distance (in m).',
+          correctNumeric: 60,
+          validation: { numericTolerance: 1, units: 'm' },
+          explanations: {
+            micro: 'R = vₓ × t = 15 × 4 = 60 m',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 60, units: 'm' },
+        synthesis: [
+          'Vertical motion: h = ½gt² → t = √(2×80/10) = 4 s',
+          'Horizontal motion: R = vₓt = 15 × 4 = 60 m',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Circular Motion #2 (Easy)
+  {
+    questionId: 'mech-circular-002',
+    primaryPatternId: 'mechanics/circular_motion',
+    difficulty: 2,
+    topicTags: ['mechanics', 'circular-motion'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-circular-002',
+      metadata: {
+        title: 'Centripetal Acceleration',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'circular-motion'],
+        patternTags: ['circular-motion', 'centripetal-acceleration'],
+      },
+      prompt: {
+        text: 'A car moves in a circle of radius 100 m at constant speed 20 m/s. Find the centripetal acceleration.',
+        given: [
+          { label: 'Radius', value: '100', unit: 'm' },
+          { label: 'Speed', value: '20', unit: 'm/s' },
+        ],
+        asked: [{ label: 'Centripetal acceleration' }],
+      },
+      primaryPatternId: 'mechanics/circular_motion',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'Centripetal acceleration is given by:',
+          choices: [
+            { key: 'A', text: '$a_c = v^2/r$', isDistractor: false },
+            { key: 'B', text: '$a_c = vr$', isDistractor: true },
+            { key: 'C', text: '$a_c = v/r$', isDistractor: true },
+            { key: 'D', text: '$a_c = r/v^2$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the centripetal acceleration (in m/s²).',
+          correctNumeric: 4,
+          validation: { numericTolerance: 0.1, units: 'm/s²' },
+          explanations: {
+            micro: 'aᶜ = v²/r = (20)²/100 = 400/100 = 4 m/s²',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 4, units: 'm/s²' },
+        synthesis: [
+          'Use centripetal acceleration formula: aᶜ = v²/r',
+          'aᶜ = (20)²/100 = 4 m/s²',
+          'Direction: toward center of circle',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Work Energy #2 (Hard)
+  {
+    questionId: 'mech-energy-002',
+    primaryPatternId: 'mechanics/work_energy',
+    difficulty: 4,
+    topicTags: ['mechanics', 'energy', 'conservation'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-energy-002',
+      metadata: {
+        title: 'Block Sliding Down Curve into Spring',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'energy'],
+        patternTags: ['work-energy', 'energy-conservation'],
+      },
+      prompt: {
+        text: 'A 1 kg block slides from rest down a frictionless curved track from height 5 m and compresses a spring (k = 500 N/m) at the bottom. Find maximum compression. (g = 10 m/s²)',
+        given: [
+          { label: 'Mass', value: '1', unit: 'kg' },
+          { label: 'Height', value: '5', unit: 'm' },
+          { label: 'Spring constant', value: '500', unit: 'N/m' },
+        ],
+        asked: [{ label: 'Maximum spring compression' }],
+      },
+      primaryPatternId: 'mechanics/work_energy',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'At maximum compression, the block\'s kinetic energy is:',
+          choices: [
+            { key: 'A', text: 'Zero (momentarily at rest)', isDistractor: false },
+            { key: 'B', text: 'Maximum', isDistractor: true },
+            { key: 'C', text: 'Equal to potential energy', isDistractor: true },
+            { key: 'D', text: 'Equal to spring energy', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate maximum compression (in m). Use mgh = ½kx²',
+          correctNumeric: 0.447,
+          validation: { numericTolerance: 0.02, units: 'm' },
+          explanations: {
+            micro: 'mgh = ½kx² → x = √(2mgh/k) = √(2×1×10×5/500) = √0.2 = 0.447 m',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 0.447, units: 'm' },
+        synthesis: [
+          'Energy conservation: mgh = ½kx²',
+          'x = √(2mgh/k) = √(100/500) = √0.2 ≈ 0.447 m',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Momentum Collision #2 (Hard)
+  {
+    questionId: 'mech-momentum-002',
+    primaryPatternId: 'mechanics/momentum_collision',
+    difficulty: 4,
+    topicTags: ['mechanics', 'momentum', 'collision'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-momentum-002',
+      metadata: {
+        title: 'Elastic Collision - Equal Masses',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'momentum', 'collision'],
+        patternTags: ['momentum-collision', 'elastic-collision'],
+      },
+      prompt: {
+        text: 'A ball of mass 2 kg moving at 6 m/s collides elastically head-on with another 2 kg ball at rest. Find the velocities of both balls after collision.',
+        given: [
+          { label: 'm₁ = m₂', value: '2', unit: 'kg' },
+          { label: 'u₁', value: '6', unit: 'm/s' },
+          { label: 'u₂', value: '0', unit: 'm/s' },
+        ],
+        asked: [
+          { label: 'v₁ (velocity of first ball after collision)' },
+          { label: 'v₂ (velocity of second ball after collision)' },
+        ],
+      },
+      primaryPatternId: 'mechanics/momentum_collision',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'In an elastic collision between equal masses where one is at rest:',
+          choices: [
+            { key: 'A', text: 'The moving ball stops and the stationary ball moves with original velocity', isDistractor: false },
+            { key: 'B', text: 'Both balls move with half the original velocity', isDistractor: true },
+            { key: 'C', text: 'Both balls stick together', isDistractor: true },
+            { key: 'D', text: 'The moving ball bounces back', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'What is v₁ after collision (in m/s)?',
+          correctNumeric: 0,
+          validation: { numericTolerance: 0.1, units: 'm/s' },
+          explanations: {
+            micro: 'For elastic collision with equal masses: v₁ = 0 (complete momentum transfer)',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'What is v₂ after collision (in m/s)?',
+          correctNumeric: 6,
+          validation: { numericTolerance: 0.1, units: 'm/s' },
+          explanations: {
+            micro: 'v₂ = u₁ = 6 m/s (complete momentum transfer)',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'v₁ = 0, v₂ = 6 m/s' },
+        synthesis: [
+          'Equal mass elastic collision: velocities exchange',
+          'v₁ = u₂ = 0 m/s',
+          'v₂ = u₁ = 6 m/s',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Pulley System #2 (Medium)
+  {
+    questionId: 'mech-pulley-002',
+    primaryPatternId: 'mechanics/pulley_system',
+    difficulty: 3,
+    topicTags: ['mechanics', 'dynamics', 'pulley'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-pulley-002',
+      metadata: {
+        title: 'Block and Pulley on Table',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'dynamics', 'pulley'],
+        patternTags: ['pulley-system', 'table-edge'],
+      },
+      prompt: {
+        text: 'A 4 kg block on a frictionless table is connected by a string over a pulley to a 2 kg hanging mass. Find the acceleration and tension. (g = 10 m/s²)',
+        given: [
+          { label: 'Mass on table', value: '4', unit: 'kg' },
+          { label: 'Hanging mass', value: '2', unit: 'kg' },
+        ],
+        asked: [
+          { label: 'Acceleration' },
+          { label: 'Tension' },
+        ],
+      },
+      primaryPatternId: 'mechanics/pulley_system',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate the acceleration (in m/s²). Use a = m₂g/(m₁+m₂)',
+          correctNumeric: 3.33,
+          validation: { numericTolerance: 0.1, units: 'm/s²' },
+          explanations: {
+            micro: 'a = m₂g/(m₁+m₂) = 2(10)/(4+2) = 20/6 = 3.33 m/s²',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the tension (in N). Use T = m₁a',
+          correctNumeric: 13.33,
+          validation: { numericTolerance: 0.2, units: 'N' },
+          explanations: {
+            micro: 'T = m₁a = 4 × 3.33 = 13.33 N',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'a = 3.33 m/s², T = 13.33 N' },
+        synthesis: [
+          'For block on table: T = m₁a',
+          'For hanging mass: m₂g - T = m₂a',
+          'Solving: a = m₂g/(m₁+m₂) = 3.33 m/s²',
+          'T = m₁a = 13.33 N',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - SHM #2 (Easy)
+  {
+    questionId: 'mech-shm-002',
+    primaryPatternId: 'mechanics/simple_harmonic_motion',
+    difficulty: 2,
+    topicTags: ['mechanics', 'oscillations', 'shm'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-shm-002',
+      metadata: {
+        title: 'Spring-Mass Period',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'oscillations'],
+        patternTags: ['simple-harmonic-motion', 'spring-mass'],
+      },
+      prompt: {
+        text: 'A 0.5 kg mass attached to a spring oscillates with period 1 second. Find the spring constant.',
+        given: [
+          { label: 'Mass', value: '0.5', unit: 'kg' },
+          { label: 'Period', value: '1', unit: 's' },
+        ],
+        asked: [{ label: 'Spring constant k' }],
+      },
+      primaryPatternId: 'mechanics/simple_harmonic_motion',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The period of a spring-mass system is:',
+          choices: [
+            { key: 'A', text: '$T = 2\\pi\\sqrt{m/k}$', isDistractor: false },
+            { key: 'B', text: '$T = 2\\pi\\sqrt{k/m}$', isDistractor: true },
+            { key: 'C', text: '$T = 2\\pi\\sqrt{L/g}$', isDistractor: true },
+            { key: 'D', text: '$T = 2\\pi mk$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the spring constant k (in N/m).',
+          correctNumeric: 19.74,
+          validation: { numericTolerance: 0.5, units: 'N/m' },
+          explanations: {
+            micro: 'k = 4π²m/T² = 4(9.87)(0.5)/1 = 19.74 N/m',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 19.74, units: 'N/m' },
+        synthesis: [
+          'From T = 2π√(m/k), we get k = 4π²m/T²',
+          'k = 4(9.87)(0.5)/1² = 19.74 N/m',
+        ],
+      },
+    },
+  },
+
+  // Thermodynamics - Ideal Gas #2 (Medium)
+  {
+    questionId: 'thermo-gas-002',
+    primaryPatternId: 'thermodynamics/ideal_gas',
+    difficulty: 3,
+    topicTags: ['thermodynamics', 'ideal-gas'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'thermo-gas-002',
+      metadata: {
+        title: 'Isobaric Expansion',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['thermodynamics', 'ideal-gas'],
+        patternTags: ['ideal-gas-law', 'isobaric-process'],
+      },
+      prompt: {
+        text: 'An ideal gas at 27°C occupies 2 L at constant pressure. To what temperature must it be heated to occupy 3 L?',
+        given: [
+          { label: 'Initial temperature', value: '27', unit: '°C (300 K)' },
+          { label: 'Initial volume', value: '2', unit: 'L' },
+          { label: 'Final volume', value: '3', unit: 'L' },
+        ],
+        asked: [{ label: 'Final temperature' }],
+      },
+      primaryPatternId: 'thermodynamics/ideal_gas',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For constant pressure, which law applies?',
+          choices: [
+            { key: 'A', text: 'Charles\'s Law: V₁/T₁ = V₂/T₂', isDistractor: false },
+            { key: 'B', text: 'Boyle\'s Law', isDistractor: true },
+            { key: 'C', text: 'Gay-Lussac\'s Law', isDistractor: true },
+            { key: 'D', text: 'Combined Gas Law', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the final temperature (in K).',
+          correctNumeric: 450,
+          validation: { numericTolerance: 5, units: 'K' },
+          explanations: {
+            micro: 'T₂ = T₁(V₂/V₁) = 300(3/2) = 450 K = 177°C',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 450, units: 'K' },
+        synthesis: [
+          'Convert to Kelvin: T₁ = 27 + 273 = 300 K',
+          'Charles\'s Law: V₁/T₁ = V₂/T₂',
+          'T₂ = T₁(V₂/V₁) = 300(3/2) = 450 K = 177°C',
+        ],
+      },
+    },
+  },
+
+  // Thermodynamics - First Law #2 (Easy)
+  {
+    questionId: 'thermo-first-002',
+    primaryPatternId: 'thermodynamics/first_law',
+    difficulty: 2,
+    topicTags: ['thermodynamics', 'first-law'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'thermo-first-002',
+      metadata: {
+        title: 'Isothermal Process',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['thermodynamics', 'first-law'],
+        patternTags: ['first-law', 'isothermal-process'],
+      },
+      prompt: {
+        text: 'In an isothermal expansion, an ideal gas absorbs 400 J of heat. How much work does the gas do?',
+        given: [
+          { label: 'Heat absorbed', value: '400', unit: 'J' },
+          { label: 'Process type', value: 'Isothermal', unit: '' },
+        ],
+        asked: [{ label: 'Work done by gas' }],
+      },
+      primaryPatternId: 'thermodynamics/first_law',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'In an isothermal process, the change in internal energy is:',
+          choices: [
+            { key: 'A', text: 'Zero (temperature constant)', isDistractor: false },
+            { key: 'B', text: 'Equal to heat absorbed', isDistractor: true },
+            { key: 'C', text: 'Equal to work done', isDistractor: true },
+            { key: 'D', text: 'Negative', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate work done (in J). Use ΔU = Q - W with ΔU = 0.',
+          correctNumeric: 400,
+          validation: { numericTolerance: 5, units: 'J' },
+          explanations: {
+            micro: 'ΔU = 0 (isothermal) → Q = W → W = 400 J',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 400, units: 'J' },
+        synthesis: [
+          'Isothermal: ΔU = 0 (internal energy depends only on T)',
+          'First law: ΔU = Q - W → 0 = Q - W',
+          'W = Q = 400 J',
+        ],
+      },
+    },
+  },
+
+  // Thermodynamics - Heat Engine #2 (Hard)
+  {
+    questionId: 'thermo-engine-002',
+    primaryPatternId: 'thermodynamics/heat_engine',
+    difficulty: 4,
+    topicTags: ['thermodynamics', 'heat-engine'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'thermo-engine-002',
+      metadata: {
+        title: 'Heat Engine Efficiency Comparison',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['thermodynamics', 'heat-engine'],
+        patternTags: ['heat-engine', 'carnot-efficiency'],
+      },
+      prompt: {
+        text: 'A heat engine has efficiency 40%. It exhausts 600 J to the cold reservoir per cycle. Find the heat absorbed from the hot reservoir and work done per cycle.',
+        given: [
+          { label: 'Efficiency', value: '40', unit: '%' },
+          { label: 'Heat rejected', value: '600', unit: 'J' },
+        ],
+        asked: [
+          { label: 'Heat absorbed Qh' },
+          { label: 'Work done W' },
+        ],
+      },
+      primaryPatternId: 'thermodynamics/heat_engine',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The efficiency η relates to Qh and Qc as:',
+          choices: [
+            { key: 'A', text: '$\\eta = 1 - Q_c/Q_h$', isDistractor: false },
+            { key: 'B', text: '$\\eta = Q_c/Q_h$', isDistractor: true },
+            { key: 'C', text: '$\\eta = Q_h/Q_c$', isDistractor: true },
+            { key: 'D', text: '$\\eta = Q_h - Q_c$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate Qh (in J).',
+          correctNumeric: 1000,
+          validation: { numericTolerance: 10, units: 'J' },
+          explanations: {
+            micro: 'η = 1 - Qc/Qh → 0.4 = 1 - 600/Qh → Qh = 600/0.6 = 1000 J',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate work done W (in J).',
+          correctNumeric: 400,
+          validation: { numericTolerance: 5, units: 'J' },
+          explanations: {
+            micro: 'W = Qh - Qc = 1000 - 600 = 400 J',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'Qh = 1000 J, W = 400 J' },
+        synthesis: [
+          'From η = 1 - Qc/Qh: 0.4 = 1 - 600/Qh',
+          'Qh = 600/0.6 = 1000 J',
+          'W = Qh - Qc = 400 J (or W = ηQh = 0.4 × 1000)',
+        ],
+      },
+    },
+  },
+
+  // Thermodynamics - Calorimetry #2 (Medium)
+  {
+    questionId: 'thermo-calor-002',
+    primaryPatternId: 'thermodynamics/calorimetry',
+    difficulty: 3,
+    topicTags: ['thermodynamics', 'calorimetry'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'thermo-calor-002',
+      metadata: {
+        title: 'Metal Block in Water',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['thermodynamics', 'calorimetry'],
+        patternTags: ['calorimetry', 'specific-heat'],
+      },
+      prompt: {
+        text: 'A 200 g metal block at 100°C is dropped into 400 g of water at 20°C. The final temperature is 25°C. Find the specific heat of the metal. (c_water = 4.2 J/g°C)',
+        given: [
+          { label: 'Metal mass', value: '200', unit: 'g' },
+          { label: 'Metal initial temp', value: '100', unit: '°C' },
+          { label: 'Water mass', value: '400', unit: 'g' },
+          { label: 'Water initial temp', value: '20', unit: '°C' },
+          { label: 'Final temp', value: '25', unit: '°C' },
+        ],
+        asked: [{ label: 'Specific heat of metal' }],
+      },
+      primaryPatternId: 'thermodynamics/calorimetry',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate heat gained by water (in J).',
+          correctNumeric: 8400,
+          validation: { numericTolerance: 100, units: 'J' },
+          explanations: {
+            micro: 'Q_water = mc∆T = 400 × 4.2 × (25-20) = 8400 J',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate specific heat of metal (in J/g°C).',
+          correctNumeric: 0.56,
+          validation: { numericTolerance: 0.02, units: 'J/g°C' },
+          explanations: {
+            micro: 'Q_metal = Q_water → 200 × c × 75 = 8400 → c = 0.56 J/g°C',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 0.56, units: 'J/g°C' },
+        synthesis: [
+          'Heat lost by metal = Heat gained by water',
+          'Q_water = 400 × 4.2 × 5 = 8400 J',
+          'c_metal = 8400/(200 × 75) = 0.56 J/g°C',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Coulomb #2 (Medium)
+  {
+    questionId: 'em-coulomb-002',
+    primaryPatternId: 'electromagnetism/coulomb_field',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'electrostatics'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-coulomb-002',
+      metadata: {
+        title: 'Three Charges in a Line',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'electrostatics'],
+        patternTags: ['coulomb-law', 'superposition'],
+      },
+      prompt: {
+        text: 'Three charges +q, -2q, and +q are placed at x = 0, x = d, and x = 2d respectively. Find the net force on the middle charge. (Express in terms of kq²/d²)',
+        given: [
+          { label: 'Charges', value: '+q, -2q, +q', unit: '' },
+          { label: 'Positions', value: '0, d, 2d', unit: '' },
+        ],
+        asked: [{ label: 'Net force on middle charge' }],
+      },
+      primaryPatternId: 'electromagnetism/coulomb_field',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The force on -2q from the +q at origin is:',
+          choices: [
+            { key: 'A', text: 'Attractive, toward origin', isDistractor: false },
+            { key: 'B', text: 'Repulsive, away from origin', isDistractor: true },
+            { key: 'C', text: 'Zero', isDistractor: true },
+            { key: 'D', text: 'Perpendicular to line', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'MCQ_SINGLE',
+          prompt: 'The net force on -2q is:',
+          choices: [
+            { key: 'A', text: 'Zero (forces from both +q charges are equal and opposite)', isDistractor: false },
+            { key: 'B', text: '$4kq^2/d^2$ toward origin', isDistractor: true },
+            { key: 'C', text: '$4kq^2/d^2$ toward x=2d', isDistractor: true },
+            { key: 'D', text: '$2kq^2/d^2$ toward origin', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'F_net = 0' },
+        synthesis: [
+          'Force from +q at origin: F₁ = 2kq²/d² (toward origin)',
+          'Force from +q at 2d: F₂ = 2kq²/d² (toward 2d)',
+          'By symmetry: F_net = 0',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Gauss Law #2 (Medium)
+  {
+    questionId: 'em-gauss-002',
+    primaryPatternId: 'electromagnetism/gauss_law',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'electrostatics', 'gauss-law'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-gauss-002',
+      metadata: {
+        title: 'Electric Field of Infinite Line Charge',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'electrostatics'],
+        patternTags: ['gauss-law', 'line-charge'],
+      },
+      prompt: {
+        text: 'An infinite line has linear charge density λ = 2 μC/m. Find the electric field at distance 10 cm from the line. (k = 9×10⁹ N·m²/C²)',
+        given: [
+          { label: 'Linear charge density', value: '2', unit: 'μC/m' },
+          { label: 'Distance', value: '10', unit: 'cm' },
+        ],
+        asked: [{ label: 'Electric field' }],
+      },
+      primaryPatternId: 'electromagnetism/gauss_law',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For an infinite line charge, E varies as:',
+          choices: [
+            { key: 'A', text: 'E ∝ 1/r', isDistractor: false },
+            { key: 'B', text: 'E ∝ 1/r²', isDistractor: true },
+            { key: 'C', text: 'E = constant', isDistractor: true },
+            { key: 'D', text: 'E ∝ r', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate E (in N/C). Use E = 2kλ/r',
+          correctNumeric: 3.6e5,
+          validation: { numericTolerance: 1e4, units: 'N/C' },
+          explanations: {
+            micro: 'E = 2kλ/r = 2(9×10⁹)(2×10⁻⁶)/(0.1) = 3.6×10⁵ N/C',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 360000, units: 'N/C' },
+        synthesis: [
+          'For infinite line: E = λ/(2πε₀r) = 2kλ/r',
+          'E = 2(9×10⁹)(2×10⁻⁶)/(0.1) = 3.6×10⁵ N/C',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Capacitors #2 (Medium)
+  {
+    questionId: 'em-capacitor-002',
+    primaryPatternId: 'electromagnetism/capacitors',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'capacitors'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-capacitor-002',
+      metadata: {
+        title: 'Capacitors in Series',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'capacitors'],
+        patternTags: ['capacitors', 'series-combination'],
+      },
+      prompt: {
+        text: 'Two capacitors of 6 μF and 3 μF are connected in series across a 12 V battery. Find the equivalent capacitance and charge stored.',
+        given: [
+          { label: 'C₁', value: '6', unit: 'μF' },
+          { label: 'C₂', value: '3', unit: 'μF' },
+          { label: 'Voltage', value: '12', unit: 'V' },
+        ],
+        asked: [
+          { label: 'Equivalent capacitance' },
+          { label: 'Charge' },
+        ],
+      },
+      primaryPatternId: 'electromagnetism/capacitors',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate equivalent capacitance (in μF). Use 1/C_eq = 1/C₁ + 1/C₂',
+          correctNumeric: 2,
+          validation: { numericTolerance: 0.1, units: 'μF' },
+          explanations: {
+            micro: '1/C_eq = 1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2 → C_eq = 2 μF',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate charge stored (in μC).',
+          correctNumeric: 24,
+          validation: { numericTolerance: 0.5, units: 'μC' },
+          explanations: {
+            micro: 'Q = C_eq × V = 2 × 12 = 24 μC',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'C_eq = 2 μF, Q = 24 μC' },
+        synthesis: [
+          'Series: 1/C_eq = 1/6 + 1/3 = 1/2 → C_eq = 2 μF',
+          'Q = CV = 2 × 12 = 24 μC',
+          'Both capacitors have same charge in series',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - DC Circuits #2 (Easy)
+  {
+    questionId: 'em-circuit-002',
+    primaryPatternId: 'electromagnetism/dc_circuits',
+    difficulty: 2,
+    topicTags: ['electromagnetism', 'circuits'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-circuit-002',
+      metadata: {
+        title: 'Resistors in Parallel',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'circuits'],
+        patternTags: ['dc-circuits', 'parallel-resistors'],
+      },
+      prompt: {
+        text: 'Three 6Ω resistors are connected in parallel. Find the equivalent resistance.',
+        given: [
+          { label: 'Each resistor', value: '6', unit: 'Ω' },
+          { label: 'Number', value: '3', unit: '' },
+        ],
+        asked: [{ label: 'Equivalent resistance' }],
+      },
+      primaryPatternId: 'electromagnetism/dc_circuits',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For n equal resistors R in parallel, R_eq equals:',
+          choices: [
+            { key: 'A', text: 'R/n', isDistractor: false },
+            { key: 'B', text: 'nR', isDistractor: true },
+            { key: 'C', text: 'R', isDistractor: true },
+            { key: 'D', text: 'R/n²', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate equivalent resistance (in Ω).',
+          correctNumeric: 2,
+          validation: { numericTolerance: 0.1, units: 'Ω' },
+          explanations: {
+            micro: 'R_eq = R/n = 6/3 = 2 Ω',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 2, units: 'Ω' },
+        synthesis: [
+          '1/R_eq = 1/6 + 1/6 + 1/6 = 3/6 = 1/2',
+          'R_eq = 2 Ω',
+          'Or directly: R_eq = R/n = 6/3 = 2 Ω',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Magnetic Force #2 (Hard)
+  {
+    questionId: 'em-magforce-002',
+    primaryPatternId: 'electromagnetism/magnetic_force',
+    difficulty: 4,
+    topicTags: ['electromagnetism', 'magnetism'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-magforce-002',
+      metadata: {
+        title: 'Circular Motion in Magnetic Field',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'magnetism'],
+        patternTags: ['magnetic-force', 'circular-motion'],
+      },
+      prompt: {
+        text: 'An electron (m = 9×10⁻³¹ kg, q = 1.6×10⁻¹⁹ C) moves at 10⁷ m/s perpendicular to a 0.1 T magnetic field. Find the radius of its circular path.',
+        given: [
+          { label: 'Mass', value: '9×10⁻³¹', unit: 'kg' },
+          { label: 'Charge', value: '1.6×10⁻¹⁹', unit: 'C' },
+          { label: 'Velocity', value: '10⁷', unit: 'm/s' },
+          { label: 'Magnetic field', value: '0.1', unit: 'T' },
+        ],
+        asked: [{ label: 'Radius of circular path' }],
+      },
+      primaryPatternId: 'electromagnetism/magnetic_force',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For circular motion in magnetic field, the radius is given by:',
+          choices: [
+            { key: 'A', text: '$r = mv/(qB)$', isDistractor: false },
+            { key: 'B', text: '$r = qB/(mv)$', isDistractor: true },
+            { key: 'C', text: '$r = qvB/m$', isDistractor: true },
+            { key: 'D', text: '$r = m/(qvB)$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the radius (in mm).',
+          correctNumeric: 0.56,
+          validation: { numericTolerance: 0.05, units: 'mm' },
+          explanations: {
+            micro: 'r = mv/(qB) = (9×10⁻³¹)(10⁷)/((1.6×10⁻¹⁹)(0.1)) = 5.6×10⁻⁴ m = 0.56 mm',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 0.56, units: 'mm' },
+        synthesis: [
+          'Magnetic force = Centripetal force: qvB = mv²/r',
+          'r = mv/(qB) = (9×10⁻³¹)(10⁷)/((1.6×10⁻¹⁹)(0.1))',
+          'r = 5.6×10⁻⁴ m = 0.56 mm',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - EM Induction #2 (Medium)
+  {
+    questionId: 'em-induction-002',
+    primaryPatternId: 'electromagnetism/em_induction',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'induction'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-induction-002',
+      metadata: {
+        title: 'Moving Rod in Magnetic Field',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'induction'],
+        patternTags: ['em-induction', 'motional-emf'],
+      },
+      prompt: {
+        text: 'A 50 cm rod moves at 4 m/s perpendicular to a 0.5 T magnetic field. Find the induced EMF.',
+        given: [
+          { label: 'Length', value: '50', unit: 'cm' },
+          { label: 'Velocity', value: '4', unit: 'm/s' },
+          { label: 'Magnetic field', value: '0.5', unit: 'T' },
+        ],
+        asked: [{ label: 'Induced EMF' }],
+      },
+      primaryPatternId: 'electromagnetism/em_induction',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The motional EMF formula is:',
+          choices: [
+            { key: 'A', text: 'ε = BLv', isDistractor: false },
+            { key: 'B', text: 'ε = BL/v', isDistractor: true },
+            { key: 'C', text: 'ε = Bv/L', isDistractor: true },
+            { key: 'D', text: 'ε = B + L + v', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the induced EMF (in V).',
+          correctNumeric: 1,
+          validation: { numericTolerance: 0.05, units: 'V' },
+          explanations: {
+            micro: 'ε = BLv = 0.5 × 0.5 × 4 = 1 V',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1, units: 'V' },
+        synthesis: [
+          'Motional EMF: ε = BLv',
+          'ε = 0.5 × 0.5 × 4 = 1 V',
+        ],
+      },
+    },
+  },
+
+  // Optics - Lenses #2 (Medium)
+  {
+    questionId: 'optics-lens-002',
+    primaryPatternId: 'optics/lenses',
+    difficulty: 3,
+    topicTags: ['optics', 'lenses'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'optics-lens-002',
+      metadata: {
+        title: 'Magnification by Convex Lens',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['optics', 'lenses'],
+        patternTags: ['thin-lens', 'magnification'],
+      },
+      prompt: {
+        text: 'An object 2 cm tall is placed 15 cm from a convex lens of focal length 10 cm. Find the height of the image.',
+        given: [
+          { label: 'Object height', value: '2', unit: 'cm' },
+          { label: 'Object distance', value: '15', unit: 'cm' },
+          { label: 'Focal length', value: '10', unit: 'cm' },
+        ],
+        asked: [{ label: 'Image height' }],
+      },
+      primaryPatternId: 'optics/lenses',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate image distance v (in cm).',
+          correctNumeric: 30,
+          validation: { numericTolerance: 1, units: 'cm' },
+          explanations: {
+            micro: '1/v = 1/f - 1/u = 1/10 - 1/15 = 1/30 → v = 30 cm',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate magnification m = v/u.',
+          correctNumeric: 2,
+          validation: { numericTolerance: 0.1 },
+          explanations: {
+            micro: 'm = v/u = 30/15 = 2',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate image height (in cm).',
+          correctNumeric: 4,
+          validation: { numericTolerance: 0.1, units: 'cm' },
+          explanations: {
+            micro: 'h\' = m × h = 2 × 2 = 4 cm',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 4, units: 'cm' },
+        synthesis: [
+          'v = 30 cm (using lens formula)',
+          'm = v/u = 30/15 = 2',
+          'Image height = 2 × 2 = 4 cm (inverted)',
+        ],
+      },
+    },
+  },
+
+  // Optics - Mirrors #2 (Medium)
+  {
+    questionId: 'optics-mirror-002',
+    primaryPatternId: 'optics/mirrors',
+    difficulty: 3,
+    topicTags: ['optics', 'mirrors'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'optics-mirror-002',
+      metadata: {
+        title: 'Convex Mirror Image',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['optics', 'mirrors'],
+        patternTags: ['mirror-equation', 'convex-mirror'],
+      },
+      prompt: {
+        text: 'A convex mirror has focal length 15 cm. An object is placed 30 cm from the mirror. Find the image distance and magnification.',
+        given: [
+          { label: 'Focal length', value: '+15', unit: 'cm' },
+          { label: 'Object distance', value: '-30', unit: 'cm' },
+        ],
+        asked: [
+          { label: 'Image distance' },
+          { label: 'Magnification' },
+        ],
+      },
+      primaryPatternId: 'optics/mirrors',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate image distance v (in cm).',
+          correctNumeric: 10,
+          validation: { numericTolerance: 0.5, units: 'cm' },
+          explanations: {
+            micro: '1/v = 1/f - 1/u = 1/15 - 1/(-30) = 1/15 + 1/30 = 1/10 → v = +10 cm',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate magnification.',
+          correctNumeric: 0.33,
+          validation: { numericTolerance: 0.02 },
+          explanations: {
+            micro: 'm = -v/u = -10/(-30) = 1/3 ≈ 0.33',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: 'v = +10 cm, m = 1/3' },
+        synthesis: [
+          '1/v = 1/15 + 1/30 = 3/30 = 1/10 → v = +10 cm',
+          'm = 1/3 (virtual, erect, diminished)',
+        ],
+      },
+    },
+  },
+
+  // Optics - Interference #2 (Medium)
+  {
+    questionId: 'optics-interference-002',
+    primaryPatternId: 'optics/interference',
+    difficulty: 3,
+    topicTags: ['optics', 'wave-optics'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'optics-interference-002',
+      metadata: {
+        title: 'Thin Film Interference',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['optics', 'wave-optics'],
+        patternTags: ['interference', 'thin-film'],
+      },
+      prompt: {
+        text: 'A thin soap film (n = 1.33) appears green (λ = 532 nm) in reflected light. What is the minimum thickness for constructive interference?',
+        given: [
+          { label: 'Refractive index', value: '1.33', unit: '' },
+          { label: 'Wavelength', value: '532', unit: 'nm' },
+        ],
+        asked: [{ label: 'Minimum thickness' }],
+      },
+      primaryPatternId: 'optics/interference',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For thin film in air, constructive interference occurs when:',
+          choices: [
+            { key: 'A', text: '2nt = (m + 1/2)λ for minimum at m=0', isDistractor: false },
+            { key: 'B', text: '2nt = mλ', isDistractor: true },
+            { key: 'C', text: 'nt = λ/2', isDistractor: true },
+            { key: 'D', text: '2t = mλ', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate minimum thickness (in nm). Use 2nt = λ/2',
+          correctNumeric: 100,
+          validation: { numericTolerance: 5, units: 'nm' },
+          explanations: {
+            micro: 't = λ/(4n) = 532/(4×1.33) = 100 nm',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 100, units: 'nm' },
+        synthesis: [
+          'For m=0: 2nt = λ/2 (accounting for phase change at top surface)',
+          't = λ/(4n) = 532/(4×1.33) = 100 nm',
+        ],
+      },
+    },
+  },
+
+  // Waves - Standing Waves #2 (Easy)
+  {
+    questionId: 'waves-standing-002',
+    primaryPatternId: 'waves/standing_waves',
+    difficulty: 2,
+    topicTags: ['waves', 'standing-waves'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'waves-standing-002',
+      metadata: {
+        title: 'Open Pipe Harmonics',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['waves', 'standing-waves'],
+        patternTags: ['standing-waves', 'organ-pipe'],
+      },
+      prompt: {
+        text: 'An open pipe is 1 m long. If the speed of sound is 340 m/s, find the fundamental frequency.',
+        given: [
+          { label: 'Length', value: '1', unit: 'm' },
+          { label: 'Speed of sound', value: '340', unit: 'm/s' },
+        ],
+        asked: [{ label: 'Fundamental frequency' }],
+      },
+      primaryPatternId: 'waves/standing_waves',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For an open pipe, the fundamental wavelength is:',
+          choices: [
+            { key: 'A', text: 'λ = 2L', isDistractor: false },
+            { key: 'B', text: 'λ = 4L', isDistractor: true },
+            { key: 'C', text: 'λ = L', isDistractor: true },
+            { key: 'D', text: 'λ = L/2', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the fundamental frequency (in Hz).',
+          correctNumeric: 170,
+          validation: { numericTolerance: 5, units: 'Hz' },
+          explanations: {
+            micro: 'f = v/λ = v/(2L) = 340/(2×1) = 170 Hz',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 170, units: 'Hz' },
+        synthesis: [
+          'Open pipe: λ₁ = 2L = 2 m',
+          'f₁ = v/λ = 340/2 = 170 Hz',
+        ],
+      },
+    },
+  },
+
+  // Waves - Doppler #2 (Hard)
+  {
+    questionId: 'waves-doppler-002',
+    primaryPatternId: 'waves/doppler',
+    difficulty: 4,
+    topicTags: ['waves', 'sound', 'doppler'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'waves-doppler-002',
+      metadata: {
+        title: 'Doppler - Both Moving',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['waves', 'sound', 'doppler'],
+        patternTags: ['doppler-effect', 'relative-motion'],
+      },
+      prompt: {
+        text: 'A source (f = 1000 Hz) moves at 40 m/s toward an observer moving at 20 m/s toward the source. Find the observed frequency. (Speed of sound = 340 m/s)',
+        given: [
+          { label: 'Source frequency', value: '1000', unit: 'Hz' },
+          { label: 'Source velocity', value: '40', unit: 'm/s (toward observer)' },
+          { label: 'Observer velocity', value: '20', unit: 'm/s (toward source)' },
+          { label: 'Speed of sound', value: '340', unit: 'm/s' },
+        ],
+        asked: [{ label: 'Observed frequency' }],
+      },
+      primaryPatternId: 'waves/doppler',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'When both source and observer move toward each other, the observed frequency:',
+          choices: [
+            { key: 'A', text: 'Increases more than single motion case', isDistractor: false },
+            { key: 'B', text: 'Decreases', isDistractor: true },
+            { key: 'C', text: 'Stays same', isDistractor: true },
+            { key: 'D', text: 'Doubles', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate observed frequency (in Hz). Use f\' = f(v + v_o)/(v - v_s)',
+          correctNumeric: 1200,
+          validation: { numericTolerance: 10, units: 'Hz' },
+          explanations: {
+            micro: 'f\' = 1000(340 + 20)/(340 - 40) = 1000(360/300) = 1200 Hz',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1200, units: 'Hz' },
+        synthesis: [
+          'General Doppler formula: f\' = f(v ± v_o)/(v ∓ v_s)',
+          'Both approaching: f\' = f(v + v_o)/(v - v_s)',
+          'f\' = 1000(360/300) = 1200 Hz',
+        ],
+      },
+    },
+  },
+
+  // Modern Physics - Photoelectric #2 (Hard)
+  {
+    questionId: 'modern-photo-002',
+    primaryPatternId: 'modern/photoelectric',
+    difficulty: 4,
+    topicTags: ['modern-physics', 'quantum', 'photoelectric'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'modern-photo-002',
+      metadata: {
+        title: 'Stopping Potential',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['modern-physics', 'quantum'],
+        patternTags: ['photoelectric-effect', 'stopping-potential'],
+      },
+      prompt: {
+        text: 'Light of wavelength 300 nm falls on a metal with work function 3.0 eV. Find the stopping potential. (hc = 1240 eV·nm)',
+        given: [
+          { label: 'Wavelength', value: '300', unit: 'nm' },
+          { label: 'Work function', value: '3.0', unit: 'eV' },
+          { label: 'hc', value: '1240', unit: 'eV·nm' },
+        ],
+        asked: [{ label: 'Stopping potential' }],
+      },
+      primaryPatternId: 'modern/photoelectric',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate photon energy (in eV). Use E = hc/λ',
+          correctNumeric: 4.13,
+          validation: { numericTolerance: 0.1, units: 'eV' },
+          explanations: {
+            micro: 'E = 1240/300 = 4.13 eV',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate stopping potential (in V). Use eV₀ = KE_max = hf - φ',
+          correctNumeric: 1.13,
+          validation: { numericTolerance: 0.1, units: 'V' },
+          explanations: {
+            micro: 'V₀ = (E - φ)/e = 4.13 - 3.0 = 1.13 V',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1.13, units: 'V' },
+        synthesis: [
+          'Photon energy: E = 1240/300 = 4.13 eV',
+          'KE_max = E - φ = 4.13 - 3.0 = 1.13 eV',
+          'Stopping potential V₀ = 1.13 V',
+        ],
+      },
+    },
+  },
+
+  // Modern Physics - Bohr Model #2 (Hard)
+  {
+    questionId: 'modern-bohr-002',
+    primaryPatternId: 'modern/bohr_model',
+    difficulty: 4,
+    topicTags: ['modern-physics', 'atomic'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'modern-bohr-002',
+      metadata: {
+        title: 'Wavelength of Emitted Photon',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['modern-physics', 'atomic'],
+        patternTags: ['bohr-model', 'emission-spectrum'],
+      },
+      prompt: {
+        text: 'A hydrogen atom transitions from n=3 to n=2. Find the wavelength of the emitted photon. (hc = 1240 eV·nm, E₁ = -13.6 eV)',
+        given: [
+          { label: 'Initial state', value: 'n = 3', unit: '' },
+          { label: 'Final state', value: 'n = 2', unit: '' },
+          { label: 'hc', value: '1240', unit: 'eV·nm' },
+        ],
+        asked: [{ label: 'Wavelength of emitted photon' }],
+      },
+      primaryPatternId: 'modern/bohr_model',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate energy of n=3 level (in eV).',
+          correctNumeric: -1.51,
+          validation: { numericTolerance: 0.05, units: 'eV' },
+          explanations: {
+            micro: 'E₃ = -13.6/9 = -1.51 eV',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate photon energy (in eV).',
+          correctNumeric: 1.89,
+          validation: { numericTolerance: 0.05, units: 'eV' },
+          explanations: {
+            micro: 'ΔE = E₃ - E₂ = -1.51 - (-3.4) = 1.89 eV',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate wavelength (in nm).',
+          correctNumeric: 656,
+          validation: { numericTolerance: 10, units: 'nm' },
+          explanations: {
+            micro: 'λ = hc/ΔE = 1240/1.89 = 656 nm (red, Hα line)',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 656, units: 'nm' },
+        synthesis: [
+          'E₃ = -13.6/9 = -1.51 eV, E₂ = -13.6/4 = -3.4 eV',
+          'ΔE = 1.89 eV',
+          'λ = 1240/1.89 = 656 nm (Balmer series, Hα)',
+        ],
+      },
+    },
+  },
+
+  // Modern Physics - Nuclear Decay #2 (Easy)
+  {
+    questionId: 'modern-nuclear-002',
+    primaryPatternId: 'modern/nuclear_decay',
+    difficulty: 2,
+    topicTags: ['modern-physics', 'nuclear'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'modern-nuclear-002',
+      metadata: {
+        title: 'Alpha Decay',
+        difficulty: 2,
+        estimatedTimeSec: 240,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['modern-physics', 'nuclear'],
+        patternTags: ['nuclear-decay', 'alpha-decay'],
+      },
+      prompt: {
+        text: 'Uranium-238 undergoes alpha decay. What is the resulting nucleus?',
+        given: [
+          { label: 'Parent nucleus', value: '²³⁸U', unit: '(Z=92)' },
+          { label: 'Alpha particle', value: '⁴He', unit: '(Z=2)' },
+        ],
+        asked: [{ label: 'Daughter nucleus' }],
+      },
+      primaryPatternId: 'modern/nuclear_decay',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'In alpha decay, the mass number decreases by:',
+          choices: [
+            { key: 'A', text: '4', isDistractor: false },
+            { key: 'B', text: '2', isDistractor: true },
+            { key: 'C', text: '1', isDistractor: true },
+            { key: 'D', text: '0', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'MCQ_SINGLE',
+          prompt: 'The daughter nucleus is:',
+          choices: [
+            { key: 'A', text: '²³⁴Th (Thorium-234)', isDistractor: false },
+            { key: 'B', text: '²³⁶U', isDistractor: true },
+            { key: 'C', text: '²³⁴Pa', isDistractor: true },
+            { key: 'D', text: '²³⁴U', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'TEXT', value: '²³⁴Th (Thorium-234)' },
+        synthesis: [
+          '²³⁸U → ²³⁴Th + ⁴He',
+          'Mass number: 238 - 4 = 234',
+          'Atomic number: 92 - 2 = 90 (Thorium)',
+        ],
+      },
+    },
+  },
 ]
 
 async function main() {
