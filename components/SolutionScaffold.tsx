@@ -337,14 +337,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   useEffect(() => {
     if (typeof window === 'undefined') return
     const seedMode = sessionModeSeed || 'guided'
-    const baseState = sessionModeState ?? getOrCreateSessionModeState(seedMode)
-    const { state: updatedState } = evaluateSessionMode(
-      baseState,
-      masteryScoreRef.current
-    )
-    setSessionModeState(updatedState)
-    setSessionMode(updatedState.mode)
-  }, [problemMasteryScore, sessionModeSeed, sessionModeState])
+    // Use functional update to avoid sessionModeState in dependencies
+    setSessionModeState(prevState => {
+      const baseState = prevState ?? getOrCreateSessionModeState(seedMode)
+      const { state: updatedState } = evaluateSessionMode(
+        baseState,
+        masteryScoreRef.current
+      )
+      setSessionMode(updatedState.mode)
+      return updatedState
+    })
+  }, [problemMasteryScore, sessionModeSeed])
 
   useEffect(() => {
     if (!showSkipCommitAnalytics) return
