@@ -706,6 +706,821 @@ const questions = [
       },
     },
   },
+
+  // Mechanics - Momentum Collision (Medium)
+  {
+    questionId: 'mech-momentum-001',
+    primaryPatternId: 'mechanics/momentum_collision',
+    difficulty: 3,
+    topicTags: ['mechanics', 'momentum', 'collision'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-momentum-001',
+      metadata: {
+        title: 'Inelastic Collision',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'momentum', 'collision'],
+        patternTags: ['momentum-conservation', 'inelastic-collision'],
+      },
+      prompt: {
+        text: 'A 3 kg ball moving at 4 m/s collides head-on with a 1 kg ball at rest. If they stick together after collision, find their common velocity.',
+        given: [
+          { label: 'Mass 1', value: '3', unit: 'kg' },
+          { label: 'Velocity 1', value: '4', unit: 'm/s' },
+          { label: 'Mass 2', value: '1', unit: 'kg' },
+          { label: 'Velocity 2', value: '0', unit: 'm/s' },
+        ],
+        asked: [
+          { label: 'Common velocity after collision' },
+        ],
+      },
+      primaryPatternId: 'mechanics/momentum_collision',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'What type of collision is this?',
+          choices: [
+            { key: 'A', text: 'Perfectly inelastic (objects stick together)', isDistractor: false },
+            { key: 'B', text: 'Perfectly elastic', isDistractor: true },
+            { key: 'C', text: 'Partially elastic', isDistractor: true },
+            { key: 'D', text: 'Explosive collision', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the initial momentum of the system (in kg·m/s).',
+          correctNumeric: 12,
+          validation: { numericTolerance: 0.1, units: 'kg·m/s' },
+          explanations: {
+            micro: 'p_initial = m₁v₁ + m₂v₂ = 3(4) + 1(0) = 12 kg·m/s',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the common velocity after collision (in m/s).',
+          correctNumeric: 3,
+          validation: { numericTolerance: 0.1, units: 'm/s' },
+          explanations: {
+            micro: 'By conservation of momentum: (m₁+m₂)v = m₁v₁ → v = 12/4 = 3 m/s',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 3, units: 'm/s' },
+        synthesis: [
+          'Identify as perfectly inelastic collision (objects stick)',
+          'Apply momentum conservation: m₁v₁ + m₂v₂ = (m₁+m₂)v',
+          'Solve: v = (3×4 + 1×0)/(3+1) = 12/4 = 3 m/s',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Circular Motion (Medium)
+  {
+    questionId: 'mech-circular-001',
+    primaryPatternId: 'mechanics/circular_motion',
+    difficulty: 3,
+    topicTags: ['mechanics', 'circular-motion', 'centripetal'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-circular-001',
+      metadata: {
+        title: 'Car on Banked Curve',
+        difficulty: 3,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'circular-motion'],
+        patternTags: ['circular-motion', 'centripetal-force'],
+      },
+      prompt: {
+        text: 'A car travels around a flat circular track of radius 50 m. If the coefficient of static friction is 0.5, what is the maximum speed the car can have without skidding? (g = 10 m/s²)',
+        given: [
+          { label: 'Radius', value: '50', unit: 'm' },
+          { label: 'Coefficient of friction', value: '0.5', unit: '' },
+          { label: 'g', value: '10', unit: 'm/s²' },
+        ],
+        asked: [
+          { label: 'Maximum speed without skidding' },
+        ],
+      },
+      primaryPatternId: 'mechanics/circular_motion',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'What provides the centripetal force for the car?',
+          choices: [
+            { key: 'A', text: 'Static friction', isDistractor: false },
+            { key: 'B', text: 'Kinetic friction', isDistractor: true },
+            { key: 'C', text: 'Normal force', isDistractor: true },
+            { key: 'D', text: 'Weight of the car', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'MCQ_SINGLE',
+          prompt: 'The maximum friction force equals:',
+          choices: [
+            { key: 'A', text: '$\\mu_s mg$', isDistractor: false },
+            { key: 'B', text: '$\\mu_s N / m$', isDistractor: true },
+            { key: 'C', text: '$mg / \\mu_s$', isDistractor: true },
+            { key: 'D', text: '$\\mu_s g$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the maximum speed (in m/s). Use: μₛmg = mv²/r',
+          correctNumeric: 15.81,
+          validation: { numericTolerance: 0.5, units: 'm/s' },
+          explanations: {
+            micro: 'v = √(μₛgr) = √(0.5 × 10 × 50) = √250 ≈ 15.81 m/s',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 15.81, units: 'm/s' },
+        synthesis: [
+          'Friction provides centripetal force: f = mv²/r',
+          'Maximum friction: f_max = μₛmg',
+          'At maximum speed: μₛmg = mv²/r → v = √(μₛgr)',
+          'Calculate: v = √(0.5 × 10 × 50) = √250 ≈ 15.81 m/s',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Simple Harmonic Motion (Medium)
+  {
+    questionId: 'mech-shm-001',
+    primaryPatternId: 'mechanics/simple_harmonic_motion',
+    difficulty: 3,
+    topicTags: ['mechanics', 'oscillations', 'shm'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-shm-001',
+      metadata: {
+        title: 'Simple Pendulum Period',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'oscillations'],
+        patternTags: ['simple-harmonic-motion', 'pendulum'],
+      },
+      prompt: {
+        text: 'A simple pendulum has a period of 2 seconds on Earth (g = 10 m/s²). What is the length of the pendulum?',
+        given: [
+          { label: 'Period', value: '2', unit: 's' },
+          { label: 'g', value: '10', unit: 'm/s²' },
+        ],
+        asked: [
+          { label: 'Length of pendulum' },
+        ],
+      },
+      primaryPatternId: 'mechanics/simple_harmonic_motion',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The period of a simple pendulum is given by:',
+          choices: [
+            { key: 'A', text: '$T = 2\\pi\\sqrt{L/g}$', isDistractor: false },
+            { key: 'B', text: '$T = 2\\pi\\sqrt{g/L}$', isDistractor: true },
+            { key: 'C', text: '$T = 2\\pi\\sqrt{m/k}$', isDistractor: true },
+            { key: 'D', text: '$T = 2\\pi L/g$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Rearranging for L, calculate the length (in m). Use T = 2π√(L/g)',
+          correctNumeric: 1.01,
+          validation: { numericTolerance: 0.05, units: 'm' },
+          explanations: {
+            micro: 'L = gT²/(4π²) = 10(2)²/(4π²) = 40/39.48 ≈ 1.01 m',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1.01, units: 'm' },
+        synthesis: [
+          'Use pendulum period formula: T = 2π√(L/g)',
+          'Rearrange: L = gT²/(4π²)',
+          'Calculate: L = 10(4)/(4×9.87) ≈ 1.01 m',
+        ],
+      },
+    },
+  },
+
+  // Mechanics - Pulley System (Hard)
+  {
+    questionId: 'mech-pulley-001',
+    primaryPatternId: 'mechanics/pulley_system',
+    difficulty: 4,
+    topicTags: ['mechanics', 'dynamics', 'pulley'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'mech-pulley-001',
+      metadata: {
+        title: 'Atwood Machine',
+        difficulty: 4,
+        estimatedTimeSec: 480,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['mechanics', 'dynamics', 'pulley'],
+        patternTags: ['pulley-system', 'newton-laws', 'constraint-equations'],
+      },
+      prompt: {
+        text: 'Two masses m₁ = 5 kg and m₂ = 3 kg are connected by a light string over a frictionless pulley. Find the acceleration of the system and the tension in the string. (g = 10 m/s²)',
+        given: [
+          { label: 'm₁', value: '5', unit: 'kg' },
+          { label: 'm₂', value: '3', unit: 'kg' },
+          { label: 'g', value: '10', unit: 'm/s²' },
+        ],
+        asked: [
+          { label: 'Acceleration of the system' },
+          { label: 'Tension in the string' },
+        ],
+      },
+      primaryPatternId: 'mechanics/pulley_system',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'For an Atwood machine, the acceleration formula is:',
+          choices: [
+            { key: 'A', text: '$a = \\frac{(m_1 - m_2)g}{m_1 + m_2}$', isDistractor: false },
+            { key: 'B', text: '$a = \\frac{(m_1 + m_2)g}{m_1 - m_2}$', isDistractor: true },
+            { key: 'C', text: '$a = \\frac{m_1 g}{m_2}$', isDistractor: true },
+            { key: 'D', text: '$a = g$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the acceleration (in m/s²).',
+          correctNumeric: 2.5,
+          validation: { numericTolerance: 0.1, units: 'm/s²' },
+          explanations: {
+            micro: 'a = (m₁-m₂)g/(m₁+m₂) = (5-3)(10)/(5+3) = 20/8 = 2.5 m/s²',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the tension in the string (in N). Use T = m₂(g+a) or T = m₁(g-a)',
+          correctNumeric: 37.5,
+          validation: { numericTolerance: 0.5, units: 'N' },
+          explanations: {
+            micro: 'T = m₂(g+a) = 3(10+2.5) = 3(12.5) = 37.5 N',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 2.5, units: 'm/s²' },
+        synthesis: [
+          'Draw FBD for each mass',
+          'For m₁: m₁g - T = m₁a',
+          'For m₂: T - m₂g = m₂a',
+          'Add equations: (m₁-m₂)g = (m₁+m₂)a',
+          'a = 2.5 m/s², T = 37.5 N',
+        ],
+      },
+    },
+  },
+
+  // Thermodynamics - First Law (Medium)
+  {
+    questionId: 'thermo-first-001',
+    primaryPatternId: 'thermodynamics/first_law',
+    difficulty: 3,
+    topicTags: ['thermodynamics', 'first-law', 'heat-work'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'thermo-first-001',
+      metadata: {
+        title: 'First Law - Isobaric Process',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['thermodynamics', 'first-law'],
+        patternTags: ['first-law', 'isobaric-process'],
+      },
+      prompt: {
+        text: 'In an isobaric process, 500 J of heat is added to an ideal gas. If the gas does 200 J of work on its surroundings, find the change in internal energy.',
+        given: [
+          { label: 'Heat added', value: '500', unit: 'J' },
+          { label: 'Work done by gas', value: '200', unit: 'J' },
+        ],
+        asked: [
+          { label: 'Change in internal energy' },
+        ],
+      },
+      primaryPatternId: 'thermodynamics/first_law',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The first law of thermodynamics states:',
+          choices: [
+            { key: 'A', text: '$\\Delta U = Q - W$', isDistractor: false },
+            { key: 'B', text: '$\\Delta U = Q + W$', isDistractor: true },
+            { key: 'C', text: '$\\Delta U = W - Q$', isDistractor: true },
+            { key: 'D', text: '$Q = W$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the change in internal energy (in J).',
+          correctNumeric: 300,
+          validation: { numericTolerance: 5, units: 'J' },
+          explanations: {
+            micro: 'ΔU = Q - W = 500 - 200 = 300 J',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 300, units: 'J' },
+        synthesis: [
+          'Apply first law: ΔU = Q - W',
+          'Q = 500 J (heat added), W = 200 J (work done by gas)',
+          'ΔU = 500 - 200 = 300 J',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Coulomb's Law (Easy)
+  {
+    questionId: 'em-coulomb-001',
+    primaryPatternId: 'electromagnetism/coulomb_field',
+    difficulty: 2,
+    topicTags: ['electromagnetism', 'electrostatics', 'coulomb'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-coulomb-001',
+      metadata: {
+        title: 'Coulomb Force Between Charges',
+        difficulty: 2,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'electrostatics'],
+        patternTags: ['coulomb-law', 'electric-force'],
+      },
+      prompt: {
+        text: 'Two point charges of +2 μC and +8 μC are placed 30 cm apart in air. Find the magnitude of the force between them. (k = 9 × 10⁹ N·m²/C²)',
+        given: [
+          { label: 'q₁', value: '2', unit: 'μC' },
+          { label: 'q₂', value: '8', unit: 'μC' },
+          { label: 'Distance', value: '30', unit: 'cm' },
+          { label: 'k', value: '9 × 10⁹', unit: 'N·m²/C²' },
+        ],
+        asked: [
+          { label: 'Force between charges' },
+        ],
+      },
+      primaryPatternId: 'electromagnetism/coulomb_field',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'Since both charges are positive, the force between them is:',
+          choices: [
+            { key: 'A', text: 'Repulsive', isDistractor: false },
+            { key: 'B', text: 'Attractive', isDistractor: true },
+            { key: 'C', text: 'Zero', isDistractor: true },
+            { key: 'D', text: 'Cannot be determined', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the force (in N). Use F = kq₁q₂/r²',
+          correctNumeric: 1.6,
+          validation: { numericTolerance: 0.1, units: 'N' },
+          explanations: {
+            micro: 'F = (9×10⁹)(2×10⁻⁶)(8×10⁻⁶)/(0.3)² = 144×10⁻³/0.09 = 1.6 N',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1.6, units: 'N' },
+        synthesis: [
+          'Convert units: q₁ = 2×10⁻⁶ C, q₂ = 8×10⁻⁶ C, r = 0.3 m',
+          'Apply Coulomb\'s law: F = kq₁q₂/r²',
+          'F = (9×10⁹)(2×10⁻⁶)(8×10⁻⁶)/(0.09) = 1.6 N (repulsive)',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Capacitors (Medium)
+  {
+    questionId: 'em-capacitor-001',
+    primaryPatternId: 'electromagnetism/capacitors',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'capacitors', 'energy'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-capacitor-001',
+      metadata: {
+        title: 'Energy Stored in Capacitor',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'capacitors'],
+        patternTags: ['capacitor-energy', 'parallel-plate'],
+      },
+      prompt: {
+        text: 'A 10 μF capacitor is charged to 100 V. Calculate the energy stored in the capacitor.',
+        given: [
+          { label: 'Capacitance', value: '10', unit: 'μF' },
+          { label: 'Voltage', value: '100', unit: 'V' },
+        ],
+        asked: [
+          { label: 'Energy stored' },
+        ],
+      },
+      primaryPatternId: 'electromagnetism/capacitors',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The energy stored in a capacitor is given by:',
+          choices: [
+            { key: 'A', text: '$U = \\frac{1}{2}CV^2$', isDistractor: false },
+            { key: 'B', text: '$U = CV^2$', isDistractor: true },
+            { key: 'C', text: '$U = \\frac{1}{2}CV$', isDistractor: true },
+            { key: 'D', text: '$U = CV$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the energy stored (in J).',
+          correctNumeric: 0.05,
+          validation: { numericTolerance: 0.002, units: 'J' },
+          explanations: {
+            micro: 'U = ½CV² = ½(10×10⁻⁶)(100)² = ½(10⁻⁵)(10⁴) = 0.05 J = 50 mJ',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 0.05, units: 'J' },
+        synthesis: [
+          'Use energy formula: U = ½CV²',
+          'Convert: C = 10 μF = 10×10⁻⁶ F',
+          'Calculate: U = ½(10×10⁻⁶)(100)² = 0.05 J',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - Magnetic Force (Medium)
+  {
+    questionId: 'em-magforce-001',
+    primaryPatternId: 'electromagnetism/magnetic_force',
+    difficulty: 3,
+    topicTags: ['electromagnetism', 'magnetism', 'lorentz-force'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-magforce-001',
+      metadata: {
+        title: 'Force on Moving Charge in Magnetic Field',
+        difficulty: 3,
+        estimatedTimeSec: 300,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'magnetism'],
+        patternTags: ['magnetic-force', 'lorentz-force'],
+      },
+      prompt: {
+        text: 'A proton (q = 1.6 × 10⁻¹⁹ C) moves at 2 × 10⁶ m/s perpendicular to a magnetic field of 0.5 T. Find the magnetic force on the proton.',
+        given: [
+          { label: 'Charge', value: '1.6 × 10⁻¹⁹', unit: 'C' },
+          { label: 'Velocity', value: '2 × 10⁶', unit: 'm/s' },
+          { label: 'Magnetic field', value: '0.5', unit: 'T' },
+          { label: 'Angle', value: '90', unit: '° (perpendicular)' },
+        ],
+        asked: [
+          { label: 'Magnetic force on proton' },
+        ],
+      },
+      primaryPatternId: 'electromagnetism/magnetic_force',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The magnetic force on a moving charge is given by:',
+          choices: [
+            { key: 'A', text: '$F = qvB\\sin\\theta$', isDistractor: false },
+            { key: 'B', text: '$F = qvB\\cos\\theta$', isDistractor: true },
+            { key: 'C', text: '$F = qB/v$', isDistractor: true },
+            { key: 'D', text: '$F = qv/B$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the magnetic force (in N). Express in scientific notation as X × 10⁻¹³, give X.',
+          correctNumeric: 1.6,
+          validation: { numericTolerance: 0.1 },
+          explanations: {
+            micro: 'F = qvB sin(90°) = (1.6×10⁻¹⁹)(2×10⁶)(0.5)(1) = 1.6×10⁻¹³ N',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1.6e-13, units: 'N' },
+        synthesis: [
+          'Use Lorentz force: F = qvB sin(θ)',
+          'Since θ = 90°, sin(90°) = 1',
+          'F = (1.6×10⁻¹⁹)(2×10⁶)(0.5) = 1.6×10⁻¹³ N',
+        ],
+      },
+    },
+  },
+
+  // Electromagnetism - EM Induction (Hard)
+  {
+    questionId: 'em-induction-001',
+    primaryPatternId: 'electromagnetism/em_induction',
+    difficulty: 4,
+    topicTags: ['electromagnetism', 'induction', 'faraday'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'em-induction-001',
+      metadata: {
+        title: 'Faraday\'s Law - Changing Flux',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['electromagnetism', 'induction'],
+        patternTags: ['faraday-law', 'induced-emf'],
+      },
+      prompt: {
+        text: 'A circular coil of 100 turns and radius 10 cm is placed perpendicular to a magnetic field. The field decreases uniformly from 0.5 T to 0 T in 0.1 s. Find the induced EMF.',
+        given: [
+          { label: 'Number of turns', value: '100', unit: '' },
+          { label: 'Radius', value: '10', unit: 'cm' },
+          { label: 'Initial field', value: '0.5', unit: 'T' },
+          { label: 'Final field', value: '0', unit: 'T' },
+          { label: 'Time', value: '0.1', unit: 's' },
+        ],
+        asked: [
+          { label: 'Induced EMF' },
+        ],
+      },
+      primaryPatternId: 'electromagnetism/em_induction',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'NUMERIC',
+          prompt: 'Calculate the area of the coil (in m²). Use A = πr²',
+          correctNumeric: 0.0314,
+          validation: { numericTolerance: 0.002, units: 'm²' },
+          explanations: {
+            micro: 'A = πr² = π(0.1)² = 0.0314 m²',
+          },
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the change in magnetic flux through one turn (in Wb).',
+          correctNumeric: 0.0157,
+          validation: { numericTolerance: 0.001, units: 'Wb' },
+          explanations: {
+            micro: 'ΔΦ = A × ΔB = 0.0314 × (0.5 - 0) = 0.0157 Wb',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the induced EMF (in V). Use ε = -N(ΔΦ/Δt)',
+          correctNumeric: 15.7,
+          validation: { numericTolerance: 0.5, units: 'V' },
+          explanations: {
+            micro: 'ε = N × ΔΦ/Δt = 100 × 0.0157/0.1 = 15.7 V',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 15.7, units: 'V' },
+        synthesis: [
+          'Calculate coil area: A = π(0.1)² = 0.0314 m²',
+          'Change in flux per turn: ΔΦ = AΔB = 0.0157 Wb',
+          'Apply Faraday\'s law: ε = N(ΔΦ/Δt) = 100(0.0157/0.1) = 15.7 V',
+        ],
+      },
+    },
+  },
+
+  // Optics - Interference (Hard)
+  {
+    questionId: 'optics-interference-001',
+    primaryPatternId: 'optics/interference',
+    difficulty: 4,
+    topicTags: ['optics', 'wave-optics', 'interference'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'optics-interference-001',
+      metadata: {
+        title: 'Young\'s Double Slit Fringe Width',
+        difficulty: 4,
+        estimatedTimeSec: 420,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['optics', 'wave-optics', 'interference'],
+        patternTags: ['double-slit', 'fringe-width'],
+      },
+      prompt: {
+        text: 'In Young\'s double slit experiment, the slit separation is 0.5 mm and the screen is 1 m away. If light of wavelength 500 nm is used, find the fringe width.',
+        given: [
+          { label: 'Slit separation (d)', value: '0.5', unit: 'mm' },
+          { label: 'Screen distance (D)', value: '1', unit: 'm' },
+          { label: 'Wavelength (λ)', value: '500', unit: 'nm' },
+        ],
+        asked: [
+          { label: 'Fringe width (β)' },
+        ],
+      },
+      primaryPatternId: 'optics/interference',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The fringe width in Young\'s double slit experiment is given by:',
+          choices: [
+            { key: 'A', text: '$\\beta = \\lambda D / d$', isDistractor: false },
+            { key: 'B', text: '$\\beta = \\lambda d / D$', isDistractor: true },
+            { key: 'C', text: '$\\beta = d D / \\lambda$', isDistractor: true },
+            { key: 'D', text: '$\\beta = D / (\\lambda d)$', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the fringe width (in mm).',
+          correctNumeric: 1,
+          validation: { numericTolerance: 0.05, units: 'mm' },
+          explanations: {
+            micro: 'β = λD/d = (500×10⁻⁹)(1)/(0.5×10⁻³) = 5×10⁻⁴/5×10⁻⁴ = 10⁻³ m = 1 mm',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 1, units: 'mm' },
+        synthesis: [
+          'Convert units: λ = 500 nm = 5×10⁻⁷ m, d = 0.5 mm = 5×10⁻⁴ m',
+          'Apply fringe width formula: β = λD/d',
+          'Calculate: β = (5×10⁻⁷)(1)/(5×10⁻⁴) = 10⁻³ m = 1 mm',
+        ],
+      },
+    },
+  },
+
+  // Modern Physics - Bohr Model (Medium)
+  {
+    questionId: 'modern-bohr-001',
+    primaryPatternId: 'modern/bohr_model',
+    difficulty: 3,
+    topicTags: ['modern-physics', 'atomic', 'bohr-model'],
+    lifecycleState: QuestionLifecycleState.approved,
+    provenance: QuestionProvenance.manual,
+    payload: {
+      schemaVersion: 'question.v2',
+      questionId: 'modern-bohr-001',
+      metadata: {
+        title: 'Hydrogen Atom Energy Levels',
+        difficulty: 3,
+        estimatedTimeSec: 360,
+        source: { kind: 'original' },
+        createdAt: new Date().toISOString(),
+      },
+      classification: {
+        topicTags: ['modern-physics', 'atomic'],
+        patternTags: ['bohr-model', 'energy-levels'],
+      },
+      prompt: {
+        text: 'Calculate the energy required to excite a hydrogen atom from the ground state (n=1) to the first excited state (n=2). The ground state energy is -13.6 eV.',
+        given: [
+          { label: 'Ground state energy', value: '-13.6', unit: 'eV' },
+          { label: 'Initial state', value: 'n = 1', unit: '' },
+          { label: 'Final state', value: 'n = 2', unit: '' },
+        ],
+        asked: [
+          { label: 'Excitation energy' },
+        ],
+      },
+      primaryPatternId: 'modern/bohr_model',
+      steps: [
+        {
+          stepId: 'step-1',
+          type: 'MCQ_SINGLE',
+          prompt: 'The energy of the nth level in hydrogen atom is:',
+          choices: [
+            { key: 'A', text: '$E_n = -13.6/n^2$ eV', isDistractor: false },
+            { key: 'B', text: '$E_n = -13.6 \\times n^2$ eV', isDistractor: true },
+            { key: 'C', text: '$E_n = -13.6/n$ eV', isDistractor: true },
+            { key: 'D', text: '$E_n = -13.6 \\times n$ eV', isDistractor: true },
+          ],
+          correct: 'A',
+        },
+        {
+          stepId: 'step-2',
+          type: 'NUMERIC',
+          prompt: 'Calculate the energy of the n=2 state (in eV).',
+          correctNumeric: -3.4,
+          validation: { numericTolerance: 0.1, units: 'eV' },
+          explanations: {
+            micro: 'E₂ = -13.6/2² = -13.6/4 = -3.4 eV',
+          },
+        },
+        {
+          stepId: 'step-3',
+          type: 'NUMERIC',
+          prompt: 'Calculate the excitation energy (in eV).',
+          correctNumeric: 10.2,
+          validation: { numericTolerance: 0.1, units: 'eV' },
+          explanations: {
+            micro: 'ΔE = E₂ - E₁ = -3.4 - (-13.6) = 10.2 eV',
+          },
+        },
+      ],
+      solutions: {
+        finalAnswer: { type: 'NUMERIC', value: 10.2, units: 'eV' },
+        synthesis: [
+          'E₁ = -13.6 eV (given)',
+          'E₂ = -13.6/4 = -3.4 eV',
+          'Excitation energy = E₂ - E₁ = -3.4 - (-13.6) = 10.2 eV',
+        ],
+      },
+    },
+  },
 ]
 
 async function main() {
