@@ -30,6 +30,10 @@ import { useToast } from '@/components/ui/ToastProvider'
 import { resolveWithQuestionEngine } from '@/lib/question-engine/adapter'
 import type { MiniProblem } from '@/lib/patternTrack'
 import FeaturedQuestions from '@/components/FeaturedQuestions'
+// Interview Mode
+import { InterviewModeToggle, InterviewTimer, RubricResults } from '@/components/interview'
+import { useInterviewMode } from '@/hooks/useInterviewMode'
+import { useInterviewSession } from '@/hooks/useInterviewSession'
 
 const DEMO_PROBLEM = "A bead of mass m is threaded on a frictionless circular hoop of radius R. The hoop rotates with constant angular velocity ω about a vertical diameter. Find the angle θ at which the bead can remain in stable equilibrium relative to the hoop."
 
@@ -64,6 +68,8 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
   const [dailyDebrief, setDailyDebrief] = useState<DailyDebrief | null>(null)
   const [showDebrief, setShowDebrief] = useState(false)
   const [returnProblemText, setReturnProblemText] = useState<string | null>(null)
+  // Track current question ID for local scaffold lookup
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
   // Track problem input for phased loading
   const [phasedProblemData, setPhasedProblemData] = useState<{
     problem: string
@@ -82,6 +88,10 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
   const isFromPlan = fromPlan || searchParams.get('fromPlan') === '1'
   const planDate = searchParams.get('planDate')
   const userId = authService.getUser()?.userId || 'anonymous'
+
+  // Interview Mode
+  const interviewMode = useInterviewMode()
+  const interviewSession = useInterviewSession(interviewMode.config, userId)
 
   // Handle problem solved callback for plan sessions
   const handlePlanTaskSolved = useCallback(() => {
@@ -126,8 +136,14 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
     }
   }, [useDashboardLayout])
 
-  // Track current question ID for local scaffold lookup
-  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
+  // Start interview session when scaffold loads (if interview mode enabled)
+  useEffect(() => {
+    if (interviewMode.isEnabled && scaffoldData && !interviewSession.session) {
+      const totalSteps = scaffoldData.steps?.length || 5
+      const questionId = currentQuestionId || `problem_${Date.now()}`
+      interviewSession.start(questionId, totalSteps)
+    }
+  }, [interviewMode.isEnabled, scaffoldData, currentQuestionId, interviewSession])
 
   const handleProblemSubmit = async (
     problemText: string,
@@ -473,6 +489,35 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
           </header>
         )}
 
+        {/* Interview Mode Toggle & Timer */}
+        {!isLoading && !scaffoldData && !phasedProblemData && (
+          <div className="mb-6 flex justify-center">
+            <InterviewModeToggle
+              onConfigChange={interviewMode.updateConfig}
+              initialConfig={interviewMode.config}
+              disabled={isLoading}
+            />
+          </div>
+        )}
+
+        {/* Interview Timer - Show when session is active */}
+        {interviewSession.isActive && (scaffoldData || phasedProblemData) && (
+          <div className="mb-4 flex justify-center">
+            <InterviewTimer
+              startedAt={interviewSession.session?.timerState.startedAt || Date.now()}
+              timeLimitSeconds={interviewMode.config.timeLimitMinutes * 60}
+              onTimeUp={() => {
+                pushToast({
+                  title: 'Time is up!',
+                  message: 'Your interview session has ended.',
+                  variant: 'warning',
+                })
+              }}
+              paused={false}
+            />
+          </div>
+        )}
+
         {/* Return to Dashboard button (when in plan session) */}
         {isFromPlan && (
           <div className="mb-4">
@@ -568,6 +613,17 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
             onReset={handleReset}
             onLoadNewProblem={handleProblemSubmit}
             onSolved={handlePlanTaskSolved}
+            interviewMode={interviewMode.isEnabled ? {
+              enabled: true,
+              config: interviewMode.config,
+              session: interviewSession.session,
+              onStepComplete: async (stepId, explanation) => {
+                await interviewSession.submitAnswer(stepId, 'completed', true, explanation)
+              },
+              onHintRequest: () => {
+                // Hints are tracked in the session
+              },
+            } : undefined}
           />
         )}
       </div>
@@ -586,6 +642,44 @@ export default function SolvePage({ useDashboardLayout = false, onReturnToDashbo
           handleProblemSubmit(DEMO_PROBLEM)
         }}
       />
+
+      {/* Interview Results Modal */}
+      {interviewSession.results && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+            <button
+              onClick={() => {
+                interviewSession.clearResults()
+                handleReset()
+              }}
+              className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Close results"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="p-6">
+              <RubricResults
+                result={interviewSession.results.rubricResult}
+                grade={interviewSession.results.grade}
+                summary={interviewSession.results.summary}
+              />
+              <div className="mt-6 flex justify-center gap-4">
+                <button
+                  onClick={() => {
+                    interviewSession.clearResults()
+                    handleReset()
+                  }}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                >
+                  Try Another Problem
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

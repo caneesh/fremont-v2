@@ -150,15 +150,27 @@ import {
   recordSessionModeError,
   saveSessionModeState,
 } from '@/lib/sessionModePolicyEngine'
+import type { InterviewSession, ExplanationSubmission } from '@/lib/interview'
+import type { InterviewModeConfig } from '@/hooks/useInterviewMode'
+import { ExplanationForm } from '@/components/interview'
+
+interface InterviewModeProps {
+  enabled: boolean
+  config: InterviewModeConfig
+  session: InterviewSession | null
+  onStepComplete: (stepId: string, explanation?: ExplanationSubmission) => Promise<void>
+  onHintRequest: (stepId: string) => void
+}
 
 interface SolutionScaffoldProps {
   data: ScaffoldData | MicroTaskScaffoldData
   onReset: () => void
   onLoadNewProblem?: (problemText: string) => void
   onSolved?: () => void
+  interviewMode?: InterviewModeProps
 }
 
-export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSolved }: SolutionScaffoldProps) {
+export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSolved, interviewMode }: SolutionScaffoldProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const [stepAnswers, setStepAnswers] = useState<Map<number, string>>(new Map())
@@ -195,6 +207,12 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   // Confidence rating state
   const [pendingConfidenceStepId, setPendingConfidenceStepId] = useState<number | null>(null)
   const [stepConfidenceRatings, setStepConfidenceRatings] = useState<Map<number, Confidence>>(new Map())
+
+  // Interview mode state
+  const [pendingInterviewExplanation, setPendingInterviewExplanation] = useState<number | null>(null)
+  const isInterviewMode = interviewMode?.enabled ?? false
+  const hintsHidden = isInterviewMode && interviewMode?.config.hintsHidden
+  const explanationsRequired = isInterviewMode && interviewMode?.config.explanationsRequired
 
   // Mistake notebook state - related past mistakes for current concepts
   const [relatedMistakes, setRelatedMistakes] = useState<MistakeCard[]>([])
@@ -1645,6 +1663,20 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       setCompletedSteps([...completedSteps, stepId])
     }
 
+    // Interview mode: require explanation before proceeding
+    if (isInterviewMode && explanationsRequired) {
+      setPendingInterviewExplanation(stepId)
+      return // Don't proceed until explanation is submitted
+    }
+
+    // If interview mode is enabled but no explanation required, still notify
+    if (isInterviewMode && interviewMode?.onStepComplete) {
+      const stepIdStr = `step_${stepId}`
+      interviewMode.onStepComplete(stepIdStr, undefined).catch(err => {
+        console.error('[InterviewMode] Failed to record step completion:', err)
+      })
+    }
+
     // Track hint-free wins for momentum
     if (momentumState) {
       const maxHintLevelUsed = stepHintLevels.get(stepId) || 0
@@ -1858,6 +1890,51 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       }
     }
   }, [data, useMicroTasks])
+
+  // Handle interview explanation submission
+  const handleInterviewExplanationSubmit = useCallback(async (explanation: ExplanationSubmission) => {
+    if (pendingInterviewExplanation === null || !interviewMode?.onStepComplete) return
+
+    const stepId = pendingInterviewExplanation
+    const stepIdStr = `step_${stepId}`
+
+    try {
+      await interviewMode.onStepComplete(stepIdStr, explanation)
+    } catch (err) {
+      console.error('[InterviewMode] Failed to submit explanation:', err)
+    }
+
+    // Clear pending and proceed to next step
+    setPendingInterviewExplanation(null)
+
+    // Continue with normal step completion flow
+    // Track hint-free wins for momentum
+    if (momentumState) {
+      const maxHintLevelUsed = stepHintLevels.get(stepId) || 0
+      const patternId = data.primaryPatternId
+      const pid = generateProblemId(data.problem)
+
+      const { updatedState, event } = recordHintFreeWin(momentumState, {
+        maxHintLevelUsed,
+        patternId,
+        stepId,
+        problemId: pid,
+      })
+      setMomentumState(updatedState)
+      if (event) {
+        setPendingMomentumEvent(event)
+      }
+    }
+
+    // Move to next step
+    if (FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS) {
+      setPendingConfidenceStepId(stepId)
+    } else {
+      if (stepId < data.steps.length - 1) {
+        setCurrentStep(stepId + 1)
+      }
+    }
+  }, [pendingInterviewExplanation, interviewMode, momentumState, stepHintLevels, data])
 
   const handleStepAnswerChange = (stepId: number, answer: string) => {
     setStepAnswers(prev => {
@@ -2835,7 +2912,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       requiredMicroTaskCount={getDecisionGateRequiredCount()}
                       maxDecisionGateAttempts={gatingPolicy?.decisionGateConfig.maxAttempts ?? 2}
                       cognitiveLoadUIConfig={cognitiveLoadUIConfig}
-                      maxHintLevel={modeConfig.maxHintLevel}
+                      maxHintLevel={hintsHidden ? 0 : modeConfig.maxHintLevel}
                       professorVisibility={modeConfig.professorVisibility}
                       hasStepErrors={Boolean(stepErrorCounts.get(step.id))}
                       useSocraticFirst={FEATURE_FLAGS.SOCRATIC_FIRST_MODE}
@@ -3113,6 +3190,45 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                 </svg>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interview Mode Explanation Form */}
+      {pendingInterviewExplanation !== null && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-dark-card rounded-xl shadow-2xl p-6 max-w-lg mx-4 animate-in zoom-in-95 duration-200">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                Step {pendingInterviewExplanation + 1} Completed!
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
+                Interview Mode: Explain your reasoning for this step
+              </p>
+            </div>
+
+            <ExplanationForm
+              requirements={{
+                approachRequired: true,
+                invariantRequired: true,
+                complexityRequired: false,
+              }}
+              onSubmit={(formData) => {
+                // Convert form data to ExplanationSubmission
+                const explanation: ExplanationSubmission = {
+                  approach: formData.approach || null,
+                  invariant: formData.invariant || null,
+                  complexity: formData.complexity || null,
+                  submittedAt: Date.now(),
+                }
+                handleInterviewExplanationSubmit(explanation)
+              }}
+            />
           </div>
         </div>
       )}
