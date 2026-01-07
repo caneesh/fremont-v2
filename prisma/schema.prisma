@@ -43,6 +43,13 @@ enum EdgeType {
   variation
 }
 
+enum Track {
+  foundation1
+  foundation2
+  intermediate
+  competitive
+}
+
 enum AttemptOutcome {
   completed
   abandoned
@@ -70,6 +77,7 @@ model Question {
   // Denormalized fields for fast filtering (extracted from JSONB)
   primaryPatternId String?                @map("primary_pattern_id")
   difficulty       Int                    @db.SmallInt
+  track            Track                  @default(competitive)
   topicTags        String[]               @map("topic_tags")
   lifecycleState   QuestionLifecycleState @default(draft) @map("lifecycle_state")
   provenance       QuestionProvenance     @default(manual)
@@ -98,6 +106,8 @@ model Question {
   // Indexes for fast lookup
   @@index([primaryPatternId, difficulty])
   @@index([difficulty])
+  @@index([track])
+  @@index([track, difficulty])
   @@index([lifecycleState])
   @@index([provenance])
   @@index([topicTags], type: Gin)
@@ -120,6 +130,9 @@ model QuestionEdge {
 
   // Optional weight for ranking (e.g., similarity score)
   weight Float? @default(1.0)
+
+  // Curation flag - curated edges cannot be auto-replaced
+  isCurated Boolean @default(false) @map("is_curated")
 
   // Metadata
   createdAt DateTime @default(now()) @map("created_at")
