@@ -207,7 +207,7 @@ export const FOUNDATION2_QUESTION_CHARACTERISTICS = {
 /**
  * Allowed track transitions
  */
-export const TRACK_TRANSITIONS = {
+export const TRACK_TRANSITIONS: Record<Track, { canProgressTo: Track[]; canRemediateTo: Track[] }> = {
   foundation1: {
     canProgressTo: ['foundation2'],
     canRemediateTo: [], // Foundation 1 is the bottom
@@ -224,7 +224,7 @@ export const TRACK_TRANSITIONS = {
     canProgressTo: [], // Top track
     canRemediateTo: ['intermediate', 'foundation2'],
   },
-} as const
+}
 
 /**
  * Check if track transition is allowed
@@ -238,9 +238,9 @@ export function isTrackTransitionAllowed(
   if (!transitions) return false
 
   if (direction === 'progress') {
-    return transitions.canProgressTo.includes(toTrack as any)
+    return transitions.canProgressTo.includes(toTrack)
   } else {
-    return transitions.canRemediateTo.includes(toTrack as any)
+    return transitions.canRemediateTo.includes(toTrack)
   }
 }
 

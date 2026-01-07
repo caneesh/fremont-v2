@@ -382,6 +382,21 @@ export const FEATURE_FLAGS = {
    * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_SOCRATIC_FIRST=true)
    */
   SOCRATIC_FIRST_MODE: true,
+
+  /**
+   * Database Questions
+   * When enabled, the practice page uses questions from the PostgreSQL database
+   * (via Prisma) instead of static JSON files.
+   *
+   * This enables:
+   * - 54+ physics questions across 27 patterns
+   * - Questions stored in the Question table with v2 payloads
+   * - Patterns from the Pattern table
+   * - Dynamic question addition without code changes
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_DATABASE_QUESTIONS=false)
+   */
+  USE_DATABASE_QUESTIONS: process.env.NEXT_PUBLIC_FEATURE_DATABASE_QUESTIONS !== 'false',
 }
 
 /**

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { AttemptOutcome, EdgeType, Prisma } from '@prisma/client'
+import { AttemptOutcome, EdgeType } from '@prisma/client'
 
 /**
  * recordCompletion API
@@ -199,17 +199,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const where: Prisma.UserQuestionHistoryWhereInput = { userId }
-
-    if (questionId) {
-      where.questionId = questionId
-    }
-
     const history = await prisma.userQuestionHistory.findMany({
-      where,
+      where: questionId ? { userId, questionId } : { userId },
       orderBy: { startedAt: 'desc' },
       take: 100,
-      include: {
+      select: {
+        id: true,
+        outcome: true,
+        score: true,
+        attemptNumber: true,
+        startedAt: true,
+        completedAt: true,
+        stepsCompleted: true,
+        stepsTotal: true,
+        hintsUsed: true,
+        durationSec: true,
         question: {
           select: {
             questionId: true,

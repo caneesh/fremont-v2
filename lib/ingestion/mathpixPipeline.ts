@@ -15,7 +15,7 @@
  */
 
 import { prisma } from '@/lib/db'
-import { ExtractionStatus } from '@prisma/client'
+import { ExtractionStatus, Prisma } from '@prisma/client'
 
 // =============================================================================
 // PIPELINE STAGES
@@ -186,7 +186,7 @@ export async function updateExtractionStatus(
     select: { stageOutputs: true },
   })
 
-  const currentOutputs = (extraction?.stageOutputs as StageOutput[]) || []
+  const currentOutputs = (extraction?.stageOutputs as unknown as StageOutput[]) || []
   const newOutput: StageOutput = {
     stage,
     startedAt: new Date(),
@@ -200,7 +200,7 @@ export async function updateExtractionStatus(
     data: {
       status,
       currentStage: stage,
-      stageOutputs: [...currentOutputs, newOutput],
+      stageOutputs: [...currentOutputs, newOutput] as unknown as Prisma.InputJsonValue,
     },
   })
 }
@@ -263,7 +263,7 @@ export async function handleStageFailure(
     select: { stageOutputs: true },
   })
 
-  const outputs = (extraction?.stageOutputs as StageOutput[]) || []
+  const outputs = (extraction?.stageOutputs as unknown as StageOutput[]) || []
   const stageFailures = outputs.filter(
     o => o.stage === stage && !o.success
   ).length
@@ -310,7 +310,7 @@ export async function getFailedExtractions(): Promise<{
   })
 
   return failed.map(f => {
-    const outputs = (f.stageOutputs as StageOutput[]) || []
+    const outputs = (f.stageOutputs as unknown as StageOutput[]) || []
     const lastFailure = outputs.filter(o => !o.success).pop()
     return {
       id: f.id,

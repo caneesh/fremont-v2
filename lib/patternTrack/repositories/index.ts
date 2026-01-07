@@ -3,15 +3,18 @@
  *
  * Provides a single point of access to all repositories.
  * V1: Uses JSON files + localStorage
- * V2: Can be swapped for Prisma/Postgres implementations
+ * V2: Uses Prisma/Postgres for patterns and questions
  */
 
-import type { IRepositoryFactory } from './interfaces'
+import type { IRepositoryFactory, IPatternRepository, IQuestionRepository } from './interfaces'
 import { JsonPatternRepository } from './jsonPatternRepository'
 import { JsonLessonRepository } from './jsonLessonRepository'
 import { JsonQuestionRepository } from './jsonQuestionRepository'
 import { LocalProgressRepository } from './localProgressRepository'
 import { LocalSessionRepository } from './localSessionRepository'
+import { PrismaPatternRepository } from './prismaPatternRepository'
+import { PrismaQuestionRepository } from './prismaQuestionRepository'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 // Export interfaces for external use
 export * from './interfaces'
@@ -22,6 +25,8 @@ export { JsonLessonRepository } from './jsonLessonRepository'
 export { JsonQuestionRepository } from './jsonQuestionRepository'
 export { LocalProgressRepository } from './localProgressRepository'
 export { LocalSessionRepository } from './localSessionRepository'
+export { PrismaPatternRepository } from './prismaPatternRepository'
+export { PrismaQuestionRepository } from './prismaQuestionRepository'
 
 /**
  * Default repository factory using JSON + localStorage
@@ -69,15 +74,67 @@ class JsonRepositoryFactory implements IRepositoryFactory {
   }
 }
 
+/**
+ * Hybrid repository factory using Prisma for patterns/questions, localStorage for progress
+ */
+class PrismaRepositoryFactory implements IRepositoryFactory {
+  private _patterns: PrismaPatternRepository | null = null
+  private _lessons: JsonLessonRepository | null = null
+  private _questions: PrismaQuestionRepository | null = null
+  private _progress: LocalProgressRepository | null = null
+  private _sessions: LocalSessionRepository | null = null
+
+  get patterns(): IPatternRepository {
+    if (!this._patterns) {
+      this._patterns = new PrismaPatternRepository()
+    }
+    return this._patterns
+  }
+
+  get lessons(): JsonLessonRepository {
+    // Still use JSON for lessons (not migrated to database yet)
+    if (!this._lessons) {
+      this._lessons = new JsonLessonRepository()
+    }
+    return this._lessons
+  }
+
+  get questions(): IQuestionRepository {
+    if (!this._questions) {
+      this._questions = new PrismaQuestionRepository()
+    }
+    return this._questions
+  }
+
+  get progress(): LocalProgressRepository {
+    if (!this._progress) {
+      this._progress = new LocalProgressRepository()
+    }
+    return this._progress
+  }
+
+  get sessions(): LocalSessionRepository {
+    if (!this._sessions) {
+      this._sessions = new LocalSessionRepository()
+    }
+    return this._sessions
+  }
+}
+
 // Singleton instance
 let repositoryFactory: IRepositoryFactory | null = null
 
 /**
  * Get the repository factory instance
+ * Uses Prisma repositories when USE_DATABASE_QUESTIONS flag is enabled
  */
 export function getRepositories(): IRepositoryFactory {
   if (!repositoryFactory) {
-    repositoryFactory = new JsonRepositoryFactory()
+    if (FEATURE_FLAGS.USE_DATABASE_QUESTIONS) {
+      repositoryFactory = new PrismaRepositoryFactory()
+    } else {
+      repositoryFactory = new JsonRepositoryFactory()
+    }
   }
   return repositoryFactory
 }
