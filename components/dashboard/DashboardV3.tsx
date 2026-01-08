@@ -7,9 +7,12 @@ import TodayPlanEditor from './TodayPlanEditor'
 import TaskPickerModal from './TaskPickerModal'
 import WinsCard from './WinsCard'
 import CoverageSummary from './CoverageSummary'
+import { WarmUpGate, WarmUpPlayer, WarmUpResults } from '@/components/warmup'
 import { computeDashboardMetrics, getTopicCoverage, getWinsMessage } from '@/lib/dashboard/dashboardMetrics'
 import * as planService from '@/lib/dashboard/todayPlanService'
 import { authService } from '@/lib/auth/authService'
+import { useWarmUp } from '@/hooks/useWarmUp'
+import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import type { DashboardMetrics, TodayPlan, TopicCoverage, TaskSuggestion } from '@/types/dashboard'
 
 interface DashboardV3Props {
@@ -32,6 +35,9 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
   const [isLoading, setIsLoading] = useState(true)
 
   const userId = authService.getUser()?.userId || 'anonymous'
+
+  // Warm-up hook - only active when feature flag is enabled
+  const warmUp = useWarmUp(userId)
 
   // Load dashboard data
   useEffect(() => {
@@ -105,7 +111,8 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
   // Get wins message
   const winsMessage = metrics ? getWinsMessage(metrics) : null
 
-  if (isLoading) {
+  // Show loading state
+  if (isLoading || (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'loading')) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -116,6 +123,67 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
     )
   }
 
+  // Show warm-up gate if feature is enabled and warm-up is pending
+  if (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'gate') {
+    return (
+      <WarmUpGate
+        session={warmUp.session}
+        canSkip={warmUp.canSkip}
+        isLoading={warmUp.isLoading}
+        onStart={warmUp.start}
+        onSkip={warmUp.skipSession}
+      />
+    )
+  }
+
+  // Show warm-up player if in progress
+  if (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'playing') {
+    return (
+      <WarmUpPlayer
+        block={warmUp.currentBlock}
+        items={warmUp.currentItems}
+        currentItemIndex={warmUp.currentItemIndex}
+        progress={warmUp.progress}
+        isLoading={warmUp.isLoading}
+        onSubmit={warmUp.submitAnswer}
+      />
+    )
+  }
+
+  // Show warm-up results
+  if (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'results') {
+    return (
+      <WarmUpResults
+        session={warmUp.session}
+        onContinue={warmUp.finishResults}
+      />
+    )
+  }
+
+  // Show error state for warm-up
+  if (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'error') {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text-primary mb-2">
+            Warm-up Error
+          </h2>
+          <p className="text-gray-600 dark:text-dark-text-secondary mb-4">
+            {warmUp.error || 'Something went wrong with warm-up.'}
+          </p>
+          <button
+            onClick={() => warmUp.reset()}
+            className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-strong transition-colors"
+          >
+            Continue to Dashboard
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Normal dashboard rendering (warm-up complete or disabled)
   return (
     <div className="space-y-6">
       {/* Header */}

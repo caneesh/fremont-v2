@@ -415,7 +415,7 @@ export const FEATURE_FLAGS = {
    *
    * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL=true)
    */
-  WARMUP_PROTOCOL: process.env.NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL === 'true',
+  WARMUP_PROTOCOL: true, // Enabled for testing
 }
 
 /**
