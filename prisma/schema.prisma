@@ -103,6 +103,12 @@ model Question {
   incomingEdges QuestionEdge[]        @relation("ToQuestion")
   attempts      UserQuestionHistory[]
 
+  // Precomputed content relations
+  precomputedOutline    PrecomputedScaffoldOutline?
+  precomputedVariations PrecomputedVariation[]
+  precomputedSimParams  PrecomputedSimulationParams?
+  precomputedContrasts  PrecomputedConceptContrast[]
+
   // Indexes for fast lookup
   @@index([primaryPatternId, difficulty])
   @@index([difficulty])
@@ -388,4 +394,199 @@ model RawExtraction {
   @@index([questionId])
   @@index([createdAt])
   @@map("raw_extractions")
+}
+
+// =============================================================================
+// PRECOMPUTED CONTENT
+// =============================================================================
+
+enum PrecomputeStatus {
+  pending
+  generating
+  completed
+  failed
+  invalidated
+}
+
+// Precomputed scaffold outlines for fast delivery
+model PrecomputedScaffoldOutline {
+  id            String   @id @default(cuid())
+  questionId    String   @unique @map("question_id")
+  scaffoldId    String   @unique @map("scaffold_id")
+
+  // Version tracking for invalidation
+  promptVersion String   @map("prompt_version")
+  modelVersion  String   @map("model_version")
+
+  // Denormalized fields for filtering
+  domain        String
+  subdomain     String
+  stepCount     Int      @map("step_count")
+
+  // Full outline response as JSONB
+  outlineData   Json     @map("outline_data") @db.JsonB
+
+  // Generation metadata
+  inputTokens   Int?     @map("input_tokens")
+  outputTokens  Int?     @map("output_tokens")
+  latencyMs     Int?     @map("latency_ms")
+  costUsd       Float?   @map("cost_usd") @db.Real
+
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  question       Question                   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  stepExpansions PrecomputedStepExpansion[]
+
+  @@index([domain, subdomain])
+  @@index([promptVersion])
+  @@map("precomputed_scaffold_outlines")
+}
+
+// Precomputed step expansions linked to outlines
+model PrecomputedStepExpansion {
+  id             String   @id @default(cuid())
+  outlineId      String   @map("outline_id")
+  stepId         String   @map("step_id")
+
+  // Version tracking
+  promptVersion  String   @map("prompt_version")
+  modelVersion   String   @map("model_version")
+
+  // Full expansion response as JSONB
+  expansionData  Json     @map("expansion_data") @db.JsonB
+
+  // Quick access fields
+  microTaskCount Int      @map("micro_task_count")
+  hasFbd         Boolean  @default(false) @map("has_fbd")
+
+  // Generation metadata
+  inputTokens    Int?     @map("input_tokens")
+  outputTokens   Int?     @map("output_tokens")
+  latencyMs      Int?     @map("latency_ms")
+  costUsd        Float?   @map("cost_usd") @db.Real
+
+  // Timestamps
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  outline        PrecomputedScaffoldOutline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+
+  @@unique([outlineId, stepId, promptVersion])
+  @@index([outlineId])
+  @@map("precomputed_step_expansions")
+}
+
+// Precomputed concept contrast distractors
+model PrecomputedConceptContrast {
+  id            String   @id @default(cuid())
+
+  // Can be linked to question or standalone by concept
+  questionId    String?  @map("question_id")
+  conceptId     String   @map("concept_id")
+  domain        String
+  subdomain     String
+
+  // Version tracking
+  promptVersion String   @map("prompt_version")
+  modelVersion  String   @map("model_version")
+
+  // Distractor data as JSONB
+  distractors   Json     @db.JsonB
+
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  question      Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([conceptId, domain, subdomain, promptVersion, modelVersion])
+  @@index([domain, subdomain])
+  @@index([conceptId])
+  @@index([questionId])
+  @@map("precomputed_concept_contrasts")
+}
+
+// Precomputed problem variations
+model PrecomputedVariation {
+  id                  String   @id @default(cuid())
+  questionId          String   @map("question_id")
+  variationType       String   @map("variation_type") // "easier" | "harder" | "same"
+
+  // Version tracking
+  promptVersion       String   @map("prompt_version")
+  modelVersion        String   @map("model_version")
+
+  // Variation content
+  problemStatement    String   @map("problem_statement") @db.Text
+  whyDifferent        String   @map("why_different")
+
+  // Optional link to generated question
+  generatedQuestionId String?  @map("generated_question_id")
+
+  // Timestamps
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  question            Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, variationType])
+  @@index([promptVersion])
+  @@map("precomputed_variations")
+}
+
+// Precomputed simulation parameters (no AI - regex extraction)
+model PrecomputedSimulationParams {
+  id             String   @id @default(cuid())
+  questionId     String   @unique @map("question_id")
+
+  // Simulation type
+  simulationType String   @map("simulation_type") // "projectile" | "incline" | "unsupported"
+
+  // Extracted parameters as JSONB
+  params         Json     @db.JsonB
+
+  // Verification flag
+  isVerified     Boolean  @default(false) @map("is_verified")
+
+  // Timestamps
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("precomputed_simulation_params")
+}
+
+// Job queue for background precomputation
+model PrecomputeJob {
+  id          String    @id @default(cuid())
+
+  // Job identification
+  jobType     String    @map("job_type") // scaffold_outline, scaffold_step, concept_contrast, variation, simulation_params
+  questionId  String    @map("question_id")
+  contentKey  String?   @map("content_key") // stepId for step expansions
+
+  // Job state
+  status      String    @default("pending") // pending | running | completed | failed
+  priority    Int       @default(0)         // Higher = more urgent
+
+  // Execution tracking
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3) @map("max_attempts")
+  lastError   String?   @map("last_error") @db.Text
+
+  // Timestamps
+  createdAt   DateTime  @default(now()) @map("created_at")
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@index([status, priority, createdAt])
+  @@index([questionId])
+  @@index([jobType, status])
+  @@map("precompute_jobs")
 }
