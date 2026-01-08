@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import VoiceInput from './VoiceInput'
 import ScaffoldDensityControl from './ScaffoldDensityControl'
+import InlineError from './ui/InlineError'
 import { localStorageProvider } from '@/lib/storage'
 import { getAdaptiveDensity } from '@/lib/adaptiveDensity'
 import { authService } from '@/lib/auth/authService'
@@ -504,11 +505,8 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
             </div>
           )}
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
+          {/* API/Blocking Error - Inline near submit button */}
+          <InlineError message={error} id="problem-submit-error" />
 
           {/* Advanced Options (Scaffold Density) */}
           <div className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden">
