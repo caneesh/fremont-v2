@@ -63,7 +63,7 @@ export function DebugRefactorView({
   const [code, setCode] = useState(
     mode === 'debug'
       ? (problem as DebugProblem).buggyCode
-      : (problem as RefactorProblem).originalCode
+      : (problem as RefactorProblem).messyCode
   )
   const [hypothesis, setHypothesis] = useState('')
   const [reflection, setReflection] = useState('')

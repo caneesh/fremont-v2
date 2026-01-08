@@ -37,3 +37,13 @@ export {
   getDebugStepDescription,
   getRefactorStepDescription,
 } from '@/lib/core/policies/debug-refactor-policy'
+
+// Re-export sample problems
+export {
+  SAMPLE_DEBUG_PROBLEMS,
+  SAMPLE_REFACTOR_PROBLEMS,
+  getDebugProblem,
+  getRefactorProblem,
+  getProblemsByMode,
+  getRandomProblem,
+} from './sample-problems'

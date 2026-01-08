@@ -79,7 +79,7 @@ export function useConstraintHighlight({
     // Add constraints to each step
     let updatedState = state
     for (let i = 0; i < stepCount; i++) {
-      updatedState = addConstraintsToStep(updatedState, i, extracted.constraints as ProblemConstraint[])
+      updatedState = addConstraintsToStep(updatedState, i, [...extracted.constraints])
     }
 
     setSessionState(updatedState)
