@@ -16,7 +16,6 @@ import {
   REFACTOR_STEP_ORDER,
 } from '@/lib/debugRefactor'
 import type {
-  ProblemMode,
   DebugProblem,
   RefactorProblem,
   DebugStep,
@@ -24,6 +23,9 @@ import type {
   ModeSubmissionResult,
   DebugHint,
 } from '@/types/debugRefactorMode'
+
+// Only debug and refactor modes are supported by this hook
+type DebugRefactorMode = 'debug' | 'refactor'
 import {
   getDebugStepDescription,
   getRefactorStepDescription,
@@ -31,7 +33,7 @@ import {
 
 interface UseDebugRefactorOptions {
   sessionId: string
-  mode: ProblemMode
+  mode: DebugRefactorMode
   problem: DebugProblem | RefactorProblem
   enabled?: boolean
 }
