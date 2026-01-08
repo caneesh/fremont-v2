@@ -243,7 +243,7 @@ describe('MicroTaskStepAccordion', () => {
 
       // Later tiers should be locked
       const lockedBadges = screen.getAllByText('Locked')
-      expect(lockedBadges.length).toBe(2) // Method and Setup are locked
+      expect(lockedBadges.length).toBe(2) // Visual and Strategy are locked
     })
 
     it('prevents clicking on locked tiers', () => {
@@ -264,8 +264,8 @@ describe('MicroTaskStepAccordion', () => {
       // Switch to reading mode
       fireEvent.click(screen.getByText('reading'))
 
-      // Try to click on the locked "Method" tier
-      fireEvent.click(screen.getByText('Method'))
+      // Try to click on the locked "Visual" tier
+      fireEvent.click(screen.getByText('Visual'))
 
       // onTaskComplete should not be called for the locked tier
       // It should only be called once from the initial switch to reading mode
@@ -329,11 +329,11 @@ describe('MicroTaskStepAccordion', () => {
       fireEvent.click(screen.getByText('complete-solid'))
 
       // Complete tier 2
-      fireEvent.click(screen.getByText('Method'))
+      fireEvent.click(screen.getByText('Visual'))
       fireEvent.click(screen.getByText('complete-solid'))
 
       // Complete tier 3 - this should complete the step
-      fireEvent.click(screen.getByText('Setup'))
+      fireEvent.click(screen.getByText('Strategy'))
       fireEvent.click(screen.getByText('complete-solid'))
 
       // Step should be complete
@@ -387,7 +387,7 @@ describe('MicroTaskStepAccordion', () => {
 
       // Check that locked tiers have dashed border class
       const lockedTiers = container.querySelectorAll('.border-dashed')
-      expect(lockedTiers.length).toBe(2) // Method and Setup are locked
+      expect(lockedTiers.length).toBe(2) // Visual and Strategy are locked
     })
 
     it('displays locked tier titles with strikethrough styling', () => {
@@ -410,7 +410,7 @@ describe('MicroTaskStepAccordion', () => {
 
       // Check that locked tier titles have line-through class
       const strikethroughElements = container.querySelectorAll('.line-through')
-      expect(strikethroughElements.length).toBe(2) // Method and Setup are locked
+      expect(strikethroughElements.length).toBe(2) // Visual and Strategy are locked
     })
 
     it('displays lock icons next to locked tier titles', () => {
@@ -462,8 +462,8 @@ describe('MicroTaskStepAccordion', () => {
       // Get all tier buttons
       const buttons = screen.getAllByRole('button')
 
-      // Find the button for "Method" (tier 2) which should be locked
-      const methodButton = buttons.find(btn => btn.textContent?.includes('Method'))
+      // Find the button for "Visual" (tier 2) which should be locked
+      const methodButton = buttons.find(btn => btn.textContent?.includes('Visual'))
       expect(methodButton).toBeDefined()
       expect(methodButton?.getAttribute('title')).toBe('Complete Tier 1 first to unlock')
     })
@@ -488,7 +488,7 @@ describe('MicroTaskStepAccordion', () => {
 
       // Check that locked tier buttons have opacity-50 class
       const reducedOpacityButtons = container.querySelectorAll('button.opacity-50')
-      expect(reducedOpacityButtons.length).toBe(2) // Method and Setup buttons
+      expect(reducedOpacityButtons.length).toBe(2) // Visual and Strategy buttons
     })
   })
 
