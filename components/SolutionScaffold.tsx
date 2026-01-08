@@ -274,6 +274,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   const [skipCommitCountdownStartSeconds, setSkipCommitCountdownStartSeconds] = useState<number | null>(null)
   const skipCommitGateShownRef = useRef(false)
   const skipCommitTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const saveMessageTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Momentum Engine state
   const [momentumState, setMomentumState] = useState<MomentumState | null>(null)
@@ -337,6 +338,26 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     masteryScoreRef.current = mastery
     setProblemMasteryScore(mastery)
   }, [computeProblemMasteryScore])
+
+  // Cleanup save message timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveMessageTimerRef.current) {
+        clearTimeout(saveMessageTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Helper to show timed save messages with proper cleanup
+  const showTimedSaveMessage = useCallback((message: string, durationMs: number = 3000) => {
+    if (saveMessageTimerRef.current) {
+      clearTimeout(saveMessageTimerRef.current)
+    }
+    setSaveMessage(message)
+    saveMessageTimerRef.current = setTimeout(() => {
+      setSaveMessage('')
+    }, durationMs)
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -1150,9 +1171,8 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   const beginFinalizeFlow = useCallback(() => {
     // Show Explain to a Friend first (Feynman Technique)
     setShowExplainToFriend(true)
-    setSaveMessage('Explain the solution to proceed')
-    setTimeout(() => setSaveMessage(''), 3000)
-  }, [])
+    showTimedSaveMessage('Explain the solution to proceed', 3000)
+  }, [showTimedSaveMessage])
 
   const handlePatternPickerSelect = useCallback((patternId: string) => {
     const startedAt = patternGateStartedAtRef.current
@@ -1357,20 +1377,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       problemHistoryService.saveDraft(problemId(), problemTitle(), progress)
 
       if (!silent) {
-        setSaveMessage('Draft saved!')
-        setTimeout(() => setSaveMessage(''), 2000)
+        showTimedSaveMessage('Draft saved!', 2000)
         setIsSaving(false)
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save draft'
       console.error('Save error:', error)
       if (!silent) {
-        setSaveMessage(`Error: ${errorMessage}`)
-        setTimeout(() => setSaveMessage(''), 4000)
+        showTimedSaveMessage(`Error: ${errorMessage}`, 4000)
         setIsSaving(false)
       }
     }
-  }, [getCurrentProgress, problemId, problemTitle])
+  }, [getCurrentProgress, problemId, problemTitle, showTimedSaveMessage])
 
   // Persist decision-gate state promptly (Pattern-First + Skip/Commit)
   useEffect(() => {
@@ -1397,14 +1415,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       setPatternPickerTitle('Pick a pattern to finalize scoring')
       setShowPatternPicker(true)
       setShowPatternPickWarning(true)
-      setSaveMessage('Pick a pattern to finalize scoring')
-      setTimeout(() => setSaveMessage(''), 3000)
+      showTimedSaveMessage('Pick a pattern to finalize scoring', 3000)
       return
     }
 
     pendingFinalizeAfterPatternPickRef.current = false
     beginFinalizeFlow()
-  }, [beginFinalizeFlow, data.patterns, patternFirstCfg.enablePatternFirst, patternSelectionState?.selectedPatternId])
+  }, [beginFinalizeFlow, data.patterns, patternFirstCfg.enablePatternFirst, patternSelectionState?.selectedPatternId, showTimedSaveMessage])
 
   const handleExplainToFriendComplete = useCallback((explanation: string, quality: string) => {
     setFriendExplanation(explanation)
@@ -1425,17 +1442,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
     // Now show reflection
     setShowReflection(true)
-    setSaveMessage('Complete reflection before finalizing')
-    setTimeout(() => setSaveMessage(''), 3000)
-  }, [problemId])
+    showTimedSaveMessage('Complete reflection before finalizing', 3000)
+  }, [problemId, showTimedSaveMessage])
 
   const handleSkipExplanation = useCallback(() => {
     // Allow skipping but note it
     setShowExplainToFriend(false)
     setShowReflection(true)
-    setSaveMessage('Skipped explanation - Complete reflection')
-    setTimeout(() => setSaveMessage(''), 3000)
-  }, [])
+    showTimedSaveMessage('Skipped explanation - Complete reflection', 3000)
+  }, [showTimedSaveMessage])
 
   // Analyze error patterns when student struggled
   const analyzeErrorPattern = useCallback(async (
@@ -1598,10 +1613,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
         }
       }
 
-      setSaveMessage('Problem solved and reflection saved!')
+      showTimedSaveMessage('Problem solved and reflection saved!', 3000)
       setIsProblemSolved(true) // Show next challenge
       setShowCelebration(true) // Trigger celebration animation
-      setTimeout(() => setSaveMessage(''), 3000)
       setIsSaving(false)
 
       // Notify parent that problem is solved (for plan session tracking)
@@ -1609,11 +1623,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save'
       console.error('Save error:', error)
-      setSaveMessage(`Error: ${errorMessage}`)
-      setTimeout(() => setSaveMessage(''), 4000)
+      showTimedSaveMessage(`Error: ${errorMessage}`, 4000)
       setIsSaving(false)
     }
-  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern, useMicroTasks, onSolved])
+  }, [getCurrentProgress, problemId, problemTitle, stepHintLevels, completedSteps, data, problemStartTime, analyzeErrorPattern, useMicroTasks, onSolved, showTimedSaveMessage])
 
   // Show post-solve activity popup RANDOMLY after problem is solved
   useEffect(() => {
@@ -1656,15 +1669,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
       setIsReviewFlagged(newFlag)
       problemHistoryService.toggleReview(problemId())
 
-      setSaveMessage(newFlag ? 'Marked for review 📌' : 'Unmarked for review')
-      setTimeout(() => setSaveMessage(''), 2000)
+      showTimedSaveMessage(newFlag ? 'Marked for review 📌' : 'Unmarked for review', 2000)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to toggle review'
       console.error('Toggle review error:', error)
-      setSaveMessage(`Error: ${errorMessage}`)
-      setTimeout(() => setSaveMessage(''), 4000)
+      showTimedSaveMessage(`Error: ${errorMessage}`, 4000)
     }
-  }, [isReviewFlagged, problemId])
+  }, [isReviewFlagged, problemId, showTimedSaveMessage])
 
   const handleStepComplete = (stepId: number) => {
     if (!completedSteps.includes(stepId)) {
