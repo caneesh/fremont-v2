@@ -84,6 +84,7 @@ import { INITIAL_SKIP_COMMIT_STATE, toSkipCommitPersistence } from '@/types/skip
 import { getPatternFirstTimePressure, getSkipCommitTimePressure } from '@/types/timePressure'
 import PatternSelectionChip from './PatternSelectionChip'
 import PatternPickerModal from './PatternPickerModal'
+import CoachToolsPanel, { CoachToolsButton, useCoachToolsPanel } from './CoachToolsPanel'
 import { getSkipCommitAnalyticsForCurrentSession } from '@/lib/skipCommitSessionAnalytics'
 import {
   shouldShowPatternFirst,
@@ -284,6 +285,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   const [currentConceptContrastChallenge, setCurrentConceptContrastChallenge] = useState<ConceptContrastChallenge | null>(null)
   const [passedConceptContrastSteps, setPassedConceptContrastSteps] = useState<Set<number>>(new Set())
   const [isLoadingConceptContrast, setIsLoadingConceptContrast] = useState(false)
+
+  // Coach Tools panel state
+  const coachToolsPanel = useCoachToolsPanel()
 
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
@@ -2578,28 +2582,20 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
             <span className="sm:hidden">{isReviewFlagged ? 'Review' : 'Review'}</span>
           </button>
 
-          {(saveMessage || (FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0)) && (
-            <div className="ml-auto flex flex-wrap items-center gap-2">
-              {FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0 && (
-                <PatternSelectionChip
-                  patterns={data.patterns}
-                  selectedPatternId={patternSelectionState?.selectedPatternId ?? null}
-                  showWarning={showPatternPickWarning && !(patternSelectionState?.selectedPatternId)}
-                  disabled={isSaving}
-                  onClick={() => {
-                    setPatternPickerTitle('Pick a pattern')
-                    setShowPatternPicker(true)
-                  }}
-                />
-              )}
+          {/* Coach Tools Button & Save Message */}
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <CoachToolsButton
+              onClick={coachToolsPanel.open}
+              hasAlerts={constraintCollisions.length > 0 || relatedMistakes.length > 0}
+              alertCount={constraintCollisions.length + relatedMistakes.length}
+            />
 
-              {saveMessage && (
-                <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-fade-in">
-                  {saveMessage}
-                </span>
-              )}
-            </div>
-          )}
+            {saveMessage && (
+              <span className="text-sm text-green-600 dark:text-green-400 font-medium animate-fade-in">
+                {saveMessage}
+              </span>
+            )}
+          </div>
         </div>
 
         {FEATURE_FLAGS.PATTERN_FIRST_MODE && patternFirstCfg.enablePatternFirst && data.patterns && data.patterns.length > 0 && showPatternPickWarning && !(patternSelectionState?.selectedPatternId) && (
@@ -3410,6 +3406,49 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
           </div>
         </div>
       )}
+
+      {/* Coach Tools Panel - Consolidated advanced interventions */}
+      <CoachToolsPanel
+        isOpen={coachToolsPanel.isOpen}
+        onClose={coachToolsPanel.close}
+        // Step Heatmap
+        showHeatmap={FEATURE_FLAGS.STEP_HEATMAP && FEATURE_FLAGS.CONFIDENCE_WEIGHTED_SRS}
+        stepConfidenceRatings={stepConfidenceRatings}
+        stepTitles={data.steps.map(s => s.title)}
+        completedSteps={completedSteps}
+        currentStep={currentStep}
+        onStepClick={(stepIndex) => {
+          const stepRef = stepRefs.current.get(stepIndex)
+          if (stepRef) {
+            stepRef.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            setHighlightedStepId(stepIndex)
+            setTimeout(() => setHighlightedStepId(null), 2000)
+          }
+          coachToolsPanel.close()
+        }}
+        // Related Mistakes
+        relatedMistakes={relatedMistakes}
+        onDismissMistakes={() => setRelatedMistakes([])}
+        // Constraint Feedback
+        constraintCollisions={constraintCollisions}
+        constraintDialogue={constraintDialogue || undefined}
+        onDismissConstraint={(id) => setDismissedCollisions(prev => new Set([...prev, id]))}
+        onHighlightProblem={handleHighlightProblem}
+        // Stuck/Rewind
+        onRecoverFromStuck={handleRecoverFromStuck}
+        // Pattern Selection
+        patterns={data.patterns || []}
+        selectedPatternId={patternSelectionState?.selectedPatternId}
+        onOpenPatternPicker={() => {
+          setPatternPickerTitle('Pick a pattern')
+          setShowPatternPicker(true)
+          coachToolsPanel.close()
+        }}
+        // Skip/Commit Analytics
+        skipCommitAnalytics={sessionSkipCommitAnalytics}
+        showSkipCommitAnalytics={showSkipCommitAnalytics}
+        onToggleSkipCommitAnalytics={() => setShowSkipCommitAnalytics(prev => !prev)}
+      />
     </div>
   )
 }
