@@ -422,6 +422,11 @@ const questions = [
           'Apply Ohm\'s Law: I = V/R = 12/4 = 3 A',
         ],
       },
+      hints: [
+        { order: 1, text: 'First identify which resistors are in series and which are in parallel.' },
+        { order: 2, text: 'For parallel resistors: 1/R_eq = 1/R₁ + 1/R₂. For series: R_eq = R₁ + R₂.' },
+        { order: 3, text: 'Once you have total resistance, use Ohm\'s Law: I = V/R_total.' },
+      ],
     },
   },
 
@@ -500,6 +505,11 @@ const questions = [
           'Calculate: KE_max = 3.1 - 2.0 = 1.1 eV',
         ],
       },
+      hints: [
+        { order: 1, text: 'First calculate the photon energy using E = hc/λ or E = hf.' },
+        { order: 2, text: 'The photoelectric equation relates photon energy to kinetic energy: KE_max = hf - φ.' },
+        { order: 3, text: 'Work function φ is the minimum energy needed to eject an electron from the metal surface.' },
+      ],
     },
   },
 
@@ -582,6 +592,11 @@ const questions = [
           'Solve for x: x = √(2×36/200) = 0.6 m',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify all forms of energy at the initial and final states.' },
+        { order: 2, text: 'Apply conservation of energy: KE₁ + PE₁ + W_other = KE₂ + PE₂.' },
+        { order: 3, text: 'If only conservative forces act, mechanical energy is conserved.' },
+      ],
     },
   },
 
@@ -650,6 +665,11 @@ const questions = [
           'Solve: 1/v = 1/20 - 1/30 = 1/60 → v = 60 cm (real image)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Thin lens equation: 1/f = 1/d₀ + 1/dᵢ.' },
+        { order: 2, text: 'Magnification m = -dᵢ/d₀. Negative m means inverted image.' },
+        { order: 3, text: 'Converging lens (f > 0) can form real or virtual images.' },
+      ],
     },
   },
 
@@ -719,6 +739,11 @@ const questions = [
           'Calculate: f\' = 500 × 340/(340-34) = 500 × 1.111 ≈ 556 Hz',
         ],
       },
+      hints: [
+        { order: 1, text: 'Doppler effect: f\' = f(v ± v_observer)/(v ∓ v_source).' },
+        { order: 2, text: 'Use + in numerator when observer moves toward source.' },
+        { order: 3, text: 'Use - in denominator when source moves toward observer.' },
+      ],
     },
   },
 
@@ -799,6 +824,11 @@ const questions = [
           'Solve: v = (3×4 + 1×0)/(3+1) = 12/4 = 3 m/s',
         ],
       },
+      hints: [
+        { order: 1, text: 'Is this an elastic or inelastic collision? Do the objects stick together?' },
+        { order: 2, text: 'Apply conservation of momentum: m₁v₁ + m₂v₂ = m₁v₁\' + m₂v₂\'.' },
+        { order: 3, text: 'For perfectly inelastic collision: (m₁+m₂)v\' = m₁v₁ + m₂v₂.' },
+      ],
     },
   },
 
@@ -881,6 +911,11 @@ const questions = [
           'Calculate: v = √(0.5 × 10 × 50) = √250 ≈ 15.81 m/s',
         ],
       },
+      hints: [
+        { order: 1, text: 'For circular motion, identify the centripetal acceleration: a = v²/r toward the center.' },
+        { order: 2, text: 'Draw a free body diagram at the specified position in the circle.' },
+        { order: 3, text: 'Apply Newton\'s second law: ΣF toward center = mv²/r.' },
+      ],
     },
   },
 
@@ -949,6 +984,11 @@ const questions = [
           'Calculate: L = 10(4)/(4×9.87) ≈ 1.01 m',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify the restoring force and find the angular frequency ω.' },
+        { order: 2, text: 'For a spring: ω = √(k/m). For a pendulum: ω = √(g/L).' },
+        { order: 3, text: 'Period T = 2π/ω. Maximum velocity v_max = ωA.' },
+      ],
     },
   },
 
@@ -1031,6 +1071,11 @@ const questions = [
           'a = 2.5 m/s², T = 37.5 N',
         ],
       },
+      hints: [
+        { order: 1, text: 'Draw free body diagrams for each mass in the system.' },
+        { order: 2, text: 'The string constraint means accelerations are related.' },
+        { order: 3, text: 'Write F = ma for each mass and solve the system of equations.' },
+      ],
     },
   },
 
@@ -1099,6 +1144,11 @@ const questions = [
           'ΔU = 500 - 200 = 300 J',
         ],
       },
+      hints: [
+        { order: 1, text: 'The first law: ΔU = Q - W, where W is work done BY the system.' },
+        { order: 2, text: 'For an ideal gas: ΔU = nCᵥΔT (depends only on temperature change).' },
+        { order: 3, text: 'Work done by gas: W = ∫PdV. For isobaric: W = PΔV.' },
+      ],
     },
   },
 
@@ -1169,6 +1219,11 @@ const questions = [
           'F = (9×10⁹)(2×10⁻⁶)(8×10⁻⁶)/(0.09) = 1.6 N (repulsive)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Coulomb\'s Law: F = kq₁q₂/r², where k = 9×10⁹ N·m²/C².' },
+        { order: 2, text: 'Electric field: E = kq/r² or E = F/q.' },
+        { order: 3, text: 'For multiple charges, use superposition: add vector fields.' },
+      ],
     },
   },
 
@@ -1237,6 +1292,11 @@ const questions = [
           'Calculate: U = ½(10×10⁻⁶)(100)² = 0.05 J',
         ],
       },
+      hints: [
+        { order: 1, text: 'Capacitance C = Q/V. For parallel plates: C = ε₀A/d.' },
+        { order: 2, text: 'Energy stored: U = ½CV² = ½QV = Q²/(2C).' },
+        { order: 3, text: 'Series: 1/C_eq = Σ(1/Cᵢ). Parallel: C_eq = ΣCᵢ.' },
+      ],
     },
   },
 
@@ -1307,6 +1367,11 @@ const questions = [
           'F = (1.6×10⁻¹⁹)(2×10⁶)(0.5) = 1.6×10⁻¹³ N',
         ],
       },
+      hints: [
+        { order: 1, text: 'Force on moving charge: F = qv × B (magnitude: F = qvB sin θ).' },
+        { order: 2, text: 'Force on current-carrying wire: F = IL × B.' },
+        { order: 3, text: 'Use right-hand rule to find force direction.' },
+      ],
     },
   },
 
@@ -1386,6 +1451,11 @@ const questions = [
           'Apply Faraday\'s law: ε = N(ΔΦ/Δt) = 100(0.0157/0.1) = 15.7 V',
         ],
       },
+      hints: [
+        { order: 1, text: 'Faraday\'s Law: EMF = -dΦ/dt, where Φ = BA cos θ.' },
+        { order: 2, text: 'Lenz\'s Law: induced current opposes the change in flux.' },
+        { order: 3, text: 'For a coil: EMF = -N(dΦ/dt), where N is number of turns.' },
+      ],
     },
   },
 
@@ -1455,6 +1525,11 @@ const questions = [
           'Calculate: β = (5×10⁻⁷)(1)/(5×10⁻⁴) = 10⁻³ m = 1 mm',
         ],
       },
+      hints: [
+        { order: 1, text: 'For double-slit: bright fringes when d sin θ = mλ.' },
+        { order: 2, text: 'Fringe spacing: Δy = λL/d.' },
+        { order: 3, text: 'For thin films, account for phase changes at boundaries.' },
+      ],
     },
   },
 
@@ -1534,6 +1609,11 @@ const questions = [
           'Excitation energy = E₂ - E₁ = -3.4 - (-13.6) = 10.2 eV',
         ],
       },
+      hints: [
+        { order: 1, text: 'Energy levels: Eₙ = -13.6/n² eV for hydrogen.' },
+        { order: 2, text: 'Photon emitted when electron drops: ΔE = hf.' },
+        { order: 3, text: 'Rydberg formula: 1/λ = R(1/n₁² - 1/n₂²).' },
+      ],
     },
   },
 
@@ -1625,6 +1705,11 @@ const questions = [
           'a = 16/4 = 4 m/s²',
         ],
       },
+      hints: [
+        { order: 1, text: 'Draw a free body diagram showing weight, normal force, and friction.' },
+        { order: 2, text: 'Friction force is f = μN, where N = mg cos(θ) on an incline.' },
+        { order: 3, text: 'Net force along incline: F = mg sin(θ) - μmg cos(θ).' },
+      ],
     },
   },
 
@@ -1705,6 +1790,11 @@ const questions = [
           'Note: Vertical component reduces normal force but doesn\'t affect horizontal motion on frictionless surface',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify all forces acting on the block and draw a free body diagram.' },
+        { order: 2, text: 'Choose a coordinate system and resolve forces into components.' },
+        { order: 3, text: 'Apply ΣF = ma in both x and y directions.' },
+      ],
     },
   },
 
@@ -1784,6 +1874,11 @@ const questions = [
           'Heat rejected: Qc = Qh - W = 1000 - 400 = 600 J',
         ],
       },
+      hints: [
+        { order: 1, text: 'Efficiency η = W/Qₕ = (Qₕ - Qc)/Qₕ = 1 - Qc/Qₕ.' },
+        { order: 2, text: 'Carnot efficiency (maximum possible): η = 1 - Tc/Tₕ.' },
+        { order: 3, text: 'All temperatures must be in Kelvin for the Carnot formula.' },
+      ],
     },
   },
 
@@ -1868,6 +1963,11 @@ const questions = [
           '22000 = 500T → T = 44°C',
         ],
       },
+      hints: [
+        { order: 1, text: 'Heat transfer: Q = mcΔT, where c is specific heat capacity.' },
+        { order: 2, text: 'For phase changes: Q = mL, where L is latent heat.' },
+        { order: 3, text: 'Energy conservation: heat lost = heat gained.' },
+      ],
     },
   },
 
@@ -1953,6 +2053,11 @@ const questions = [
           'Field increases linearly with r inside the sphere',
         ],
       },
+      hints: [
+        { order: 1, text: 'Gauss\'s Law: Φ = ∮E·dA = Q_enclosed/ε₀.' },
+        { order: 2, text: 'Choose a Gaussian surface that matches the charge symmetry.' },
+        { order: 3, text: 'For spherical symmetry: E(4πr²) = Q/ε₀.' },
+      ],
     },
   },
 
@@ -2036,6 +2141,11 @@ const questions = [
           'Magnification m = -v/u = -(-60)/(-30) = -2 (inverted, magnified)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Mirror equation: 1/f = 1/d₀ + 1/dᵢ.' },
+        { order: 2, text: 'Magnification: m = -dᵢ/d₀ = hᵢ/h₀.' },
+        { order: 3, text: 'Sign convention: real images have positive dᵢ (concave mirror).' },
+      ],
     },
   },
 
@@ -2116,6 +2226,11 @@ const questions = [
           'Note: f₃ = 3f₁ where f₁ = v/2L = 100 Hz is fundamental',
         ],
       },
+      hints: [
+        { order: 1, text: 'Standing wave condition: L = nλ/2 for string fixed at both ends.' },
+        { order: 2, text: 'Fundamental frequency: f₁ = v/(2L). Harmonics: fₙ = nf₁.' },
+        { order: 3, text: 'Wave speed on string: v = √(T/μ).' },
+      ],
     },
   },
 
@@ -2195,6 +2310,11 @@ const questions = [
           'Alternatively: 800 → 400 → 200 → 100 Bq',
         ],
       },
+      hints: [
+        { order: 1, text: 'Radioactive decay: N(t) = N₀e^(-λt).' },
+        { order: 2, text: 'Half-life: t₁/₂ = ln(2)/λ.' },
+        { order: 3, text: 'After n half-lives: N = N₀/2ⁿ.' },
+      ],
     },
   },
 
@@ -2275,6 +2395,11 @@ const questions = [
           'a = (35.35 - 15)/(3 + 5) = 2.54 m/s²',
         ],
       },
+      hints: [
+        { order: 1, text: 'Start by drawing a free body diagram. What forces act on the block?' },
+        { order: 2, text: 'Decompose the weight into components parallel and perpendicular to the incline.' },
+        { order: 3, text: 'Apply Newton\'s second law along the incline: the acceleration is a = g sin(θ).' },
+      ],
     },
   },
 
@@ -2354,6 +2479,11 @@ const questions = [
           'a = (17.32 - 10 - 5.46)/2 ≈ 1.15 m/s²',
         ],
       },
+      hints: [
+        { order: 1, text: 'Draw a free body diagram showing weight, normal force, and friction.' },
+        { order: 2, text: 'Friction force is f = μN, where N = mg cos(θ) on an incline.' },
+        { order: 3, text: 'Net force along incline: F = mg sin(θ) - μmg cos(θ).' },
+      ],
     },
   },
 
@@ -2419,6 +2549,11 @@ const questions = [
           'a = F/m = 20/4 = 5 m/s²',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify all forces acting on the block and draw a free body diagram.' },
+        { order: 2, text: 'Choose a coordinate system and resolve forces into components.' },
+        { order: 3, text: 'Apply ΣF = ma in both x and y directions.' },
+      ],
     },
   },
 
@@ -2497,6 +2632,11 @@ const questions = [
           'Horizontal motion: R = vₓt = 15 × 4 = 60 m',
         ],
       },
+      hints: [
+        { order: 1, text: 'Break the initial velocity into horizontal and vertical components.' },
+        { order: 2, text: 'Horizontal motion is uniform; vertical motion is accelerated by gravity.' },
+        { order: 3, text: 'For range: R = v²sin(2θ)/g when starting and landing at same height.' },
+      ],
     },
   },
 
@@ -2563,6 +2703,11 @@ const questions = [
           'Direction: toward center of circle',
         ],
       },
+      hints: [
+        { order: 1, text: 'For circular motion, identify the centripetal acceleration: a = v²/r toward the center.' },
+        { order: 2, text: 'Draw a free body diagram at the specified position in the circle.' },
+        { order: 3, text: 'Apply Newton\'s second law: ΣF toward center = mv²/r.' },
+      ],
     },
   },
 
@@ -2629,6 +2774,11 @@ const questions = [
           'x = √(2mgh/k) = √(100/500) = √0.2 ≈ 0.447 m',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify all forms of energy at the initial and final states.' },
+        { order: 2, text: 'Apply conservation of energy: KE₁ + PE₁ + W_other = KE₂ + PE₂.' },
+        { order: 3, text: 'If only conservative forces act, mechanical energy is conserved.' },
+      ],
     },
   },
 
@@ -2709,6 +2859,11 @@ const questions = [
           'v₂ = u₁ = 6 m/s',
         ],
       },
+      hints: [
+        { order: 1, text: 'Is this an elastic or inelastic collision? Do the objects stick together?' },
+        { order: 2, text: 'Apply conservation of momentum: m₁v₁ + m₂v₂ = m₁v₁\' + m₂v₂\'.' },
+        { order: 3, text: 'For perfectly inelastic collision: (m₁+m₂)v\' = m₁v₁ + m₂v₂.' },
+      ],
     },
   },
 
@@ -2777,6 +2932,11 @@ const questions = [
           'T = m₁a = 13.33 N',
         ],
       },
+      hints: [
+        { order: 1, text: 'Draw free body diagrams for each mass in the system.' },
+        { order: 2, text: 'The string constraint means accelerations are related.' },
+        { order: 3, text: 'Write F = ma for each mass and solve the system of equations.' },
+      ],
     },
   },
 
@@ -2842,6 +3002,11 @@ const questions = [
           'k = 4(9.87)(0.5)/1² = 19.74 N/m',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify the restoring force and find the angular frequency ω.' },
+        { order: 2, text: 'For a spring: ω = √(k/m). For a pendulum: ω = √(g/L).' },
+        { order: 3, text: 'Period T = 2π/ω. Maximum velocity v_max = ωA.' },
+      ],
     },
   },
 
@@ -2909,6 +3074,11 @@ const questions = [
           'T₂ = T₁(V₂/V₁) = 300(3/2) = 450 K = 177°C',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify what quantities are constant (isothermal, isobaric, isochoric).' },
+        { order: 2, text: 'Use the appropriate gas law: PV = nRT or P₁V₁/T₁ = P₂V₂/T₂.' },
+        { order: 3, text: 'Boyle\'s Law (constant T): P₁V₁ = P₂V₂.' },
+      ],
     },
   },
 
@@ -2975,6 +3145,11 @@ const questions = [
           'W = Q = 400 J',
         ],
       },
+      hints: [
+        { order: 1, text: 'The first law: ΔU = Q - W, where W is work done BY the system.' },
+        { order: 2, text: 'For an ideal gas: ΔU = nCᵥΔT (depends only on temperature change).' },
+        { order: 3, text: 'Work done by gas: W = ∫PdV. For isobaric: W = PΔV.' },
+      ],
     },
   },
 
@@ -3054,6 +3229,11 @@ const questions = [
           'W = Qh - Qc = 400 J (or W = ηQh = 0.4 × 1000)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Efficiency η = W/Qₕ = (Qₕ - Qc)/Qₕ = 1 - Qc/Qₕ.' },
+        { order: 2, text: 'Carnot efficiency (maximum possible): η = 1 - Tc/Tₕ.' },
+        { order: 3, text: 'All temperatures must be in Kelvin for the Carnot formula.' },
+      ],
     },
   },
 
@@ -3121,6 +3301,11 @@ const questions = [
           'c_metal = 8400/(200 × 75) = 0.56 J/g°C',
         ],
       },
+      hints: [
+        { order: 1, text: 'Heat transfer: Q = mcΔT, where c is specific heat capacity.' },
+        { order: 2, text: 'For phase changes: Q = mL, where L is latent heat.' },
+        { order: 3, text: 'Energy conservation: heat lost = heat gained.' },
+      ],
     },
   },
 
@@ -3189,6 +3374,11 @@ const questions = [
           'By symmetry: F_net = 0',
         ],
       },
+      hints: [
+        { order: 1, text: 'Coulomb\'s Law: F = kq₁q₂/r², where k = 9×10⁹ N·m²/C².' },
+        { order: 2, text: 'Electric field: E = kq/r² or E = F/q.' },
+        { order: 3, text: 'For multiple charges, use superposition: add vector fields.' },
+      ],
     },
   },
 
@@ -3254,6 +3444,11 @@ const questions = [
           'E = 2(9×10⁹)(2×10⁻⁶)/(0.1) = 3.6×10⁵ N/C',
         ],
       },
+      hints: [
+        { order: 1, text: 'Gauss\'s Law: Φ = ∮E·dA = Q_enclosed/ε₀.' },
+        { order: 2, text: 'Choose a Gaussian surface that matches the charge symmetry.' },
+        { order: 3, text: 'For spherical symmetry: E(4πr²) = Q/ε₀.' },
+      ],
     },
   },
 
@@ -3322,6 +3517,11 @@ const questions = [
           'Both capacitors have same charge in series',
         ],
       },
+      hints: [
+        { order: 1, text: 'Capacitance C = Q/V. For parallel plates: C = ε₀A/d.' },
+        { order: 2, text: 'Energy stored: U = ½CV² = ½QV = Q²/(2C).' },
+        { order: 3, text: 'Series: 1/C_eq = Σ(1/Cᵢ). Parallel: C_eq = ΣCᵢ.' },
+      ],
     },
   },
 
@@ -3388,6 +3588,11 @@ const questions = [
           'Or directly: R_eq = R/n = 6/3 = 2 Ω',
         ],
       },
+      hints: [
+        { order: 1, text: 'Identify series and parallel combinations of resistors.' },
+        { order: 2, text: 'Series: R_eq = R₁ + R₂. Parallel: 1/R_eq = 1/R₁ + 1/R₂.' },
+        { order: 3, text: 'Use Ohm\'s Law (V = IR) and Kirchhoff\'s laws.' },
+      ],
     },
   },
 
@@ -3456,6 +3661,11 @@ const questions = [
           'r = 5.6×10⁻⁴ m = 0.56 mm',
         ],
       },
+      hints: [
+        { order: 1, text: 'Force on moving charge: F = qv × B (magnitude: F = qvB sin θ).' },
+        { order: 2, text: 'Force on current-carrying wire: F = IL × B.' },
+        { order: 3, text: 'Use right-hand rule to find force direction.' },
+      ],
     },
   },
 
@@ -3522,6 +3732,11 @@ const questions = [
           'ε = 0.5 × 0.5 × 4 = 1 V',
         ],
       },
+      hints: [
+        { order: 1, text: 'Faraday\'s Law: EMF = -dΦ/dt, where Φ = BA cos θ.' },
+        { order: 2, text: 'Lenz\'s Law: induced current opposes the change in flux.' },
+        { order: 3, text: 'For a coil: EMF = -N(dΦ/dt), where N is number of turns.' },
+      ],
     },
   },
 
@@ -3597,6 +3812,11 @@ const questions = [
           'Image height = 2 × 2 = 4 cm (inverted)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Thin lens equation: 1/f = 1/d₀ + 1/dᵢ.' },
+        { order: 2, text: 'Magnification m = -dᵢ/d₀. Negative m means inverted image.' },
+        { order: 3, text: 'Converging lens (f > 0) can form real or virtual images.' },
+      ],
     },
   },
 
@@ -3663,6 +3883,11 @@ const questions = [
           'm = 1/3 (virtual, erect, diminished)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Mirror equation: 1/f = 1/d₀ + 1/dᵢ.' },
+        { order: 2, text: 'Magnification: m = -dᵢ/d₀ = hᵢ/h₀.' },
+        { order: 3, text: 'Sign convention: real images have positive dᵢ (concave mirror).' },
+      ],
     },
   },
 
@@ -3728,6 +3953,11 @@ const questions = [
           't = λ/(4n) = 532/(4×1.33) = 100 nm',
         ],
       },
+      hints: [
+        { order: 1, text: 'For double-slit: bright fringes when d sin θ = mλ.' },
+        { order: 2, text: 'Fringe spacing: Δy = λL/d.' },
+        { order: 3, text: 'For thin films, account for phase changes at boundaries.' },
+      ],
     },
   },
 
@@ -3793,6 +4023,11 @@ const questions = [
           'f₁ = v/λ = 340/2 = 170 Hz',
         ],
       },
+      hints: [
+        { order: 1, text: 'Standing wave condition: L = nλ/2 for string fixed at both ends.' },
+        { order: 2, text: 'Fundamental frequency: f₁ = v/(2L). Harmonics: fₙ = nf₁.' },
+        { order: 3, text: 'Wave speed on string: v = √(T/μ).' },
+      ],
     },
   },
 
@@ -3861,6 +4096,11 @@ const questions = [
           'f\' = 1000(360/300) = 1200 Hz',
         ],
       },
+      hints: [
+        { order: 1, text: 'Doppler effect: f\' = f(v ± v_observer)/(v ∓ v_source).' },
+        { order: 2, text: 'Use + in numerator when observer moves toward source.' },
+        { order: 3, text: 'Use - in denominator when source moves toward observer.' },
+      ],
     },
   },
 
@@ -3926,6 +4166,11 @@ const questions = [
           'Stopping potential V₀ = 1.13 V',
         ],
       },
+      hints: [
+        { order: 1, text: 'Photon energy: E = hf = hc/λ.' },
+        { order: 2, text: 'Photoelectric equation: KE_max = hf - φ.' },
+        { order: 3, text: 'Threshold frequency: f₀ = φ/h. Below this, no emission.' },
+      ],
     },
   },
 
@@ -4001,6 +4246,11 @@ const questions = [
           'λ = 1240/1.89 = 656 nm (Balmer series, Hα)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Energy levels: Eₙ = -13.6/n² eV for hydrogen.' },
+        { order: 2, text: 'Photon emitted when electron drops: ΔE = hf.' },
+        { order: 3, text: 'Rydberg formula: 1/λ = R(1/n₁² - 1/n₂²).' },
+      ],
     },
   },
 
@@ -4069,6 +4319,11 @@ const questions = [
           'Atomic number: 92 - 2 = 90 (Thorium)',
         ],
       },
+      hints: [
+        { order: 1, text: 'Radioactive decay: N(t) = N₀e^(-λt).' },
+        { order: 2, text: 'Half-life: t₁/₂ = ln(2)/λ.' },
+        { order: 3, text: 'After n half-lives: N = N₀/2ⁿ.' },
+      ],
     },
   },
 ]

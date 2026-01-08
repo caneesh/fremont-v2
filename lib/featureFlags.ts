@@ -397,6 +397,25 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_DATABASE_QUESTIONS=false)
    */
   USE_DATABASE_QUESTIONS: process.env.NEXT_PUBLIC_FEATURE_DATABASE_QUESTIONS !== 'false',
+
+  /**
+   * Warm-Up Protocol
+   * When enabled, shows 2-5 minute micro-drills before the main study session.
+   *
+   * Features:
+   * - Decay-based block selection (prioritizes rusty patterns)
+   * - Timed MCQ/short answer drills (20s per item)
+   * - Skip once per day with mastery penalty (-0.05)
+   * - Session gating (must complete or skip before accessing dashboard)
+   *
+   * Selection algorithm uses:
+   * - Pattern decay scores (higher = more urgent)
+   * - Recent mistake types
+   * - Mastery thresholds (include if decay > 0.3, exclude if mastery > 0.85)
+   *
+   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL=true)
+   */
+  WARMUP_PROTOCOL: process.env.NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL === 'true',
 }
 
 /**
