@@ -413,9 +413,9 @@ export const FEATURE_FLAGS = {
    * - Recent mistake types
    * - Mastery thresholds (include if decay > 0.3, exclude if mastery > 0.85)
    *
-   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL=true)
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL=false)
    */
-  WARMUP_PROTOCOL: false,
+  WARMUP_PROTOCOL: process.env.NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL !== 'false',
 }
 
 /**
