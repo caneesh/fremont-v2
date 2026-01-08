@@ -26,6 +26,7 @@ function PracticeContent() {
   const [results, setResults] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 })
   const [allPatterns, setAllPatterns] = useState<Pattern[]>([])
   const [startTime, setStartTime] = useState<number>(Date.now())
+  const [hintsRevealed, setHintsRevealed] = useState<number>(0)
 
   const mode = searchParams.get('mode') || 'mixed'
   const count = parseInt(searchParams.get('count') || '10', 10)
@@ -112,6 +113,7 @@ function PracticeContent() {
           identified_pattern_ids: selectedPatterns,
           is_correct: isAnswerCorrect,
           time_taken_seconds: timeTaken,
+          hints_used: hintsRevealed,
         }),
       })
     } catch (error) {
@@ -126,6 +128,7 @@ function PracticeContent() {
       setShowAnswer(false)
       setIsCorrect(null)
       setStartTime(Date.now())
+      setHintsRevealed(0)
     } else {
       setSessionComplete(true)
     }
@@ -183,6 +186,7 @@ function PracticeContent() {
                   setSelectedPatterns([])
                   setShowAnswer(false)
                   setIsCorrect(null)
+                  setHintsRevealed(0)
                   loadQuestions()
                 }}
                 className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent-strong transition-colors font-medium"
@@ -260,16 +264,56 @@ function PracticeContent() {
             <LatexRenderer content={currentQuestion.problem_text} />
           </div>
 
-          {/* Hints */}
-          {currentQuestion.hints.length > 0 && !showAnswer && (
-            <details className="mb-6">
-              <summary className="text-sm text-accent cursor-pointer hover:underline">
-                Need a hint?
-              </summary>
-              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-800 dark:text-blue-300">
-                {currentQuestion.hints[0].text}
+          {/* Hints Section */}
+          {currentQuestion.hints && currentQuestion.hints.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+                  Hints ({hintsRevealed}/{currentQuestion.hints.length} revealed)
+                </span>
+                {!showAnswer && hintsRevealed < currentQuestion.hints.length && (
+                  <button
+                    onClick={() => setHintsRevealed(prev => prev + 1)}
+                    className="text-sm text-accent hover:text-accent-strong flex items-center gap-1 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Reveal Hint {hintsRevealed + 1}
+                  </button>
+                )}
               </div>
-            </details>
+
+              {/* Revealed Hints */}
+              {hintsRevealed > 0 && (
+                <div className="space-y-2">
+                  {currentQuestion.hints.slice(0, hintsRevealed).map((hint, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg text-sm ${
+                        index === 0
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-l-4 border-blue-400'
+                          : index === 1
+                            ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-l-4 border-amber-400'
+                            : 'bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-l-4 border-purple-400'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="font-semibold shrink-0">Hint {index + 1}:</span>
+                        <span>{hint.text}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Hint Progress Indicator */}
+              {!showAnswer && hintsRevealed === 0 && (
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">
+                  Try to solve it first! Hints are here if you get stuck.
+                </p>
+              )}
+            </div>
           )}
         </div>
 
@@ -346,9 +390,16 @@ function PracticeContent() {
               ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700'
               : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700'
           }`}>
-            <p className={`font-semibold mb-2 ${isCorrect ? 'text-green-800 dark:text-green-400' : 'text-red-800 dark:text-red-400'}`}>
-              {isCorrect ? 'Correct!' : 'Not quite right'}
-            </p>
+            <div className="flex items-start justify-between mb-2">
+              <p className={`font-semibold ${isCorrect ? 'text-green-800 dark:text-green-400' : 'text-red-800 dark:text-red-400'}`}>
+                {isCorrect ? 'Correct!' : 'Not quite right'}
+              </p>
+              {hintsRevealed > 0 && (
+                <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-dark-card-soft text-gray-600 dark:text-dark-text-muted">
+                  {hintsRevealed} hint{hintsRevealed !== 1 ? 's' : ''} used
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
               {currentQuestion.solution_explanation}
             </p>
