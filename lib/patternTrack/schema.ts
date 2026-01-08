@@ -172,6 +172,8 @@ export interface PatternPracticeEntry {
   time_taken_seconds: number
   /** Confidence if provided */
   confidence?: 'low' | 'medium' | 'high'
+  /** Number of hints revealed before answering */
+  hints_used?: number
 }
 
 /**

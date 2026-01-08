@@ -60,6 +60,7 @@ function setStoredData<T>(key: string, data: T): void {
 
 /**
  * Calculate mastery level from progress stats
+ * Applies penalties for hint usage in recent attempts
  */
 function calculateMasteryLevel(progress: PatternProgress): number {
   if (progress.total_attempts === 0) return 0
@@ -68,7 +69,20 @@ function calculateMasteryLevel(progress: PatternProgress): number {
   const streakBonus = Math.min(progress.current_streak * 2, 20) // Up to 20 bonus points
   const falsePositivePenalty = Math.min(progress.false_positives * 5, 30) // Up to 30 penalty
 
-  let mastery = (successRate * 80) + streakBonus - falsePositivePenalty
+  // Calculate hint penalty from recent attempts (last 10)
+  const recentAttempts = progress.practice_history.slice(-10)
+  let totalHintsUsed = 0
+  let attemptsWithHints = 0
+  for (const attempt of recentAttempts) {
+    if (attempt.hints_used && attempt.hints_used > 0) {
+      totalHintsUsed += attempt.hints_used
+      attemptsWithHints++
+    }
+  }
+  // Penalty: -5 per hint used in recent attempts, up to -25
+  const hintPenalty = Math.min(totalHintsUsed * 5, 25)
+
+  let mastery = (successRate * 80) + streakBonus - falsePositivePenalty - hintPenalty
   mastery = Math.max(0, Math.min(100, mastery))
 
   return Math.round(mastery)
@@ -194,7 +208,8 @@ export class LocalProgressRepository implements IProgressRepository {
     questionId: string,
     identified: boolean,
     timeTaken: number,
-    confidence?: 'low' | 'medium' | 'high'
+    confidence?: 'low' | 'medium' | 'high',
+    hintsUsed?: number
   ): Promise<PatternProgress> {
     const existing = await this.getPatternProgress(userId, patternId)
     const now = new Date().toISOString()
@@ -205,6 +220,7 @@ export class LocalProgressRepository implements IProgressRepository {
       identified_correctly: identified,
       time_taken_seconds: timeTaken,
       confidence,
+      hints_used: hintsUsed,
     }
 
     const history = [...(existing?.practice_history || []), entry].slice(-100) // Keep last 100

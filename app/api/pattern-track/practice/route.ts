@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       is_correct,
       time_taken_seconds,
       confidence,
+      hints_used,
     } = body
 
     if (!user_id || !question_id) {
@@ -105,7 +106,8 @@ export async function POST(request: NextRequest) {
         question_id,
         identified,
         time_taken_seconds || 0,
-        confidence
+        confidence,
+        hints_used
       )
       progressUpdates.push(progress)
     }

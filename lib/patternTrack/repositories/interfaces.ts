@@ -139,7 +139,8 @@ export interface IProgressRepository {
     questionId: string,
     identified: boolean,
     timeTaken: number,
-    confidence?: 'low' | 'medium' | 'high'
+    confidence?: 'low' | 'medium' | 'high',
+    hintsUsed?: number
   ): Promise<PatternProgress>
 
   // Lesson Progress
