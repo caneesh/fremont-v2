@@ -159,6 +159,8 @@ import type { InterviewModeConfig } from '@/hooks/useInterviewMode'
 import { ExplanationForm } from '@/components/interview'
 import { usePivot } from '@/hooks/usePivot'
 import { PivotModal } from '@/components/pivot'
+import { useConstraintHighlight } from '@/hooks/useConstraintHighlight'
+import ConstraintHighlightModal from './ConstraintHighlightModal'
 
 interface InterviewModeProps {
   enabled: boolean
@@ -476,6 +478,22 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
   // Pivot timer ref for checking time-based triggers
   const lastPivotCheckRef = useRef<Map<number, number>>(new Map())
+
+  // Constraint Highlight hook
+  const {
+    isInitialized: constraintHighlightInitialized,
+    activeHighlight,
+    checkTrigger: checkConstraintHighlightTrigger,
+    triggerHighlight: triggerConstraintHighlight,
+    acknowledgeHighlight: acknowledgeConstraintHighlight,
+    dismissHighlight: dismissConstraintHighlight,
+    hasActiveHighlight,
+  } = useConstraintHighlight({
+    sessionId,
+    problemText: data.problem,
+    stepCount: data.steps.length,
+    enabled: FEATURE_FLAGS.CONSTRAINT_HIGHLIGHT && !isInterviewMode,
+  })
 
   // Circuit Breaker integration
   const {
@@ -2239,6 +2257,40 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     prevStepHintLevelsRef.current = new Map(stepHintLevels)
   }, [stepHintLevels, pivotInitialized, hasActivePivot, checkAndTriggerPivot])
 
+  // Track previous error counts for constraint highlight trigger detection
+  const prevConstraintErrorCountsRef = useRef<Map<number, number>>(new Map())
+
+  // Trigger constraint highlight on wrong attempts
+  useEffect(() => {
+    if (!FEATURE_FLAGS.CONSTRAINT_HIGHLIGHT || !constraintHighlightInitialized || hasActiveHighlight) return
+
+    // Check if any step's error count increased
+    stepErrorCounts.forEach((count, stepIndex) => {
+      const prevCount = prevConstraintErrorCountsRef.current.get(stepIndex) || 0
+      if (count > prevCount && count >= 1) {
+        // Check if we should highlight a constraint
+        const decision = checkConstraintHighlightTrigger(stepIndex, count)
+        if (decision.shouldHighlight && decision.constraintId) {
+          // Debounce to allow other feedback to show first
+          setTimeout(() => {
+            if (!hasActiveHighlight) {
+              triggerConstraintHighlight(stepIndex, decision.constraintId!)
+            }
+          }, 300)
+        }
+      }
+    })
+
+    // Update previous counts
+    prevConstraintErrorCountsRef.current = new Map(stepErrorCounts)
+  }, [
+    stepErrorCounts,
+    constraintHighlightInitialized,
+    hasActiveHighlight,
+    checkConstraintHighlightTrigger,
+    triggerConstraintHighlight,
+  ])
+
   // Handle dismissing constraint collision feedback
   const handleDismissConstraintFeedback = useCallback(() => {
     // Mark all current collisions as dismissed
@@ -3669,6 +3721,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
           stepIndex={pivotStepIndex}
           onAnswer={handlePivotAnswer}
           onSkip={handlePivotSkip}
+        />
+      )}
+
+      {/* Constraint Highlight Modal */}
+      {hasActiveHighlight && activeHighlight && (
+        <ConstraintHighlightModal
+          constraint={activeHighlight.constraint}
+          position={activeHighlight.position}
+          problemText={data.problem}
+          stepIndex={activeHighlight.stepIndex}
+          onAcknowledge={acknowledgeConstraintHighlight}
+          onDismiss={dismissConstraintHighlight}
         />
       )}
 

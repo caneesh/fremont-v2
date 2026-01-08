@@ -72,7 +72,7 @@ export default function ConceptsDrawer({ concepts, onToggle, forceOpen }: Concep
         `}
         data-testid="concepts-drawer-toggle"
         aria-expanded={isOpen}
-        aria-label={`${isOpen ? 'Close' : 'Open'} concepts drawer`}
+        aria-label="Toggle concepts drawer"
       >
         <svg
           className="w-5 h-5 text-primary-600 dark:text-accent"

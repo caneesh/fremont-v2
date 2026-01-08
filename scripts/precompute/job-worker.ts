@@ -132,9 +132,39 @@ class PrecomputeJobWorker {
     }
   }
 
+  /**
+   * Check if precompute tables exist in the database
+   */
+  private async checkTablesExist(): Promise<boolean> {
+    try {
+      await this.prisma.$queryRaw`SELECT 1 FROM precompute_jobs LIMIT 1`
+      return true
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('does not exist')) {
+        return false
+      }
+      // Re-throw other errors
+      throw error
+    }
+  }
+
   async run(options: WorkerOptions): Promise<void> {
     console.log('\n🔧 Starting Precompute Job Worker...')
     console.log(`   Options: ${JSON.stringify(options, null, 2)}\n`)
+
+    // Check if required tables exist
+    const tablesExist = await this.checkTablesExist()
+    if (!tablesExist) {
+      if (options.dryRun) {
+        console.log('⚠️  Precompute tables do not exist yet.')
+        console.log('   Run `npx prisma migrate dev` to create the tables.')
+        console.log('\n📋 DRY RUN: Would process jobs from precompute_jobs table.')
+        console.log('   No jobs to process (table does not exist).\n')
+        return
+      } else {
+        throw new Error('Precompute tables do not exist. Run `npx prisma migrate dev` first.')
+      }
+    }
 
     this.isRunning = true
 

@@ -438,6 +438,21 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_PIVOT_INJECTION=false)
    */
   PIVOT_INJECTION: process.env.NEXT_PUBLIC_FEATURE_PIVOT_INJECTION !== 'false',
+
+  /**
+   * Constraint Highlight
+   * When enabled, highlights constraint keywords in the problem statement
+   * after a wrong answer to help students notice what they may have missed.
+   *
+   * Features:
+   * - Detects 14+ physics constraints (frictionless, massless, elastic, etc.)
+   * - Shows highlighted keyword with hint after first wrong attempt
+   * - Requires acknowledgment before continuing
+   * - Tracks which constraints students commonly miss
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONSTRAINT_HIGHLIGHT=false)
+   */
+  CONSTRAINT_HIGHLIGHT: process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_HIGHLIGHT !== 'false',
 }
 
 /**
