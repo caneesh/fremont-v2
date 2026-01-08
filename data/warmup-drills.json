@@ -367,6 +367,336 @@
           "timeLimitSeconds": 20
         }
       ]
+    },
+    {
+      "id": "warmup-kinematics",
+      "topicId": "kinematics",
+      "title": "Kinematics Equations Warm-Up",
+      "description": "Applying the equations of motion",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "kin-1",
+          "promptText": "A car accelerates from rest at 2 m/s². What is its velocity after 5 seconds?",
+          "type": "mcq",
+          "choices": ["10 m/s", "25 m/s", "5 m/s", "2.5 m/s"],
+          "correctAnswer": "10 m/s",
+          "explanation": "Using v = u + at: v = 0 + (2)(5) = 10 m/s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "kin-2",
+          "promptText": "A ball is dropped from rest. How far does it fall in 3 seconds? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["45 m", "30 m", "90 m", "15 m"],
+          "correctAnswer": "45 m",
+          "explanation": "Using s = ut + ½at²: s = 0 + ½(10)(3)² = 45 m",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "kin-3",
+          "promptText": "A car traveling at 20 m/s brakes with acceleration -4 m/s². How far does it travel before stopping?",
+          "type": "mcq",
+          "choices": ["50 m", "100 m", "25 m", "80 m"],
+          "correctAnswer": "50 m",
+          "explanation": "Using v² = u² + 2as: 0 = 400 + 2(-4)s → s = 50 m",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "kin-4",
+          "promptText": "An object has initial velocity 5 m/s and final velocity 15 m/s after traveling 20 m. What is its acceleration?",
+          "type": "mcq",
+          "choices": ["5 m/s²", "10 m/s²", "2.5 m/s²", "0.5 m/s²"],
+          "correctAnswer": "5 m/s²",
+          "explanation": "Using v² = u² + 2as: 225 = 25 + 2a(20) → 200 = 40a → a = 5 m/s²",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "kin-5",
+          "promptText": "A train decelerates uniformly from 30 m/s to 10 m/s in 4 seconds. What is the deceleration?",
+          "type": "mcq",
+          "choices": ["5 m/s²", "10 m/s²", "20 m/s²", "2.5 m/s²"],
+          "correctAnswer": "5 m/s²",
+          "explanation": "Using a = (v - u)/t: a = (10 - 30)/4 = -20/4 = -5 m/s². Deceleration = 5 m/s²",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-newtons-laws",
+      "topicId": "newtons_laws",
+      "title": "Newton's Laws Warm-Up",
+      "description": "Applying Newton's three laws of motion",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "newton-1",
+          "promptText": "A 5 kg block is pushed with 20 N force on a frictionless surface. What is its acceleration?",
+          "type": "mcq",
+          "choices": ["4 m/s²", "100 m/s²", "0.25 m/s²", "25 m/s²"],
+          "correctAnswer": "4 m/s²",
+          "explanation": "Using F = ma: a = F/m = 20/5 = 4 m/s²",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "newton-2",
+          "promptText": "A 2 kg object accelerates at 3 m/s². What is the net force acting on it?",
+          "type": "mcq",
+          "choices": ["6 N", "1.5 N", "5 N", "0.67 N"],
+          "correctAnswer": "6 N",
+          "explanation": "Using F = ma: F = (2)(3) = 6 N",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "newton-3",
+          "promptText": "When you push a wall, the wall pushes back on you. This is an example of:",
+          "type": "mcq",
+          "choices": ["Newton's Third Law", "Newton's First Law", "Newton's Second Law", "Law of Conservation"],
+          "correctAnswer": "Newton's Third Law",
+          "explanation": "Newton's Third Law: For every action, there is an equal and opposite reaction.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "newton-4",
+          "promptText": "A 10 kg object is in free fall. What is the net force on it? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["100 N downward", "0 N", "10 N downward", "100 N upward"],
+          "correctAnswer": "100 N downward",
+          "explanation": "Net force = Weight = mg = (10)(10) = 100 N downward",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "newton-5",
+          "promptText": "A book on a table remains at rest. According to Newton's First Law, this is because:",
+          "type": "mcq",
+          "choices": ["The net force is zero", "There are no forces", "Gravity is zero", "Friction prevents motion"],
+          "correctAnswer": "The net force is zero",
+          "explanation": "Newton's First Law: An object at rest stays at rest when the net force is zero (normal = weight).",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-work-energy",
+      "topicId": "work_energy",
+      "title": "Work & Energy Warm-Up",
+      "description": "Work, kinetic energy, and potential energy",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "we-1",
+          "promptText": "A 10 N force moves an object 5 m in the direction of the force. What is the work done?",
+          "type": "mcq",
+          "choices": ["50 J", "2 J", "15 J", "0.5 J"],
+          "correctAnswer": "50 J",
+          "explanation": "Work = Force × Distance = 10 × 5 = 50 J",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "we-2",
+          "promptText": "What is the kinetic energy of a 2 kg object moving at 3 m/s?",
+          "type": "mcq",
+          "choices": ["9 J", "6 J", "18 J", "3 J"],
+          "correctAnswer": "9 J",
+          "explanation": "KE = ½mv² = ½(2)(3)² = ½(2)(9) = 9 J",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "we-3",
+          "promptText": "A 5 kg object is lifted 4 m. What is its gravitational PE gained? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["200 J", "50 J", "20 J", "2 J"],
+          "correctAnswer": "200 J",
+          "explanation": "PE = mgh = (5)(10)(4) = 200 J",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "we-4",
+          "promptText": "A force perpendicular to displacement does how much work?",
+          "type": "mcq",
+          "choices": ["Zero", "Maximum", "Negative", "Cannot determine"],
+          "correctAnswer": "Zero",
+          "explanation": "Work = Fd·cos(θ). When θ = 90°, cos(90°) = 0, so work = 0",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "we-5",
+          "promptText": "If an object's speed doubles, its kinetic energy:",
+          "type": "mcq",
+          "choices": ["Quadruples", "Doubles", "Stays the same", "Halves"],
+          "correctAnswer": "Quadruples",
+          "explanation": "KE = ½mv². If v → 2v, then KE → ½m(2v)² = 4(½mv²). KE increases by factor of 4.",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-circular-motion",
+      "topicId": "circular_motion",
+      "title": "Circular Motion Warm-Up",
+      "description": "Centripetal acceleration and circular motion",
+      "durationMinutes": 4,
+      "difficulty": "hard",
+      "drills": [
+        {
+          "id": "circ-1",
+          "promptText": "The direction of centripetal acceleration is:",
+          "type": "mcq",
+          "choices": ["Toward the center", "Away from center", "Tangent to circle", "In direction of motion"],
+          "correctAnswer": "Toward the center",
+          "explanation": "Centripetal means 'center-seeking'. The acceleration always points toward the center of the circle.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "circ-2",
+          "promptText": "A car moves in a circle of radius 50 m at 10 m/s. What is its centripetal acceleration?",
+          "type": "mcq",
+          "choices": ["2 m/s²", "5 m/s²", "500 m/s²", "0.2 m/s²"],
+          "correctAnswer": "2 m/s²",
+          "explanation": "a = v²/r = (10)²/50 = 100/50 = 2 m/s²",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "circ-3",
+          "promptText": "For uniform circular motion, the speed is:",
+          "type": "mcq",
+          "choices": ["Constant", "Increasing", "Decreasing", "Zero"],
+          "correctAnswer": "Constant",
+          "explanation": "'Uniform' means constant speed. Only the direction changes, not the magnitude of velocity.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "circ-4",
+          "promptText": "What provides the centripetal force for a car turning on a flat road?",
+          "type": "mcq",
+          "choices": ["Friction", "Normal force", "Gravity", "Engine force"],
+          "correctAnswer": "Friction",
+          "explanation": "On a flat road, static friction between tires and road provides the centripetal force for turning.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "circ-5",
+          "promptText": "If the radius of circular motion is halved but speed stays the same, centripetal acceleration:",
+          "type": "mcq",
+          "choices": ["Doubles", "Halves", "Quadruples", "Stays the same"],
+          "correctAnswer": "Doubles",
+          "explanation": "a = v²/r. If r → r/2, then a → v²/(r/2) = 2v²/r = 2a. Acceleration doubles.",
+          "timeLimitSeconds": 25
+        }
+      ]
+    },
+    {
+      "id": "warmup-momentum",
+      "topicId": "momentum",
+      "title": "Momentum Warm-Up",
+      "description": "Linear momentum and impulse",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "mom-1",
+          "promptText": "What is the momentum of a 3 kg object moving at 4 m/s?",
+          "type": "mcq",
+          "choices": ["12 kg·m/s", "7 kg·m/s", "0.75 kg·m/s", "1.33 kg·m/s"],
+          "correctAnswer": "12 kg·m/s",
+          "explanation": "Momentum p = mv = (3)(4) = 12 kg·m/s",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "mom-2",
+          "promptText": "A 1000 kg car moving at 20 m/s collides with a wall and stops. What is the change in momentum?",
+          "type": "mcq",
+          "choices": ["20,000 kg·m/s", "0 kg·m/s", "1000 kg·m/s", "20 kg·m/s"],
+          "correctAnswer": "20,000 kg·m/s",
+          "explanation": "Δp = final - initial = 0 - (1000)(20) = -20,000 kg·m/s. Magnitude = 20,000 kg·m/s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "mom-3",
+          "promptText": "Impulse equals:",
+          "type": "mcq",
+          "choices": ["Change in momentum", "Force times velocity", "Mass times acceleration", "Work done"],
+          "correctAnswer": "Change in momentum",
+          "explanation": "Impulse J = F·Δt = Δp (change in momentum). This is the impulse-momentum theorem.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "mom-4",
+          "promptText": "Two objects with equal and opposite momenta collide and stick. Total momentum after collision is:",
+          "type": "mcq",
+          "choices": ["Zero", "Double the larger", "Sum of magnitudes", "Cannot determine"],
+          "correctAnswer": "Zero",
+          "explanation": "If momenta are equal and opposite (e.g., +10 and -10), total = 0. After collision, still 0.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "mom-5",
+          "promptText": "A 60 kg person jumps off a 100 kg boat. If person moves at 2 m/s, the boat moves at:",
+          "type": "mcq",
+          "choices": ["1.2 m/s opposite", "2 m/s opposite", "0.6 m/s same direction", "3.33 m/s opposite"],
+          "correctAnswer": "1.2 m/s opposite",
+          "explanation": "Conservation of momentum: 0 = (60)(2) + (100)v → v = -1.2 m/s (opposite direction)",
+          "timeLimitSeconds": 25
+        }
+      ]
+    },
+    {
+      "id": "warmup-projectile",
+      "topicId": "projectile_motion",
+      "title": "Projectile Motion Warm-Up",
+      "description": "Motion in two dimensions under gravity",
+      "durationMinutes": 4,
+      "difficulty": "hard",
+      "drills": [
+        {
+          "id": "proj-1",
+          "promptText": "In projectile motion (ignoring air resistance), the horizontal acceleration is:",
+          "type": "mcq",
+          "choices": ["Zero", "g downward", "g horizontal", "Varies with time"],
+          "correctAnswer": "Zero",
+          "explanation": "No horizontal force acts on the projectile, so horizontal acceleration = 0. Horizontal velocity is constant.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "proj-2",
+          "promptText": "At the highest point of projectile motion, what is the vertical velocity?",
+          "type": "mcq",
+          "choices": ["Zero", "Maximum", "Equal to horizontal", "g"],
+          "correctAnswer": "Zero",
+          "explanation": "At the peak, the projectile momentarily stops moving vertically before falling back down.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "proj-3",
+          "promptText": "A ball is thrown horizontally from a cliff at 10 m/s. After 2 s, its horizontal velocity is: (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["10 m/s", "30 m/s", "0 m/s", "20 m/s"],
+          "correctAnswer": "10 m/s",
+          "explanation": "Horizontal velocity is constant (no horizontal force). It remains 10 m/s throughout the flight.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "proj-4",
+          "promptText": "Two balls are dropped simultaneously: one from rest, one thrown horizontally. Which hits the ground first?",
+          "type": "mcq",
+          "choices": ["Both at the same time", "The dropped one", "The thrown one", "Depends on speed"],
+          "correctAnswer": "Both at the same time",
+          "explanation": "Both have the same vertical motion (starting with zero vertical velocity). Horizontal motion doesn't affect fall time.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "proj-5",
+          "promptText": "For maximum range on level ground, a projectile should be launched at:",
+          "type": "mcq",
+          "choices": ["45°", "30°", "60°", "90°"],
+          "correctAnswer": "45°",
+          "explanation": "Maximum range R = v²sin(2θ)/g is achieved when sin(2θ) = 1, i.e., θ = 45°.",
+          "timeLimitSeconds": 20
+        }
+      ]
     }
   ]
 }
