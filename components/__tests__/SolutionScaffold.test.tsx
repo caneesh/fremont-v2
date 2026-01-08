@@ -16,6 +16,8 @@ vi.mock('@/lib/featureFlags', async () => {
       CONFIDENCE_WEIGHTED_SRS: false,
       // Pivot injection uses setInterval which conflicts with vi.runAllTimers()
       PIVOT_INJECTION: false,
+      // Constraint highlight triggers on wrong answers, disable for test stability
+      CONSTRAINT_HIGHLIGHT: false,
     },
   }
 })
@@ -304,6 +306,43 @@ vi.mock('../SubmissionCanvas', () => ({
 
 vi.mock('../simulation', () => ({
   WhatIfSimulation: () => <div data-testid="what-if-simulation" />,
+}))
+
+vi.mock('../solve/ConceptsDrawer', () => ({
+  default: ({ concepts, forceOpen, onToggle }: {
+    concepts: { id: string; name: string; definition: string }[]
+    forceOpen?: boolean
+    onToggle?: (isOpen: boolean) => void
+  }) => (
+    <div data-testid="concepts-drawer" data-force-open={forceOpen ? 'true' : 'false'}>
+      <button onClick={() => onToggle?.(true)}>toggle-drawer</button>
+      <span>Concepts ({concepts.length})</span>
+    </div>
+  ),
+}))
+
+vi.mock('../solve/SolveCompletionActions', () => ({
+  default: ({
+    onContinuePath,
+    onReinforce,
+    onExploreWhatIf,
+    onReviewConcepts,
+  }: {
+    canGenerateNextChallenge: boolean
+    canLaunchSimulation: boolean
+    onContinuePath: () => void
+    onReinforce: () => void
+    onExploreWhatIf: () => void
+    onReviewConcepts: () => void
+    topic?: string
+  }) => (
+    <div data-testid="solve-completion-actions">
+      <button onClick={onContinuePath}>continue-path</button>
+      <button onClick={onReinforce}>reinforce</button>
+      <button onClick={onExploreWhatIf}>explore-whatif</button>
+      <button onClick={onReviewConcepts}>review-concepts</button>
+    </div>
+  ),
 }))
 
 vi.mock('../SocraticRewindModal', () => ({
@@ -952,7 +991,7 @@ describe('SolutionScaffold', () => {
     expect(screen.getByText('Hint problem')).not.toBeNull()
   })
 
-  it('renders concept panel', () => {
+  it('renders concepts drawer during solving (progressive disclosure)', () => {
     render(
       <SolutionScaffold
         data={hintData}
@@ -960,7 +999,8 @@ describe('SolutionScaffold', () => {
       />
     )
 
-    expect(screen.getByTestId('concept-panel')).not.toBeNull()
+    // During solving, we show the concepts drawer instead of the panel
+    expect(screen.getByTestId('concepts-drawer')).not.toBeNull()
   })
 
   it('shows next challenge when onLoadNewProblem is provided after solving', async () => {
@@ -1709,6 +1749,84 @@ describe('SolutionScaffold', () => {
       // Modal still open (proceed doesn't auto-close, user must close explicitly)
       // In real usage, the modal handles this internally
       expect(screen.getByTestId('socratic-rewind-modal')).toBeDefined()
+    })
+  })
+
+  describe('Progressive Disclosure - Solve Focus Mode', () => {
+    it('shows step progress indicator during solving', () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      const progressIndicator = screen.getByTestId('step-progress-indicator')
+      expect(progressIndicator).toBeDefined()
+      expect(progressIndicator.textContent).toContain('Step 1 of 2')
+    })
+
+    it('hides post-completion sections during solving', () => {
+      render(
+        <SolutionScaffold
+          data={hintData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // These should not be visible during solving
+      expect(screen.queryByTestId('solve-completion-actions')).toBeNull()
+    })
+
+    it('shows completion actions after problem is solved and reflection complete', async () => {
+      render(
+        <SolutionScaffold
+          data={hintData}
+          onReset={vi.fn()}
+          onLoadNewProblem={vi.fn()}
+        />
+      )
+
+      // Mark problem as solved
+      await act(async () => {
+        fireEvent.click(screen.getByText('Mark as Solved'))
+      })
+
+      // Complete explanation
+      await act(async () => {
+        fireEvent.click(screen.getByText('finish-explain'))
+      })
+
+      // Complete reflection
+      await act(async () => {
+        fireEvent.click(screen.getByText('finish-reflection'))
+      })
+
+      // Now completion actions should be visible
+      const completionActions = await screen.findByTestId('solve-completion-actions')
+      expect(completionActions).toBeDefined()
+    })
+
+    it('updates step progress indicator as steps are completed', async () => {
+      render(
+        <SolutionScaffold
+          data={multiStepData}
+          onReset={vi.fn()}
+        />
+      )
+
+      // Initially on step 1
+      let progressIndicator = screen.getByTestId('step-progress-indicator')
+      expect(progressIndicator.textContent).toContain('Step 1 of 2')
+
+      // Complete first step
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('complete-step')[0])
+      })
+
+      // Now on step 2
+      progressIndicator = screen.getByTestId('step-progress-indicator')
+      expect(progressIndicator.textContent).toContain('Step 2 of 2')
     })
   })
 })

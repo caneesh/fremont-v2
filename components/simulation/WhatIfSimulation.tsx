@@ -39,7 +39,7 @@ export default function WhatIfSimulation({ scaffoldData, questionId, onClose }: 
   }
 
   return (
-    <>
+    <div data-testid="what-if-simulation">
       {/* Simulation Mode Button */}
       {!isOpen && (
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border-2 border-indigo-200 dark:border-indigo-500/30 p-4">
@@ -107,7 +107,7 @@ export default function WhatIfSimulation({ scaffoldData, questionId, onClose }: 
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }
 
