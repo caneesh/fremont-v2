@@ -287,7 +287,7 @@ function UnderstandStep({
   onContinue,
 }: {
   problem: DebugProblem | RefactorProblem
-  mode: ProblemMode
+  mode: DebugRefactorMode
   onContinue: () => void
 }) {
   return (
@@ -485,7 +485,7 @@ function FixStep({
   canAdvance,
   onContinue,
 }: {
-  mode: ProblemMode
+  mode: DebugRefactorMode
   testResults: TestResult[]
   remainingAttempts: number
   canAdvance: boolean
