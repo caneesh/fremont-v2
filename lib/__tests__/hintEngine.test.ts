@@ -96,7 +96,7 @@ describe('hintEngine', () => {
   describe('formatHintForStepType', () => {
     const mockHint: HintLevel = {
       level: 1,
-      title: 'Test Hint',
+      title: 'Concept Identification',
       content: 'This is a test hint content'
     }
 

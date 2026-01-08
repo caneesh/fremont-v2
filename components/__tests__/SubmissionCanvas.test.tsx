@@ -131,7 +131,7 @@ const mockGradeResultConceptual: GradeSolutionResponse = {
 
 const mockMisconception: DetectedMisconception = {
   id: 'misc-1',
-  type: 'force_nature',
+  type: 'FORCE_NATURE',
   description: 'Treating centripetal force as a separate force.',
   evidence: 'centripetal force is added',
   confidence: 0.91,

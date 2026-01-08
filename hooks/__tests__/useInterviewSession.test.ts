@@ -29,6 +29,7 @@ vi.mock('@/lib/interview', () => ({
 function createMockSession(overrides: Partial<InterviewSession> = {}): InterviewSession {
   return {
     id: 'test-session-123',
+    tenantId: 'test-tenant',
     userId: 'test-user',
     questionId: 'q1',
     status: 'in_progress',
@@ -39,8 +40,14 @@ function createMockSession(overrides: Partial<InterviewSession> = {}): Interview
       explanationsRequired: true,
       rubricScoringEnabled: true,
     },
+    explanationRequirements: {
+      approachRequired: true,
+      invariantRequired: true,
+      complexityRequired: false,
+    },
     timerState: {
-      startTime: Date.now(),
+      startedAt: Date.now(),
+      pausedAt: null,
       elapsedSeconds: 0,
       remainingSeconds: 1800,
       isExpired: false,
@@ -48,8 +55,10 @@ function createMockSession(overrides: Partial<InterviewSession> = {}): Interview
     currentStepIndex: 0,
     totalSteps: 3,
     stepAttempts: [],
+    rubricResult: null,
+    startedAt: Date.now(),
+    completedAt: null,
     createdAt: Date.now(),
-    updatedAt: Date.now(),
     ...overrides,
   }
 }
@@ -70,17 +79,19 @@ function createMockConfig(overrides: Partial<InterviewModeConfig> = {}): Intervi
 function createMockRubricResult(): RubricResult {
   return {
     totalScore: 85,
-    maxScore: 100,
-    percentage: 85,
-    dimensions: [
+    maxPossibleScore: 100,
+    percentageScore: 85,
+    scores: [
       {
-        name: 'Correctness',
+        dimension: 'correctness',
         score: 90,
         maxScore: 100,
-        weight: 0.3,
-        criteria: [],
+        feedback: 'Good work on correctness',
       },
     ],
+    overallFeedback: 'Good overall performance',
+    strengths: ['Correct approach'],
+    improvements: ['Could explain more clearly'],
   }
 }
 
@@ -253,8 +264,21 @@ describe('useInterviewSession', () => {
       })
       vi.mocked(interviewService.submitStepAnswer).mockResolvedValue({
         session: updatedSession,
-        stepResult: { isCorrect: true, attemptNumber: 1, hintsRequested: 0 },
+        attempt: {
+          stepId: 'step_0',
+          attemptNumber: 1,
+          answer: 'F=ma',
+          isCorrect: true,
+          timeSpentSeconds: 60,
+          hintsRequested: 0,
+          explanation: null,
+          submittedAt: Date.now(),
+        },
+        isCorrect: true,
+        explanationValidation: null,
         sessionCompleted: false,
+        rubricResult: null,
+        grade: null,
       })
 
       const config = createMockConfig()
@@ -289,8 +313,21 @@ describe('useInterviewSession', () => {
       })
       vi.mocked(interviewService.submitStepAnswer).mockResolvedValue({
         session: mockSession,
-        stepResult: { isCorrect: true, attemptNumber: 1, hintsRequested: 0 },
+        attempt: {
+          stepId: 'step_0',
+          attemptNumber: 1,
+          answer: 'F=ma',
+          isCorrect: true,
+          timeSpentSeconds: 60,
+          hintsRequested: 0,
+          explanation: null,
+          submittedAt: Date.now(),
+        },
+        isCorrect: true,
+        explanationValidation: null,
         sessionCompleted: false,
+        rubricResult: null,
+        grade: null,
       })
 
       const config = createMockConfig()
@@ -327,9 +364,9 @@ describe('useInterviewSession', () => {
         status: 'completed',
         currentStepIndex: 2,
         stepAttempts: [
-          { stepId: 'step_0', isCorrect: true, attemptNumber: 1, hintsRequested: 0, timestamp: Date.now() },
-          { stepId: 'step_1', isCorrect: true, attemptNumber: 1, hintsRequested: 0, timestamp: Date.now() },
-          { stepId: 'step_2', isCorrect: true, attemptNumber: 1, hintsRequested: 0, timestamp: Date.now() },
+          { stepId: 'step_0', isCorrect: true, attemptNumber: 1, hintsRequested: 0, answer: 'a', timeSpentSeconds: 30, explanation: null, submittedAt: Date.now() },
+          { stepId: 'step_1', isCorrect: true, attemptNumber: 1, hintsRequested: 0, answer: 'b', timeSpentSeconds: 30, explanation: null, submittedAt: Date.now() },
+          { stepId: 'step_2', isCorrect: true, attemptNumber: 1, hintsRequested: 0, answer: 'c', timeSpentSeconds: 30, explanation: null, submittedAt: Date.now() },
         ],
       })
       const mockRubric = createMockRubricResult()
@@ -339,7 +376,18 @@ describe('useInterviewSession', () => {
       })
       vi.mocked(interviewService.submitStepAnswer).mockResolvedValue({
         session: completedSession,
-        stepResult: { isCorrect: true, attemptNumber: 1, hintsRequested: 0 },
+        attempt: {
+          stepId: 'step_2',
+          attemptNumber: 1,
+          answer: 'c',
+          isCorrect: true,
+          timeSpentSeconds: 30,
+          hintsRequested: 0,
+          explanation: null,
+          submittedAt: Date.now(),
+        },
+        isCorrect: true,
+        explanationValidation: null,
         sessionCompleted: true,
         rubricResult: mockRubric,
         grade: 'B',
@@ -461,7 +509,8 @@ describe('useInterviewSession', () => {
     it('should update remaining seconds when session is active', async () => {
       const mockSession = createMockSession({
         timerState: {
-          startTime: Date.now(),
+          startedAt: Date.now(),
+          pausedAt: null,
           elapsedSeconds: 0,
           remainingSeconds: 1800,
           isExpired: false,

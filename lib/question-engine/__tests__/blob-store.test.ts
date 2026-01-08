@@ -206,6 +206,7 @@ describe('blobExists', () => {
       downloadUrl: 'https://blob.vercel.com/q.json',
       size: 1024,
       uploadedAt: new Date(),
+      cacheControl: 'public, max-age=31536000',
     })
 
     const result = await blobExists('abc123')

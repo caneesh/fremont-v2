@@ -93,7 +93,7 @@ const multiTierStep: MicroTaskStep = {
     },
     {
       level: 2,
-      levelTitle: 'Method',
+      levelTitle: 'Visual',
       question: 'Q2',
       explanation: 'Explanation 2',
       type: 'MULTIPLE_CHOICE',
@@ -102,7 +102,7 @@ const multiTierStep: MicroTaskStep = {
     },
     {
       level: 3,
-      levelTitle: 'Setup',
+      levelTitle: 'Strategy',
       question: 'Q3',
       explanation: 'Explanation 3',
       type: 'MULTIPLE_CHOICE',

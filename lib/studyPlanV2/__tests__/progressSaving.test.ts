@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { StudyPlanV2Service } from '../studyPlanV2Service'
 import { createInitialPatternState } from '../scheduler'
-import type { UserPatternState, StudyPlanV2Repository } from '@/types/studyPlanV2'
+import type { UserPatternState } from '@/types/studyPlanV2'
+import type { StudyPlanV2Repository } from '../repository'
 
 // Helper to create a mock repository
 function createMockRepo(): StudyPlanV2Repository {

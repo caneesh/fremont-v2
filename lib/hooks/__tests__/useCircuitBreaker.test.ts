@@ -189,7 +189,7 @@ describe('useCircuitBreaker', () => {
         useCircuitBreaker({ sessionId: SESSION_ID, problemId: PROBLEM_ID })
       )
 
-      let evaluation: ReturnType<typeof result.current.recordGradingErrors>
+      let evaluation: ReturnType<typeof result.current.recordGradingErrors> | null = null
 
       act(() => {
         evaluation = result.current.recordGradingErrors([], 1)

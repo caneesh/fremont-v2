@@ -6,7 +6,7 @@ import type { DetectedMisconception } from '@/types/misconception'
 
 const misconceptionHigh: DetectedMisconception = {
   id: 'misc-1',
-  type: 'force_nature',
+  type: 'FORCE_NATURE',
   description: 'Treating centripetal force as a separate force.',
   evidence: 'centripetal force is added',
   confidence: 0.9,
@@ -18,7 +18,7 @@ const misconceptionHigh: DetectedMisconception = {
 
 const misconceptionLow: DetectedMisconception = {
   id: 'misc-2',
-  type: 'sign_convention',
+  type: 'VECTOR_SCALAR',
   description: 'Mixed sign conventions in vector components.',
   evidence: 'took down as positive then used up',
   confidence: 0.72,

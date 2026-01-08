@@ -1025,6 +1025,7 @@ describe('SolutionScaffold', () => {
     const { problemHistoryService } = await import('@/lib/problemHistory')
 
     vi.mocked(problemHistoryService.getAttempt).mockReturnValue({
+      id: 'attempt-1',
       problemId: 'test-123',
       problemTitle: 'Test',
       status: 'SOLVED',
@@ -1057,6 +1058,7 @@ describe('SolutionScaffold', () => {
     const { problemHistoryService } = await import('@/lib/problemHistory')
 
     vi.mocked(problemHistoryService.getAttempt).mockReturnValue({
+      id: 'attempt-2',
       problemId: 'test-123',
       problemTitle: 'Test',
       status: 'IN_PROGRESS',
@@ -1272,7 +1274,12 @@ describe('SolutionScaffold', () => {
     const { conceptMasteryService } = await import('@/lib/conceptMasteryService')
     const { problemHistoryService } = await import('@/lib/problemHistory')
 
-    vi.mocked(problemHistoryService.getHistory).mockReturnValue({ total: 10 })
+    vi.mocked(problemHistoryService.getHistory).mockReturnValue({
+      attempts: [],
+      total: 10,
+      page: 1,
+      totalPages: 1
+    })
     localStorage.setItem('physiscaffold_user', 'test-student')
 
     render(
@@ -1485,11 +1492,10 @@ describe('SolutionScaffold', () => {
       const { mistakeTrackingService } = await import('@/lib/mistakeTracking')
       vi.mocked(mistakeTrackingService.generateWarnings).mockReturnValue([
         {
-          type: 'concept',
-          conceptId: 'c1',
-          conceptName: 'Concept 1',
-          message: 'Watch this',
+          message: 'Watch this concept',
           severity: 'medium',
+          relatedConcepts: ['Concept 1'],
+          suggestions: ['Review the concept'],
         },
       ])
 
@@ -1551,7 +1557,15 @@ describe('SolutionScaffold', () => {
 
     it('saves current step position in drafts', async () => {
       const { problemHistoryService } = await import('@/lib/problemHistory')
-      vi.mocked(problemHistoryService.saveDraft).mockImplementation(() => undefined)
+      vi.mocked(problemHistoryService.saveDraft).mockImplementation(() => ({
+        id: 'attempt-draft',
+        problemId: 'test-123',
+        problemTitle: 'Test',
+        status: 'IN_PROGRESS' as const,
+        reviewFlag: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }))
 
       render(
         <SolutionScaffold
