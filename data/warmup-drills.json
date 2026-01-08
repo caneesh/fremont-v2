@@ -697,6 +697,253 @@
           "timeLimitSeconds": 20
         }
       ]
+    },
+    {
+      "id": "warmup-thermodynamics",
+      "topicId": "thermodynamics",
+      "title": "Thermodynamics Warm-Up",
+      "description": "Heat, temperature, and thermal processes",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "thermo-1",
+          "promptText": "Heat always flows spontaneously from:",
+          "type": "mcq",
+          "choices": ["Hot to cold objects", "Cold to hot objects", "Large to small objects", "Dense to less dense objects"],
+          "correctAnswer": "Hot to cold objects",
+          "explanation": "The Second Law of Thermodynamics: heat flows spontaneously from higher to lower temperature.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "thermo-2",
+          "promptText": "In an isothermal process, what remains constant?",
+          "type": "mcq",
+          "choices": ["Temperature", "Pressure", "Volume", "Internal energy only"],
+          "correctAnswer": "Temperature",
+          "explanation": "Isothermal means 'same temperature'. For an ideal gas, this also means constant internal energy.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "thermo-3",
+          "promptText": "How much heat is needed to raise 2 kg of water by 10°C? (c = 4200 J/kg·K)",
+          "type": "mcq",
+          "choices": ["84,000 J", "8,400 J", "42,000 J", "840 J"],
+          "correctAnswer": "84,000 J",
+          "explanation": "Q = mcΔT = (2)(4200)(10) = 84,000 J",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "thermo-4",
+          "promptText": "In an adiabatic process:",
+          "type": "mcq",
+          "choices": ["No heat is exchanged", "No work is done", "Temperature is constant", "Pressure is constant"],
+          "correctAnswer": "No heat is exchanged",
+          "explanation": "Adiabatic means thermally isolated - no heat enters or leaves the system (Q = 0).",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "thermo-5",
+          "promptText": "The First Law of Thermodynamics states that ΔU equals:",
+          "type": "mcq",
+          "choices": ["Q - W", "Q + W", "Q × W", "Q / W"],
+          "correctAnswer": "Q - W",
+          "explanation": "ΔU = Q - W, where Q is heat added and W is work done BY the system. Energy is conserved.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "thermo-6",
+          "promptText": "At absolute zero (0 K), the kinetic energy of gas molecules is:",
+          "type": "mcq",
+          "choices": ["Zero", "Maximum", "Negative", "Undefined"],
+          "correctAnswer": "Zero",
+          "explanation": "At 0 K, all molecular motion stops. KE = (3/2)kT, so when T = 0, KE = 0.",
+          "timeLimitSeconds": 15
+        }
+      ]
+    },
+    {
+      "id": "warmup-waves",
+      "topicId": "waves",
+      "title": "Waves Warm-Up",
+      "description": "Wave properties, sound, and light",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "wave-1",
+          "promptText": "The relationship between wave speed (v), frequency (f), and wavelength (λ) is:",
+          "type": "mcq",
+          "choices": ["v = fλ", "v = f/λ", "v = λ/f", "v = f + λ"],
+          "correctAnswer": "v = fλ",
+          "explanation": "Wave equation: speed = frequency × wavelength. This applies to all waves.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "wave-2",
+          "promptText": "A sound wave has frequency 500 Hz and wavelength 0.68 m. What is its speed?",
+          "type": "mcq",
+          "choices": ["340 m/s", "500 m/s", "735 m/s", "170 m/s"],
+          "correctAnswer": "340 m/s",
+          "explanation": "v = fλ = (500)(0.68) = 340 m/s (speed of sound in air)",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "wave-3",
+          "promptText": "In a transverse wave, particles move:",
+          "type": "mcq",
+          "choices": ["Perpendicular to wave direction", "Parallel to wave direction", "In circles", "Randomly"],
+          "correctAnswer": "Perpendicular to wave direction",
+          "explanation": "Transverse waves have particle motion perpendicular to wave propagation (e.g., light, water surface).",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "wave-4",
+          "promptText": "When a wave enters a denser medium, its speed:",
+          "type": "mcq",
+          "choices": ["Decreases", "Increases", "Stays the same", "Becomes zero"],
+          "correctAnswer": "Decreases",
+          "explanation": "In a denser medium, wave speed typically decreases while frequency stays constant, so wavelength decreases.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "wave-5",
+          "promptText": "The phenomenon where two waves combine to form a wave of greater amplitude is:",
+          "type": "mcq",
+          "choices": ["Constructive interference", "Destructive interference", "Diffraction", "Refraction"],
+          "correctAnswer": "Constructive interference",
+          "explanation": "Constructive interference occurs when waves are in phase - crests align with crests.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "wave-6",
+          "promptText": "The Doppler effect causes a sound to have higher frequency when the source is:",
+          "type": "mcq",
+          "choices": ["Approaching", "Receding", "Stationary", "Moving perpendicular"],
+          "correctAnswer": "Approaching",
+          "explanation": "When a source approaches, wave fronts compress, increasing the observed frequency (higher pitch).",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-shm",
+      "topicId": "simple_harmonic_motion",
+      "title": "Simple Harmonic Motion Warm-Up",
+      "description": "Oscillations, springs, and pendulums",
+      "durationMinutes": 4,
+      "difficulty": "hard",
+      "drills": [
+        {
+          "id": "shm-1",
+          "promptText": "In SHM, acceleration is proportional to:",
+          "type": "mcq",
+          "choices": ["Displacement (opposite direction)", "Velocity", "Time", "Displacement (same direction)"],
+          "correctAnswer": "Displacement (opposite direction)",
+          "explanation": "a = -ω²x. Acceleration is proportional to displacement but opposite in direction (restoring force).",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "shm-2",
+          "promptText": "The period of a simple pendulum depends on:",
+          "type": "mcq",
+          "choices": ["Length and g only", "Mass and length", "Amplitude and mass", "Mass only"],
+          "correctAnswer": "Length and g only",
+          "explanation": "T = 2π√(L/g). Period depends only on length and gravitational acceleration, not mass or amplitude.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "shm-3",
+          "promptText": "At the equilibrium position in SHM, the velocity is:",
+          "type": "mcq",
+          "choices": ["Maximum", "Zero", "Half of maximum", "Undefined"],
+          "correctAnswer": "Maximum",
+          "explanation": "At equilibrium, all energy is kinetic (no PE), so velocity is maximum. At extremes, velocity is zero.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "shm-4",
+          "promptText": "A mass on a spring has period T. If the mass is doubled, the new period is:",
+          "type": "mcq",
+          "choices": ["T√2", "2T", "T/2", "T/√2"],
+          "correctAnswer": "T√2",
+          "explanation": "T = 2π√(m/k). If m → 2m, then T → 2π√(2m/k) = √2 × 2π√(m/k) = T√2",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "shm-5",
+          "promptText": "The total energy in SHM is proportional to:",
+          "type": "mcq",
+          "choices": ["Amplitude squared", "Amplitude", "Frequency", "Period"],
+          "correctAnswer": "Amplitude squared",
+          "explanation": "E = ½kA². Total energy is proportional to the square of amplitude.",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-electrostatics",
+      "topicId": "electrostatics",
+      "title": "Electrostatics Warm-Up",
+      "description": "Electric charges, fields, and forces",
+      "durationMinutes": 4,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "elec-1",
+          "promptText": "The electric force between two charges is proportional to:",
+          "type": "mcq",
+          "choices": ["1/r²", "1/r", "r", "r²"],
+          "correctAnswer": "1/r²",
+          "explanation": "Coulomb's Law: F = kq₁q₂/r². Force follows an inverse square law with distance.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "elec-2",
+          "promptText": "If the distance between two charges is doubled, the force becomes:",
+          "type": "mcq",
+          "choices": ["1/4 of original", "1/2 of original", "2 times original", "4 times original"],
+          "correctAnswer": "1/4 of original",
+          "explanation": "F ∝ 1/r². If r → 2r, then F → F/4 (force decreases by factor of 4).",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "elec-3",
+          "promptText": "Electric field lines point:",
+          "type": "mcq",
+          "choices": ["Away from positive charges", "Toward positive charges", "Parallel to charges", "In circles around charges"],
+          "correctAnswer": "Away from positive charges",
+          "explanation": "Field lines originate from positive charges and terminate on negative charges.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "elec-4",
+          "promptText": "The SI unit of electric field is:",
+          "type": "mcq",
+          "choices": ["N/C or V/m", "C/m", "J/C", "N·m"],
+          "correctAnswer": "N/C or V/m",
+          "explanation": "Electric field E = F/q (N/C) or E = V/d (V/m). Both units are equivalent.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "elec-5",
+          "promptText": "Inside a conductor at electrostatic equilibrium, the electric field is:",
+          "type": "mcq",
+          "choices": ["Zero", "Maximum", "Equal to surface field", "Depends on shape"],
+          "correctAnswer": "Zero",
+          "explanation": "Charges redistribute on the surface until E = 0 inside. Otherwise, charges would move.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "elec-6",
+          "promptText": "Work done moving a charge in a uniform electric field depends on:",
+          "type": "mcq",
+          "choices": ["Only start and end points", "The path taken", "Speed of movement", "Time taken"],
+          "correctAnswer": "Only start and end points",
+          "explanation": "Electric force is conservative. Work depends only on displacement, not the path taken.",
+          "timeLimitSeconds": 20
+        }
+      ]
     }
   ]
 }

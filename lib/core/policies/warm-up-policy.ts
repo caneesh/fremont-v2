@@ -170,6 +170,42 @@ export const DEFAULT_WARMUP_BLOCKS: WarmUpBlock[] = [
     drillTemplateIds: ['proj-1', 'proj-2', 'proj-3', 'proj-4', 'proj-5'],
     difficulty: 'hard',
   },
+  {
+    id: 'warmup-thermodynamics',
+    topicId: 'thermodynamics',
+    title: 'Thermodynamics Warm-Up',
+    description: 'Heat transfer, processes, and the First Law',
+    durationMinutes: 5,
+    drillTemplateIds: ['thermo-1', 'thermo-2', 'thermo-3', 'thermo-4', 'thermo-5', 'thermo-6'],
+    difficulty: 'medium',
+  },
+  {
+    id: 'warmup-waves',
+    topicId: 'waves',
+    title: 'Waves Warm-Up',
+    description: 'Wave properties, interference, and Doppler effect',
+    durationMinutes: 5,
+    drillTemplateIds: ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5', 'wave-6'],
+    difficulty: 'medium',
+  },
+  {
+    id: 'warmup-shm',
+    topicId: 'shm',
+    title: 'Simple Harmonic Motion Warm-Up',
+    description: 'Oscillations, pendulums, and spring-mass systems',
+    durationMinutes: 4,
+    drillTemplateIds: ['shm-1', 'shm-2', 'shm-3', 'shm-4', 'shm-5'],
+    difficulty: 'hard',
+  },
+  {
+    id: 'warmup-electrostatics',
+    topicId: 'electrostatics',
+    title: 'Electrostatics Warm-Up',
+    description: "Coulomb's Law, electric fields, and charge interactions",
+    durationMinutes: 5,
+    drillTemplateIds: ['elec-1', 'elec-2', 'elec-3', 'elec-4', 'elec-5', 'elec-6'],
+    difficulty: 'medium',
+  },
 ]
 
 /**
