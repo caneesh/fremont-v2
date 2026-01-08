@@ -1,0 +1,372 @@
+{
+  "blocks": [
+    {
+      "id": "warmup-vector-basics",
+      "topicId": "vector_component",
+      "title": "Vector Component Warm-Up",
+      "description": "Quick review of vector resolution and components",
+      "durationMinutes": 3,
+      "difficulty": "easy",
+      "drills": [
+        {
+          "id": "vec-1",
+          "promptText": "A force of 10 N acts at 30° to the horizontal. What is the horizontal component?",
+          "type": "mcq",
+          "choices": ["5√3 N", "5 N", "10√3 N", "10 N"],
+          "correctAnswer": "5√3 N",
+          "explanation": "The horizontal component is F·cos(θ) = 10·cos(30°) = 10·(√3/2) = 5√3 N",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-2",
+          "promptText": "If Fx = 8 N and Fy = 6 N, what is the magnitude of F?",
+          "type": "mcq",
+          "choices": ["10 N", "14 N", "2 N", "100 N"],
+          "correctAnswer": "10 N",
+          "explanation": "Use Pythagorean theorem: |F| = √(Fx² + Fy²) = √(64 + 36) = √100 = 10 N",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-3",
+          "promptText": "A velocity of 20 m/s at 45° above horizontal. What is the vertical component?",
+          "type": "mcq",
+          "choices": ["10√2 m/s", "20√2 m/s", "10 m/s", "20 m/s"],
+          "correctAnswer": "10√2 m/s",
+          "explanation": "Vertical component = v·sin(θ) = 20·sin(45°) = 20·(√2/2) = 10√2 m/s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-4",
+          "promptText": "A 50 N force has components Fx = 30 N and Fy = 40 N. At what angle does it act from the horizontal?",
+          "type": "mcq",
+          "choices": ["53°", "37°", "45°", "60°"],
+          "correctAnswer": "53°",
+          "explanation": "θ = arctan(Fy/Fx) = arctan(40/30) = arctan(4/3) ≈ 53°",
+          "timeLimitSeconds": 25
+        }
+      ]
+    },
+    {
+      "id": "warmup-sign-convention",
+      "topicId": "sign_convention",
+      "title": "Sign Convention Warm-Up",
+      "description": "Practice with positive/negative direction conventions",
+      "durationMinutes": 3,
+      "difficulty": "easy",
+      "drills": [
+        {
+          "id": "sign-1",
+          "promptText": "A ball is thrown upward with initial velocity 20 m/s. Taking up as positive, what is the acceleration?",
+          "type": "mcq",
+          "choices": ["-10 m/s²", "+10 m/s²", "0 m/s²", "-20 m/s²"],
+          "correctAnswer": "-10 m/s²",
+          "explanation": "Gravity always points downward. With up as positive, g = -10 m/s²",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "sign-2",
+          "promptText": "An object moves left at 5 m/s. Taking right as positive, what is its velocity?",
+          "type": "mcq",
+          "choices": ["-5 m/s", "+5 m/s", "0 m/s", "±5 m/s"],
+          "correctAnswer": "-5 m/s",
+          "explanation": "Moving left (opposite to positive direction) means negative velocity: -5 m/s",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "sign-3",
+          "promptText": "A car decelerates from 30 m/s to 10 m/s. Taking the direction of motion as positive, is the acceleration positive or negative?",
+          "type": "mcq",
+          "choices": ["Negative", "Positive", "Zero", "Cannot determine"],
+          "correctAnswer": "Negative",
+          "explanation": "Deceleration means the acceleration opposes the motion. With motion as positive, acceleration is negative.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "sign-4",
+          "promptText": "On an incline, taking down the slope as positive, what sign does the normal force have?",
+          "type": "mcq",
+          "choices": ["Zero component along slope", "Positive", "Negative", "Depends on mass"],
+          "correctAnswer": "Zero component along slope",
+          "explanation": "The normal force is perpendicular to the slope, so it has no component along the slope direction.",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-trig-identity",
+      "topicId": "trig_identity",
+      "title": "Trig Identity Warm-Up",
+      "description": "Essential trigonometric identities for physics",
+      "durationMinutes": 3,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "trig-1",
+          "promptText": "What is sin(30°)?",
+          "type": "mcq",
+          "choices": ["1/2", "√3/2", "1/√2", "√3"],
+          "correctAnswer": "1/2",
+          "explanation": "sin(30°) = 1/2 is a standard value to memorize",
+          "timeLimitSeconds": 10
+        },
+        {
+          "id": "trig-2",
+          "promptText": "What is cos(60°)?",
+          "type": "mcq",
+          "choices": ["1/2", "√3/2", "1/√2", "1"],
+          "correctAnswer": "1/2",
+          "explanation": "cos(60°) = 1/2. Note that sin(30°) = cos(60°) since 30° + 60° = 90°",
+          "timeLimitSeconds": 10
+        },
+        {
+          "id": "trig-3",
+          "promptText": "What is tan(45°)?",
+          "type": "mcq",
+          "choices": ["1", "0", "√2", "1/√2"],
+          "correctAnswer": "1",
+          "explanation": "tan(45°) = sin(45°)/cos(45°) = 1, since sin and cos are equal at 45°",
+          "timeLimitSeconds": 10
+        },
+        {
+          "id": "trig-4",
+          "promptText": "If sin(θ) = 3/5, what is cos(θ) for θ in the first quadrant?",
+          "type": "mcq",
+          "choices": ["4/5", "3/5", "5/3", "5/4"],
+          "correctAnswer": "4/5",
+          "explanation": "Using sin²θ + cos²θ = 1: cos²θ = 1 - 9/25 = 16/25, so cos(θ) = 4/5",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-unit-conversion",
+      "topicId": "unit_conversion",
+      "title": "Unit Conversion Warm-Up",
+      "description": "Quick unit conversion practice",
+      "durationMinutes": 3,
+      "difficulty": "easy",
+      "drills": [
+        {
+          "id": "unit-1",
+          "promptText": "Convert 72 km/h to m/s",
+          "type": "mcq",
+          "choices": ["20 m/s", "72 m/s", "7.2 m/s", "200 m/s"],
+          "correctAnswer": "20 m/s",
+          "explanation": "72 km/h × (1000 m/km) × (1 h/3600 s) = 72 × (1/3.6) = 20 m/s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "unit-2",
+          "promptText": "Convert 500 g to kg",
+          "type": "mcq",
+          "choices": ["0.5 kg", "5 kg", "50 kg", "0.05 kg"],
+          "correctAnswer": "0.5 kg",
+          "explanation": "500 g × (1 kg / 1000 g) = 0.5 kg",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "unit-3",
+          "promptText": "How many centimeters are in 2.5 meters?",
+          "type": "mcq",
+          "choices": ["250 cm", "25 cm", "2500 cm", "0.025 cm"],
+          "correctAnswer": "250 cm",
+          "explanation": "2.5 m × (100 cm/m) = 250 cm",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "unit-4",
+          "promptText": "Convert 15 m/s to km/h",
+          "type": "mcq",
+          "choices": ["54 km/h", "15 km/h", "150 km/h", "4.17 km/h"],
+          "correctAnswer": "54 km/h",
+          "explanation": "15 m/s × 3.6 = 54 km/h (multiply by 3.6 to go from m/s to km/h)",
+          "timeLimitSeconds": 20
+        }
+      ]
+    },
+    {
+      "id": "warmup-algebra",
+      "topicId": "algebra_manipulation",
+      "title": "Algebra Manipulation Warm-Up",
+      "description": "Solving equations commonly seen in physics",
+      "durationMinutes": 3,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "alg-1",
+          "promptText": "Solve for v: v² = u² + 2as, given u = 0, a = 10, s = 5",
+          "type": "mcq",
+          "choices": ["10", "100", "√50", "5"],
+          "correctAnswer": "10",
+          "explanation": "v² = 0 + 2(10)(5) = 100, so v = 10",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "alg-2",
+          "promptText": "Solve for t: s = ut + ½at², given s = 20, u = 0, a = 10",
+          "type": "mcq",
+          "choices": ["2", "4", "√2", "1"],
+          "correctAnswer": "2",
+          "explanation": "20 = 0 + ½(10)t² → 20 = 5t² → t² = 4 → t = 2",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "alg-3",
+          "promptText": "If F = ma and a = v²/r, express F in terms of m, v, and r",
+          "type": "mcq",
+          "choices": ["mv²/r", "mr/v²", "v²/mr", "mrv²"],
+          "correctAnswer": "mv²/r",
+          "explanation": "Substituting a = v²/r into F = ma gives F = m(v²/r) = mv²/r",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "alg-4",
+          "promptText": "Rearrange v = u + at to solve for a",
+          "type": "mcq",
+          "choices": ["(v - u)/t", "(u - v)/t", "v - u - t", "vt - u"],
+          "correctAnswer": "(v - u)/t",
+          "explanation": "v = u + at → v - u = at → a = (v - u)/t",
+          "timeLimitSeconds": 15
+        }
+      ]
+    },
+    {
+      "id": "warmup-conservation",
+      "topicId": "conservation_scope",
+      "title": "Conservation Laws Warm-Up",
+      "description": "When to apply conservation principles",
+      "durationMinutes": 3,
+      "difficulty": "medium",
+      "drills": [
+        {
+          "id": "cons-1",
+          "promptText": "A ball falls freely under gravity. Is mechanical energy conserved?",
+          "type": "mcq",
+          "choices": ["Yes, if air resistance is negligible", "No, never", "Only at the top", "Only at the bottom"],
+          "correctAnswer": "Yes, if air resistance is negligible",
+          "explanation": "With only gravity (a conservative force) doing work, mechanical energy (KE + PE) is conserved.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "cons-2",
+          "promptText": "Two objects collide and stick together. What is always conserved?",
+          "type": "mcq",
+          "choices": ["Momentum", "Kinetic energy", "Both", "Neither"],
+          "correctAnswer": "Momentum",
+          "explanation": "In all collisions, momentum is conserved. In inelastic collisions (like sticking), KE is not conserved.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "cons-3",
+          "promptText": "A block slides on a rough surface and stops. Why isn't mechanical energy conserved?",
+          "type": "mcq",
+          "choices": ["Friction does negative work", "Gravity does work", "Normal force does work", "Mass changes"],
+          "correctAnswer": "Friction does negative work",
+          "explanation": "Friction is a non-conservative force. It converts mechanical energy to thermal energy.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "cons-4",
+          "promptText": "A satellite orbits Earth in a circular orbit. Is its mechanical energy constant?",
+          "type": "mcq",
+          "choices": ["Yes", "No, it increases", "No, it decreases", "Only at perihelion"],
+          "correctAnswer": "Yes",
+          "explanation": "For circular orbits, gravity is always perpendicular to motion, so it does no work. Energy is constant.",
+          "timeLimitSeconds": 25
+        }
+      ]
+    },
+    {
+      "id": "warmup-reference-frame",
+      "topicId": "reference_frame",
+      "title": "Reference Frame Warm-Up",
+      "description": "Understanding inertial and non-inertial frames",
+      "durationMinutes": 3,
+      "difficulty": "hard",
+      "drills": [
+        {
+          "id": "ref-1",
+          "promptText": "In a car accelerating forward, a hanging pendulum tilts backward. In the car's frame, what causes this?",
+          "type": "mcq",
+          "choices": ["Pseudo force (backward)", "Gravity alone", "Tension alone", "No force needed"],
+          "correctAnswer": "Pseudo force (backward)",
+          "explanation": "In the non-inertial (accelerating) frame, we must add a pseudo force ma opposite to the acceleration.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "ref-2",
+          "promptText": "Which is an inertial reference frame?",
+          "type": "mcq",
+          "choices": ["A train moving at constant velocity", "A rotating merry-go-round", "An accelerating rocket", "A car going around a curve"],
+          "correctAnswer": "A train moving at constant velocity",
+          "explanation": "Inertial frames are non-accelerating. Only constant velocity motion qualifies.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "ref-3",
+          "promptText": "The centrifugal force is:",
+          "type": "mcq",
+          "choices": ["A pseudo force in rotating frames", "A real force", "Always equal to centripetal force", "Present in inertial frames"],
+          "correctAnswer": "A pseudo force in rotating frames",
+          "explanation": "Centrifugal force only appears in rotating (non-inertial) frames as a pseudo force.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "ref-4",
+          "promptText": "A person in a falling elevator feels weightless because:",
+          "type": "mcq",
+          "choices": ["They and the elevator accelerate together", "Gravity disappears", "Normal force increases", "Mass becomes zero"],
+          "correctAnswer": "They and the elevator accelerate together",
+          "explanation": "Both person and elevator fall with g, so there's no normal force between them - hence weightlessness.",
+          "timeLimitSeconds": 25
+        }
+      ]
+    },
+    {
+      "id": "warmup-fbd",
+      "topicId": "force_enumeration",
+      "title": "Free Body Diagram Warm-Up",
+      "description": "Identifying all forces on an object",
+      "durationMinutes": 3,
+      "difficulty": "easy",
+      "drills": [
+        {
+          "id": "fbd-1",
+          "promptText": "A book rests on a table. How many forces act on the book?",
+          "type": "mcq",
+          "choices": ["2 (weight and normal)", "1 (weight only)", "3 (weight, normal, friction)", "0 (it's at rest)"],
+          "correctAnswer": "2 (weight and normal)",
+          "explanation": "Weight pulls down, normal force pushes up. No friction since there's no tendency to slide.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-2",
+          "promptText": "A block slides down a rough incline. How many forces act on it?",
+          "type": "mcq",
+          "choices": ["3 (weight, normal, friction)", "2 (weight, normal)", "4 (weight, normal, friction, applied)", "1 (weight)"],
+          "correctAnswer": "3 (weight, normal, friction)",
+          "explanation": "Weight (down), normal (perpendicular to surface), and kinetic friction (opposing motion up the slope).",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-3",
+          "promptText": "A ball is thrown upward and is in mid-air (ignore air resistance). What forces act on it?",
+          "type": "mcq",
+          "choices": ["Only gravity", "Gravity and an upward force", "No forces (it's moving up)", "Gravity and air resistance"],
+          "correctAnswer": "Only gravity",
+          "explanation": "Once released, only gravity acts. There's no 'upward force' - the ball moves up due to initial velocity.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-4",
+          "promptText": "A car drives at constant speed on a level road. The net force is:",
+          "type": "mcq",
+          "choices": ["Zero", "Forward (engine force)", "Backward (friction)", "Downward (gravity)"],
+          "correctAnswer": "Zero",
+          "explanation": "Constant velocity means zero acceleration, which means net force = 0 (engine force balances friction).",
+          "timeLimitSeconds": 20
+        }
+      ]
+    }
+  ]
+}

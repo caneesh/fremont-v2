@@ -32,6 +32,7 @@ import {
 import { createWarmUpRepository } from './warm-up-repository'
 import { DEFAULT_WARMUP_BLOCKS } from '@/lib/core/policies/warm-up-policy'
 import { eventLogger } from '@/lib/storage/eventLogger'
+import warmupDrillsData from '@/data/warmup-drills.json'
 
 // Default tenant for single-tenant mode
 const DEFAULT_TENANT = 'default'
@@ -86,29 +87,74 @@ const noopAnalytics: WarmUpAnalytics = {
   },
 }
 
+// Parse warm-up content from JSON
+interface WarmUpDrillJSON {
+  id: string
+  promptText: string
+  type: 'mcq' | 'short' | 'fill'
+  choices?: string[]
+  correctAnswer: string
+  explanation: string
+  timeLimitSeconds: number
+}
+
+interface WarmUpBlockJSON {
+  id: string
+  topicId: string
+  title: string
+  description: string
+  durationMinutes: number
+  difficulty: 'easy' | 'medium' | 'hard'
+  drills: WarmUpDrillJSON[]
+}
+
+// Convert JSON blocks to WarmUpBlock type
+const warmUpBlocks: WarmUpBlock[] = (warmupDrillsData.blocks as WarmUpBlockJSON[]).map(block => ({
+  id: block.id,
+  topicId: block.topicId,
+  title: block.title,
+  description: block.description,
+  durationMinutes: block.durationMinutes,
+  difficulty: block.difficulty,
+  drillTemplateIds: block.drills.map(d => d.id),
+}))
+
+// Create a map for quick drill lookup
+const drillsByBlockId = new Map<string, WarmUpDrillItem[]>()
+for (const block of warmupDrillsData.blocks as WarmUpBlockJSON[]) {
+  drillsByBlockId.set(
+    block.id,
+    block.drills.map(drill => ({
+      id: drill.id,
+      warmUpBlockId: block.id,
+      promptText: drill.promptText,
+      type: drill.type,
+      choices: drill.choices,
+      correctAnswer: drill.correctAnswer,
+      explanation: drill.explanation,
+      timeLimitSeconds: drill.timeLimitSeconds,
+    }))
+  )
+}
+
 /**
- * In-memory content provider with default warm-up blocks
+ * Content provider using JSON-based warm-up drills
  */
 const defaultContentProvider: WarmUpContentProvider = {
   async getAllBlocks(): Promise<WarmUpBlock[]> {
-    return [...DEFAULT_WARMUP_BLOCKS]
+    return [...warmUpBlocks]
   },
 
   async getBlockById(blockId: string): Promise<WarmUpBlock | null> {
-    return DEFAULT_WARMUP_BLOCKS.find(b => b.id === blockId) ?? null
+    return warmUpBlocks.find(b => b.id === blockId) ?? null
   },
 
   async getBlocksByTopic(topicId: string): Promise<WarmUpBlock[]> {
-    return DEFAULT_WARMUP_BLOCKS.filter(b => b.topicId === topicId)
+    return warmUpBlocks.filter(b => b.topicId === topicId)
   },
 
   async getDrillItems(blockId: string): Promise<WarmUpDrillItem[]> {
-    // Return mock drill items for now
-    // In production, these would come from a content database
-    const block = DEFAULT_WARMUP_BLOCKS.find(b => b.id === blockId)
-    if (!block) return []
-
-    return generateMockDrillItems(block)
+    return drillsByBlockId.get(blockId) ?? []
   },
 }
 
