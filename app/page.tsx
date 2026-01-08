@@ -4,6 +4,7 @@ import { Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import SolvePage from '@/components/solve/SolvePage'
 import MobileNav from '@/components/MobileNav'
+import ShellSkeleton from '@/components/shell/ShellSkeleton'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 /**
@@ -16,6 +17,10 @@ import { FEATURE_FLAGS } from '@/lib/featureFlags'
  *
  * When DASHBOARD_V3 is disabled (legacy):
  * - / renders the solver directly (existing behavior)
+ *
+ * IMPORTANT: We show a proper ShellSkeleton during redirect instead of a
+ * simple spinner to avoid the "spinner -> redirect -> spinner" experience.
+ * The skeleton matches the target layout structure for seamless transition.
  */
 function HomeContent() {
   const searchParams = useSearchParams()
@@ -41,16 +46,15 @@ function HomeContent() {
     }
   }, [searchParams, router])
 
-  // When Dashboard v3 is enabled, show loading while redirecting
+  // When Dashboard v3 is enabled, show skeleton while redirecting
+  // This eliminates the "spinner -> redirect -> spinner" experience
   if (FEATURE_FLAGS.DASHBOARD_V3) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-accent mb-4"></div>
-          <p className="text-gray-600 dark:text-dark-text-secondary">Loading...</p>
-        </div>
-      </main>
-    )
+    // Determine which skeleton to show based on redirect target
+    const questionId = searchParams.get('question')
+    const loadProblemId = searchParams.get('loadProblem')
+    const targetIsSolve = !!(questionId || loadProblemId)
+
+    return <ShellSkeleton variant={targetIsSolve ? 'solve' : 'dashboard'} />
   }
 
   // Legacy layout - render solver directly on home page
@@ -64,14 +68,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </main>
-    }>
+    <Suspense fallback={<ShellSkeleton variant="dashboard" />}>
       <HomeContent />
     </Suspense>
   )
