@@ -277,6 +277,9 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
             </div>
           </div>
 
+          {/* Progress Overview */}
+          <ProgressOverview />
+
           {/* Coverage Summary */}
           <CoverageSummary coverage={coverage} />
         </div>
