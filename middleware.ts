@@ -11,7 +11,22 @@
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { kv } from '@vercel/kv'
+
+// Lazy import KV to avoid Edge Runtime issues during build
+let kvClient: typeof import('@vercel/kv').kv | null = null
+
+async function getKV() {
+  if (!kvClient) {
+    try {
+      const { kv } = await import('@vercel/kv')
+      kvClient = kv
+    } catch {
+      // KV not available (e.g., during build or when not configured)
+      return null
+    }
+  }
+  return kvClient
+}
 
 // =============================================================================
 // Configuration
@@ -39,6 +54,13 @@ async function checkRateLimit(ip: string, limit: number): Promise<RateLimitResul
   const now = Math.floor(Date.now() / 1000)
 
   try {
+    const kv = await getKV()
+
+    // If KV is not available, fail open
+    if (!kv) {
+      return { allowed: true, remaining: limit, resetAt: now + RATE_LIMIT_WINDOW_SECONDS }
+    }
+
     // Increment counter atomically
     const pipeline = kv.pipeline()
     pipeline.incr(key)
