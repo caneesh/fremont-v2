@@ -127,7 +127,7 @@ export default function TodaysFocus({ className = '' }: TodaysFocusProps) {
       {/* Section header */}
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-          Today's Focus
+          Today&apos;s Focus
         </h2>
         <span className="
           px-2 py-0.5
