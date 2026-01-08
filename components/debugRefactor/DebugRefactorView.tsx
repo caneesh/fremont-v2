@@ -10,11 +10,12 @@
 import { useState, useCallback } from 'react'
 import { useDebugRefactor } from '@/hooks/useDebugRefactor'
 import type {
-  ProblemMode,
   DebugProblem,
   RefactorProblem,
-  TestCase,
 } from '@/types/debugRefactorMode'
+
+// Only debug and refactor modes are supported
+type DebugRefactorMode = 'debug' | 'refactor'
 import type { TestResult } from '@/lib/debugRefactor'
 import { StepProgress } from './StepProgress'
 import { CodeEditor } from './CodeEditor'
@@ -23,7 +24,7 @@ import { ResultsModal } from './ResultsModal'
 
 interface DebugRefactorViewProps {
   sessionId: string
-  mode: ProblemMode
+  mode: DebugRefactorMode
   problem: DebugProblem | RefactorProblem
   onComplete?: () => void
   onExit?: () => void
