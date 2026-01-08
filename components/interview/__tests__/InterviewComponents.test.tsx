@@ -506,7 +506,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -519,7 +519,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="A" as Grade
+        grade={"A" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -531,7 +531,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult({ percentageScore: 85 })}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -543,7 +543,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -562,7 +562,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult({ overallFeedback: 'You did great!' })}
-        grade="A" as Grade
+        grade={"A" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -574,7 +574,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -596,7 +596,7 @@ describe('RubricResults', () => {
         result={createMockRubricResult({
           strengths: ['Great analysis', 'Fast thinking'],
         })}
-        grade="A" as Grade
+        grade={"A" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -612,7 +612,7 @@ describe('RubricResults', () => {
         result={createMockRubricResult({
           improvements: ['Practice more', 'Review concepts'],
         })}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -626,7 +626,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult({ strengths: [] })}
-        grade="C" as Grade
+        grade={"C" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -638,7 +638,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult({ improvements: [] })}
-        grade="A" as Grade
+        grade={"A" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -650,7 +650,7 @@ describe('RubricResults', () => {
     const { container } = render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="A" as Grade
+        grade={"A" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -663,7 +663,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -676,7 +676,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="F" as Grade
+        grade={"F" as Grade}
         summary={createMockSummary()}
       />
     )
@@ -690,7 +690,7 @@ describe('RubricResults', () => {
     render(
       <RubricResults
         result={createMockRubricResult()}
-        grade="B" as Grade
+        grade={"B" as Grade}
         summary={{ ...createMockSummary(), totalTimeSeconds: 90 }}
       />
     )
