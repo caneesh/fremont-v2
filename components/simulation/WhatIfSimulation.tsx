@@ -2,26 +2,31 @@
 
 import { useState } from 'react'
 import type { ScaffoldData } from '@/types/scaffold'
-import type { SimulationType } from '@/types/simulation'
-import { detectSimulationType, extractParameters } from '@/lib/simulationService'
+import { useSimulationParams } from '@/hooks/useSimulationParams'
 import ProjectileSimulation from './ProjectileSimulation'
 import InclinePlaneSimulation from './InclinePlaneSimulation'
 
 interface WhatIfSimulationProps {
   scaffoldData: ScaffoldData
+  questionId?: string  // Optional: enables precomputed params lookup
   onClose?: () => void
 }
 
 /**
  * WhatIfSimulation - Main wrapper component for physics simulations
  * Detects the appropriate simulation type based on problem content
- * and renders the corresponding interactive simulation
+ * and renders the corresponding interactive simulation.
+ *
+ * When questionId is provided, uses precomputed params if available.
  */
-export default function WhatIfSimulation({ scaffoldData, onClose }: WhatIfSimulationProps) {
+export default function WhatIfSimulation({ scaffoldData, questionId, onClose }: WhatIfSimulationProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const simulationType = detectSimulationType(scaffoldData)
-  const extractedParams = extractParameters(scaffoldData)
+  // Use hook for precompute-aware param fetching
+  const { type: simulationType, params: extractedParams, isLoading } = useSimulationParams({
+    questionId,
+    scaffoldData,
+  })
 
   const handleClose = () => {
     setIsOpen(false)
@@ -89,13 +94,13 @@ export default function WhatIfSimulation({ scaffoldData, onClose }: WhatIfSimula
           <div className="w-full max-w-3xl max-h-[90vh] overflow-auto animate-scale-in">
             {simulationType === 'projectile' && (
               <ProjectileSimulation
-                initialParams={extractedParams.params}
+                initialParams={extractedParams}
                 onClose={handleClose}
               />
             )}
             {simulationType === 'incline' && (
               <InclinePlaneSimulation
-                initialParams={extractedParams.params}
+                initialParams={extractedParams}
                 onClose={handleClose}
               />
             )}
@@ -112,15 +117,20 @@ export default function WhatIfSimulation({ scaffoldData, onClose }: WhatIfSimula
  */
 export function SimulationButton({
   scaffoldData,
+  questionId,
   variant = 'default',
 }: {
   scaffoldData: ScaffoldData
+  questionId?: string
   variant?: 'default' | 'compact' | 'icon'
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const simulationType = detectSimulationType(scaffoldData)
-  const extractedParams = extractParameters(scaffoldData)
+  // Use hook for precompute-aware param fetching
+  const { type: simulationType, params: extractedParams } = useSimulationParams({
+    questionId,
+    scaffoldData,
+  })
 
   if (simulationType === 'unsupported') {
     return null
@@ -168,13 +178,13 @@ export function SimulationButton({
           <div className="w-full max-w-3xl max-h-[90vh] overflow-auto animate-scale-in">
             {simulationType === 'projectile' && (
               <ProjectileSimulation
-                initialParams={extractedParams.params}
+                initialParams={extractedParams}
                 onClose={handleClose}
               />
             )}
             {simulationType === 'incline' && (
               <InclinePlaneSimulation
-                initialParams={extractedParams.params}
+                initialParams={extractedParams}
                 onClose={handleClose}
               />
             )}
