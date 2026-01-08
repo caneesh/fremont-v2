@@ -6,12 +6,15 @@
  * Displays the final results after completing a debug/refactor session.
  */
 
-import type { ModeSubmissionResult, ProblemMode } from '@/types/debugRefactorMode'
+import type { ModeSubmissionResult } from '@/types/debugRefactorMode'
+
+// Only debug and refactor modes are supported
+type DebugRefactorMode = 'debug' | 'refactor'
 import { debugRefactorService } from '@/lib/debugRefactor'
 
 interface ResultsModalProps {
   result: ModeSubmissionResult
-  mode: ProblemMode
+  mode: DebugRefactorMode
   onClose: () => void
   onRetry: () => void
 }
