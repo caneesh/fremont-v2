@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import type { MistakeCard } from '@/types/mistakeNotebook'
 import type { ConstraintCollision, SocraticDialogue } from '@/types/constraintCollision'
 import type { Confidence } from '@/types/confidence'
@@ -63,7 +63,6 @@ export default function CoachToolsPanel({
   onToggleSkipCommitAnalytics,
 }: CoachToolsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const [activeSection, setActiveSection] = useState<string | null>(null)
 
   // Focus trap
   useEffect(() => {
