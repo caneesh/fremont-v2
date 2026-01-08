@@ -187,6 +187,26 @@
   animation: slide-up 0.3s ease-out forwards;
 }
 
+/* Indeterminate progress bar animation (honest loading indicator) */
+@keyframes indeterminate-progress {
+  0% {
+    width: 30%;
+    transform: translateX(-100%);
+  }
+  50% {
+    width: 50%;
+  }
+  100% {
+    width: 30%;
+    transform: translateX(400%);
+  }
+}
+
+.animate-indeterminate-progress {
+  width: 30%;
+  animation: indeterminate-progress 2s ease-in-out infinite;
+}
+
 /* ============================================
    DARK MODE DESIGN SYSTEM
    A layered, premium dark theme

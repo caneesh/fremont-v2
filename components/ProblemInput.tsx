@@ -33,12 +33,13 @@ type InputMode = 'text' | 'voice' | 'scan'
 
 type ScanState = 'idle' | 'uploading' | 'extracting' | 'extracted' | 'error'
 
-const LOADING_STAGES = [
-  { message: "Analyzing problem structure...", progress: 20, duration: 3000 },
-  { message: "Identifying physics concepts...", progress: 40, duration: 5000 },
-  { message: "Building solution roadmap...", progress: 60, duration: 8000 },
-  { message: "Generating progressive hints...", progress: 80, duration: 12000 },
-  { message: "Finalizing scaffold...", progress: 95, duration: 15000 },
+// Honest loading messages - cycle through these without fake percentages
+const LOADING_MESSAGES = [
+  "Analyzing problem structure...",
+  "Identifying physics concepts...",
+  "Building solution roadmap...",
+  "Generating progressive hints...",
+  "Preparing your scaffold...",
 ]
 
 const SAMPLE_PROBLEMS = [
@@ -58,8 +59,7 @@ const SAMPLE_PROBLEMS = [
 
 export default function ProblemInput({ onSubmit, isLoading, error, initialProblem, initialDensity, onRegisterSubmit }: ProblemInputProps) {
   const [problemText, setProblemText] = useState(initialProblem || '')
-  const [currentStage, setCurrentStage] = useState(0)
-  const [progress, setProgress] = useState(0)
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
   const [inputMode, setInputMode] = useState<InputMode>('text')
   const [scaffoldDensity, setScaffoldDensity] = useState<ScaffoldDensity>(initialDensity || 3)
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
@@ -110,36 +110,17 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
     }
   }, [initialProblem])
 
+  // Cycle through loading messages while loading (honest indeterminate progress)
   useEffect(() => {
     if (!isLoading) {
-      setCurrentStage(0)
-      setProgress(0)
+      setCurrentMessageIndex(0)
       return
     }
 
-    // Advance through stages based on time
-    const startTime = Date.now()
-
+    // Cycle through messages every 3 seconds to show activity without fake progress
     const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime
-
-      // Find current stage based on elapsed time
-      let newStage = 0
-      for (let i = 0; i < LOADING_STAGES.length; i++) {
-        if (elapsed >= LOADING_STAGES[i].duration) {
-          newStage = i
-        }
-      }
-
-      setCurrentStage(Math.min(newStage, LOADING_STAGES.length - 1))
-
-      // Smooth progress animation
-      const targetProgress = LOADING_STAGES[newStage]?.progress || 95
-      setProgress(prev => {
-        const diff = targetProgress - prev
-        return prev + diff * 0.1 // Smooth easing
-      })
-    }, 100)
+      setCurrentMessageIndex(prev => (prev + 1) % LOADING_MESSAGES.length)
+    }, 3000)
 
     return () => clearInterval(interval)
   }, [isLoading])
@@ -629,58 +610,39 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
             )}
           </div>
 
-          {/* Animated Loading Progress */}
+          {/* Honest Indeterminate Loading Progress */}
           {isLoading && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-6">
               <div className="space-y-4">
-                {/* Progress Bar */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-blue-900 dark:text-blue-300">
-                      {LOADING_STAGES[currentStage]?.message || 'Processing...'}
-                    </span>
-                    <span className="text-blue-700 dark:text-blue-400 font-medium">
-                      {Math.round(progress)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-3 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent dark:to-purple-500 h-full rounded-full transition-all duration-300 ease-out relative"
-                      style={{ width: `${progress}%` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                {/* Status Message */}
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
                     </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-blue-900 dark:text-blue-300 transition-opacity duration-300">
+                      {LOADING_MESSAGES[currentMessageIndex]}
+                    </p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                      This typically takes 10-20 seconds
+                    </p>
                   </div>
                 </div>
 
-                {/* Stage Indicators */}
-                <div className="flex justify-between items-center pt-2">
-                  {LOADING_STAGES.map((stage, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex flex-col items-center space-y-1 ${
-                        idx === currentStage ? 'scale-110' : ''
-                      } transition-transform duration-300`}
-                    >
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors duration-300 ${
-                          idx <= currentStage
-                            ? 'bg-accent text-white border-accent'
-                            : 'bg-white dark:bg-dark-card-soft text-gray-400 dark:text-dark-text-muted border-gray-300 dark:border-dark-border'
-                        }`}
-                      >
-                        {idx < currentStage ? '✓' : idx + 1}
-                      </div>
-                    </div>
-                  ))}
+                {/* Indeterminate Progress Bar */}
+                <div className="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-2 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 dark:from-accent dark:via-purple-500 dark:to-accent rounded-full animate-indeterminate-progress"></div>
                 </div>
 
-                {/* Estimated Time */}
-                <div className="text-center pt-2">
-                  <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">
-                    Estimated time: ~{Math.max(5, 20 - Math.floor(progress / 5))} seconds remaining
-                  </p>
-                </div>
+                {/* Tip */}
+                <p className="text-xs text-center text-blue-700 dark:text-blue-400">
+                  AI is generating a personalized scaffold for your problem
+                </p>
               </div>
             </div>
           )}
