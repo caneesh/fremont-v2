@@ -111,6 +111,7 @@ export function startWarmUpSession(session: WarmUpSession): WarmUpSession {
 
 /**
  * Record a warm-up item result
+ * Idempotent: if the item already has a result, it won't be added again
  */
 export function recordWarmUpItemResult(
   session: WarmUpSession,
@@ -124,6 +125,13 @@ export function recordWarmUpItemResult(
 
   const block = session.assignedBlocks[blockIndex]
   const existingResults = block.itemResults || []
+
+  // Check if this item already has a result (idempotency)
+  const alreadyRecorded = existingResults.some(r => r.itemId === result.itemId)
+  if (alreadyRecorded) {
+    return session // Item already recorded, skip duplicate
+  }
+
   const updatedResults = [...existingResults, result]
 
   const updatedBlock: AssignedWarmUpBlock = {
