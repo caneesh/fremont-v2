@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { validateAuthHeader, unauthorizedResponse, quotaExceededResponse } from '@/lib/auth/apiAuth'
 import { serverQuotaService } from '@/lib/auth/serverQuotaService'
+import { precomputeService } from '@/lib/precompute'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
 
 // Create client lazily to ensure env vars are available in serverless context
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { problemText, coreConcept } = body
+    const { problemText, coreConcept, questionId } = body
 
     if (!problemText) {
       return NextResponse.json(
@@ -34,6 +35,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 1. Check precomputed content first if questionId is provided
+    if (questionId) {
+      const precomputed = await precomputeService.getVariations(questionId, undefined, {
+        acceptOlderVersion: true,
+      })
+
+      if (precomputed.found && precomputed.data && precomputed.data.length > 0) {
+        // Increment quota for precomputed variations too
+        serverQuotaService.incrementQuota(authContext.userId, 'variations')
+
+        return NextResponse.json({
+          variations: precomputed.data.map((v) => ({
+            problemStatement: v.problemStatement,
+            whyDifferent: v.whyDifferent,
+            variationType: v.variationType,
+          })),
+          source: 'precomputed',
+        })
+      }
+    }
+
+    // 2. Fall back to live generation
     // Check for API key
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
@@ -134,7 +157,10 @@ Respond with ONLY the JSON, no other text.`
       // Increment quota after successful generation
       serverQuotaService.incrementQuota(authContext.userId, 'variations')
 
-      return NextResponse.json(variationData)
+      return NextResponse.json({
+        ...variationData,
+        source: 'live',
+      })
     } catch (error) {
       console.error('Failed to parse variation JSON:', error)
       return NextResponse.json(
