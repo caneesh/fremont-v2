@@ -180,6 +180,11 @@ const questions = [
           { condition: 'θ → 90°', expected: 'a → g', why: 'Vertical free fall' },
         ],
       },
+      hints: [
+        { order: 1, text: 'Start by drawing a free body diagram. What forces act on the block?' },
+        { order: 2, text: 'Decompose the weight into components parallel and perpendicular to the incline. Which trigonometric function gives the parallel component?' },
+        { order: 3, text: 'Apply Newton\'s second law along the incline direction: ΣF = ma. The only force along the incline is the weight component.' },
+      ],
     },
   },
 
@@ -259,6 +264,11 @@ const questions = [
           'Substitute values: R = (20)²sin(90°)/10 = 400×1/10 = 40 m',
         ],
       },
+      hints: [
+        { order: 1, text: 'This is a projectile motion problem. What are the horizontal and vertical components of the initial velocity?' },
+        { order: 2, text: 'For a projectile landing at the same height it was launched, you can use the range formula: R = v²sin(2θ)/g' },
+        { order: 3, text: 'sin(2×45°) = sin(90°) = 1, which gives maximum range for a given speed.' },
+      ],
     },
   },
 
@@ -329,6 +339,11 @@ const questions = [
           'Solve: V₂ = P₁V₁/P₂ = (1 atm)(2 L)/(2 atm) = 1 L',
         ],
       },
+      hints: [
+        { order: 1, text: 'What type of process is this? Look at what quantity is held constant.' },
+        { order: 2, text: 'For an isothermal (constant T) process, use Boyle\'s Law: P₁V₁ = P₂V₂' },
+        { order: 3, text: 'Rearrange to find V₂: V₂ = P₁V₁/P₂. When pressure doubles, volume halves.' },
+      ],
     },
   },
 

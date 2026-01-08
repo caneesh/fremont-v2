@@ -48,6 +48,12 @@ interface QuestionPayload {
     prompt: string
     explanations?: { hint?: string }
   }>
+  // Dedicated hints array for practice mode
+  hints?: Array<{
+    order: number
+    text: string
+    pattern_id?: string
+  }>
 }
 
 /**
@@ -74,9 +80,19 @@ function transformQuestion(dbQuestion: {
     })
   }
 
-  // Extract hints from steps
+  // Extract hints - prefer dedicated hints array, fallback to step explanations
   const hints: QuestionHint[] = []
-  if (payload.steps) {
+  if (payload.hints && payload.hints.length > 0) {
+    // Use dedicated hints array
+    payload.hints.forEach((hint) => {
+      hints.push({
+        order: hint.order,
+        text: hint.text,
+        pattern_id: hint.pattern_id || dbQuestion.primaryPatternId || undefined,
+      })
+    })
+  } else if (payload.steps) {
+    // Fallback: extract hints from step explanations
     payload.steps.forEach((step, index) => {
       if (step.explanations?.hint) {
         hints.push({
