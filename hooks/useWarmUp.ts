@@ -425,20 +425,33 @@ export function useWarmUp(userId: string = 'anonymous'): UseWarmUpReturn {
       try {
         setState(prev => ({ ...prev, isLoading: true, error: null }))
 
-        const result = await warmUpService.skipWarmUp(session.id, reason)
+        const response = await fetch('/api/warmup/skip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: session.id,
+            reason,
+            userId,
+          }),
+        })
+        const result = await response.json()
 
-        if (!result.canSkip) {
-          setState(prev => ({
-            ...prev,
-            isLoading: false,
-            error: result.skipDeniedReason ?? 'Cannot skip warm-up',
-            canSkip: false,
-          }))
-          return false
+        if (!result.success) {
+          if (!result.canSkip) {
+            setState(prev => ({
+              ...prev,
+              isLoading: false,
+              error: result.skipDeniedReason ?? 'Cannot skip warm-up',
+              canSkip: false,
+            }))
+            return false
+          }
+          throw new Error(result.error || 'Failed to skip warm-up')
         }
 
         setState(prev => ({
           ...prev,
+          phase: 'complete',
           session: result.session,
           currentBlock: null,
           currentItems: [],
@@ -456,8 +469,18 @@ export function useWarmUp(userId: string = 'anonymous'): UseWarmUpReturn {
         return false
       }
     },
-    [state.session]
+    [state.session, userId]
   )
+
+  /**
+   * Finish viewing results and proceed to complete phase
+   */
+  const finishResults = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      phase: 'complete',
+    }))
+  }, [])
 
   /**
    * Reset the warm-up state
@@ -473,10 +496,12 @@ export function useWarmUp(userId: string = 'anonymous'): UseWarmUpReturn {
 
   return {
     ...state,
+    checkStatus,
     checkAndAssign,
     start,
     submitAnswer,
     skipSession,
+    finishResults,
     reset,
     isActive,
     isCompleted,
