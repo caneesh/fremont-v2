@@ -420,16 +420,22 @@ export class InMemoryWarmUpRepository implements WarmUpRepository {
   }
 }
 
-// Singleton in-memory repository for server-side
-const serverRepository = new InMemoryWarmUpRepository()
+// Global singleton for server-side to persist across Next.js module reloads
+const globalForWarmUp = globalThis as unknown as {
+  warmUpRepository: InMemoryWarmUpRepository | undefined
+}
 
 /**
  * Create a new instance of the appropriate repository
- * Uses in-memory on server, localStorage in browser
+ * Uses in-memory on server (with global cache), localStorage in browser
  */
 export function createWarmUpRepository(): WarmUpRepository {
   if (typeof window === 'undefined') {
-    return serverRepository
+    // Use global singleton to persist across module reloads in dev
+    if (!globalForWarmUp.warmUpRepository) {
+      globalForWarmUp.warmUpRepository = new InMemoryWarmUpRepository()
+    }
+    return globalForWarmUp.warmUpRepository
   }
   return new LocalStorageWarmUpRepository()
 }
