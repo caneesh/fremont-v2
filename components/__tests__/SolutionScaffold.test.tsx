@@ -14,6 +14,8 @@ vi.mock('@/lib/featureFlags', async () => {
       // Keep these off in unit tests to avoid gating UI blocking step activation/advancement.
       ADAPTIVE_PREFLIGHT: false,
       CONFIDENCE_WEIGHTED_SRS: false,
+      // Pivot injection uses setInterval which conflicts with vi.runAllTimers()
+      PIVOT_INJECTION: false,
     },
   }
 })

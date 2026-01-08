@@ -154,6 +154,8 @@ import {
 import type { InterviewSession, ExplanationSubmission } from '@/lib/interview'
 import type { InterviewModeConfig } from '@/hooks/useInterviewMode'
 import { ExplanationForm } from '@/components/interview'
+import { usePivot } from '@/hooks/usePivot'
+import { PivotModal } from '@/components/pivot'
 
 interface InterviewModeProps {
   enabled: boolean
@@ -434,6 +436,33 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
   // Generate problem ID for circuit breaker (needs to be before hook call)
   const currentProblemId = generateProblemId(data.problem)
+
+  // Get userId for pivot
+  const pivotUserId = useMemo(() => {
+    if (typeof window === 'undefined') return 'anonymous'
+    return localStorage.getItem('physiscaffold_user') || 'anonymous'
+  }, [])
+
+  // Pivot Injection hook
+  const {
+    isInitialized: pivotInitialized,
+    activePivot,
+    activeStepIndex: pivotStepIndex,
+    checkTrigger: checkPivotTrigger,
+    showPivot,
+    answerPivot,
+    skipPivot,
+    dismissPivot,
+    hasActivePivot,
+  } = usePivot({
+    sessionId,
+    userId: pivotUserId,
+    stepCount: data.steps.length,
+    enabled: FEATURE_FLAGS.PIVOT_INJECTION && !isInterviewMode,
+  })
+
+  // Pivot timer ref for checking time-based triggers
+  const lastPivotCheckRef = useRef<Map<number, number>>(new Map())
 
   // Circuit Breaker integration
   const {
@@ -2051,6 +2080,152 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     }
   }
 
+  // Pivot trigger check function
+  const checkAndTriggerPivot = useCallback(async (
+    stepIndex: number,
+    triggerType: 'time_on_step' | 'wrong_attempts' | 'hint_level',
+    stepDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
+  ) => {
+    if (!FEATURE_FLAGS.PIVOT_INJECTION || !pivotInitialized || hasActivePivot) return
+
+    // Get current state for this step
+    const errorCount = stepErrorCounts.get(stepIndex) || 0
+    const hintLevel = stepHintLevels.get(stepIndex) || 0
+    const activationTime = stepActivationTimesRef.current.get(stepIndex)
+    const timeSpentSeconds = activationTime
+      ? Math.floor((Date.now() - activationTime) / 1000)
+      : 0
+
+    const trigger: import('@/types/pivot').PivotTrigger = {
+      stepId: `step_${stepIndex}`,
+      stepIndex,
+      timeSpentSeconds,
+      attemptCount: errorCount,
+      hintLevel,
+      patternId: data.primaryPatternId,
+    }
+
+    try {
+      const decision = await checkPivotTrigger(trigger, stepDifficulty)
+      if (decision.shouldTrigger) {
+        console.log(`[Pivot] Triggering pivot on step ${stepIndex}:`, decision.reason)
+        await showPivot(stepIndex, timeSpentSeconds, data.primaryPatternId)
+      }
+    } catch (error) {
+      console.error('[Pivot] Failed to check/show pivot:', error)
+    }
+  }, [pivotInitialized, hasActivePivot, stepErrorCounts, stepHintLevels, checkPivotTrigger, showPivot, data.primaryPatternId])
+
+  // Handle pivot answer submission
+  const handlePivotAnswer = useCallback(async (answer: string, wasHelpful: boolean) => {
+    try {
+      const result = await answerPivot(answer, wasHelpful)
+      if (result.timeBonus > 0) {
+        console.log(`[Pivot] Time bonus earned: ${result.timeBonus}s`)
+      }
+    } catch (error) {
+      console.error('[Pivot] Failed to submit answer:', error)
+    }
+  }, [answerPivot])
+
+  // Handle pivot skip
+  const handlePivotSkip = useCallback(async () => {
+    try {
+      await skipPivot()
+    } catch (error) {
+      console.error('[Pivot] Failed to skip pivot:', error)
+    }
+  }, [skipPivot])
+
+  // Pivot time-based trigger check effect
+  // Uses a ref to track if we've set up the interval (for cleanup in tests)
+  const pivotIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    // Clear any existing interval
+    if (pivotIntervalRef.current) {
+      clearInterval(pivotIntervalRef.current)
+      pivotIntervalRef.current = null
+    }
+
+    if (!FEATURE_FLAGS.PIVOT_INJECTION || !pivotInitialized) return
+
+    // Check current step every 30 seconds for time-based triggers
+    const checkPivotTime = () => {
+      if (hasActivePivot) return
+
+      // Check if current step has been active for too long
+      const activationTime = stepActivationTimesRef.current.get(currentStep)
+      if (activationTime) {
+        const timeSpentSeconds = Math.floor((Date.now() - activationTime) / 1000)
+        const lastCheck = lastPivotCheckRef.current.get(currentStep) || 0
+
+        // Only check if we haven't checked in the last 30 seconds and time threshold is met
+        if (timeSpentSeconds >= 90 && timeSpentSeconds - lastCheck >= 30) {
+          lastPivotCheckRef.current.set(currentStep, timeSpentSeconds)
+          checkAndTriggerPivot(currentStep, 'time_on_step', 'medium')
+        }
+      }
+    }
+
+    pivotIntervalRef.current = setInterval(checkPivotTime, 30000) // Check every 30 seconds
+
+    return () => {
+      if (pivotIntervalRef.current) {
+        clearInterval(pivotIntervalRef.current)
+        pivotIntervalRef.current = null
+      }
+    }
+  }, [pivotInitialized, currentStep, hasActivePivot, checkAndTriggerPivot])
+
+  // Track previous error counts for pivot trigger detection
+  const prevStepErrorCountsRef = useRef<Map<number, number>>(new Map())
+
+  // Trigger pivot on wrong attempts
+  useEffect(() => {
+    if (!FEATURE_FLAGS.PIVOT_INJECTION || !pivotInitialized || hasActivePivot) return
+
+    // Check if any step's error count increased
+    stepErrorCounts.forEach((count, stepIndex) => {
+      const prevCount = prevStepErrorCountsRef.current.get(stepIndex) || 0
+      if (count > prevCount && count >= 2) {
+        // Debounce to avoid multiple triggers
+        setTimeout(() => {
+          if (!hasActivePivot) {
+            checkAndTriggerPivot(stepIndex, 'wrong_attempts', 'medium')
+          }
+        }, 500)
+      }
+    })
+
+    // Update previous counts
+    prevStepErrorCountsRef.current = new Map(stepErrorCounts)
+  }, [stepErrorCounts, pivotInitialized, hasActivePivot, checkAndTriggerPivot])
+
+  // Track previous hint levels for pivot trigger detection
+  const prevStepHintLevelsRef = useRef<Map<number, number>>(new Map())
+
+  // Trigger pivot on hint level increase
+  useEffect(() => {
+    if (!FEATURE_FLAGS.PIVOT_INJECTION || !pivotInitialized || hasActivePivot) return
+
+    // Check if any step's hint level increased to >= 2
+    stepHintLevels.forEach((level, stepIndex) => {
+      const prevLevel = prevStepHintLevelsRef.current.get(stepIndex) || 0
+      if (level >= 2 && prevLevel < 2) {
+        // Debounce to avoid multiple triggers
+        setTimeout(() => {
+          if (!hasActivePivot) {
+            checkAndTriggerPivot(stepIndex, 'hint_level', 'medium')
+          }
+        }, 1000)
+      }
+    })
+
+    // Update previous levels
+    prevStepHintLevelsRef.current = new Map(stepHintLevels)
+  }, [stepHintLevels, pivotInitialized, hasActivePivot, checkAndTriggerPivot])
+
   // Handle dismissing constraint collision feedback
   const handleDismissConstraintFeedback = useCallback(() => {
     // Mark all current collisions as dismissed
@@ -3416,6 +3591,16 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
             </p>
           </div>
         </div>
+      )}
+
+      {/* Pivot Injection Modal */}
+      {hasActivePivot && activePivot && pivotStepIndex !== null && (
+        <PivotModal
+          pivot={activePivot}
+          stepIndex={pivotStepIndex}
+          onAnswer={handlePivotAnswer}
+          onSkip={handlePivotSkip}
+        />
       )}
 
       {/* Coach Tools Panel - Consolidated advanced interventions */}

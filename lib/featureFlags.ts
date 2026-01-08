@@ -416,6 +416,28 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL=false)
    */
   WARMUP_PROTOCOL: process.env.NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL !== 'false',
+
+  /**
+   * Pivot Injection
+   * When enabled, dynamically injects pivot questions during problem-solving
+   * to help students get "unstuck" and think differently.
+   *
+   * Triggers when:
+   * - Time spent on step exceeds threshold (90-180 seconds)
+   * - Multiple wrong attempts (2-4 depending on difficulty)
+   * - High hint level reached (level >= 2)
+   *
+   * Pivot categories:
+   * - Simplify: Break down complex problems
+   * - Analogy: Connect to familiar concepts
+   * - Constraint: Identify problem boundaries
+   * - Decompose: Split into sub-problems
+   * - Visualize: Draw or imagine the scenario
+   * - Reverse: Work backwards from goal
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_PIVOT_INJECTION=false)
+   */
+  PIVOT_INJECTION: process.env.NEXT_PUBLIC_FEATURE_PIVOT_INJECTION !== 'false',
 }
 
 /**
