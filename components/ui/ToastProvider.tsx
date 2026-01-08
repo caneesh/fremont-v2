@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useAccessibleModal } from '@/hooks/useAccessibleModal'
 
 type ToastVariant = 'info' | 'success' | 'warning' | 'error'
 
@@ -42,6 +43,95 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 
 function generateId(prefix: string) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+}
+
+/**
+ * ConfirmDialog - Accessible confirmation dialog component
+ *
+ * Provides:
+ * - Focus trap inside dialog
+ * - Escape key closes (returns false)
+ * - aria-modal, role="dialog"
+ * - aria-labelledby, aria-describedby
+ * - Returns focus on close
+ */
+function ConfirmDialog({
+  confirmState,
+  onClose,
+}: {
+  confirmState: ConfirmState | null
+  onClose: (result: boolean) => void
+}) {
+  const { modalRef } = useAccessibleModal({
+    isOpen: !!confirmState,
+    onClose: () => onClose(false),
+    closeOnEscape: true,
+    trapFocus: true,
+    lockScroll: true,
+  })
+
+  if (!confirmState) return null
+
+  const titleId = 'confirm-dialog-title'
+  const descId = 'confirm-dialog-description'
+
+  return (
+    <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 dark:bg-black/70"
+        onClick={() => onClose(false)}
+        aria-hidden="true"
+      />
+
+      {/* Dialog */}
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={confirmState.title ? titleId : undefined}
+        aria-describedby={descId}
+        className="relative w-full max-w-md rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border shadow-2xl dark:shadow-dark-lg animate-scale-in"
+      >
+        <div className="p-5">
+          {confirmState.title && (
+            <h2
+              id={titleId}
+              className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary"
+            >
+              {confirmState.title}
+            </h2>
+          )}
+          <p
+            id={descId}
+            className="mt-2 text-sm text-gray-700 dark:text-dark-text-secondary"
+          >
+            {confirmState.message}
+          </p>
+        </div>
+        <div className="px-5 pb-5 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => onClose(false)}
+            className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border transition-colors"
+          >
+            {confirmState.cancelText}
+          </button>
+          <button
+            type="button"
+            onClick={() => onClose(true)}
+            className={`px-4 py-2 rounded-lg text-white transition-colors ${
+              confirmState.destructive
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-accent hover:bg-accent-strong'
+            }`}
+          >
+            {confirmState.confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -166,45 +256,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         ))}
       </div>
 
-      {/* Confirm modal */}
-      {confirmState && (
-        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 dark:bg-black/70"
-            onClick={() => closeConfirm(false)}
-          />
-          <div className="relative w-full max-w-md rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border shadow-2xl dark:shadow-dark-lg">
-            <div className="p-5">
-              {confirmState.title && (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-                  {confirmState.title}
-                </h3>
-              )}
-              <p className="mt-2 text-sm text-gray-700 dark:text-dark-text-secondary">
-                {confirmState.message}
-              </p>
-            </div>
-            <div className="px-5 pb-5 flex items-center justify-end gap-3">
-              <button
-                onClick={() => closeConfirm(false)}
-                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border transition-colors"
-              >
-                {confirmState.cancelText}
-              </button>
-              <button
-                onClick={() => closeConfirm(true)}
-                className={`px-4 py-2 rounded-lg text-white transition-colors ${
-                  confirmState.destructive
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-accent hover:bg-accent-strong'
-                }`}
-              >
-                {confirmState.confirmText}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Confirm modal - Accessible dialog */}
+      <ConfirmDialog
+        confirmState={confirmState}
+        onClose={closeConfirm}
+      />
     </ToastContext.Provider>
   )
 }
