@@ -35,6 +35,33 @@ export async function GET(request: NextRequest) {
     // Get lesson progress
     const lessonProgress = await repos.progress.getAllLessonProgress(userId)
 
+    // Calculate hint usage stats from pattern progress
+    let totalHintsUsed = 0
+    let questionsWithHints = 0
+    let totalQuestions = 0
+
+    for (const progress of patternProgress) {
+      for (const entry of progress.practice_history || []) {
+        totalQuestions++
+        if (entry.hints_used && entry.hints_used > 0) {
+          totalHintsUsed += entry.hints_used
+          questionsWithHints++
+        }
+      }
+    }
+
+    const hintStats = {
+      total_hints_used: totalHintsUsed,
+      questions_with_hints: questionsWithHints,
+      total_questions: totalQuestions,
+      avg_hints_per_question: totalQuestions > 0
+        ? Math.round((totalHintsUsed / totalQuestions) * 100) / 100
+        : 0,
+      hint_free_rate: totalQuestions > 0
+        ? Math.round(((totalQuestions - questionsWithHints) / totalQuestions) * 100)
+        : 100,
+    }
+
     return NextResponse.json({
       trackProgress,
       patternProgress,
@@ -42,6 +69,7 @@ export async function GET(request: NextRequest) {
       strongPatterns,
       needsReview,
       lessonProgress,
+      hintStats,
     })
   } catch (error) {
     console.error('Error fetching progress:', error)

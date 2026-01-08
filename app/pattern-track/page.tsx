@@ -14,6 +14,13 @@ export default function PatternTrackPage() {
   const [trackProgress, setTrackProgress] = useState<TrackProgress | null>(null)
   const [weakPatterns, setWeakPatterns] = useState<PatternWithProgress[]>([])
   const [needsReview, setNeedsReview] = useState<PatternWithProgress[]>([])
+  const [hintStats, setHintStats] = useState<{
+    total_hints_used: number
+    questions_with_hints: number
+    total_questions: number
+    avg_hints_per_question: number
+    hint_free_rate: number
+  } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,6 +41,7 @@ export default function PatternTrackPage() {
           setTrackProgress(data.trackProgress)
           setWeakPatterns(data.weakPatterns || [])
           setNeedsReview(data.needsReview || [])
+          setHintStats(data.hintStats || null)
         }
       } catch (error) {
         console.error('Error loading pattern track data:', error)
@@ -156,6 +164,60 @@ export default function PatternTrackPage() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Hint Usage Stats */}
+        {hintStats && hintStats.total_questions > 0 && (
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-md p-4 sm:p-6 mb-6 md:mb-8 border border-transparent dark:border-dark-border">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Hint Usage
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 bg-gray-50 dark:bg-dark-card-soft rounded-lg">
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {hintStats.hint_free_rate}%
+                </p>
+                <p className="text-xs text-gray-600 dark:text-dark-text-muted">Hint-Free Rate</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-dark-card-soft rounded-lg">
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                  {hintStats.total_hints_used}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-dark-text-muted">Total Hints Used</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-dark-card-soft rounded-lg">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {hintStats.avg_hints_per_question}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-dark-text-muted">Avg per Question</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-dark-card-soft rounded-lg">
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {hintStats.total_questions - hintStats.questions_with_hints}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-dark-text-muted">Solved Without Hints</p>
+              </div>
+            </div>
+            {hintStats.hint_free_rate < 50 && (
+              <p className="mt-3 text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Try solving more problems without hints to boost your mastery score!
+              </p>
+            )}
+            {hintStats.hint_free_rate >= 80 && (
+              <p className="mt-3 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Excellent! You&apos;re solving most problems independently.
+              </p>
+            )}
           </div>
         )}
 
