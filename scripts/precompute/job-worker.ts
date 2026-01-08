@@ -392,8 +392,9 @@ class PrecomputeJobWorker {
     })
 
     // Queue step expansion jobs for each step
+    // Use job.questionId (user-facing ID) not questionId (internal ID) for queuing
     for (const step of outlineData.steps || []) {
-      await this.queueJob('scaffold_step', questionId, step.step_id, job.priority - 1)
+      await this.queueJob('scaffold_step', job.questionId, step.step_id, job.priority - 1)
     }
   }
 
