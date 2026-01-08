@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { precomputeService } from '@/lib/precompute'
 import type {
   GenerateConceptContrastRequest,
   GenerateConceptContrastResponse,
@@ -71,9 +72,10 @@ export async function POST(request: NextRequest) {
 
 /**
  * Handle challenge generation
+ * Checks precomputed content first, falls back to live generation
  */
-async function handleGenerate(body: { action: string } & GenerateConceptContrastRequest) {
-  const { selectedConcept, problemContext, numDistractors = 2, targetStepId } = body
+async function handleGenerate(body: { action: string } & GenerateConceptContrastRequest & { questionId?: string }) {
+  const { selectedConcept, problemContext, numDistractors = 2, targetStepId, questionId } = body
 
   if (!selectedConcept || !problemContext) {
     return NextResponse.json(
@@ -82,6 +84,52 @@ async function handleGenerate(body: { action: string } & GenerateConceptContrast
     )
   }
 
+  // 1. Check precomputed content first
+  const precomputed = await precomputeService.getConceptContrast(
+    {
+      questionId,
+      conceptId: selectedConcept.id,
+      domain: problemContext.domain,
+      subdomain: problemContext.subdomain,
+    },
+    { acceptOlderVersion: true }
+  )
+
+  if (precomputed.found && precomputed.data) {
+    // Build challenge from precomputed distractors
+    const distractorData = precomputed.data as unknown as { distractors: Partial<DistractorConcept>[] }
+    const distractors = (distractorData.distractors || []).slice(0, numDistractors)
+
+    const challenge: ConceptContrastChallenge = {
+      id: `cc_precomputed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      selectedConcept: {
+        id: selectedConcept.id,
+        name: selectedConcept.name,
+        formula: selectedConcept.formula,
+      },
+      distractors: distractors.map((d, idx) => ({
+        id: `distractor_${idx}`,
+        name: d.name || `Distractor ${idx + 1}`,
+        whyPlausible: d.whyPlausible || '',
+        criticalFlaw: d.criticalFlaw || '',
+        problemConditionViolated: d.problemConditionViolated || '',
+        commonMisconception: d.commonMisconception || '',
+        rejectionHint: d.rejectionHint || '',
+      })),
+      problemContext,
+      targetStepId,
+      challengePrompt: buildDefaultChallengePrompt(selectedConcept.name),
+      requiredCorrectRejections: Math.min(numDistractors, 2),
+      maxAttempts: 3,
+    }
+
+    return NextResponse.json(
+      { success: true, challenge, source: 'precomputed' } as GenerateConceptContrastResponse & { source: string },
+      { status: 200 }
+    )
+  }
+
+  // 2. Fall back to live generation
   const prompt = buildGeneratePrompt(selectedConcept, problemContext, numDistractors)
 
   const message = await getAnthropicClient().messages.create({
@@ -128,9 +176,10 @@ async function handleGenerate(body: { action: string } & GenerateConceptContrast
       maxAttempts: 3,
     }
 
-    const response: GenerateConceptContrastResponse = {
+    const response: GenerateConceptContrastResponse & { source: string } = {
       success: true,
       challenge,
+      source: 'live',
     }
 
     return NextResponse.json(response, { status: 200 })
@@ -147,7 +196,7 @@ async function handleGenerate(body: { action: string } & GenerateConceptContrast
     )
 
     return NextResponse.json(
-      { success: true, challenge: fallbackChallenge },
+      { success: true, challenge: fallbackChallenge, source: 'fallback' },
       { status: 200 }
     )
   }
