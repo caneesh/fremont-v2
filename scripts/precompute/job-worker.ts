@@ -266,7 +266,7 @@ class PrecomputeJobWorker {
     try {
       // Get question data
       const question = await this.prisma.question.findUnique({
-        where: { id: job.questionId },
+        where: { questionId: job.questionId },
         select: {
           id: true,
           questionId: true,

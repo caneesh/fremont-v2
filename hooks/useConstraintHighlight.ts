@@ -1,62 +1,50 @@
-'use client'
+/**
+ * useConstraintHighlight Hook
+ *
+ * Manages constraint highlighting state for problem solving.
+ * Highlights constraints students may have missed after wrong answers.
+ */
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type {
   ConstraintHighlight,
+  ProblemConstraint,
   ConstraintSessionState,
-  ConstraintHighlightState,
-  ConstraintHighlightDecision,
   TextPosition,
 } from '@/types/constraintHighlight'
-import { constraintHighlightService } from '@/lib/constraintHighlight'
+import {
+  createConstraintSessionState,
+  addConstraintsToStep,
+  highlightConstraint,
+  acknowledgeConstraint,
+  dismissConstraint,
+  getNextConstraintToHighlight,
+} from '@/lib/core/entities/constraint-highlight'
+import { extractConstraints } from '@/lib/constraintExtractor'
+import { CONSTRAINT_DEFINITIONS } from '@/lib/constraintImplicationRules'
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-export interface UseConstraintHighlightOptions {
+interface UseConstraintHighlightOptions {
   sessionId: string
   problemText: string
   stepCount: number
   enabled?: boolean
 }
 
-export interface ActiveHighlight {
-  constraintId: string
+interface ActiveHighlight {
   constraint: ConstraintHighlight
-  stepIndex: number
   position: TextPosition
+  stepIndex: number
 }
 
-export interface UseConstraintHighlightReturn {
-  // State
+interface UseConstraintHighlightReturn {
   isInitialized: boolean
-  sessionState: ConstraintSessionState | null
   activeHighlight: ActiveHighlight | null
-
-  // Actions
-  checkTrigger: (
-    stepIndex: number,
-    wrongAttemptCount: number
-  ) => ConstraintHighlightDecision
-  triggerHighlight: (stepIndex: number, constraintId: string) => void
+  checkTrigger: (stepIndex: number, wrongAttempts: number) => boolean
+  triggerHighlight: (stepIndex: number) => void
   acknowledgeHighlight: () => void
   dismissHighlight: () => void
-
-  // Helpers
-  getStepState: (stepIndex: number) => ConstraintHighlightState | null
-  getConstraint: (constraintId: string) => ConstraintHighlight | null
-  getConstraintHint: (constraintId: string) => string | null
   hasActiveHighlight: boolean
-
-  // Statistics
-  totalHighlighted: number
-  totalAcknowledged: number
 }
-
-// =============================================================================
-// HOOK
-// =============================================================================
 
 export function useConstraintHighlight({
   sessionId,
@@ -68,167 +56,98 @@ export function useConstraintHighlight({
   const [sessionState, setSessionState] = useState<ConstraintSessionState | null>(null)
   const [activeHighlight, setActiveHighlight] = useState<ActiveHighlight | null>(null)
 
-  const initRef = useRef(false)
+  const extractedConstraintsRef = useRef<ProblemConstraint[]>([])
 
-  // Initialize session on mount
+  // Initialize session state and extract constraints
   useEffect(() => {
-    if (!enabled || !sessionId || !problemText || initRef.current) return
-
-    initRef.current = true
-
-    try {
-      const state = constraintHighlightService.initializeSession(
-        sessionId,
-        problemText,
-        stepCount
-      )
-      setSessionState(state)
+    if (!enabled) {
       setIsInitialized(true)
-
-      // Log detected constraints
-      const totalConstraints = state.stepStates.reduce(
-        (sum, s) => sum + s.problemConstraints.length,
-        0
-      )
-      if (totalConstraints > 0) {
-        console.log(
-          `[ConstraintHighlight] Initialized with ${totalConstraints} constraints detected`
-        )
-      }
-    } catch (error) {
-      console.error('[ConstraintHighlight] Failed to initialize:', error)
-      setIsInitialized(true) // Mark as initialized to prevent retries
+      return
     }
+
+    // Create session state
+    const state = createConstraintSessionState(sessionId, stepCount)
+
+    // Extract constraints from problem text
+    const extracted = extractConstraints(problemText)
+    extractedConstraintsRef.current = extracted.constraints as ProblemConstraint[]
+
+    // Add constraints to each step
+    let updatedState = state
+    for (let i = 0; i < stepCount; i++) {
+      updatedState = addConstraintsToStep(updatedState, i, extracted.constraints as ProblemConstraint[])
+    }
+
+    setSessionState(updatedState)
+    setIsInitialized(true)
   }, [sessionId, problemText, stepCount, enabled])
 
-  // Check if highlight should trigger
-  const checkTrigger = useCallback(
-    (stepIndex: number, wrongAttemptCount: number): ConstraintHighlightDecision => {
-      if (!enabled || !isInitialized) {
-        return { shouldHighlight: false, reason: 'no_constraints_found' }
-      }
+  // Check if highlight should be triggered
+  const checkTrigger = useCallback((stepIndex: number, wrongAttempts: number): boolean => {
+    if (!enabled || !sessionState) return false
 
-      return constraintHighlightService.checkHighlightTrigger(
-        sessionId,
-        stepIndex,
-        wrongAttemptCount
-      )
-    },
-    [sessionId, enabled, isInitialized]
-  )
+    // Trigger after 1 wrong attempt
+    if (wrongAttempts < 1) return false
 
-  // Trigger highlight for a constraint
-  const triggerHighlight = useCallback(
-    (stepIndex: number, constraintId: string): void => {
-      if (!enabled || !isInitialized) return
+    // Check if there's a constraint to highlight
+    const nextConstraint = getNextConstraintToHighlight(sessionState, stepIndex)
+    return nextConstraint !== null
+  }, [enabled, sessionState])
 
-      const result = constraintHighlightService.triggerHighlight(
-        sessionId,
-        stepIndex,
-        constraintId
-      )
+  // Trigger a highlight
+  const triggerHighlight = useCallback((stepIndex: number) => {
+    if (!enabled || !sessionState) return
 
-      setSessionState(result.sessionState)
+    const nextConstraint = getNextConstraintToHighlight(sessionState, stepIndex)
+    if (!nextConstraint) return
 
-      if (result.constraint) {
-        // Find the position of this constraint in the step state
-        const stepState = result.sessionState.stepStates[stepIndex]
-        const problemConstraint = stepState?.problemConstraints.find(
-          c => c.constraintId === constraintId
-        )
+    // Find the constraint definition
+    const constraintDef = CONSTRAINT_DEFINITIONS.find(
+      c => c.id === nextConstraint.constraintId
+    )
+    if (!constraintDef) return
 
-        setActiveHighlight({
-          constraintId,
-          constraint: result.constraint,
-          stepIndex,
-          position: problemConstraint?.position || { start: 0, end: 0 },
-        })
+    // Update session state
+    const updatedState = highlightConstraint(sessionState, stepIndex, nextConstraint.constraintId)
+    setSessionState(updatedState)
 
-        console.log(
-          `[ConstraintHighlight] Triggered highlight for "${result.constraint.keyword}" on step ${stepIndex}`
-        )
-      }
-    },
-    [sessionId, enabled, isInitialized]
-  )
+    // Set active highlight
+    setActiveHighlight({
+      constraint: constraintDef,
+      position: nextConstraint.position,
+      stepIndex,
+    })
+  }, [enabled, sessionState])
 
-  // Acknowledge the active highlight
-  const acknowledgeHighlight = useCallback((): void => {
-    if (!activeHighlight) return
+  // Acknowledge the highlight
+  const acknowledgeHighlight = useCallback(() => {
+    if (!activeHighlight || !sessionState) return
 
-    const updatedState = constraintHighlightService.acknowledgeHighlight(
-      sessionId,
+    const updatedState = acknowledgeConstraint(
+      sessionState,
       activeHighlight.stepIndex,
-      activeHighlight.constraintId
+      activeHighlight.constraint.id
     )
-
     setSessionState(updatedState)
     setActiveHighlight(null)
+  }, [activeHighlight, sessionState])
 
-    console.log(
-      `[ConstraintHighlight] Acknowledged "${activeHighlight.constraint.keyword}"`
-    )
-  }, [sessionId, activeHighlight])
+  // Dismiss the highlight
+  const dismissHighlight = useCallback(() => {
+    if (!activeHighlight || !sessionState) return
 
-  // Dismiss highlight without acknowledgment
-  const dismissHighlight = useCallback((): void => {
-    if (!activeHighlight) return
-
-    const updatedState = constraintHighlightService.dismissHighlight(
-      sessionId,
-      activeHighlight.stepIndex
-    )
-
+    const updatedState = dismissConstraint(sessionState, activeHighlight.stepIndex)
     setSessionState(updatedState)
     setActiveHighlight(null)
-  }, [sessionId, activeHighlight])
-
-  // Get step state
-  const getStepState = useCallback(
-    (stepIndex: number): ConstraintHighlightState | null => {
-      return constraintHighlightService.getStepState(sessionId, stepIndex)
-    },
-    [sessionId]
-  )
-
-  // Get constraint by ID
-  const getConstraint = useCallback(
-    (constraintId: string): ConstraintHighlight | null => {
-      return constraintHighlightService.getConstraint(constraintId)
-    },
-    []
-  )
-
-  // Get constraint hint
-  const getConstraintHint = useCallback(
-    (constraintId: string): string | null => {
-      return constraintHighlightService.getConstraintHint(constraintId)
-    },
-    []
-  )
+  }, [activeHighlight, sessionState])
 
   return {
-    // State
     isInitialized,
-    sessionState,
     activeHighlight,
-
-    // Actions
     checkTrigger,
     triggerHighlight,
     acknowledgeHighlight,
     dismissHighlight,
-
-    // Helpers
-    getStepState,
-    getConstraint,
-    getConstraintHint,
     hasActiveHighlight: activeHighlight !== null,
-
-    // Statistics
-    totalHighlighted: sessionState?.totalConstraintsHighlighted ?? 0,
-    totalAcknowledged: sessionState?.totalConstraintsAcknowledged ?? 0,
   }
 }
-
-export default useConstraintHighlight
