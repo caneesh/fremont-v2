@@ -76,7 +76,7 @@ export default function ProblemVariations({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-blue-400 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-lg border-2 border-blue-400 overflow-hidden" data-testid="problem-variations">
       {/* Header - Always visible */}
       <button
         onClick={loadVariations}

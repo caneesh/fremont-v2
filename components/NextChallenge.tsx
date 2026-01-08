@@ -47,7 +47,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (!nextProblem && !isGenerating && !error) {
     return (
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300">
+      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300" data-testid="next-challenge">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-900 mb-2 flex items-center gap-2">

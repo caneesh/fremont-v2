@@ -310,7 +310,12 @@ function PracticeContent() {
               {/* Hint Progress Indicator */}
               {!showAnswer && hintsRevealed === 0 && (
                 <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">
-                  Try to solve it first! Hints are here if you get stuck.
+                  Try to solve it first! Each hint costs -5 mastery points.
+                </p>
+              )}
+              {!showAnswer && hintsRevealed > 0 && hintsRevealed < currentQuestion.hints.length && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                  Current penalty: -{hintsRevealed * 5} mastery
                 </p>
               )}
             </div>
@@ -395,9 +400,14 @@ function PracticeContent() {
                 {isCorrect ? 'Correct!' : 'Not quite right'}
               </p>
               {hintsRevealed > 0 && (
-                <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-dark-card-soft text-gray-600 dark:text-dark-text-muted">
-                  {hintsRevealed} hint{hintsRevealed !== 1 ? 's' : ''} used
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                    {hintsRevealed} hint{hintsRevealed !== 1 ? 's' : ''} used
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                    -{Math.min(hintsRevealed * 5, 25)} mastery
+                  </span>
+                </div>
               )}
             </div>
             <p className="text-sm text-gray-700 dark:text-dark-text-secondary">

@@ -13,6 +13,9 @@ import StepAccordion from './StepAccordion'
 import MicroTaskStepAccordion from './MicroTaskStepAccordion'
 import DiagramStep from './diagram/DiagramStep'
 import ConceptPanel from './ConceptPanel'
+import ConceptsDrawer from './solve/ConceptsDrawer'
+import SolveCompletionActions from './solve/SolveCompletionActions'
+import { useSolveUIState, getStepProgressText } from '@/hooks/useSolveUIState'
 import SanityCheckStep from './SanityCheckStep'
 import SanityCheckMatrix from './SanityCheckMatrix'
 import NextChallenge from './NextChallenge'
@@ -292,6 +295,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   // Coach Tools panel state
   const coachToolsPanel = useCoachToolsPanel()
 
+  // Concepts drawer state (for progressive disclosure)
+  const [forceConceptsDrawerOpen, setForceConceptsDrawerOpen] = useState<boolean | undefined>(undefined)
+
   // Micro-task mode state
   const useMicroTasks = isMicroTaskScaffold(data)
   const [microTaskProgress, setMicroTaskProgress] = useState<Map<number, MicroTaskStepProgress>>(new Map())
@@ -430,6 +436,13 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     if (skipStepsMode) return true
     return completedSteps.length === data.steps.length
   }, [skipStepsMode, completedSteps.length, data.steps.length])
+
+  // Progressive disclosure: Solve UI state machine (SOLVING vs COMPLETED)
+  const solveUIState = useSolveUIState({
+    allStepsComplete,
+    isProblemSolved,
+    isReflectionComplete,
+  })
 
   // Generate session ID for circuit breaker (stable across component lifecycle)
   const sessionId = useRef(`session_${Date.now()}`).current
@@ -2799,9 +2812,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${solveUIState.isSolving ? '' : 'lg:grid-cols-4'}`}>
         {reverseSolveEnabled && modeConfig.showSteps && (
-          <div className="lg:col-span-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 sm:p-5">
+          <div className={`${solveUIState.isSolving ? '' : 'lg:col-span-4'} bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 sm:p-5`}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-amber-800 dark:text-amber-300">
@@ -2827,7 +2840,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
           </div>
         )}
         {/* Main solving area - Steps */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className={`${solveUIState.isSolving ? '' : 'lg:col-span-3'} space-y-4`}>
           {modeConfig.submissionVisibility === 'always' && (
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
               <div className="flex items-center gap-3 mb-4">
@@ -2976,9 +2989,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
           <div className="demo-step-steps bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border border-transparent dark:border-dark-border">
             <div className="flex items-start justify-between mb-4">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary">
-                Solution Roadmap
-              </h3>
+              <div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-dark-text-primary">
+                  Solution Roadmap
+                </h3>
+                {/* Step Progress Indicator - Focus Mode */}
+                {solveUIState.isSolving && (
+                  <p className="text-sm text-primary-600 dark:text-accent font-medium mt-1" data-testid="step-progress-indicator">
+                    {getStepProgressText(currentStep, data.steps.length)}
+                  </p>
+                )}
+              </div>
               {/* Recover from stuck button */}
               <button
                 onClick={handleRecoverFromStuck}
@@ -3275,6 +3296,40 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
             </div>
           )}
 
+          {/* Post-Completion Decision Layer - Progressive Disclosure */}
+          {solveUIState.showCompletionActions && (
+            <SolveCompletionActions
+              canGenerateNextChallenge={Boolean(onLoadNewProblem)}
+              canLaunchSimulation={isHintScaffold(data)}
+              topic={`${data.domain} - ${data.subdomain}`}
+              onContinuePath={() => {
+                // Scroll to NextChallenge component or trigger generation
+                const nextChallengeEl = document.querySelector('[data-testid="next-challenge"]')
+                if (nextChallengeEl) {
+                  nextChallengeEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+              }}
+              onReinforce={() => {
+                // Scroll to ProblemVariations component
+                const variationsEl = document.querySelector('[data-testid="problem-variations"]')
+                if (variationsEl) {
+                  variationsEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+              }}
+              onExploreWhatIf={() => {
+                // Scroll to WhatIfSimulation component
+                const simulationEl = document.querySelector('[data-testid="what-if-simulation"]')
+                if (simulationEl) {
+                  simulationEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+              }}
+              onReviewConcepts={() => {
+                // Open the concepts drawer
+                setForceConceptsDrawerOpen(true)
+              }}
+            />
+          )}
+
           {/* Practice Options - show after reflection is complete */}
           {isProblemSolved && isReflectionComplete && (
             <div className="space-y-4">
@@ -3305,13 +3360,27 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
           )}
         </div>
 
-        {/* Right sidebar - Concept panel */}
-        {modeConfig.showSidebar && (
-          <div className="demo-step-concepts lg:col-span-1">
+        {/* Right sidebar - Concept panel (desktop only, hidden on mobile) */}
+        {modeConfig.showSidebar && !solveUIState.isSolving && (
+          <div className="demo-step-concepts lg:col-span-1 hidden lg:block">
             <ConceptPanel concepts={data.concepts} />
           </div>
         )}
       </div>
+
+      {/* Concepts Drawer - Progressive disclosure overlay (replaces sidebar during solving) */}
+      {modeConfig.showSidebar && (
+        <ConceptsDrawer
+          concepts={data.concepts}
+          forceOpen={forceConceptsDrawerOpen}
+          onToggle={(isOpen) => {
+            // Clear force state after user interaction
+            if (forceConceptsDrawerOpen !== undefined) {
+              setForceConceptsDrawerOpen(undefined)
+            }
+          }}
+        />
+      )}
 
       {/* Post-Solve Activity Popup */}
       {showPostSolveActivity && (
