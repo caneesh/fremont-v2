@@ -20,8 +20,7 @@ import {
   dismissConstraint,
   getNextConstraintToHighlight,
 } from '@/lib/core/entities/constraint-highlight'
-import { extractConstraints } from '@/lib/constraintExtractor'
-import { CONSTRAINT_DESCRIPTIONS } from '@/lib/constraintImplicationRules'
+import { DEFAULT_CONSTRAINTS, detectConstraints } from '@/lib/core/policies/constraint-highlight-policy'
 
 interface UseConstraintHighlightOptions {
   sessionId: string
@@ -74,8 +73,8 @@ export function useConstraintHighlight({
     const state = createConstraintSessionState(sessionId, stepCount)
 
     // Extract constraints from problem text
-    const extracted = extractConstraints(problemText)
-    extractedConstraintsRef.current = extracted.constraints as ProblemConstraint[]
+    const extracted = detectConstraints(problemText)
+    extractedConstraintsRef.current = [...extracted.constraints]
 
     // Add constraints to each step
     let updatedState = state
@@ -109,7 +108,7 @@ export function useConstraintHighlight({
     if (!nextConstraint) return
 
     // Find the constraint definition
-    const constraintDef = CONSTRAINT_DEFINITIONS.find(
+    const constraintDef = DEFAULT_CONSTRAINTS.find(
       c => c.id === nextConstraint.constraintId
     )
     if (!constraintDef) return

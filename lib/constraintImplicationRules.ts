@@ -959,3 +959,155 @@ export const CONSTRAINT_DESCRIPTIONS: Record<string, string> = {
   initial_velocity_given: 'Initial velocity is specified',
   vertical_projection: 'Vertical projection; 1D motion analysis',
 }
+
+/**
+ * Constraint definitions for highlighting feature
+ * Maps constraint IDs to user-facing display information
+ */
+export const CONSTRAINT_DEFINITIONS: Array<{
+  id: string
+  keyword: string
+  displayText: string
+  hint: string
+  category: 'surface' | 'motion' | 'connection' | 'force' | 'energy' | 'symmetry' | 'reference' | 'approximation'
+  synonyms: readonly string[]
+  implication: string
+}> = [
+  // Surface constraints
+  {
+    id: 'frictionless',
+    keyword: 'frictionless',
+    displayText: 'Frictionless Surface',
+    hint: 'The surface is smooth - no friction force acts on the object.',
+    category: 'surface',
+    synonyms: ['smooth', 'without friction', 'no friction'],
+    implication: 'μ = 0, so friction force f = 0. Only normal force and weight act.',
+  },
+  {
+    id: 'friction_present',
+    keyword: 'rough',
+    displayText: 'Rough Surface (Friction Present)',
+    hint: 'The surface is rough - friction force must be included.',
+    category: 'surface',
+    synonyms: ['rough surface', 'with friction'],
+    implication: 'Include friction force f = μN in your analysis.',
+  },
+  {
+    id: 'friction_coefficient',
+    keyword: 'coefficient of friction',
+    displayText: 'Friction Coefficient Given',
+    hint: 'The coefficient of friction is specified - use it to calculate friction force.',
+    category: 'surface',
+    synonyms: ['μ =', 'coefficient'],
+    implication: 'Use f = μN to calculate friction force magnitude.',
+  },
+
+  // Connection constraints
+  {
+    id: 'massless_string',
+    keyword: 'massless string',
+    displayText: 'Massless String',
+    hint: 'The string has negligible mass.',
+    category: 'connection',
+    synonyms: ['light string', 'weightless rope', 'massless rope'],
+    implication: 'Tension is the same throughout the entire string.',
+  },
+  {
+    id: 'inextensible_string',
+    keyword: 'inextensible',
+    displayText: 'Inextensible String',
+    hint: 'The string cannot stretch - its length remains constant.',
+    category: 'connection',
+    synonyms: ['inextensible rope', 'non-stretching'],
+    implication: 'Connected objects have related accelerations via constraint equations.',
+  },
+  {
+    id: 'taut_string',
+    keyword: 'taut',
+    displayText: 'String Remains Taut',
+    hint: 'The string stays tight throughout the motion.',
+    category: 'connection',
+    synonyms: ['remains taut', 'always taut'],
+    implication: 'Tension T > 0 always. Use constraint equation for motion.',
+  },
+  {
+    id: 'massless_pulley',
+    keyword: 'massless pulley',
+    displayText: 'Massless/Ideal Pulley',
+    hint: 'The pulley has negligible mass and friction.',
+    category: 'connection',
+    synonyms: ['light pulley', 'ideal pulley', 'frictionless pulley'],
+    implication: 'Tension is the same on both sides of the pulley.',
+  },
+
+  // Motion constraints
+  {
+    id: 'pure_rolling',
+    keyword: 'rolling without slipping',
+    displayText: 'Rolling Without Slipping',
+    hint: 'The object rolls without sliding on the surface.',
+    category: 'motion',
+    synonyms: ['pure rolling', 'no slipping', 'rolls without sliding'],
+    implication: 'Use v = ωR and a = αR. Friction may be static.',
+  },
+  {
+    id: 'no_slip',
+    keyword: 'no slipping',
+    displayText: 'No Slipping Between Surfaces',
+    hint: 'The objects in contact do not slip relative to each other.',
+    category: 'motion',
+    synonyms: ['does not slip', 'move together'],
+    implication: 'Objects have the same velocity/acceleration at contact point.',
+  },
+  {
+    id: 'initial_velocity_zero',
+    keyword: 'from rest',
+    displayText: 'Starts From Rest',
+    hint: 'The initial velocity is zero.',
+    category: 'motion',
+    synonyms: ['at rest', 'released from rest', 'initially at rest'],
+    implication: 'v₀ = 0 in kinematic equations.',
+  },
+
+  // Force constraints
+  {
+    id: 'no_air_resistance',
+    keyword: 'neglect air resistance',
+    displayText: 'No Air Resistance',
+    hint: 'Air resistance can be ignored.',
+    category: 'force',
+    synonyms: ['no drag', 'ignore air resistance', 'in vacuum'],
+    implication: 'Only gravitational force acts during flight.',
+  },
+
+  // Energy constraints
+  {
+    id: 'elastic_collision',
+    keyword: 'elastic collision',
+    displayText: 'Elastic Collision',
+    hint: 'Both momentum and kinetic energy are conserved.',
+    category: 'energy',
+    synonyms: ['perfectly elastic'],
+    implication: 'Use both momentum and KE conservation equations.',
+  },
+  {
+    id: 'perfectly_inelastic',
+    keyword: 'perfectly inelastic',
+    displayText: 'Perfectly Inelastic Collision',
+    hint: 'Objects stick together after collision.',
+    category: 'energy',
+    synonyms: ['stick together', 'coalesce'],
+    implication: 'Only momentum conserved. Final velocity is common.',
+  },
+
+  // Approximation constraints
+  {
+    id: 'small_angle',
+    keyword: 'small angle',
+    displayText: 'Small Angle Approximation',
+    hint: 'The angle is small enough for approximations.',
+    category: 'approximation',
+    synonyms: ['small oscillations', 'small amplitude'],
+    implication: 'Use sin θ ≈ θ, cos θ ≈ 1, tan θ ≈ θ (θ in radians).',
+  },
+]
