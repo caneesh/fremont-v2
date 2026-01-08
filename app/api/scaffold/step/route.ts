@@ -3,22 +3,26 @@
  *
  * Phase B: Generate Step Expansion (on-demand)
  * Deep content generation for a single step when user clicks on it
+ *
+ * Supports precomputed content lookup for approved questions.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { generateStepExpansion } from '@/lib/phasedScaffold'
+import { precomputeService } from '@/lib/precompute'
 import type { StepExpansionRequest, StepExpansionResponse } from '@/types/phasedScaffold'
 
 export interface StepExpansionAPIResponse {
   success: boolean
   data?: StepExpansionResponse
   error?: string
+  source?: 'precomputed' | 'live'
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: StepExpansionRequest = await request.json()
-    const { scaffold_id, step_id, outline_steps, problem } = body
+    const { scaffold_id, step_id, questionId, outline_steps, problem } = body
 
     // Validate required fields
     if (!scaffold_id) {
@@ -61,6 +65,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 1. Check precomputed content first if questionId is provided
+    if (questionId) {
+      const precomputed = await precomputeService.getStepExpansion(questionId, step_id, {
+        acceptOlderVersion: true,
+      })
+
+      if (precomputed.found && precomputed.data) {
+        return NextResponse.json({
+          success: true,
+          data: precomputed.data,
+          source: 'precomputed',
+        } as StepExpansionAPIResponse)
+      }
+    }
+
+    // 2. Fall back to live generation
     // Check for API key
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
@@ -83,6 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: expansion,
+      source: 'live',
     } as StepExpansionAPIResponse)
   } catch (error) {
     console.error('Error generating step expansion:', error)

@@ -60,7 +60,7 @@ class PrecomputeService {
 
       return {
         found: true,
-        data: outline.outlineData as OutlineScaffoldResponse,
+        data: outline.outlineData as unknown as OutlineScaffoldResponse,
         source: 'precomputed',
         meta: {
           promptVersion: outline.promptVersion,
@@ -124,7 +124,7 @@ class PrecomputeService {
 
       return {
         found: true,
-        data: expansion.expansionData as StepExpansionResponse,
+        data: expansion.expansionData as unknown as StepExpansionResponse,
         source: 'precomputed',
         meta: {
           promptVersion: expansion.promptVersion,
@@ -192,7 +192,7 @@ class PrecomputeService {
 
       return {
         found: true,
-        data: contrast.distractors as ConceptContrastData,
+        data: contrast.distractors as unknown as ConceptContrastData,
         source: 'precomputed',
         meta: {
           promptVersion: contrast.promptVersion,

@@ -186,6 +186,7 @@ export interface CachedFinalSolve {
 
 export interface OutlineRequest {
   problem: string
+  questionId?: string       // Optional question ID for precomputed lookup
   diagram_image?: string    // Optional base64 image
   options?: {
     density?: 1 | 2 | 3 | 4 | 5
@@ -196,6 +197,7 @@ export interface OutlineRequest {
 export interface StepExpansionRequest {
   scaffold_id: string
   step_id: string
+  questionId?: string         // Optional question ID for precomputed lookup
   outline_steps: OutlineStep[]  // For consistency check
   problem: string           // Original problem for context
 }
