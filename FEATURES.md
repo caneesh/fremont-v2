@@ -80,6 +80,48 @@ A comprehensive intelligent tutoring system for IIT-JEE Physics problem-solving.
 - **Socratic dialogue guidance** for corrections
 - **Implication-based rules** for physical laws
 
+### Constraint Highlighting Intervention
+After a wrong answer, highlight specific constraints the student may have missed:
+
+**Constraint Categories:**
+| Category | Examples |
+|----------|----------|
+| `surface` | frictionless, rough, smooth |
+| `motion` | constant velocity, at rest, maximum height |
+| `connection` | massless rope, inextensible, rigid |
+| `force` | negligible air resistance, no external forces |
+| `energy` | elastic collision, perfectly inelastic |
+| `symmetry` | identical objects, equal masses |
+| `reference` | ground frame, moving frame |
+| `approximation` | small angle, point mass |
+
+**Policy:**
+- Trigger after first wrong answer
+- Maximum 2 constraints highlighted at once
+- 5-second highlight duration
+- User must acknowledge before continuing
+
+### Pivot Injection System
+When a student takes too long on a step, inject a "pivot" question to help them think from a different angle:
+
+**Pivot Categories:**
+| Type | Description |
+|------|-------------|
+| `simplify` | Think about a simpler version |
+| `analogy` | Connect to familiar concept |
+| `constraint` | Focus on missed constraint |
+| `decompose` | Break into smaller parts |
+| `visualize` | Encourage diagram thinking |
+| `reverse` | Work backwards from answer |
+
+**Trigger Policy:**
+- Minimum 60s before considering pivot
+- Default trigger at 120s (2 min)
+- Hard steps: 180s (3 min)
+- After 3 wrong attempts
+- Max 2 pivots per step, 5 per session
+- 120s cooldown between pivots
+
 ### Boundary Case & Sanity Checking
 - **Boundary Case Builder** - stress test equations with limiting cases (θ → 0°, m → ∞)
 - **Sanity Check Matrix:**
@@ -147,6 +189,33 @@ A comprehensive intelligent tutoring system for IIT-JEE Physics problem-solving.
 - **Confidence Rating** - post-answer self-assessment
 - **Confidence-Weighted SRS** - accelerated review based on confidence × correctness
 - **Step Heatmap** - visual confidence distribution
+
+### Warm-Up Protocol
+Short micro-drills before main session based on spaced repetition decay scores:
+
+**Session Structure:**
+- Duration: 2-5 minutes
+- Max 3 blocks per session
+- Max 5 items per block
+- 20-second default time limit per item
+
+**Drill Types:**
+| Type | Description |
+|------|-------------|
+| `mcq` | Multiple choice questions |
+| `short` | Short answer responses |
+| `fill` | Fill-in-the-blank |
+
+**Selection Algorithm:**
+- Uses pattern decay scores to prioritize rusty skills
+- Includes patterns with decay > 0.3
+- Excludes patterns with mastery > 0.85
+- Considers recent mistake types
+
+**Skip Policy:**
+- 1 skip allowed per day
+- Skip incurs -0.05 mastery penalty
+- Lifetime skip count tracked
 
 ---
 
@@ -351,6 +420,11 @@ Events tracked:
 | `ADAPTIVE_PREFLIGHT` | Enabled | Risk-based preflight gating |
 | `WHY_THIS_STEP` | Enabled | Step purpose explanations |
 | `STEP_HEATMAP` | Enabled | Confidence visualization |
+| `DASHBOARD_V3` | Enabled | Pattern-first dashboard |
+| `SOCRATIC_FIRST_MODE` | Enabled | Dialogue-based step interaction |
+| `WARMUP_PROTOCOL` | Planned | Pre-session micro-drills |
+| `PIVOT_INJECTION` | Planned | Time-triggered help questions |
+| `CONSTRAINT_HIGHLIGHT` | Planned | Wrong-answer constraint hints |
 | `FBD_CANVAS` | Disabled | Free body diagram tool |
 | `PHASED_SCAFFOLD` | Disabled | 3-phase loading |
 
@@ -390,12 +464,13 @@ Events tracked:
 
 | Category | Count |
 |----------|-------|
-| Pedagogical Features | 15+ |
+| Pedagogical Features | 18+ |
 | Interactive Modes | 8 |
-| Study Systems | 4 |
+| Study Systems | 5 |
+| Intervention Systems | 3 |
 | API Endpoints | 47 |
 | Database Models | 8 |
-| Feature Flags | 20 |
+| Feature Flags | 25 |
 | UI Components | 100+ |
 | Service Modules | 40+ |
 
