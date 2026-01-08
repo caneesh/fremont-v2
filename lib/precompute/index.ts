@@ -35,3 +35,14 @@ export {
 
 // Service
 export { precomputeService } from './precomputeService'
+
+// Job Queue
+export {
+  queuePrecomputeJob,
+  queueAllJobsForQuestion,
+  getPendingJobCounts,
+  getJobStats,
+  retryFailedJobs,
+  clearOldCompletedJobs,
+} from './jobQueue'
+export type { PrecomputeJobType } from './jobQueue'
