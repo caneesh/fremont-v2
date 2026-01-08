@@ -828,7 +828,7 @@
     },
     {
       "id": "warmup-shm",
-      "topicId": "simple_harmonic_motion",
+      "topicId": "shm",
       "title": "Simple Harmonic Motion Warm-Up",
       "description": "Oscillations, springs, and pendulums",
       "durationMinutes": 4,

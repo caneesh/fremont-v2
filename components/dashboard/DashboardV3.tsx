@@ -7,7 +7,11 @@ import TodayPlanEditor from './TodayPlanEditor'
 import TaskPickerModal from './TaskPickerModal'
 import WinsCard from './WinsCard'
 import CoverageSummary from './CoverageSummary'
+import { TodaysFocus } from './TodaysFocus'
 import { ProgressOverview } from './ProgressOverview'
+import { MistakeIntelligence } from './MistakeIntelligence'
+import { ActiveProblems } from './ActiveProblems'
+import { SystemSignals } from './SystemSignals'
 import { WarmUpGate, WarmUpPlayer, WarmUpResults } from '@/components/warmup'
 import { computeDashboardMetrics, getTopicCoverage, getWinsMessage } from '@/lib/dashboard/dashboardMetrics'
 import * as planService from '@/lib/dashboard/todayPlanService'
@@ -210,13 +214,17 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
       {/* Wins Card */}
       {winsMessage && <WinsCard message={winsMessage} />}
 
+      {/* Section 1: Today's Focus - Primary CTA */}
+      <TodaysFocus />
+
       {/* Hero Metrics */}
       {metrics && <DashboardHeroMetrics metrics={metrics} />}
 
       {/* Main Content - Two Column on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Plan Editor - Takes 2 columns on desktop */}
-        <div className="lg:col-span-2">
+        {/* Left Column - Takes 2 columns on desktop */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Plan Editor */}
           {plan && (
             <TodayPlanEditor
               plan={plan}
@@ -227,60 +235,26 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
               onStartSession={handleStartSession}
             />
           )}
+
+          {/* Section 4: Active Problems */}
+          <ActiveProblems />
         </div>
 
-        {/* Sidebar */}
+        {/* Right Sidebar */}
         <div className="space-y-4">
-          {/* Quick Actions */}
-          <div className="bg-white dark:bg-dark-card rounded-xl p-5 shadow-md dark:shadow-dark-md border border-gray-100 dark:border-dark-border">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => router.push('/solve')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-left"
-              >
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-                  Solve Custom Problem
-                </span>
-              </button>
-              <button
-                onClick={() => router.push('/mistake-notebook?review=true')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-left"
-              >
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                  <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-                  Review Mistakes
-                </span>
-              </button>
-              <button
-                onClick={() => router.push('/pattern-track')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-card-soft transition-colors text-left"
-              >
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-                  Pattern Tracks
-                </span>
-              </button>
-            </div>
-          </div>
+          {/* Section 2: Progress Overview */}
+          <ProgressOverview />
+
+          {/* Section 3: Mistake Intelligence */}
+          <MistakeIntelligence />
 
           {/* Coverage Summary */}
           <CoverageSummary coverage={coverage} />
         </div>
       </div>
+
+      {/* Section 5: System Signals - Collapsible at bottom */}
+      <SystemSignals defaultCollapsed={true} />
 
       {/* Task Picker Modal */}
       <TaskPickerModal

@@ -21,7 +21,7 @@ import {
   getNextConstraintToHighlight,
 } from '@/lib/core/entities/constraint-highlight'
 import { extractConstraints } from '@/lib/constraintExtractor'
-import { CONSTRAINT_DEFINITIONS } from '@/lib/constraintImplicationRules'
+import { CONSTRAINT_DESCRIPTIONS } from '@/lib/constraintImplicationRules'
 
 interface UseConstraintHighlightOptions {
   sessionId: string
@@ -36,10 +36,15 @@ interface ActiveHighlight {
   stepIndex: number
 }
 
+interface ConstraintTriggerDecision {
+  shouldHighlight: boolean
+  constraintId?: string
+}
+
 interface UseConstraintHighlightReturn {
   isInitialized: boolean
   activeHighlight: ActiveHighlight | null
-  checkTrigger: (stepIndex: number, wrongAttempts: number) => boolean
+  checkTrigger: (stepIndex: number, wrongAttempts: number) => ConstraintTriggerDecision
   triggerHighlight: (stepIndex: number) => void
   acknowledgeHighlight: () => void
   dismissHighlight: () => void
@@ -83,15 +88,17 @@ export function useConstraintHighlight({
   }, [sessionId, problemText, stepCount, enabled])
 
   // Check if highlight should be triggered
-  const checkTrigger = useCallback((stepIndex: number, wrongAttempts: number): boolean => {
-    if (!enabled || !sessionState) return false
+  const checkTrigger = useCallback((stepIndex: number, wrongAttempts: number): ConstraintTriggerDecision => {
+    if (!enabled || !sessionState) return { shouldHighlight: false }
 
     // Trigger after 1 wrong attempt
-    if (wrongAttempts < 1) return false
+    if (wrongAttempts < 1) return { shouldHighlight: false }
 
     // Check if there's a constraint to highlight
     const nextConstraint = getNextConstraintToHighlight(sessionState, stepIndex)
-    return nextConstraint !== null
+    if (!nextConstraint) return { shouldHighlight: false }
+
+    return { shouldHighlight: true, constraintId: nextConstraint.constraintId }
   }, [enabled, sessionState])
 
   // Trigger a highlight

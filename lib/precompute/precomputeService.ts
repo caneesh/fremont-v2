@@ -18,6 +18,25 @@ import type { OutlineScaffoldResponse, StepExpansionResponse } from '@/types/pha
 
 class PrecomputeService {
   /**
+   * Resolve user-facing questionId to internal database ID
+   * The precomputed tables use internal ID (CUID) as foreign key
+   */
+  private async resolveQuestionId(questionId: string): Promise<string | null> {
+    // If it looks like a CUID (starts with 'c' and is ~25 chars), assume it's already internal
+    if (questionId.startsWith('c') && questionId.length > 20) {
+      return questionId
+    }
+
+    // Otherwise, look up the internal ID
+    const question = await prisma.question.findUnique({
+      where: { questionId },
+      select: { id: true },
+    })
+
+    return question?.id ?? null
+  }
+
+  /**
    * Get precomputed scaffold outline for a question
    */
   async getScaffoldOutline(
@@ -28,10 +47,16 @@ class PrecomputeService {
     const currentVersion = getCurrentVersion('scaffold_outline')
 
     try {
+      // Resolve user-facing questionId to internal ID
+      const internalId = await this.resolveQuestionId(questionId)
+      if (!internalId) {
+        return { found: false, source: 'live' }
+      }
+
       // Try exact version match first
       let outline = await prisma.precomputedScaffoldOutline.findFirst({
         where: {
-          questionId,
+          questionId: internalId,
           promptVersion: currentVersion.promptVersion,
           modelVersion: currentVersion.modelVersion,
         },
@@ -40,7 +65,7 @@ class PrecomputeService {
       // Fall back to any version if allowed
       if (!outline && acceptOlderVersion) {
         outline = await prisma.precomputedScaffoldOutline.findUnique({
-          where: { questionId },
+          where: { questionId: internalId },
         })
 
         // Validate the version is acceptable
@@ -88,9 +113,15 @@ class PrecomputeService {
     const currentVersion = getCurrentVersion('scaffold_step')
 
     try {
+      // Resolve user-facing questionId to internal ID
+      const internalId = await this.resolveQuestionId(questionId)
+      if (!internalId) {
+        return { found: false, source: 'live' }
+      }
+
       // First get the outline to find the correct relation
       const outline = await prisma.precomputedScaffoldOutline.findUnique({
-        where: { questionId },
+        where: { questionId: internalId },
         include: {
           stepExpansions: {
             where: { stepId },
@@ -156,7 +187,12 @@ class PrecomputeService {
       const where: Record<string, unknown> = {}
 
       if (params.questionId) {
-        where.questionId = params.questionId
+        // Resolve user-facing questionId to internal ID
+        const internalId = await this.resolveQuestionId(params.questionId)
+        if (!internalId) {
+          return { found: false, source: 'live' }
+        }
+        where.questionId = internalId
       } else if (params.conceptId && params.domain && params.subdomain) {
         where.conceptId = params.conceptId
         where.domain = params.domain
@@ -215,7 +251,13 @@ class PrecomputeService {
     options: PrecomputeLookupOptions = {}
   ): Promise<PrecomputeLookupResult<VariationData[]>> {
     try {
-      const where: Record<string, unknown> = { questionId }
+      // Resolve user-facing questionId to internal ID
+      const internalId = await this.resolveQuestionId(questionId)
+      if (!internalId) {
+        return { found: false, source: 'live' }
+      }
+
+      const where: Record<string, unknown> = { questionId: internalId }
 
       if (variationType) {
         where.variationType = variationType
@@ -279,8 +321,14 @@ class PrecomputeService {
     questionId: string
   ): Promise<PrecomputeLookupResult<SimulationParamsData>> {
     try {
+      // Resolve user-facing questionId to internal ID
+      const internalId = await this.resolveQuestionId(questionId)
+      if (!internalId) {
+        return { found: false, source: 'live' }
+      }
+
       const simParams = await prisma.precomputedSimulationParams.findUnique({
-        where: { questionId },
+        where: { questionId: internalId },
       })
 
       if (!simParams) {
@@ -317,10 +365,16 @@ class PrecomputeService {
     const result: Record<string, boolean> = {}
 
     try {
+      // Resolve user-facing questionId to internal ID
+      const internalId = await this.resolveQuestionId(questionId)
+      if (!internalId) {
+        return {}
+      }
+
       const [outline, contrasts, variations, simulation] = await Promise.all([
         types.includes('outline')
           ? prisma.precomputedScaffoldOutline.findUnique({
-              where: { questionId },
+              where: { questionId: internalId },
               select: {
                 id: true,
                 stepExpansions: { select: { id: true } },
@@ -328,14 +382,14 @@ class PrecomputeService {
             })
           : null,
         types.includes('contrasts')
-          ? prisma.precomputedConceptContrast.count({ where: { questionId } })
+          ? prisma.precomputedConceptContrast.count({ where: { questionId: internalId } })
           : 0,
         types.includes('variations')
-          ? prisma.precomputedVariation.count({ where: { questionId } })
+          ? prisma.precomputedVariation.count({ where: { questionId: internalId } })
           : 0,
         types.includes('simulation')
           ? prisma.precomputedSimulationParams.findUnique({
-              where: { questionId },
+              where: { questionId: internalId },
               select: { id: true },
             })
           : null,

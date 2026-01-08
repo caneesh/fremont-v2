@@ -288,6 +288,7 @@ class PrecomputeJobWorker {
       }
 
       // Process based on job type
+      // Use question.id (internal CUID) for storage due to foreign key constraints
       switch (job.jobType) {
         case 'scaffold_outline':
           await this.processScaffoldOutline(job, question.id, problemText)

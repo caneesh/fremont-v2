@@ -453,6 +453,30 @@ export const FEATURE_FLAGS = {
    * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_CONSTRAINT_HIGHLIGHT=false)
    */
   CONSTRAINT_HIGHLIGHT: process.env.NEXT_PUBLIC_FEATURE_CONSTRAINT_HIGHLIGHT !== 'false',
+
+  /**
+   * Debug/Refactor Problem Modes
+   * When enabled, provides alternative problem-solving modes beyond standard scaffolds:
+   *
+   * Debug Mode:
+   * - 5-step flow: understand → hypothesis → fix → test → reflection
+   * - Given buggy code + failing tests, student must identify and fix the bug
+   * - Scoring: tests 40%, bugId 30%, hypothesis 15%, reflection 15%
+   *
+   * Refactor Mode:
+   * - 5-step flow: read → identify → refactor → test → reflection
+   * - Given working but smelly code, student must improve it
+   * - Scoring: tests 30%, smells 35%, style 20%, quality 15%
+   *
+   * Features:
+   * - Code editor with syntax highlighting
+   * - Test runner visualization
+   * - Step-by-step guided progression
+   * - Rubric-based scoring with detailed feedback
+   *
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_DEBUG_REFACTOR=false)
+   */
+  DEBUG_REFACTOR_MODE: process.env.NEXT_PUBLIC_FEATURE_DEBUG_REFACTOR !== 'false',
 }
 
 /**

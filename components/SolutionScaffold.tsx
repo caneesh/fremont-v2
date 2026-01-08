@@ -2274,7 +2274,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
           // Debounce to allow other feedback to show first
           setTimeout(() => {
             if (!hasActiveHighlight) {
-              triggerConstraintHighlight(stepIndex, decision.constraintId!)
+              triggerConstraintHighlight(stepIndex)
             }
           }, 300)
         }

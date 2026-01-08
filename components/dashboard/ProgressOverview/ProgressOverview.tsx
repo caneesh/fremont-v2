@@ -117,13 +117,9 @@ export default function ProgressOverview({ className = '' }: ProgressOverviewPro
     return <LoadingSkeleton />
   }
 
-  // Empty state - no patterns
-  const hasNoProgress = data.patterns.length === 0 ||
-    (data.patterns.every(p => p.state === 'not_started') &&
-     data.confidenceDistribution.total === 0 &&
-     data.sanityCheckStats.total === 0)
-
-  if (hasNoProgress) {
+  // Only show empty state if no patterns loaded (data source issue)
+  // We want to show patterns even if all are 'not_started' so users can see what exists
+  if (data.patterns.length === 0) {
     return <EmptyState />
   }
 
