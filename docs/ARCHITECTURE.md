@@ -1,285 +1,733 @@
-# PhysiScaffold — Architecture Lock-In Document
+# PhysiScaffold - Architecture Document
 
-**Status**: LOCKED
-**Version**: 1.0
-**Date**: 2026-01-06
+**Version**: 2.0
+**Last Updated**: 2026-01-09
 
-This document defines the immutable architectural decisions for the PhysiScaffold adaptive learning platform. Future developers MUST NOT violate these invariants.
+This document describes the system architecture of PhysiScaffold, an AI-powered physics tutoring platform.
 
 ---
 
-## 1. Domain Model
+## 1. System Overview
 
-### Entities
+PhysiScaffold is a Next.js 15 application that provides scaffolded physics problem-solving with adaptive learning features. The core philosophy is the "Socratic Engine" - guiding students through reasoning rather than providing direct answers.
+
+### High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           Client (Browser)                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐ │
+│  │  Dashboard  │  │   Solver    │  │  Pattern    │  │  History   │ │
+│  │  (v3 Shell) │  │    Page     │  │   Track     │  │   Page     │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └────────────┘ │
+│                              │                                      │
+│                    ┌─────────▼─────────┐                           │
+│                    │   React Components │                           │
+│                    │   (100+ components)│                           │
+│                    └─────────┬─────────┘                           │
+└──────────────────────────────┼──────────────────────────────────────┘
+                               │ HTTP/WebSocket
+┌──────────────────────────────▼──────────────────────────────────────┐
+│                        Next.js API Routes                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
+│  │  /scaffold/* │  │ /socratic-*  │  │  /pattern-*  │  ... 60+    │
+│  └──────────────┘  └──────────────┘  └──────────────┘              │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│                         Service Layer                               │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  Core Services: scaffold, hint, socratic, pattern, warmup   │   │
+│  │  Adaptive: SRS, mistake tracking, cognitive load, preflight │   │
+│  │  Physics: constraint collision, FBD validation, concepts    │   │
+│  │  Policy: gating, session mode, recovery mode                │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       │                       │                       │
+       ▼                       ▼                       ▼
+┌─────────────┐        ┌─────────────┐        ┌─────────────┐
+│  Anthropic  │        │  PostgreSQL │        │  Vercel KV  │
+│  Claude API │        │   (Neon)    │        │   (Redis)   │
+└─────────────┘        └─────────────┘        └─────────────┘
+```
+
+---
+
+## 2. Core Architectural Patterns
+
+### 2.1 Two-Pass AI Architecture
+
+The scaffold generation uses a two-pass model to ensure accuracy while maintaining pedagogical soundness:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Two-Pass Generation                          │
+│                                                                 │
+│  ┌─────────────────────┐     ┌─────────────────────┐           │
+│  │     Pass 1          │     │     Pass 2          │           │
+│  │  (Hidden Solver)    │────▶│ (Visible Scaffold)  │           │
+│  │                     │     │                     │           │
+│  │  • Full solution    │     │  • Step-by-step     │           │
+│  │  • Verified answer  │     │  • Hints & tasks    │           │
+│  │  • Internal only    │     │  • Student-facing   │           │
+│  └─────────────────────┘     └─────────────────────┘           │
+│                                                                 │
+│  Purpose: Pass 1 ensures correctness; Pass 2 ensures pedagogy  │
+│  without leaking answers prematurely.                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `lib/anthropic.ts`, `/api/scaffold/*`
+
+### 2.2 Phased Scaffold Delivery
+
+Scaffolds are delivered in phases to minimize perceived latency:
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Phase A   │    │   Phase B   │    │   Phase C   │
+│   Outline   │───▶│  Expansion  │───▶│   Reveal    │
+│  (10-20s)   │    │ (on-demand) │    │  (optional) │
+└─────────────┘    └─────────────┘    └─────────────┘
+      │                  │                  │
+      ▼                  ▼                  ▼
+ Step list only    Micro-tasks,       Full solution
+ Minimal info      hints, traps       per step
+```
+
+| Phase | Endpoint | Content | Timing |
+|-------|----------|---------|--------|
+| A | `/api/scaffold/outline` | Step list, goals, minimal info | ~10-20 seconds |
+| B | `/api/scaffold/step` | Micro-tasks, hints, explanations | On-demand per step |
+| C | `/api/scaffold/step` (reveal) | Complete solution | User-triggered |
+
+**Implementation**: `lib/phasedScaffold.ts`
+
+**Note**: The phased scaffold UI flag is currently disabled (`FEATURE_FLAGS.PHASED_SCAFFOLD = false`) due to UI state issues.
+
+### 2.3 Service Layer Architecture
+
+The application uses a service-oriented architecture with 60+ specialized services:
+
+```
+lib/
+├── Core Services
+│   ├── anthropic.ts              # Claude API integration
+│   ├── phasedScaffold.ts         # Scaffold generation
+│   ├── hintEngine.ts             # 5-level hint system
+│   └── scaffoldCache.ts          # Scaffold caching
+│
+├── Pedagogical Services
+│   ├── socraticTutorService.ts   # Socratic dialogue
+│   ├── socraticRewindService.ts  # Rewind & recovery
+│   ├── revealReconstructValidate.ts # 3-stage learning
+│   └── explainToFriendService.ts # Feynman summaries
+│
+├── Adaptive Learning Services
+│   ├── confidenceWeightedSRS.ts  # Confidence × correctness SRS
+│   ├── mistakeNotebook.ts        # Error tracking
+│   ├── mistakeTracking.ts        # Struggle detection
+│   ├── cognitiveLoadService.ts   # Load management
+│   ├── adaptivePreflightService.ts # Risk-based gating
+│   └── adaptiveDensity.ts        # Dynamic granularity
+│
+├── Physics-Specific Services
+│   ├── constraintCollisionEngine.ts  # Law violation detection
+│   ├── constraintExtractor.ts        # Problem constraint parsing
+│   ├── constraintDialogueEngine.ts   # Socratic correction
+│   ├── boundaryCaseService.ts        # Limiting case validation
+│   └── conceptMappingService.ts      # Concept relationships
+│
+├── Pattern & Curriculum Services
+│   ├── patternFirstService.ts    # Pattern identification
+│   ├── drillService.ts           # Drill generation
+│   ├── warmupSelector.ts         # Session warm-up
+│   └── studyPlanV2/              # Pattern-first curriculum
+│
+└── Policy Engines
+    ├── gatingPolicyEngine.ts     # Feature availability
+    ├── sessionModePolicyEngine.ts # Exam vs practice
+    └── recoveryModePolicy.ts     # Error recovery
+```
+
+### 2.4 Feature Flag System
+
+Features are controlled via a centralized flag system:
+
+```typescript
+// lib/featureFlags.ts
+export const FEATURE_FLAGS = {
+  // Hardcoded flags (always on/off)
+  MICRO_TASKS: true,
+  MISTAKE_NOTEBOOK: true,
+  DASHBOARD_V3: true,
+  SOCRATIC_FIRST_MODE: true,
+  FBD_CANVAS: false,           // Disabled: step completion issues
+  PHASED_SCAFFOLD: false,      // Disabled: UI state issues
+
+  // Environment-configurable flags (default ON)
+  SOCRATIC_TUTOR_CHAT: process.env.NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR !== 'false',
+  PATTERN_FIRST_MODE: process.env.NEXT_PUBLIC_FEATURE_PATTERN_FIRST !== 'false',
+  // ... 20+ additional flags
+}
+```
+
+**Design Principles**:
+- Most features default to ON
+- Set to `false` in env to disable
+- Hardcoded flags for features with known issues
+- Client-side flags prefixed with `NEXT_PUBLIC_`
+
+---
+
+## 3. Data Architecture
+
+### 3.1 Database Schema (PostgreSQL via Neon)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Core Entities                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐     ┌─────────────────┐     ┌─────────────┐       │
+│  │  questions  │────▶│ question_edges  │◀────│  questions  │       │
+│  │             │     │ (relationships) │     │             │       │
+│  └──────┬──────┘     └─────────────────┘     └─────────────┘       │
+│         │                                                           │
+│         ├────────────────┐                                          │
+│         │                │                                          │
+│         ▼                ▼                                          │
+│  ┌─────────────┐  ┌─────────────┐                                  │
+│  │question_tags│  │user_question│                                  │
+│  │ (normalized)│  │  _history   │                                  │
+│  └─────────────┘  └─────────────┘                                  │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                      Progress Tracking                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐     │
+│  │pattern_progress │  │ lesson_progress │  │ track_progress  │     │
+│  │ (per pattern)   │  │  (per lesson)   │  │ (denormalized)  │     │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘     │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                     Precomputed Content                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌──────────────────────┐  ┌──────────────────────┐                │
+│  │precomputed_scaffold  │  │ precomputed_step     │                │
+│  │     _outlines        │──│    _expansions       │                │
+│  └──────────────────────┘  └──────────────────────┘                │
+│                                                                     │
+│  ┌──────────────────────┐  ┌──────────────────────┐                │
+│  │precomputed_concept   │  │ precomputed          │                │
+│  │     _contrasts       │  │    _variations       │                │
+│  └──────────────────────┘  └──────────────────────┘                │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Key Enums
+
+```typescript
+enum QuestionLifecycleState {
+  draft      // Initial state; not visible to users
+  review     // Under editorial review
+  approved   // Live in production
+  retired    // Removed from active pool
+}
+
+enum Track {
+  foundation1   // Beginners, intuition building
+  foundation2   // Pre-competitive readiness
+  intermediate  // Class 11-12 regular
+  competitive   // JEE/NEET aspirants
+}
+
+enum AttemptOutcome {
+  completed   // All steps done + sanity check passed
+  abandoned   // Left mid-problem
+  revealed    // Used full solution reveal
+  skipped     // Skip-or-Commit gate skip
+}
+
+enum EdgeType {
+  same_difficulty  // A ↔ B equally hard
+  harder           // A → B means B is harder
+  easier           // A → B means B is easier
+  same_pattern     // Share physics pattern
+  prerequisite     // A must be done before B
+  variation        // Variations of same problem
+}
+```
+
+### 3.3 Storage Strategy
+
+| Data Type | Storage | Rationale |
+|-----------|---------|-----------|
+| Questions, Progress | PostgreSQL (Neon) | Relational, ACID, complex queries |
+| Session State | Vercel KV (Redis) | Fast read/write, TTL support |
+| Scaffold Cache | Redis + DB | Hot cache in Redis, persistent in DB |
+| Problem History | localStorage + DB | Offline-first, synced to DB |
+| Static Data | JSON files | Questions, patterns, drills |
+| File Uploads | Vercel Blob | Paper solution images |
+
+---
+
+## 4. API Architecture
+
+### 4.1 API Route Organization
+
+```
+app/api/
+├── scaffold/                 # Scaffold generation
+│   ├── outline/route.ts      # Phase A - step outline
+│   ├── step/route.ts         # Phase B - step expansion
+│   └── hint/route.ts         # Hint generation
+│
+├── socratic-tutor/           # Socratic dialogue
+│   ├── route.ts              # Main chat
+│   ├── initial-prompt/       # Opening question
+│   └── hint-verification/    # Verify hint understanding
+│
+├── pattern-track/            # Pattern learning
+│   ├── patterns/route.ts     # Pattern list/details
+│   ├── questions/route.ts    # Questions by pattern
+│   ├── lessons/route.ts      # Lesson management
+│   ├── practice/route.ts     # Practice mode
+│   └── progress/route.ts     # User progress
+│
+├── warmup/                   # Warm-up protocol
+│   ├── start/route.ts        # Start session
+│   ├── assign/route.ts       # Assign drill blocks
+│   ├── submit/route.ts       # Submit answers
+│   └── drills/[blockId]/     # Get block drills
+│
+├── pivot/                    # Pivot injection
+│   ├── init/route.ts         # Initialize state
+│   ├── show/route.ts         # Trigger pivot
+│   └── answer/route.ts       # Answer pivot
+│
+├── paper-solution/           # Handwritten analysis
+│   ├── upload/route.ts       # Upload image
+│   ├── extract/route.ts      # OCR extraction
+│   └── analyze/route.ts      # Rubric analysis
+│
+├── question/                 # Question lifecycle
+│   ├── resolve/route.ts      # Template resolution
+│   ├── complete/route.ts     # Mark complete
+│   └── lifecycle/route.ts    # State transitions
+│
+└── ... (40+ additional endpoints)
+```
+
+### 4.2 Key API Contracts
+
+#### Scaffold Outline (Phase A)
+
+```typescript
+// POST /api/scaffold/outline
+Request {
+  problem: string           // Problem text
+  questionId?: string       // Optional precomputed question ID
+}
+
+Response {
+  success: boolean
+  data: {
+    scaffold_id: string
+    problem: string
+    tags: { domain, subdomain, patterns, difficulty }
+    concepts: Array<{ id, name }>
+    steps: Array<{
+      step_id: string
+      title: string
+      goal: string
+      minimal_task: string
+      step_type: 'concept' | 'setup' | 'equation' | 'calculation'
+    }>
+    estimated_time_mins: number
+  }
+}
+```
+
+#### Step Expansion (Phase B)
+
+```typescript
+// POST /api/scaffold/step
+Request {
+  scaffold_id: string
+  step_id: string
+  problem: string
+}
+
+Response {
+  success: boolean
+  data: {
+    scaffold_id: string
+    step_id: string
+    micro_tasks: Array<{
+      task_id: string
+      type: 'MCQ' | 'fill_blank' | 'open'
+      question: string
+      options?: string[]
+      correct_index?: number
+      reasoning: string
+    }>
+    explanation: string
+    traps: string[]
+    hints: Array<{ level: 1-5, content: string }>
+    gating: {
+      min_correct_tasks: number
+      allow_skip_after_attempts: number
+    }
+  }
+}
+```
+
+#### Socratic Tutor Chat
+
+```typescript
+// POST /api/socratic-tutor
+Request {
+  stepContext: {
+    step_id: string
+    title: string
+    goal: string
+    concepts: string[]
+  }
+  messages: Array<{ role: 'user' | 'assistant', content: string }>
+  userMessage: string
+}
+
+Response {
+  response: string
+  isComplete: boolean      // True when understanding validated
+  followUpQuestion?: string
+}
+```
+
+---
+
+## 5. Domain Model
+
+### 5.1 Core Entities
 
 | Entity | Description | Key Fields |
 |--------|-------------|------------|
-| `Question` | Single physics problem node | id, questionId, difficulty, track, lifecycleState, payload |
+| `Question` | Physics problem with JSONB payload | id, questionId, difficulty, track, lifecycleState, payload |
 | `QuestionEdge` | Directed relationship between questions | fromQuestionId, toQuestionId, edgeType, weight, isCurated |
 | `QuestionTag` | Normalized tags for filtering | questionId, tagType, tagValue |
 | `Pattern` | Physics problem pattern | patternId, label, parentPatternId, level |
 | `Topic` | Physics topic hierarchy | topicId, label, parentTopicId, level |
 | `UserQuestionHistory` | User's attempt on a question | userId, questionId, outcome, score, stepsCompleted |
-| `RawExtraction` | Immutable Mathpix output | mathpixJobId, rawLatex, rawText, confidence |
-| `UserAiQuota` | Daily AI usage limits | userId, featureType, quotaDate, usedCount, maxAllowed |
+| `PatternProgress` | User's mastery per pattern | userId, patternId, masteryLevel, currentStreak |
+| `PrecomputedScaffoldOutline` | Cached Phase A content | questionId, scaffoldId, outlineData |
 
-### Relationships
-
-```
-Question 1──* QuestionEdge (outgoing)
-Question 1──* QuestionEdge (incoming)
-Question 1──* QuestionTag
-Question 1──* UserQuestionHistory
-RawExtraction *──1 Question (optional link)
-Pattern 1──* Question (via primaryPatternId)
-```
-
----
-
-## 2. Question Lifecycle
+### 5.2 Question Lifecycle
 
 ```
 ┌─────────┐     ┌─────────┐     ┌──────────┐     ┌─────────┐
 │  draft  │────▶│ review  │────▶│ approved │────▶│ retired │
 └─────────┘     └─────────┘     └──────────┘     └─────────┘
-     │               │                │
-     │               │                │
-     ▼               ▼                │
- [rejected]     [rejected]            │
-                                      │
-                               [can reactivate]
 ```
 
-| State | Description | Allowed Transitions |
-|-------|-------------|---------------------|
-| `draft` | Initial state; not visible to users | → review, → rejected |
-| `review` | Under editorial review | → approved, → draft, → rejected |
-| `approved` | Live in production | → retired |
-| `retired` | Removed from active pool | → approved (reactivate) |
+| State | Description | Visibility |
+|-------|-------------|------------|
+| `draft` | Initial state | Editorial only |
+| `review` | Under editorial review | Editorial only |
+| `approved` | Live in production | Users can access |
+| `retired` | Removed from active pool | Historical only |
 
-### Lifecycle Invariants
-
+**Invariants**:
 - Only `approved` questions are served to users
-- Questions CANNOT skip states (draft → approved is INVALID)
-- Retired questions retain all history and edges
-- AI-generated questions MUST go through `review` before `approved`
+- Questions cannot skip states (draft → approved is INVALID)
+- AI-generated questions MUST go through `review`
+
+### 5.3 Track Definitions
+
+| Track | Difficulty | Target Audience | Characteristics |
+|-------|------------|-----------------|-----------------|
+| `foundation1` | 1-2 | Beginners | Intuition, qualitative reasoning |
+| `foundation2` | 2-4 | Pre-competitive | Vector sense, 2-3 step problems |
+| `intermediate` | 4-6 | Class 11-12 | Equation setup, standard procedures |
+| `competitive` | 6-10 | JEE/NEET | Pattern recognition, trap avoidance |
 
 ---
 
-## 3. Track Definitions
+## 6. Adaptive Learning Architecture
 
-| Track | Cognitive Ability | Difficulty Range | Target Audience |
-|-------|-------------------|------------------|-----------------|
-| `foundation1` | Intuition, representation, cause-effect | 1-2 | Beginners, remediation |
-| `foundation2` | Vector sense, constraints, multi-step | 2-4 | Pre-competitive readiness |
-| `intermediate` | Algebraic fluency, equation setup | 4-6 | Class 11-12 regular |
-| `competitive` | Deep problem-solving, pattern recognition | 6-10 | JEE/NEET aspirants |
+### 6.1 Confidence-Weighted SRS
 
-### Track Characteristics
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 Confidence × Correctness Matrix             │
+├───────────────┬─────────────┬─────────────┬────────────────┤
+│               │   Correct   │   Correct   │    Wrong       │
+│               │   + Solid   │   + Guess   │   + Solid      │
+├───────────────┼─────────────┼─────────────┼────────────────┤
+│ Scheduling    │ Accelerated │ Sooner      │ Aggressive     │
+│               │ (mastery)   │ (lucky)     │ (misconception)│
+├───────────────┼─────────────┼─────────────┼────────────────┤
+│ Interval      │ × 2.5       │ × 1.2       │ ÷ 3           │
+│ Multiplier    │             │             │                │
+└───────────────┴─────────────┴─────────────┴────────────────┘
+```
 
-#### Foundation 1
-- Skills: Intuition, representation, qualitative reasoning
-- Format: Conceptual MCQs, diagram interpretation
-- Math: Minimal (arithmetic only)
-- Connects: → Foundation 2
+**Implementation**: `lib/confidenceWeightedSRS.ts`
 
-#### Foundation 2
-- Skills: Vector sense, constraint identification, 2-3 step reasoning
-- Format: Qualitative + simple quantitative
-- Math: Basic algebra, trigonometry
-- Connects: → Intermediate, → Competitive (with gates)
+### 6.2 Cognitive Load Governor
 
-#### Intermediate
-- Skills: Equation setup, unit analysis, standard procedures
-- Format: Numerical problems, derivations
-- Math: Full Class 11-12 curriculum
-- Connects: → Competitive
+Monitors session metrics and adjusts UI complexity:
 
-#### Competitive
-- Skills: Pattern recognition, trap avoidance, time optimization
-- Format: JEE/NEET style problems
-- Math: Advanced techniques, shortcuts
-- Connects: ← All tracks (as remediation destination)
+```
+Inputs:
+  - timeSpentPerStep
+  - wrongAttempts
+  - hintEscalationSpeed
+  - revealUsed
+  - circuitBreakerState
 
----
+When cognitiveLoadScore = 'high':
+  - Show only ONE active step
+  - Collapse future steps
+  - Reduce MCQs to binary
+  - Shorten hint text
+```
 
-## 4. Edge Types
+**Implementation**: `lib/cognitiveLoadService.ts`
 
-| Edge Type | Direction Meaning | Pedagogical Use |
-|-----------|-------------------|-----------------|
-| `same_difficulty` | A ↔ B are equally hard | "Another" button selection |
-| `harder` | A → B means B is harder than A | "Harder" button selection |
-| `easier` | A → B means B is easier than A | Remediation paths |
-| `same_pattern` | A ↔ B share the same physics pattern | Pattern drilling |
-| `prerequisite` | A → B means A must be done before B | Gating logic |
-| `variation` | A ↔ B are variations of same core problem | Spaced practice |
+### 6.3 Adaptive Preflight Gating
 
-### Edge Creation Rules
+Risk-based preflight checks before high-probability-of-error steps:
 
-| Edge Type | Auto-Generated | Curated Override | Stability |
-|-----------|----------------|------------------|-----------|
-| `same_difficulty` | Yes (correlation engine) | Yes | Can be updated |
-| `harder` | Yes | Yes | Can be updated |
-| `easier` | Yes | Yes | Can be updated |
-| `same_pattern` | Yes | Yes | Can be updated |
-| `prerequisite` | No | Yes (only curated) | Locked once set |
-| `variation` | Yes | Yes | Can be updated |
+```
+riskScore = weighted_average(
+  mistakeNotebook.getSeverity(concept),
+  mistakeTracking.getStruggleRate(pattern),
+  conceptMastery.getMasteryScore(concept)
+)
 
-### Edge Weight
+if (riskScore > 0.55) {
+  triggerPreflightCheck()
+}
+```
 
-- Range: 0.0 to 1.0
-- Higher weight = stronger recommendation
-- Curated edges have weight = 1.0 by default
-- Auto-generated edges have weight = similarity score
+**Implementation**: `lib/adaptivePreflightService.ts`
 
 ---
 
-## 5. Invariants (NON-NEGOTIABLE)
+## 7. Physics-Specific Architecture
+
+### 7.1 Constraint Collision Engine
+
+Real-time detection of physics law violations:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 Constraint Collision Flow                   │
+│                                                             │
+│  Problem Text ──▶ Constraint Extractor ──▶ Constraint Set  │
+│                                                             │
+│  Student Work ──▶ Collision Detector ──▶ Violations?       │
+│                         │                     │             │
+│                         │              ┌──────┴──────┐      │
+│                         │              │             │      │
+│                         ▼              ▼             ▼      │
+│                    No Violations    Soft        Critical   │
+│                         │           Warning      Block     │
+│                         │              │             │      │
+│                         ▼              ▼             ▼      │
+│                      Continue     Show Hint    Socratic    │
+│                                                Dialogue    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Constraint Categories**:
+- Friction: frictionless, rough, kinetic/static coefficients
+- Momentum: elastic/inelastic collisions
+- Energy: conservative/non-conservative forces
+- Forces: massless, rigid, inextensible
+
+**Implementation**: `lib/constraintCollisionEngine.ts`, `lib/constraintExtractor.ts`
+
+### 7.2 Pattern Registry
+
+27 physics problem-solving patterns organized hierarchically:
+
+```
+data/studyPlanV2/patterns.json
+├── mechanics/
+│   ├── newton-incline
+│   ├── newton-pulley
+│   ├── energy-conservation
+│   ├── momentum-collision
+│   └── ...
+├── thermodynamics/
+│   ├── ideal-gas
+│   ├── heat-transfer
+│   └── ...
+├── electromagnetism/
+│   ├── coulomb-field
+│   ├── circuit-analysis
+│   └── ...
+└── ...
+```
+
+---
+
+## 8. Client Architecture
+
+### 8.1 Component Hierarchy
+
+```
+app/
+├── layout.tsx                 # Root layout
+├── page.tsx                   # Home (redirects based on Dashboard v3)
+├── solve/page.tsx             # Solver page
+├── study-path/page.tsx        # Dashboard
+└── pattern-track/page.tsx     # Pattern learning
+
+components/
+├── shell/
+│   ├── AppShell.tsx           # Main layout wrapper
+│   ├── Sidebar.tsx            # Desktop navigation
+│   └── BottomNav.tsx          # Mobile navigation
+│
+├── solve/
+│   ├── SolvePage.tsx          # Main solver entry
+│   ├── SolutionScaffold.tsx   # Scaffold renderer
+│   ├── StepAccordion.tsx      # Step UI
+│   └── StepContent.tsx        # Step details
+│
+├── dashboard/
+│   ├── DashboardV3.tsx        # Dashboard container
+│   ├── ProgressOverview.tsx   # Hero metrics
+│   └── TodaysFocus.tsx        # Daily plan
+│
+├── micro-tasks/
+│   ├── MicroTaskRenderer.tsx  # Task display
+│   ├── MCQTask.tsx            # Multiple choice
+│   └── FillBlankTask.tsx      # Fill in blank
+│
+└── modals/
+    ├── PatternFirstModal.tsx  # Pattern gate
+    ├── SkipCommitGateModal.tsx # Triage gate
+    └── ConceptContrastModal.tsx # Concept challenge
+```
+
+### 8.2 State Management
+
+| State Type | Storage | Sync |
+|------------|---------|------|
+| UI State | React useState/useReducer | N/A |
+| Session | localStorage | On mount |
+| Problem History | localStorage + API | Periodic sync |
+| User Progress | Database (Prisma) | On action |
+| Feature Flags | Environment variables | Build time |
+
+---
+
+## 9. Deployment Architecture
+
+### 9.1 Infrastructure
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Vercel                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                    Edge Network                      │   │
+│  │  ┌───────────┐  ┌───────────┐  ┌───────────┐       │   │
+│  │  │  Static   │  │   SSR     │  │   API     │       │   │
+│  │  │  Assets   │  │  Pages    │  │  Routes   │       │   │
+│  │  └───────────┘  └───────────┘  └───────────┘       │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│   Neon      │       │ Vercel KV   │       │  Anthropic  │
+│ PostgreSQL  │       │   (Redis)   │       │   Claude    │
+│ (Serverless)│       │             │       │     API     │
+└─────────────┘       └─────────────┘       └─────────────┘
+```
+
+### 9.2 Environment Configuration
+
+| Environment | DATABASE_URL | Features |
+|-------------|--------------|----------|
+| Development | Local or Neon dev | All flags ON |
+| Preview | Neon preview branch | All flags ON |
+| Production | Neon production | Configured via env |
+
+---
+
+## 10. Invariants (NON-NEGOTIABLE)
 
 ### Data Integrity
 
-1. **Raw extractions are immutable**
-   - `RawExtraction.rawLatex` and `RawExtraction.rawText` MUST NEVER be modified after creation
-   - Any transformation creates a NEW record linked via `questionId`
-
-2. **Question IDs are stable**
-   - `Question.questionId` is the canonical identifier
-   - MUST NOT be reused after deletion
-
-3. **Edge direction is semantic**
-   - `harder` edge from A→B means B is harder than A
-   - NEVER invert meaning
+1. **Raw extractions are immutable** - `RawExtraction.rawLatex` MUST NEVER be modified after creation
+2. **Question IDs are stable** - `Question.questionId` MUST NOT be reused after deletion
+3. **Edge direction is semantic** - `harder` edge from A→B means B is harder than A
 
 ### User Safety
 
-4. **Only approved questions reach users**
-   - All selection algorithms MUST filter by `lifecycleState = 'approved'`
-   - Draft/review questions are editorial-only
-
-5. **Original questions only in production**
-   - Never serve raw Mathpix output
-   - Always serve transformed, human-reviewed content
-
-6. **AI is optional at runtime**
-   - Core learning MUST work with AI disabled
-   - AI enhances but never gates progression
+4. **Only approved questions reach users** - All selection algorithms MUST filter by `lifecycleState = 'approved'`
+5. **AI never publishes directly** - AI-generated content goes to `draft`, requires human review
 
 ### Progression Logic
 
-7. **Completion is explicit**
-   - A question is "completed" only when all scaffold steps are done + sanity check passed
-   - Partial progress is "in_progress", not "completed"
-
-8. **Prerequisites are absolute**
-   - If edge type is `prerequisite`, the source question MUST be completed before destination is served
-   - No overrides for prerequisite gating
-
-9. **Track boundaries are soft**
-   - Users can attempt questions from any track
-   - System recommends track-appropriate questions
-   - Struggling triggers remediation edges, not hard locks
-
-### Correlation Engine
-
-10. **Curated edges are never auto-replaced**
-    - If `createdBy` is set (curated), correlation engine CANNOT modify or delete
-    - Auto-generated edges can be updated
-
-11. **No full recomputation**
-    - New questions link incrementally
-    - Batch jobs update edges for changed questions only
-    - Historical edges remain stable unless explicitly re-correlated
+6. **Completion is explicit** - A question is "completed" only when all scaffold steps are done + sanity check passed
+7. **Prerequisites are absolute** - If edge type is `prerequisite`, source question MUST be completed before destination
 
 ### AI Controls
 
-12. **AI quotas are per-user-per-day**
-    - No unlimited AI usage
-    - Quotas reset at midnight UTC
-
-13. **AI provenance is tracked**
-    - Every AI-generated question has `isAiGenerated = true`
-    - Model and generation timestamp are recorded
-
-14. **AI never publishes directly**
-    - AI-generated content goes to `draft`
-    - Human review required for `approved` state
+8. **AI quotas are per-user-per-day** - No unlimited AI usage; quotas reset at midnight UTC
+9. **AI provenance is tracked** - Every AI-generated question has `isAiGenerated = true` with model and timestamp
 
 ---
 
-## 6. Selection Algorithm (Deterministic)
+## 11. Scalability Considerations
+
+### Current Design Limits
+
+| Component | Current Limit | Scaling Path |
+|-----------|---------------|--------------|
+| Scaffold generation | ~20s latency | Precomputation, caching |
+| Database connections | Neon pooler limits | Connection pooling |
+| AI API calls | Anthropic rate limits | Queuing, batching |
+| Redis cache | Vercel KV limits | Cache eviction policies |
+
+### Precomputation Strategy
 
 ```
-getNextQuestion(userId, mode):
-  1. Get user's completed question IDs
-  2. Get current question's outgoing edges filtered by mode:
-     - mode = "same": same_difficulty, same_pattern, variation
-     - mode = "harder": harder
-     - mode = "easier": easier
-  3. Filter edges: target must be approved AND not completed by user
-  4. Sort by: weight DESC, then createdAt ASC
-  5. Return first match
-  6. If no edges: fallback to pool query:
-     - Same pattern, same difficulty range, not completed
-     - Random selection from top 5
-  7. If no pool: return null (no question available)
+┌─────────────────────────────────────────────────────────────┐
+│                   Precompute Pipeline                       │
+│                                                             │
+│  Question Added ──▶ PrecomputeJob Queue                    │
+│                           │                                 │
+│         ┌─────────────────┼─────────────────┐              │
+│         │                 │                 │              │
+│         ▼                 ▼                 ▼              │
+│   Scaffold Outline   Step Expansions   Concept Contrasts   │
+│   (Phase A cache)    (Phase B cache)   (Distractor cache)  │
+│                                                             │
+│  Status: pending → generating → completed → invalidated    │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+**Implementation**: `precompute_jobs` table, background workers
 
 ---
 
-## 7. API Contracts
+## Document History
 
-### getNextQuestion
-
-```typescript
-// Request
-POST /api/question/next
-{
-  userId: string
-  currentQuestionId?: string
-  mode: "same" | "harder" | "easier"
-}
-
-// Response
-{
-  success: boolean
-  question?: Question
-  selectionMethod: "edge" | "pool" | "none"
-  edgeId?: string
-}
-```
-
-### recordCompletion
-
-```typescript
-// Request
-POST /api/question/complete
-{
-  userId: string
-  questionId: string
-  outcome: "completed" | "abandoned" | "revealed" | "skipped"
-  score?: number
-  stepsCompleted: number
-  stepsTotal: number
-  hintsUsed: number
-  durationSec: number
-}
-
-// Response
-{
-  success: boolean
-  historyId: string
-  unlockedQuestionIds: string[]
-}
-```
-
----
-
-## Document Approval
-
-This architecture is LOCKED. Changes require:
-1. Written justification
-2. Impact analysis on all 14 invariants
-3. Approval from system architect
-
-**Approved by**: System Architect
-**Date**: 2026-01-06
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-01-06 | Initial domain model and invariants |
+| 2.0 | 2026-01-09 | Complete architecture rewrite with full system coverage |
