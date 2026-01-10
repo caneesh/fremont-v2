@@ -61,11 +61,11 @@ export default function ConceptsDrawer({ concepts, onToggle, forceOpen }: Concep
       <button
         onClick={handleToggle}
         className={`
-          fixed right-4 top-1/2 -translate-y-1/2 z-40
-          flex items-center gap-2 px-3 py-3
+          fixed right-4 top-20 z-40
+          flex items-center gap-2 px-3 py-2
           bg-white dark:bg-dark-card
           border border-gray-200 dark:border-dark-border
-          rounded-l-lg shadow-lg dark:shadow-dark-lg
+          rounded-lg shadow-lg dark:shadow-dark-lg
           hover:bg-gray-50 dark:hover:bg-dark-card-soft
           transition-all duration-200
           ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
