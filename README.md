@@ -4,6 +4,8 @@ An AI-powered physics tutoring platform designed for IIT-JEE level problem-solvi
 
 **Philosophy**: We don't give answers; we give the framework for the answer.
 
+> **Tip**: Visit `/features` in the app to explore all 45+ features interactively.
+
 ## Quick Start
 
 ```bash
@@ -45,24 +47,14 @@ The platform uses a two-pass AI generation model:
 
 This ensures pedagogically sound guidance without spoiling solutions.
 
-### Phased Scaffold Delivery
-
-Scaffolds are delivered in phases to minimize latency:
-
-| Phase | Content | Timing |
-|-------|---------|--------|
-| **Phase A** | Step outline with minimal info | ~10-20 seconds |
-| **Phase B** | Detailed step content with micro-tasks | On-demand per step |
-| **Phase C** | Full solution reveal | Optional |
-
 ### Data Flow
 
 ```
 User submits problem
-  -> POST /api/scaffold/outline (Phase A)
+  -> POST /api/scaffold/outline (generate steps)
   -> Render step list
   -> User expands step
-  -> POST /api/scaffold/step (Phase B)
+  -> POST /api/scaffold/step (expand content)
   -> Display micro-tasks + hints
   -> User completes step
   -> POST /api/socratic-tutor (comprehension check)
@@ -87,56 +79,101 @@ User submits problem
 | **Testing** | Vitest 4.0.16, Playwright 1.57.0 |
 | **Deployment** | Vercel |
 
+## Key Features
+
+All features are tracked in the [Feature Registry](/lib/featureRegistry.ts). Visit `/features` in the app to explore interactively.
+
+### Core Learning System (IMPLEMENTED)
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Problem Solver | `/solve` | AI-generated solution scaffolds |
+| Micro-Task Mode | `/solve` | MCQs and fill-in-blanks for active learning |
+| 5-Level Hint System | `/solve` | Progressive hints from concept to full solution |
+| Socratic Tutor Chat | `/solve` | AI professor validation after steps |
+| Solution Roadmap | `/solve` | Step-by-step accordion with progressive unlocking |
+
+### Adaptive Learning (IMPLEMENTED)
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Mistake Notebook | `/mistake-notebook` | Tracks errors for targeted SRS review |
+| Confidence-Weighted SRS | embedded | Spaced repetition adjusted by self-reported confidence |
+| Error Anticipator | embedded | Warning beacons for common mistakes |
+| Adaptive Preflight | embedded | Auto-inserts checks on high-risk steps |
+| Cognitive Load Governor | embedded | Reduces UI complexity for struggling students |
+
+### Exam Strategy Training (IMPLEMENTED)
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Pattern-First Mode | modal | Timed pattern identification before solving (~12s) |
+| Skip-or-Commit Gate | modal | Forces triage decisions at T=25s |
+| Warm-Up Protocol | `/study-path` | 2-5 minute micro-drills before sessions |
+| Pattern Track | `/pattern-track` | Pattern-driven curriculum (27 patterns) |
+| Micro-Pattern Drills | `/drills` | Rapid-fire timed practice |
+
+### Interactive Features (IMPLEMENTED)
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Concept Network | `/concept-network` | Visual concept mastery map |
+| Spot the Mistake | `/spot-mistake` | Critical thinking - find errors in solutions |
+| Boundary Case Builder | embedded | Interactive equation stress-testing |
+| Paper Solution Upload | embedded | OCR + analysis of handwritten work |
+| Constraint Collision Detection | embedded | Real-time physics law violation detection |
+
+### Navigation (IMPLEMENTED)
+
+| Feature | Route | Description |
+|---------|-------|-------------|
+| Dashboard | `/study-path` | Progress tracking and daily plan |
+| Problem History | `/history` | Track all attempts with resume capability |
+| Feature Explorer | `/features` | Browse all features with status badges |
+| Feature Flags Dashboard | `/features/flags` | View effective flag values |
+
+### Disabled Features
+
+| Feature | Reason |
+|---------|--------|
+| FBD Canvas | Causes step completion issues |
+| Phased Scaffold Loading | UI state issues |
+
 ## Project Structure
 
 ```
 fremont-v2/
 ├── app/                           # Next.js App Router
 │   ├── api/                       # API routes (60+ endpoints)
-│   │   ├── scaffold/              # Scaffold generation (outline, step, hint)
-│   │   ├── socratic-tutor/        # Socratic chat endpoints
-│   │   ├── pattern-track/         # Pattern learning system
-│   │   ├── warmup/                # Warm-up drill system
-│   │   ├── pivot/                 # Pivot injection system
-│   │   ├── paper-solution/        # Handwritten solution analysis
-│   │   ├── spot-mistake/          # Spot the mistake mode
-│   │   └── question/              # Question lifecycle management
 │   ├── solve/                     # Main solver page
-│   ├── study-path/                # Learning curriculum (v1 + v2)
+│   ├── study-path/                # Dashboard
 │   ├── pattern-track/             # Pattern management & practice
 │   ├── mistake-notebook/          # Spaced repetition review
 │   ├── drills/                    # Drill practice mode
 │   ├── history/                   # Problem history tracking
-│   └── spot-mistake/              # Spot mistake exercises
+│   ├── features/                  # Feature Explorer + Flags Dashboard
+│   └── debug/                     # Development tools
 │
 ├── components/                    # React components (100+)
 │   ├── solve/                     # Main solver UI
 │   ├── dashboard/                 # Dashboard v3 components
 │   ├── micro-tasks/               # MCQ/fill-blank components
-│   ├── paper-solution/            # Image upload & analysis
-│   ├── warmup/                    # Warm-up protocol UI
 │   ├── shell/                     # AppShell, layouts, navigation
 │   └── ui/                        # Base UI components
 │
 ├── lib/                           # Core services (60+ modules)
+│   ├── featureRegistry.ts         # Single source of truth for features
 │   ├── featureFlags.ts            # Feature flag configuration
-│   ├── anthropic.ts               # Claude API integration
-│   ├── db.ts                      # Prisma client
-│   ├── phasedScaffold.ts          # 3-phase scaffold generation
-│   ├── hintEngine.ts              # 5-level hint system
-│   ├── mistakeNotebook.ts         # Error tracking & SRS
-│   ├── constraintCollisionEngine.ts # Physics constraint validation
+│   ├── featureOverrides.ts        # localStorage override utilities
 │   └── ...                        # 50+ additional services
 │
-├── types/                         # TypeScript definitions (60+)
-├── data/                          # Static data & JSON schemas
-│   ├── questions.json             # Sample questions
-│   ├── topics.json                # Curriculum hierarchy
-│   ├── warmup-drills.json         # Warm-up drill bank
-│   └── studyPlanV2/               # Pattern definitions (27 patterns)
-├── prisma/                        # Database schema & migrations
+├── docs/                          # Documentation
+│   ├── FEATURES.md                # Complete feature inventory
+│   ├── USER_GUIDE.md              # User documentation
+│   └── ...
+│
 ├── e2e/                           # End-to-end tests (Playwright)
-└── hooks/                         # React custom hooks
+└── prisma/                        # Database schema & migrations
 ```
 
 ## Environment Variables
@@ -151,100 +188,42 @@ fremont-v2/
 | `REDIS_URL` | Vercel KV Redis URL |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob storage token |
 
-### Optional
-
-| Variable | Description |
-|----------|-------------|
-| `MATHPIX_APP_ID` | MathPix app ID for PDF extraction |
-| `MATHPIX_APP_KEY` | MathPix API key |
-
 ### Feature Flags
 
-Most features are ON by default. Key flags:
+Most features are ON by default. Key configurable flags:
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `NEXT_PUBLIC_FEATURE_DASHBOARD_V3` | ON | New dashboard layout |
 | `NEXT_PUBLIC_FEATURE_SOCRATIC_TUTOR` | ON | Post-step Socratic chat |
 | `NEXT_PUBLIC_FEATURE_PATTERN_FIRST` | ON | Pattern identification gate |
 | `NEXT_PUBLIC_FEATURE_SKIP_COMMIT` | ON | Triage decision training |
 | `NEXT_PUBLIC_FEATURE_CONFIDENCE_SRS` | ON | Confidence-weighted SRS |
 | `NEXT_PUBLIC_FEATURE_WARMUP_PROTOCOL` | ON | Session warm-up drills |
 | `NEXT_PUBLIC_FEATURE_PIVOT_INJECTION` | ON | Help questions during solving |
-| `NEXT_PUBLIC_ENABLE_FBD` | OFF | Free Body Diagram canvas |
+
+Hardcoded flags (cannot change via env):
+- `DASHBOARD_V3`: ON
+- `SOCRATIC_FIRST_MODE`: ON
+- `FBD_CANVAS`: OFF (causes issues)
+- `PHASED_SCAFFOLD`: OFF (UI issues)
 
 See `.env.example` for the complete list with descriptions.
-
-## Database Schema
-
-The PostgreSQL database (via Neon serverless) uses Prisma ORM with these core tables:
-
-| Table | Purpose |
-|-------|---------|
-| `questions` | Problem storage with JSONB payloads |
-| `question_edges` | Relationships (prerequisites, variations) |
-| `question_tags` | Normalized tags (topics, patterns, traps) |
-| `user_question_history` | Attempt tracking and progress |
-| `patterns` | Problem-solving pattern registry |
-| `pattern_progress` | User mastery per pattern |
-| `lesson_progress` | Lesson completion tracking |
-| `track_progress` | Overall user progress (denormalized) |
-| `precomputed_scaffold_outlines` | Cached Phase A outlines |
-| `precomputed_step_expansions` | Cached Phase B step details |
 
 ## Available Scripts
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
-| `npm run build` | Build for production (includes Prisma generate) |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
+| `npm run build` | Build for production |
 | `npm run test` | Run unit tests (Vitest) |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:ui` | Run tests with Vitest UI |
 | `npm run test:e2e` | Run end-to-end tests (Playwright) |
-| `npm run db:generate` | Generate Prisma client |
 | `npm run db:push` | Push schema to database |
-| `npm run db:migrate` | Run database migrations (dev) |
-| `npm run db:migrate:prod` | Run database migrations (prod) |
 | `npm run db:studio` | Open Prisma Studio |
-| `npm run db:seed` | Seed database with sample data |
-
-## Key Features
-
-### Core Learning System
-- **Two-Pass AI Architecture**: Hidden solver + visible scaffolder
-- **Micro-Task Mode**: MCQs and fill-in-blanks for active learning
-- **5-Level Hint System**: Progressive hints from concept to full solution
-- **Socratic Tutor Chat**: AI professor validation after steps
-- **Solution Roadmap**: Step-by-step accordion with progressive unlocking
-
-### Adaptive Learning
-- **Confidence-Weighted SRS**: Spaced repetition adjusted by self-reported confidence
-- **Mistake Notebook**: Tracks errors for targeted review
-- **Error Anticipator**: Warning beacons for common mistakes
-- **Adaptive Preflight**: Auto-inserts checks on high-risk steps
-- **Cognitive Load Governor**: Reduces UI complexity for struggling students
-
-### Exam Strategy Training
-- **Pattern-First Mode**: Timed pattern identification before solving (~12s)
-- **Skip-or-Commit Gate**: Forces triage decisions at T=25s
-- **Warm-Up Protocol**: 2-5 minute micro-drills before sessions
-
-### Interactive Features
-- **Boundary Case Builder**: Interactive equation stress-testing
-- **Concept Contrast Challenge**: Explain why similar concepts don't apply
-- **Socratic Rewind**: "I'm stuck" triggers guided recovery
-- **Paper Solution Upload**: OCR + analysis of handwritten work
-- **Constraint Collision Detection**: Real-time physics law violation detection
 
 ## Current Limitations
 
-Based on the current implementation:
-
-1. **FBD Canvas**: Interactive Free Body Diagram drawing is disabled - causes step completion issues (`FEATURE_FLAGS.FBD_CANVAS = false`)
-2. **Phased Scaffold UI**: The phased loading flag is disabled due to UI issues (`FEATURE_FLAGS.PHASED_SCAFFOLD = false`)
+1. **FBD Canvas**: Interactive Free Body Diagram drawing is disabled (`FEATURE_FLAGS.FBD_CANVAS = false`)
+2. **Phased Scaffold UI**: The phased loading flag is disabled (`FEATURE_FLAGS.PHASED_SCAFFOLD = false`)
 3. **Authentication**: Uses simple session-based authentication stored in localStorage
 4. **Offline Support**: No offline capability; requires active internet for AI features
 5. **Mobile**: Desktop-first design; some features have limited mobile optimization

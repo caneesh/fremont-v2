@@ -86,6 +86,7 @@ test.describe('Feature Routes Smoke Test', () => {
   const implementedRoutes = [
     { path: '/features', name: 'Feature Explorer' },
     { path: '/features/flags', name: 'Feature Flags' },
+    { path: '/debug/features', name: 'Debug Feature Flags' },
     { path: '/solve', name: 'Problem Solver' },
     { path: '/study-path', name: 'Dashboard' },
     { path: '/history', name: 'History' },
@@ -103,6 +104,61 @@ test.describe('Feature Routes Smoke Test', () => {
       expect(response?.status()).toBe(200)
     })
   }
+})
+
+test.describe('Debug Feature Flags', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('physiscaffold_session', JSON.stringify({
+        userId: 'user-001',
+        code: 'PILOT-ALPHA-001',
+        authenticatedAt: new Date().toISOString(),
+      }))
+    })
+  })
+
+  test('Debug Feature Flags page loads', async ({ page }) => {
+    await page.goto('/debug/features')
+
+    // Check page title is present
+    await expect(page.getByRole('heading', { name: 'Debug: Feature Flags' })).toBeVisible()
+
+    // Check DEV ONLY badge is visible
+    await expect(page.getByText('DEV ONLY')).toBeVisible()
+
+    // Check that stats cards are visible
+    await expect(page.getByText('Total Flags')).toBeVisible()
+    await expect(page.getByText('Overridden')).toBeVisible()
+    await expect(page.getByText('Missing Env')).toBeVisible()
+  })
+
+  test('can toggle feature flag override', async ({ page }) => {
+    await page.goto('/debug/features')
+
+    // Find the first flag and toggle it
+    const firstFlagCard = page.locator('[class*="rounded-lg shadow-md"]').first()
+
+    // Click ON button to override
+    await firstFlagCard.getByRole('button', { name: 'ON' }).click()
+
+    // Verify the Overridden badge appears
+    await expect(page.getByText('Overridden').first()).toBeVisible()
+  })
+
+  test('can clear all overrides', async ({ page }) => {
+    await page.goto('/debug/features')
+
+    // First set an override
+    const firstFlagCard = page.locator('[class*="rounded-lg shadow-md"]').first()
+    await firstFlagCard.getByRole('button', { name: 'ON' }).click()
+
+    // Clear all overrides
+    await page.getByRole('button', { name: /Clear All Overrides/ }).click()
+
+    // Verify no overridden badge exists (stats should show 0)
+    const overriddenStat = page.locator('text=Overridden').locator('..').locator('p').first()
+    await expect(overriddenStat).toContainText('0')
+  })
 })
 
 test.describe('Feature Explorer Filtering', () => {
