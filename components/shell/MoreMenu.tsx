@@ -61,6 +61,16 @@ const menuItems: NavItem[] = [
     color: 'red',
   },
   {
+    name: 'Features',
+    path: '/features',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      </svg>
+    ),
+    color: 'blue',
+  },
+  {
     name: 'User Guide',
     path: 'https://github.com/caneesh/fremont-v2/blob/main/docs/PILOT_USER_GUIDE.md',
     icon: (
@@ -114,6 +124,8 @@ export default function MoreMenu({ isOpen, onClose, userName, onLogout }: MoreMe
         return 'text-orange-600 dark:text-orange-400'
       case 'red':
         return 'text-red-600 dark:text-red-400'
+      case 'blue':
+        return 'text-blue-600 dark:text-blue-400'
       default:
         return 'text-gray-700 dark:text-dark-text-secondary'
     }

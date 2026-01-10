@@ -97,6 +97,16 @@ const secondaryNavItems: NavItem[] = [
     ),
     color: 'red',
   },
+  {
+    name: 'Features',
+    path: '/features',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      </svg>
+    ),
+    color: 'blue',
+  },
 ]
 
 export default function Sidebar({ currentPath, collapsed = false, userName, onLogout }: SidebarProps) {
@@ -130,6 +140,9 @@ export default function Sidebar({ currentPath, collapsed = false, userName, onLo
     }
     if (item.color === 'red') {
       return `${baseClasses} text-gray-600 dark:text-dark-text-secondary hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400`
+    }
+    if (item.color === 'blue') {
+      return `${baseClasses} text-gray-600 dark:text-dark-text-secondary hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400`
     }
 
     return `${baseClasses} text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-card-soft hover:text-gray-900 dark:hover:text-dark-text-primary`
