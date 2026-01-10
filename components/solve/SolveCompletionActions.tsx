@@ -43,7 +43,7 @@ export default function SolveCompletionActions({
 
   return (
     <div
-      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl shadow-lg dark:shadow-dark-lg border border-emerald-200 dark:border-emerald-700/50 overflow-hidden"
+      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-800 rounded-xl shadow-lg dark:shadow-dark-lg border border-emerald-200 dark:border-emerald-600/30 overflow-hidden"
       data-testid="solve-completion-actions"
     >
       {/* Header */}
@@ -140,12 +140,12 @@ export default function SolveCompletionActions({
             onMouseLeave={() => setHoveredAction(null)}
             className={`
               flex flex-col items-center gap-2 p-4 rounded-lg
-              bg-white dark:bg-dark-card
-              border border-gray-200 dark:border-dark-border
-              hover:border-blue-400 dark:hover:border-blue-500
-              hover:bg-blue-50 dark:hover:bg-blue-900/10
+              bg-white dark:bg-slate-700
+              border border-gray-200 dark:border-slate-600
+              hover:border-blue-400 dark:hover:border-blue-400
+              hover:bg-blue-50 dark:hover:bg-blue-900/30
               transition-all duration-200
-              ${hoveredAction === 'reinforce-concept' ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}
+              ${hoveredAction === 'reinforce-concept' ? 'border-blue-400 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' : ''}
             `}
             data-testid="completion-action-reinforce"
           >
@@ -164,7 +164,7 @@ export default function SolveCompletionActions({
                 />
               </svg>
             </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-dark-text-primary text-center">
+            <span className="text-sm font-medium text-gray-900 dark:text-slate-100 text-center">
               {COMPLETION_ACTIONS.secondary[0].label}
             </span>
           </button>
@@ -177,12 +177,12 @@ export default function SolveCompletionActions({
               onMouseLeave={() => setHoveredAction(null)}
               className={`
                 flex flex-col items-center gap-2 p-4 rounded-lg
-                bg-white dark:bg-dark-card
-                border border-gray-200 dark:border-dark-border
-                hover:border-indigo-400 dark:hover:border-indigo-500
-                hover:bg-indigo-50 dark:hover:bg-indigo-900/10
+                bg-white dark:bg-slate-700
+                border border-gray-200 dark:border-slate-600
+                hover:border-indigo-400 dark:hover:border-indigo-400
+                hover:bg-indigo-50 dark:hover:bg-indigo-900/30
                 transition-all duration-200
-                ${hoveredAction === 'explore-whatif' ? 'border-indigo-400 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-900/10' : ''}
+                ${hoveredAction === 'explore-whatif' ? 'border-indigo-400 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' : ''}
               `}
               data-testid="completion-action-whatif"
             >
@@ -201,7 +201,7 @@ export default function SolveCompletionActions({
                   />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-gray-900 dark:text-dark-text-primary text-center">
+              <span className="text-sm font-medium text-gray-900 dark:text-slate-100 text-center">
                 {COMPLETION_ACTIONS.secondary[1].label}
               </span>
             </button>
@@ -214,12 +214,12 @@ export default function SolveCompletionActions({
             onMouseLeave={() => setHoveredAction(null)}
             className={`
               flex flex-col items-center gap-2 p-4 rounded-lg
-              bg-white dark:bg-dark-card
-              border border-gray-200 dark:border-dark-border
-              hover:border-amber-400 dark:hover:border-amber-500
-              hover:bg-amber-50 dark:hover:bg-amber-900/10
+              bg-white dark:bg-slate-700
+              border border-gray-200 dark:border-slate-600
+              hover:border-amber-400 dark:hover:border-amber-400
+              hover:bg-amber-50 dark:hover:bg-amber-900/30
               transition-all duration-200
-              ${hoveredAction === 'review-concepts' ? 'border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/10' : ''}
+              ${hoveredAction === 'review-concepts' ? 'border-amber-400 dark:border-amber-400 bg-amber-50 dark:bg-amber-900/30' : ''}
             `}
             data-testid="completion-action-review-concepts"
           >
@@ -238,14 +238,14 @@ export default function SolveCompletionActions({
                 />
               </svg>
             </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-dark-text-primary text-center">
+            <span className="text-sm font-medium text-gray-900 dark:text-slate-100 text-center">
               {COMPLETION_ACTIONS.secondary[2].label}
             </span>
           </button>
         </div>
 
         {/* Tip */}
-        <p className="text-xs text-gray-500 dark:text-dark-text-muted text-center pt-2">
+        <p className="text-xs text-gray-500 dark:text-slate-400 text-center pt-2">
           Tip: Continuing the path builds mastery by progressively challenging you.
         </p>
       </div>
