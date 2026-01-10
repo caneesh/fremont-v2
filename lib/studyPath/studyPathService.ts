@@ -1,6 +1,7 @@
 import topicsData from '@/data/topics.json'
 import questionsData from '@/data/questions.json'
-import type { Topic, Question, StudyProgress, StudyStats } from '@/types/studyPath'
+import type { Topic, Question, StudyProgress, StudyStats, QuestionTrack } from '@/types/studyPath'
+import { questionMatchesTrack } from '@/types/studyPath'
 import { checkLocalStorageAvailable, hasLocalStorageSpace } from '@/lib/utils'
 
 const STORAGE_KEY_PROGRESS = 'physiscaffold_study_progress'
@@ -51,11 +52,41 @@ class StudyPathService {
   }
 
   /**
-   * Get recommended next questions based on progress
+   * Get all questions filtered by track
    */
-  getRecommendedQuestions(limit: number = 5): Question[] {
-    const stats = this.getStudyStats()
+  getQuestionsByTrack(track: QuestionTrack): Question[] {
     const allQuestions = this.getAllQuestions()
+    return allQuestions.filter(q => questionMatchesTrack(q, track))
+  }
+
+  /**
+   * Get questions by topic, filtered by track
+   */
+  getQuestionsByTopicAndTrack(topicId: string, track: QuestionTrack): Question[] {
+    const topicQuestions = this.getQuestionsByTopic(topicId)
+    return topicQuestions.filter(q => questionMatchesTrack(q, track))
+  }
+
+  /**
+   * Get questions by subtopic, filtered by track
+   */
+  getQuestionsBySubtopicAndTrack(topicId: string, subtopicId: string, track: QuestionTrack): Question[] {
+    const subtopicQuestions = this.getQuestionsBySubtopic(topicId, subtopicId)
+    return subtopicQuestions.filter(q => questionMatchesTrack(q, track))
+  }
+
+  /**
+   * Get recommended next questions based on progress
+   * Optionally filter by track
+   */
+  getRecommendedQuestions(limit: number = 5, track?: QuestionTrack): Question[] {
+    const stats = this.getStudyStats()
+    let allQuestions = this.getAllQuestions()
+
+    // Filter by track if specified
+    if (track) {
+      allQuestions = allQuestions.filter(q => questionMatchesTrack(q, track))
+    }
 
     // Find questions not yet attempted
     const unattempted = allQuestions.filter(

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { studyPathService } from '@/lib/studyPath/studyPathService'
 import type { Topic, StudyStats, Question } from '@/types/studyPath'
+import { questionMatchesTrack } from '@/types/studyPath'
 import MobileNav from '@/components/MobileNav'
 import PullToRefreshIndicator from '@/components/PullToRefreshIndicator'
 import { usePullToRefresh } from '@/hooks/usePullToRefresh'
@@ -12,9 +13,11 @@ import PageHeader from '@/components/PageHeader'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 import StudyPlanV2Dashboard from '@/components/StudyPlanV2Dashboard'
 import { DashboardV3 } from '@/components/dashboard'
+import { useUserProfile } from '@/lib/profile'
 
 export default function StudyPathPage() {
   const router = useRouter()
+  const { track, isLoaded: profileLoaded } = useUserProfile()
   const [topics, setTopics] = useState<Topic[]>([])
   const [stats, setStats] = useState<StudyStats | null>(null)
   const [recommendedQuestions, setRecommendedQuestions] = useState<Question[]>([])
@@ -22,12 +25,15 @@ export default function StudyPathPage() {
   const [showV3, setShowV3] = useState(FEATURE_FLAGS.DASHBOARD_V3)
 
   useEffect(() => {
+    // Wait for profile to load before fetching questions
+    if (!profileLoaded) return
+
     const loadData = async () => {
       try {
-        // Fetch topics and questions from API
+        // Fetch topics and questions from API (pass track for filtering)
         const [topicsResponse, questionsResponse] = await Promise.all([
           fetch('/api/study-path/topics'),
-          fetch('/api/study-path/questions')
+          fetch(`/api/study-path/questions?track=${track}`)
         ])
 
         if (topicsResponse.ok) {
@@ -39,7 +45,7 @@ export default function StudyPathPage() {
         const studyStats = studyPathService.getStudyStats()
         setStats(studyStats)
 
-        // Calculate recommended questions
+        // Calculate recommended questions (already filtered by track from API)
         if (questionsResponse.ok) {
           const questionsData = await questionsResponse.json()
           const allQuestions = questionsData.questions || []
@@ -66,7 +72,7 @@ export default function StudyPathPage() {
     }
 
     loadData()
-  }, [])
+  }, [profileLoaded, track])
 
   const getTopicProgress = (topicId: string) => {
     return studyPathService.getTopicCompletionPercentage(topicId)

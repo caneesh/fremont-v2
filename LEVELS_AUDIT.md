@@ -248,7 +248,21 @@ Future consideration:
 
 ### Remaining Work
 
-- Dashboard Integration: Filter questions by user's selected track (Phase 4 in plan)
+- ~~Dashboard Integration: Filter questions by user's selected track~~ **DONE**
+
+### Track Filtering Integration (Added 2026-01-10)
+
+| Component | Change |
+|-----------|--------|
+| `types/studyPath.ts` | Added `QuestionTrack` type, `difficultyToTracks()`, `questionMatchesTrack()` |
+| `lib/studyPath/studyPathService.ts` | Added `getQuestionsByTrack()`, `getQuestionsByTopicAndTrack()`, `getQuestionsBySubtopicAndTrack()`, updated `getRecommendedQuestions()` |
+| `app/api/study-path/questions/route.ts` | Added `?track=` query parameter for filtering |
+| `app/study-path/page.tsx` | Uses `useUserProfile()` hook to pass track to API |
+
+**Track-to-Difficulty Mapping:**
+- Foundation 1/2: Easy questions
+- Foundation 2/Intermediate: Medium questions
+- Intermediate/Competitive: Hard questions
 
 ---
 
