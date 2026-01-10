@@ -2,6 +2,8 @@
 
 This guide walks you through using PhysiScaffold to solve physics problems from start to finish.
 
+> **Note**: This guide is synchronized with the [Feature Registry](/lib/featureRegistry.ts). Visit `/features` in the app to explore all features interactively.
+
 ## Getting Started
 
 ### Prerequisites
@@ -16,39 +18,52 @@ This guide walks you through using PhysiScaffold to solve physics problems from 
    - Local development: `http://localhost:3000`
    - Production: Your deployed URL
 2. If prompted, enter your pilot code
-3. With Dashboard v3 enabled (default), you'll land on the Study Path dashboard
-4. Without Dashboard v3, you'll land directly on the solver interface
+3. You'll land on the **Dashboard** at `/study-path`
+
+<!-- TODO: Screenshot of login screen -->
 
 ## Navigation
 
-### With Dashboard v3 (Default)
+### Desktop Layout
 
 The application uses a unified shell layout:
 
-- **Desktop**: Sidebar + TopBar navigation
-- **Mobile**: Bottom navigation bar with 4 items + More menu
+- **Sidebar** (left): Primary navigation + Tools section
+- **TopBar** (top): Page title and actions
 
-**Main Routes:**
+<!-- TODO: Screenshot of desktop layout -->
 
-| Route | Description |
-|-------|-------------|
-| `/study-path` | Dashboard with daily plan and progress |
-| `/solve` | Main problem-solving interface |
-| `/pattern-track` | Pattern learning and practice |
-| `/mistake-notebook` | Spaced repetition review |
-| `/history` | Problem attempt history |
-| `/drills/[patternId]` | Drill practice sessions |
+### Mobile Layout
 
-### Without Dashboard v3
+- **Bottom Navigation Bar**: 4 primary items
+- **More Menu**: Additional tools (tap "More" icon)
 
-The home page (`/`) renders the solver directly.
+<!-- TODO: Screenshot of mobile layout -->
+
+### Route Reference
+
+| Feature | Route | How to Access |
+|---------|-------|---------------|
+| Dashboard | `/study-path` | Sidebar > Dashboard |
+| Problem Solver | `/solve` | Sidebar > Solve |
+| Mistake Notebook | `/mistake-notebook` | Sidebar > Review |
+| Problem History | `/history` | Sidebar > History |
+| Concept Network | `/concept-network` | Sidebar > Tools > Concept Network |
+| Pattern Track | `/pattern-track` | Sidebar > Tools > Pattern Track |
+| Spot the Mistake | `/spot-mistake` | Sidebar > Tools > Spot Mistake |
+| Error Patterns | `/error-patterns` | Sidebar > Tools > Error Patterns |
+| Feature Explorer | `/features` | Sidebar > Tools > Features |
+| Micro-Pattern Drills | `/drills` | From Pattern Track or Warm-Up |
+
+---
 
 ## Solving a Problem
 
 ### Step 1: Enter Your Problem
 
-**From Dashboard:**
-1. Click "New Problem" or navigate to `/solve`
+**Where to find it**: `/solve` (Sidebar > Solve)
+
+1. Click "New Problem" from Dashboard or navigate to `/solve`
 2. Locate the **problem input area**
 3. Type or paste your physics problem text
 
@@ -65,9 +80,15 @@ Take g = 10 m/s². Find the block's acceleration.
 - Select a sample problem from the "Sample Problems" buttons
 - The problem text auto-fills into the input area
 
-### Step 2: Pattern-First Gate (if enabled)
+<!-- TODO: Screenshot of problem input -->
 
-When `PATTERN_FIRST_MODE` is enabled:
+---
+
+### Step 2: Pattern-First Gate
+
+**Status**: IMPLEMENTED | **Flag**: `PATTERN_FIRST_MODE` (default: ON)
+
+**Where to find it**: Modal appears automatically after submitting a problem
 
 1. A modal appears with a 12-second timer
 2. Read the problem quickly
@@ -75,15 +96,23 @@ When `PATTERN_FIRST_MODE` is enabled:
 4. Your selection is recorded for learning analytics
 5. Scaffold generation proceeds after selection or timeout
 
+<!-- TODO: Screenshot of Pattern-First modal -->
+
+---
+
 ### Step 3: Wait for Scaffold Generation
 
 - A loading indicator appears while the AI processes your problem
-- Phase A (outline) typically takes 10-20 seconds
+- Typically takes 10-20 seconds
 - The **Solution Roadmap** appears when ready
 
-### Step 4: Skip-or-Commit Gate (if enabled)
+---
 
-When `SKIP_COMMIT_GATE` is enabled:
+### Step 4: Skip-or-Commit Gate
+
+**Status**: IMPLEMENTED | **Flag**: `SKIP_COMMIT_GATE` (default: ON)
+
+**Where to find it**: Modal appears 25 seconds into problem solving
 
 1. At T=25 seconds, a decision modal appears
 2. Choose:
@@ -92,7 +121,13 @@ When `SKIP_COMMIT_GATE` is enabled:
 3. Auto-commits after 8 seconds if no selection
 4. Trains exam triage skills
 
+<!-- TODO: Screenshot of Skip-Commit modal -->
+
+---
+
 ### Step 5: Review the Solution Roadmap
+
+**Where to find it**: Main panel on `/solve` page
 
 The scaffold appears as an **accordion** with numbered steps:
 
@@ -110,6 +145,10 @@ Sanity Check                                  ○ Locked
 - **Locked steps (○)**: Complete previous steps first
 - **Completed steps (✓)**: Already finished
 
+<!-- TODO: Screenshot of Solution Roadmap -->
+
+---
+
 ### Step 6: Complete Each Step
 
 When you expand a step:
@@ -123,16 +162,22 @@ When you expand a step:
    - Correct: Step advances with celebration
    - Wrong: Targeted feedback with reasoning
 
-**Step Interaction Flow (Socratic-First Mode):**
+**Socratic-First Step Interaction** (default mode):
 
 1. Step opens with a thinking prompt: "What's your approach?"
 2. You answer and rate your confidence (guess/okay/solid)
 3. AI verifies and guides with follow-up questions
 4. If stuck: Hint ladder with Socratic verification per hint
 
-### Step 7: Warm-Up Protocol (if enabled)
+<!-- TODO: Screenshot of step interaction -->
 
-When `WARMUP_PROTOCOL` is enabled:
+---
+
+### Step 7: Warm-Up Protocol
+
+**Status**: IMPLEMENTED | **Flag**: `WARMUP_PROTOCOL` (default: ON)
+
+**Where to find it**: Modal appears on Dashboard (`/study-path`) at session start
 
 1. Before main study session, 2-5 minute micro-drills appear
 2. Drills focus on rusty patterns (decay-based selection)
@@ -140,16 +185,28 @@ When `WARMUP_PROTOCOL` is enabled:
 4. Skip option available once per day (with mastery penalty)
 5. Must complete or skip to access dashboard
 
-### Step 8: Pivot Injection (if enabled)
+<!-- TODO: Screenshot of Warm-Up modal -->
 
-When `PIVOT_INJECTION` is enabled and you're stuck:
+---
+
+### Step 8: Pivot Injection
+
+**Status**: IMPLEMENTED | **Flag**: `PIVOT_INJECTION` (default: ON)
+
+**Where to find it**: Appears automatically in `/solve` when you're stuck
 
 1. After threshold time (90-180s) or multiple wrong attempts
 2. A pivot question appears to help reframe thinking
 3. Categories: Simplify, Analogy, Constraint, Decompose, Visualize, Reverse
 4. Answer the pivot or skip to continue
 
+---
+
 ### Step 9: Professor Check-In (Socratic Tutor)
+
+**Status**: IMPLEMENTED | **Flag**: `SOCRATIC_TUTOR_CHAT` (default: ON)
+
+**Where to find it**: Chat panel appears in `/solve` after completing steps
 
 After completing certain steps, the **Socratic Tutor** chat appears:
 
@@ -166,7 +223,15 @@ After completing certain steps, the **Socratic Tutor** chat appears:
 slides down, friction acts up the incline to oppose it."
 ```
 
+<!-- TODO: Screenshot of Socratic Tutor chat -->
+
+---
+
 ### Step 10: Using Hints
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: "Show Hint" button within each step on `/solve`
 
 If you're stuck on a step:
 
@@ -179,13 +244,19 @@ If you're stuck on a step:
    - Level 5: Full Solution (Reveal)
 3. Try to solve with minimal hints for best learning
 
-**Feynman Hint Prompts (if enabled):**
+**Feynman Hint Prompts** (if enabled):
 - Before unlocking Level 3+ hints, you must explain the concept
 - This ensures understanding before getting computational help
 
+---
+
 ### Step 11: Rate Your Confidence
 
-After completing a step (when Confidence-Weighted SRS is enabled):
+**Status**: IMPLEMENTED | **Flag**: `CONFIDENCE_WEIGHTED_SRS` (default: ON)
+
+**Where to find it**: Prompt appears after step completion on `/solve`
+
+After completing a step:
 
 1. A prompt asks: "How confident are you?"
 2. Options: **Guess** / **Okay** / **Solid**
@@ -194,7 +265,13 @@ After completing a step (when Confidence-Weighted SRS is enabled):
    - Correct + Low confidence = sooner review (lucky guess)
    - Wrong + High confidence = aggressive review (misconception)
 
+---
+
 ### Step 12: Complete Sanity Check
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: Final step of the scaffold on `/solve`
 
 The final step validates your answer:
 
@@ -209,6 +286,8 @@ With friction, acceleration should be less, so 3.27 m/s²
 is reasonable. Units are m/s² — correct for acceleration."
 ```
 
+---
+
 ### Step 13: Problem Completed
 
 After the sanity check:
@@ -221,7 +300,13 @@ After the sanity check:
    - Return to dashboard
 4. Progress stored in history
 
+---
+
 ## Using the Concept Inventory Panel
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: Right panel on `/solve` (desktop)
 
 The **right panel** displays contextual information:
 
@@ -232,9 +317,17 @@ The **right panel** displays contextual information:
 
 Use this as a reference while solving - it updates based on the current step.
 
+<!-- TODO: Screenshot of Concept Inventory panel -->
+
+---
+
 ## Viewing Problem History
 
-Access your problem history at `/history`:
+**Status**: IMPLEMENTED
+
+**Where to find it**: `/history` (Sidebar > History)
+
+Access your problem history:
 
 | Status | Meaning |
 |--------|---------|
@@ -249,9 +342,15 @@ Click any problem to:
 - **Review** (if solved)
 - **Retry** (start fresh)
 
+<!-- TODO: Screenshot of Problem History -->
+
+---
+
 ## Using the Mistake Notebook
 
-Access at `/mistake-notebook`:
+**Status**: IMPLEMENTED | **Flag**: `MISTAKE_NOTEBOOK` (hardcoded ON)
+
+**Where to find it**: `/mistake-notebook` (Sidebar > Review)
 
 1. View tracked mistakes from problem-solving sessions
 2. Mistakes categorized by:
@@ -261,9 +360,15 @@ Access at `/mistake-notebook`:
 3. Review cards with spaced repetition scheduling
 4. Cards scheduled based on last review and confidence
 
+<!-- TODO: Screenshot of Mistake Notebook -->
+
+---
+
 ## Pattern Track (Study Plan v2)
 
-Access at `/pattern-track` or `/study-path`:
+**Status**: IMPLEMENTED | **Flag**: `STUDY_PLAN_V2` (default: ON)
+
+**Where to find it**: `/pattern-track` (Sidebar > Tools > Pattern Track)
 
 ### Curriculum Structure
 - **Tracks**: Foundation1 → Foundation2 → Intermediate → Competitive
@@ -276,6 +381,27 @@ Access at `/pattern-track` or `/study-path`:
 - Practice mode with pattern-specific questions
 - Track streaks and daily activity
 
+<!-- TODO: Screenshot of Pattern Track -->
+
+---
+
+## Micro-Pattern Drills
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: `/drills` or `/drills/[patternId]` (from Pattern Track or Warm-Up)
+
+Rapid-fire pattern recognition practice:
+
+1. Timed questions (20 seconds per item)
+2. Focus on specific patterns
+3. Track accuracy and speed
+4. Builds automaticity for exam conditions
+
+<!-- TODO: Screenshot of Drills -->
+
+---
+
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -283,6 +409,8 @@ Access at `/pattern-track` or `/study-path`:
 | `Enter` | Submit answer |
 | `Tab` | Move to next input |
 | `Shift+Tab` | Move to previous input |
+
+---
 
 ## Tips for Effective Learning
 
@@ -301,29 +429,41 @@ Access at `/pattern-track` or `/study-path`:
 - Leave problems in "In Progress" state
 - Always reveal full solutions (builds dependency)
 
+---
+
 ## Interactive Features
 
 ### Boundary Case Builder
 
-When enabled (`BOUNDARY_CASE_BUILDER`):
+**Status**: IMPLEMENTED | **Flag**: `BOUNDARY_CASE_BUILDER` (default: ON)
+
+**Where to find it**: Appears in `/solve` after deriving an equation
 
 1. Available after deriving an equation
 2. Stress-test by setting variables to limits (θ→0°, m→∞)
 3. Verify behavior matches physical intuition
 4. Builds equation validation skills
 
+---
+
 ### Concept Contrast Challenge
 
-When enabled (`CONCEPT_CONTRAST`):
+**Status**: IMPLEMENTED | **Flag**: `CONCEPT_CONTRAST` (default: ON)
+
+**Where to find it**: Modal appears in `/solve` on key physics concepts
 
 1. Triggers on steps with key physics concepts
 2. Challenges you to explain why similar concepts don't apply
 3. Example: "Why not use energy conservation here?"
 4. Forces deep understanding through differentiation
 
+---
+
 ### Paper Solution Upload
 
-When enabled (`PAPER_SOLUTION_UPLOAD`):
+**Status**: IMPLEMENTED | **Flag**: `PAPER_SOLUTION_UPLOAD` (default: ON)
+
+**Where to find it**: "Upload Solution" button in `/solve`
 
 1. Click "Upload Solution" button
 2. Take a photo of your handwritten work
@@ -331,23 +471,64 @@ When enabled (`PAPER_SOLUTION_UPLOAD`):
 4. AI analyzes against rubrics
 5. Receive feedback on your handwritten solution
 
+---
+
 ### Constraint Highlight
 
-When enabled (`CONSTRAINT_HIGHLIGHT`):
+**Status**: IMPLEMENTED | **Flag**: `CONSTRAINT_HIGHLIGHT` (default: ON)
+
+**Where to find it**: Modal appears in `/solve` after wrong answer
 
 1. After a wrong answer, constraint keywords highlight in problem
 2. Keywords: frictionless, massless, elastic, rigid, etc.
 3. Helps notice what you may have missed
 4. Requires acknowledgment before continuing
 
-### Socratic Rewind
+---
 
-When stuck:
+### Concept Network
 
-1. Click "I'm stuck" or use rewind button
-2. System rewinds to earlier step
-3. Socratic questions guide you to re-examine
-4. Helps recover from errors without revealing answer
+**Status**: IMPLEMENTED
+
+**Where to find it**: `/concept-network` (Sidebar > Tools > Concept Network)
+
+1. Visual map of concept mastery
+2. Nodes represent physics concepts
+3. Edges show relationships
+4. Repair mode for weak concepts
+
+<!-- TODO: Screenshot of Concept Network -->
+
+---
+
+### Spot the Mistake
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: `/spot-mistake` (Sidebar > Tools > Spot Mistake)
+
+1. View a provided solution with intentional errors
+2. Identify and explain the mistakes
+3. Receive feedback on your spotting accuracy
+4. Builds critical analysis skills
+
+<!-- TODO: Screenshot of Spot the Mistake -->
+
+---
+
+## Feature Explorer
+
+**Status**: IMPLEMENTED
+
+**Where to find it**: `/features` (Sidebar > Tools > Features)
+
+Browse all app features:
+- Filter by category, status, or search
+- See implementation status at a glance
+- Click to navigate to feature routes
+- View which features require specific flags
+
+---
 
 ## Troubleshooting
 
@@ -384,9 +565,12 @@ When stuck:
 - Must answer all drills in block
 - Skip option available once per day
 
+---
+
 ## Getting Help
 
 - Check the [README](../README.md) for setup issues
 - Review [FEATURES.md](./FEATURES.md) for feature details
 - Use [TESTING_GUIDE.md](./TESTING_GUIDE.md) for test scenarios
 - Check [ARCHITECTURE.md](./ARCHITECTURE.md) for technical details
+- Visit `/features` in the app to explore all features

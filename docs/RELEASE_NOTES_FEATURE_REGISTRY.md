@@ -39,6 +39,16 @@ This release introduces a Feature Registry as the single source of truth for all
 - See which features depend on each flag
 - Copy-paste environment variable syntax for configuration
 
+### Debug Feature Flags (`/debug/features`)
+- Development-only page for testing feature flag behaviors
+- **localStorage overrides**: Toggle flags ON/OFF locally without changing env vars
+- **Missing env vars list**: See which env vars aren't set (using defaults)
+- **Why hidden explanations**: Understand why each disabled feature is hidden
+- Override controls: ON / Default / OFF buttons per flag
+- "Clear All Overrides" button to reset to actual flag values
+- Overrides persist in localStorage under key `physiscaffold_feature_overrides`
+- Uses `useFeatureOverride` hook for client-side override support
+
 ### Navigation Updates
 - Added "Features" link to sidebar secondary navigation (desktop)
 - Added "Features" link to More menu (mobile)
@@ -48,8 +58,10 @@ This release introduces a Feature Registry as the single source of truth for all
 
 ### Files Added
 - `lib/featureRegistry.ts` - Feature registry with 35+ feature definitions
+- `lib/featureOverrides.ts` - localStorage override utilities and hooks
 - `app/features/page.tsx` - Feature Explorer page
 - `app/features/flags/page.tsx` - Feature Flags dashboard
+- `app/debug/features/page.tsx` - Debug Feature Flags with localStorage overrides
 - `e2e/features.spec.ts` - Playwright smoke tests
 - `docs/RELEASE_NOTES_FEATURE_REGISTRY.md` - This file
 
@@ -62,15 +74,19 @@ This release introduces a Feature Registry as the single source of truth for all
 |-------|-------------|
 | `/features` | Feature Explorer with filterable grid |
 | `/features/flags` | Feature Flags dashboard |
+| `/debug/features` | Debug Feature Flags with localStorage overrides |
 
 ## Smoke Tests
 
 New Playwright tests added in `e2e/features.spec.ts`:
 - Feature Explorer page loads
 - Feature Flags dashboard loads
+- Debug Feature Flags page loads
 - Navigation between pages works
 - Filtering functionality works
-- All 11 core feature routes return 200
+- localStorage override toggle works
+- Clear all overrides works
+- All 12 core feature routes return 200
 
 Run tests with:
 ```bash
