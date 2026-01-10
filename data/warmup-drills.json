@@ -43,6 +43,42 @@
           "correctAnswer": "53°",
           "explanation": "θ = arctan(Fy/Fx) = arctan(40/30) = arctan(4/3) ≈ 53°",
           "timeLimitSeconds": 25
+        },
+        {
+          "id": "vec-5",
+          "promptText": "A displacement vector has magnitude 13 m. If its x-component is 5 m, what is the y-component?",
+          "type": "mcq",
+          "choices": ["12 m", "8 m", "18 m", "√13 m"],
+          "correctAnswer": "12 m",
+          "explanation": "Using |d|² = dx² + dy²: 169 = 25 + dy² → dy² = 144 → dy = 12 m",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-6",
+          "promptText": "Two forces of 6 N and 8 N act at right angles. What is the resultant force?",
+          "type": "mcq",
+          "choices": ["10 N", "14 N", "2 N", "48 N"],
+          "correctAnswer": "10 N",
+          "explanation": "For perpendicular vectors: |R| = √(6² + 8²) = √(36 + 64) = √100 = 10 N",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-7",
+          "promptText": "A force of 100 N acts at 60° to the horizontal. What is its vertical component?",
+          "type": "mcq",
+          "choices": ["50√3 N", "50 N", "100√3 N", "25 N"],
+          "correctAnswer": "50√3 N",
+          "explanation": "Vertical component = F·sin(θ) = 100·sin(60°) = 100·(√3/2) = 50√3 N",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "vec-8",
+          "promptText": "Vector A points east (3 units) and vector B points north (4 units). What is |A + B|?",
+          "type": "mcq",
+          "choices": ["5 units", "7 units", "1 unit", "12 units"],
+          "correctAnswer": "5 units",
+          "explanation": "East and north are perpendicular: |A + B| = √(3² + 4²) = √25 = 5 units",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -89,6 +125,42 @@
           "correctAnswer": "Zero component along slope",
           "explanation": "The normal force is perpendicular to the slope, so it has no component along the slope direction.",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "sign-5",
+          "promptText": "A spring is compressed 5 cm from equilibrium. Taking rightward (stretch direction) as positive, what is the displacement?",
+          "type": "mcq",
+          "choices": ["-5 cm", "+5 cm", "0 cm", "±5 cm"],
+          "correctAnswer": "-5 cm",
+          "explanation": "Compression is opposite to the stretch direction, so displacement is negative: -5 cm",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "sign-6",
+          "promptText": "Work done by friction on a sliding object is always:",
+          "type": "mcq",
+          "choices": ["Negative", "Positive", "Zero", "Depends on speed"],
+          "correctAnswer": "Negative",
+          "explanation": "Friction opposes motion, so force and displacement are opposite. W = F·d·cos(180°) < 0",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "sign-7",
+          "promptText": "A ball bounces off a wall. Taking toward the wall as positive, the change in velocity is:",
+          "type": "mcq",
+          "choices": ["Negative", "Positive", "Zero", "Undefined"],
+          "correctAnswer": "Negative",
+          "explanation": "If initial v is positive (toward wall), final v is negative (away). Δv = v_f - v_i < 0",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "sign-8",
+          "promptText": "An elevator accelerates downward at 2 m/s². Taking up as positive, what is the acceleration?",
+          "type": "mcq",
+          "choices": ["-2 m/s²", "+2 m/s²", "0 m/s²", "-10 m/s²"],
+          "correctAnswer": "-2 m/s²",
+          "explanation": "Downward acceleration with up as positive means a = -2 m/s²",
+          "timeLimitSeconds": 15
         }
       ]
     },
@@ -135,6 +207,42 @@
           "correctAnswer": "4/5",
           "explanation": "Using sin²θ + cos²θ = 1: cos²θ = 1 - 9/25 = 16/25, so cos(θ) = 4/5",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "trig-5",
+          "promptText": "What is sin(45°)?",
+          "type": "mcq",
+          "choices": ["1/√2", "1/2", "√3/2", "1"],
+          "correctAnswer": "1/√2",
+          "explanation": "sin(45°) = 1/√2 = √2/2 ≈ 0.707",
+          "timeLimitSeconds": 10
+        },
+        {
+          "id": "trig-6",
+          "promptText": "What is cos(0°)?",
+          "type": "mcq",
+          "choices": ["1", "0", "1/2", "√2"],
+          "correctAnswer": "1",
+          "explanation": "cos(0°) = 1. At 0°, the adjacent side equals the hypotenuse.",
+          "timeLimitSeconds": 10
+        },
+        {
+          "id": "trig-7",
+          "promptText": "If tan(θ) = 1, what is θ in the first quadrant?",
+          "type": "mcq",
+          "choices": ["45°", "30°", "60°", "90°"],
+          "correctAnswer": "45°",
+          "explanation": "tan(θ) = 1 when sin(θ) = cos(θ), which occurs at θ = 45°",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "trig-8",
+          "promptText": "What is sin(90°)?",
+          "type": "mcq",
+          "choices": ["1", "0", "1/2", "Undefined"],
+          "correctAnswer": "1",
+          "explanation": "sin(90°) = 1. At 90°, the opposite side equals the hypotenuse.",
+          "timeLimitSeconds": 10
         }
       ]
     },
@@ -181,6 +289,42 @@
           "correctAnswer": "54 km/h",
           "explanation": "15 m/s × 3.6 = 54 km/h (multiply by 3.6 to go from m/s to km/h)",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "unit-5",
+          "promptText": "Convert 1 hour to seconds",
+          "type": "mcq",
+          "choices": ["3600 s", "360 s", "60 s", "36000 s"],
+          "correctAnswer": "3600 s",
+          "explanation": "1 hour = 60 minutes × 60 seconds = 3600 s",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "unit-6",
+          "promptText": "Convert 2 kJ to joules",
+          "type": "mcq",
+          "choices": ["2000 J", "200 J", "20 J", "0.002 J"],
+          "correctAnswer": "2000 J",
+          "explanation": "2 kJ × (1000 J/kJ) = 2000 J",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "unit-7",
+          "promptText": "Convert 45 km/h to m/s",
+          "type": "mcq",
+          "choices": ["12.5 m/s", "45 m/s", "162 m/s", "4.5 m/s"],
+          "correctAnswer": "12.5 m/s",
+          "explanation": "45 km/h ÷ 3.6 = 12.5 m/s (divide by 3.6 to convert km/h to m/s)",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "unit-8",
+          "promptText": "Convert 5000 mm to meters",
+          "type": "mcq",
+          "choices": ["5 m", "50 m", "0.5 m", "500 m"],
+          "correctAnswer": "5 m",
+          "explanation": "5000 mm × (1 m / 1000 mm) = 5 m",
+          "timeLimitSeconds": 15
         }
       ]
     },
@@ -227,6 +371,42 @@
           "correctAnswer": "(v - u)/t",
           "explanation": "v = u + at → v - u = at → a = (v - u)/t",
           "timeLimitSeconds": 15
+        },
+        {
+          "id": "alg-5",
+          "promptText": "Rearrange KE = ½mv² to solve for v",
+          "type": "mcq",
+          "choices": ["√(2KE/m)", "2KE/m", "KE/(2m)", "√(KE/2m)"],
+          "correctAnswer": "√(2KE/m)",
+          "explanation": "KE = ½mv² → 2KE = mv² → v² = 2KE/m → v = √(2KE/m)",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "alg-6",
+          "promptText": "If x² + 4x - 12 = 0, what are the positive solutions?",
+          "type": "mcq",
+          "choices": ["x = 2", "x = 6", "x = 4", "x = 3"],
+          "correctAnswer": "x = 2",
+          "explanation": "Factor: (x + 6)(x - 2) = 0 → x = -6 or x = 2. Positive solution: x = 2",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "alg-7",
+          "promptText": "Solve for T: T - mg = ma",
+          "type": "mcq",
+          "choices": ["m(g + a)", "m(a - g)", "ma/g", "mg - ma"],
+          "correctAnswer": "m(g + a)",
+          "explanation": "T - mg = ma → T = ma + mg = m(a + g)",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "alg-8",
+          "promptText": "If F = Gm₁m₂/r², find r in terms of the other variables",
+          "type": "mcq",
+          "choices": ["√(Gm₁m₂/F)", "Gm₁m₂/F", "F/(Gm₁m₂)", "√(F/Gm₁m₂)"],
+          "correctAnswer": "√(Gm₁m₂/F)",
+          "explanation": "F = Gm₁m₂/r² → r² = Gm₁m₂/F → r = √(Gm₁m₂/F)",
+          "timeLimitSeconds": 25
         }
       ]
     },
@@ -273,6 +453,42 @@
           "correctAnswer": "Yes",
           "explanation": "For circular orbits, gravity is always perpendicular to motion, so it does no work. Energy is constant.",
           "timeLimitSeconds": 25
+        },
+        {
+          "id": "cons-5",
+          "promptText": "A spring launches a ball vertically. When is mechanical energy conserved?",
+          "type": "mcq",
+          "choices": ["Throughout if no air resistance", "Only while touching spring", "Only after leaving spring", "Never"],
+          "correctAnswer": "Throughout if no air resistance",
+          "explanation": "Both spring force and gravity are conservative. Total mechanical energy (spring PE + gravitational PE + KE) is conserved.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "cons-6",
+          "promptText": "In an explosion, total momentum is conserved because:",
+          "type": "mcq",
+          "choices": ["Internal forces cancel out", "External forces dominate", "Mass is conserved", "Energy is released"],
+          "correctAnswer": "Internal forces cancel out",
+          "explanation": "Internal explosion forces are action-reaction pairs that cancel. With no net external force, momentum is conserved.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "cons-7",
+          "promptText": "A ball rolls down a ramp with friction. Which is conserved?",
+          "type": "mcq",
+          "choices": ["Total energy (including thermal)", "Mechanical energy", "Kinetic energy only", "Potential energy only"],
+          "correctAnswer": "Total energy (including thermal)",
+          "explanation": "Friction converts mechanical to thermal energy. Total energy is always conserved, but mechanical energy is not.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "cons-8",
+          "promptText": "Two ice skaters push off each other. What is conserved?",
+          "type": "mcq",
+          "choices": ["Momentum", "Kinetic energy", "Neither", "Both"],
+          "correctAnswer": "Momentum",
+          "explanation": "No external horizontal forces, so momentum is conserved. KE increases (chemical energy from muscles).",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -319,6 +535,42 @@
           "correctAnswer": "They and the elevator accelerate together",
           "explanation": "Both person and elevator fall with g, so there's no normal force between them - hence weightlessness.",
           "timeLimitSeconds": 25
+        },
+        {
+          "id": "ref-5",
+          "promptText": "On a spinning merry-go-round, which way does the Coriolis force act on a person walking outward?",
+          "type": "mcq",
+          "choices": ["Perpendicular to their motion", "Toward the center", "Away from center", "Opposite to rotation"],
+          "correctAnswer": "Perpendicular to their motion",
+          "explanation": "Coriolis force is always perpendicular to velocity in the rotating frame: F = -2mω × v",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "ref-6",
+          "promptText": "A ball is dropped inside a train moving at constant velocity. To a person on the platform, the ball falls:",
+          "type": "mcq",
+          "choices": ["In a parabolic path", "Straight down", "Backward", "Forward"],
+          "correctAnswer": "In a parabolic path",
+          "explanation": "The ball has horizontal velocity (from train) and accelerates downward. From platform, this is projectile motion.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "ref-7",
+          "promptText": "Why does Newton's second law (F = ma) not apply directly in a rotating reference frame?",
+          "type": "mcq",
+          "choices": ["It's a non-inertial frame", "Mass changes", "Force is undefined", "Acceleration is zero"],
+          "correctAnswer": "It's a non-inertial frame",
+          "explanation": "Newton's laws apply directly only in inertial frames. In rotating frames, pseudo forces must be added.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "ref-8",
+          "promptText": "Two cars approach each other at 60 km/h each. What is their relative velocity?",
+          "type": "mcq",
+          "choices": ["120 km/h", "60 km/h", "0 km/h", "30 km/h"],
+          "correctAnswer": "120 km/h",
+          "explanation": "Relative velocity = v₁ - (-v₂) = 60 - (-60) = 120 km/h (velocities are opposite)",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -365,6 +617,42 @@
           "correctAnswer": "Zero",
           "explanation": "Constant velocity means zero acceleration, which means net force = 0 (engine force balances friction).",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-5",
+          "promptText": "A block hangs from two ropes at angles. How many forces act on the block?",
+          "type": "mcq",
+          "choices": ["3 (two tensions and weight)", "2 (tension and weight)", "1 (weight)", "4"],
+          "correctAnswer": "3 (two tensions and weight)",
+          "explanation": "Each rope provides tension, plus gravity provides weight. Total: 3 forces.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-6",
+          "promptText": "A pendulum at its lowest point (swinging). What forces act on the bob?",
+          "type": "mcq",
+          "choices": ["Tension and weight", "Only weight", "Tension, weight, and centripetal", "Only tension"],
+          "correctAnswer": "Tension and weight",
+          "explanation": "Only real forces are tension (from string) and weight (gravity). Centripetal force is the net force, not a separate force.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "fbd-7",
+          "promptText": "A person stands in an elevator accelerating upward. The normal force is:",
+          "type": "mcq",
+          "choices": ["Greater than their weight", "Equal to their weight", "Less than their weight", "Zero"],
+          "correctAnswer": "Greater than their weight",
+          "explanation": "Net force is upward (N - mg = ma). So N = m(g + a) > mg.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "fbd-8",
+          "promptText": "A block sits on another block on a frictionless floor. How many forces act on the bottom block?",
+          "type": "mcq",
+          "choices": ["3 (weight, normal from floor, normal from top block)", "2 (weight, normal)", "4", "1"],
+          "correctAnswer": "3 (weight, normal from floor, normal from top block)",
+          "explanation": "Bottom block experiences: its weight down, floor normal up, and top block's weight pressing down (normal contact).",
+          "timeLimitSeconds": 25
         }
       ]
     },
@@ -419,6 +707,33 @@
           "choices": ["5 m/s²", "10 m/s²", "20 m/s²", "2.5 m/s²"],
           "correctAnswer": "5 m/s²",
           "explanation": "Using a = (v - u)/t: a = (10 - 30)/4 = -20/4 = -5 m/s². Deceleration = 5 m/s²",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "kin-6",
+          "promptText": "A stone is thrown upward at 30 m/s. What is its velocity after 2 seconds? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["10 m/s upward", "10 m/s downward", "30 m/s downward", "50 m/s upward"],
+          "correctAnswer": "10 m/s upward",
+          "explanation": "v = u + at = 30 + (-10)(2) = 30 - 20 = 10 m/s (still moving upward)",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "kin-7",
+          "promptText": "An object starts at rest and accelerates at 4 m/s². How far does it travel in 3 seconds?",
+          "type": "mcq",
+          "choices": ["18 m", "12 m", "36 m", "6 m"],
+          "correctAnswer": "18 m",
+          "explanation": "s = ut + ½at² = 0 + ½(4)(3)² = ½(4)(9) = 18 m",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "kin-8",
+          "promptText": "A ball is thrown upward and reaches maximum height in 3 seconds. What was the initial velocity? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["30 m/s", "15 m/s", "45 m/s", "10 m/s"],
+          "correctAnswer": "30 m/s",
+          "explanation": "At max height, v = 0. Using v = u + at: 0 = u + (-10)(3) → u = 30 m/s",
           "timeLimitSeconds": 20
         }
       ]
@@ -475,6 +790,33 @@
           "correctAnswer": "The net force is zero",
           "explanation": "Newton's First Law: An object at rest stays at rest when the net force is zero (normal = weight).",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "newton-6",
+          "promptText": "Two blocks (3 kg and 2 kg) are pushed together with 10 N. What is the acceleration of the system?",
+          "type": "mcq",
+          "choices": ["2 m/s²", "5 m/s²", "10 m/s²", "3.33 m/s²"],
+          "correctAnswer": "2 m/s²",
+          "explanation": "Total mass = 5 kg. Using F = ma: a = F/m = 10/5 = 2 m/s²",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "newton-7",
+          "promptText": "A 1000 kg car accelerates at 2 m/s². If friction is 500 N, what is the engine force?",
+          "type": "mcq",
+          "choices": ["2500 N", "2000 N", "1500 N", "500 N"],
+          "correctAnswer": "2500 N",
+          "explanation": "Net force = ma = 1000 × 2 = 2000 N. Engine force = Net + Friction = 2000 + 500 = 2500 N",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "newton-8",
+          "promptText": "An astronaut pushes against a spacecraft in space. What happens?",
+          "type": "mcq",
+          "choices": ["Both move in opposite directions", "Only astronaut moves", "Only spacecraft moves", "Neither moves"],
+          "correctAnswer": "Both move in opposite directions",
+          "explanation": "Newton's Third Law: astronaut pushes spacecraft, spacecraft pushes astronaut. Both accelerate oppositely.",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -530,6 +872,33 @@
           "correctAnswer": "Quadruples",
           "explanation": "KE = ½mv². If v → 2v, then KE → ½m(2v)² = 4(½mv²). KE increases by factor of 4.",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "we-6",
+          "promptText": "A spring with k = 200 N/m is compressed 0.1 m. What is the stored potential energy?",
+          "type": "mcq",
+          "choices": ["1 J", "2 J", "10 J", "20 J"],
+          "correctAnswer": "1 J",
+          "explanation": "PE = ½kx² = ½(200)(0.1)² = ½(200)(0.01) = 1 J",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "we-7",
+          "promptText": "A 2 kg ball falls from 5 m height. What is its speed just before hitting the ground? (g = 10 m/s²)",
+          "type": "mcq",
+          "choices": ["10 m/s", "100 m/s", "5 m/s", "20 m/s"],
+          "correctAnswer": "10 m/s",
+          "explanation": "Using energy conservation: mgh = ½mv² → v = √(2gh) = √(2×10×5) = √100 = 10 m/s",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "we-8",
+          "promptText": "Power is defined as:",
+          "type": "mcq",
+          "choices": ["Work done per unit time", "Force times distance", "Energy times time", "Mass times velocity"],
+          "correctAnswer": "Work done per unit time",
+          "explanation": "Power P = W/t = Work/Time. The SI unit is watts (W = J/s).",
+          "timeLimitSeconds": 15
         }
       ]
     },
@@ -584,6 +953,33 @@
           "choices": ["Doubles", "Halves", "Quadruples", "Stays the same"],
           "correctAnswer": "Doubles",
           "explanation": "a = v²/r. If r → r/2, then a → v²/(r/2) = 2v²/r = 2a. Acceleration doubles.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "circ-6",
+          "promptText": "A ball on a string moves in a vertical circle. At the top, the tension is minimum because:",
+          "type": "mcq",
+          "choices": ["Gravity helps provide centripetal force", "Speed is minimum", "Radius is maximum", "Weight is zero"],
+          "correctAnswer": "Gravity helps provide centripetal force",
+          "explanation": "At top: T + mg = mv²/r, so T = mv²/r - mg. Gravity assists centripetal force, reducing tension needed.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "circ-7",
+          "promptText": "A satellite orbits Earth at radius r with speed v. If it moves to radius 2r, what is its new speed?",
+          "type": "mcq",
+          "choices": ["v/√2", "v/2", "2v", "√2v"],
+          "correctAnswer": "v/√2",
+          "explanation": "For circular orbit: v = √(GM/r). If r → 2r, v → √(GM/2r) = v/√2",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "circ-8",
+          "promptText": "A 1000 kg car rounds a curve of radius 100 m at 20 m/s. What centripetal force is needed?",
+          "type": "mcq",
+          "choices": ["4000 N", "2000 N", "20000 N", "400 N"],
+          "correctAnswer": "4000 N",
+          "explanation": "F = mv²/r = (1000)(20)²/100 = (1000)(400)/100 = 4000 N",
           "timeLimitSeconds": 25
         }
       ]
@@ -640,6 +1036,33 @@
           "correctAnswer": "1.2 m/s opposite",
           "explanation": "Conservation of momentum: 0 = (60)(2) + (100)v → v = -1.2 m/s (opposite direction)",
           "timeLimitSeconds": 25
+        },
+        {
+          "id": "mom-6",
+          "promptText": "A 5 kg ball moving at 4 m/s collides elastically with a stationary 5 kg ball. What happens?",
+          "type": "mcq",
+          "choices": ["First stops, second moves at 4 m/s", "Both move at 2 m/s", "Both stop", "First continues at 4 m/s"],
+          "correctAnswer": "First stops, second moves at 4 m/s",
+          "explanation": "In elastic collision of equal masses, the moving ball transfers all momentum to the stationary one.",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "mom-7",
+          "promptText": "A 0.5 kg ball is hit by a bat with 100 N force for 0.01 s. What is the impulse?",
+          "type": "mcq",
+          "choices": ["1 N·s", "0.5 N·s", "100 N·s", "0.01 N·s"],
+          "correctAnswer": "1 N·s",
+          "explanation": "Impulse J = F × t = 100 × 0.01 = 1 N·s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "mom-8",
+          "promptText": "A 2 kg ball at rest is hit and gains velocity 10 m/s. What is the change in momentum?",
+          "type": "mcq",
+          "choices": ["20 kg·m/s", "10 kg·m/s", "5 kg·m/s", "12 kg·m/s"],
+          "correctAnswer": "20 kg·m/s",
+          "explanation": "Δp = m × Δv = 2 × (10 - 0) = 20 kg·m/s",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -694,6 +1117,33 @@
           "choices": ["45°", "30°", "60°", "90°"],
           "correctAnswer": "45°",
           "explanation": "Maximum range R = v²sin(2θ)/g is achieved when sin(2θ) = 1, i.e., θ = 45°.",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "proj-6",
+          "promptText": "A projectile is launched at 30° and 60° with the same speed. How do their ranges compare?",
+          "type": "mcq",
+          "choices": ["Equal ranges", "30° has more range", "60° has more range", "Cannot determine"],
+          "correctAnswer": "Equal ranges",
+          "explanation": "Complementary angles (30° + 60° = 90°) give the same range: sin(60°) = sin(120°)",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "proj-7",
+          "promptText": "A ball is thrown at 20 m/s at 30° above horizontal. What is its initial vertical velocity?",
+          "type": "mcq",
+          "choices": ["10 m/s", "10√3 m/s", "20 m/s", "5 m/s"],
+          "correctAnswer": "10 m/s",
+          "explanation": "vy = v·sin(θ) = 20·sin(30°) = 20·(1/2) = 10 m/s",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "proj-8",
+          "promptText": "Time of flight for a projectile launched at angle θ with speed v is: (g = gravitational acceleration)",
+          "type": "mcq",
+          "choices": ["2v·sin(θ)/g", "v·sin(θ)/g", "2v·cos(θ)/g", "v²·sin(θ)/g"],
+          "correctAnswer": "2v·sin(θ)/g",
+          "explanation": "Time to max height = v·sin(θ)/g. Total time = 2× = 2v·sin(θ)/g",
           "timeLimitSeconds": 20
         }
       ]
@@ -759,6 +1209,24 @@
           "correctAnswer": "Zero",
           "explanation": "At 0 K, all molecular motion stops. KE = (3/2)kT, so when T = 0, KE = 0.",
           "timeLimitSeconds": 15
+        },
+        {
+          "id": "thermo-7",
+          "promptText": "In an isobaric process, which quantity remains constant?",
+          "type": "mcq",
+          "choices": ["Pressure", "Volume", "Temperature", "Internal energy"],
+          "correctAnswer": "Pressure",
+          "explanation": "Isobaric means constant pressure. 'Iso' = same, 'baric' = pressure (from Greek).",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "thermo-8",
+          "promptText": "Efficiency of a Carnot engine operating between 600 K and 300 K is:",
+          "type": "mcq",
+          "choices": ["50%", "100%", "25%", "75%"],
+          "correctAnswer": "50%",
+          "explanation": "η = 1 - Tc/Th = 1 - 300/600 = 1 - 0.5 = 0.5 = 50%",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -823,6 +1291,24 @@
           "correctAnswer": "Approaching",
           "explanation": "When a source approaches, wave fronts compress, increasing the observed frequency (higher pitch).",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "wave-7",
+          "promptText": "Sound cannot travel through:",
+          "type": "mcq",
+          "choices": ["A vacuum", "Water", "Steel", "Air"],
+          "correctAnswer": "A vacuum",
+          "explanation": "Sound requires a medium (particles) to travel. In a vacuum, there are no particles to vibrate.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "wave-8",
+          "promptText": "If a wave's frequency doubles while speed stays constant, its wavelength:",
+          "type": "mcq",
+          "choices": ["Halves", "Doubles", "Stays the same", "Quadruples"],
+          "correctAnswer": "Halves",
+          "explanation": "v = fλ. If v is constant and f → 2f, then λ → v/(2f) = λ/2. Wavelength halves.",
+          "timeLimitSeconds": 20
         }
       ]
     },
@@ -878,6 +1364,33 @@
           "correctAnswer": "Amplitude squared",
           "explanation": "E = ½kA². Total energy is proportional to the square of amplitude.",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "shm-6",
+          "promptText": "A spring has k = 100 N/m. What mass gives a period of 2π seconds?",
+          "type": "mcq",
+          "choices": ["100 kg", "1 kg", "10 kg", "0.1 kg"],
+          "correctAnswer": "100 kg",
+          "explanation": "T = 2π√(m/k) → 2π = 2π√(m/100) → 1 = √(m/100) → m = 100 kg",
+          "timeLimitSeconds": 25
+        },
+        {
+          "id": "shm-7",
+          "promptText": "At what position in SHM is the acceleration maximum?",
+          "type": "mcq",
+          "choices": ["At maximum displacement", "At equilibrium", "Halfway between", "Acceleration is constant"],
+          "correctAnswer": "At maximum displacement",
+          "explanation": "a = -ω²x. Acceleration is maximum when |x| is maximum (at the extremes of oscillation).",
+          "timeLimitSeconds": 20
+        },
+        {
+          "id": "shm-8",
+          "promptText": "A pendulum clock runs slow in summer. This is because:",
+          "type": "mcq",
+          "choices": ["The pendulum expands (longer L)", "Gravity decreases", "Air resistance increases", "Temperature affects g"],
+          "correctAnswer": "The pendulum expands (longer L)",
+          "explanation": "Heat causes thermal expansion, increasing L. Since T = 2π√(L/g), longer L means longer period (slower clock).",
+          "timeLimitSeconds": 25
         }
       ]
     },
@@ -942,6 +1455,24 @@
           "correctAnswer": "Only start and end points",
           "explanation": "Electric force is conservative. Work depends only on displacement, not the path taken.",
           "timeLimitSeconds": 20
+        },
+        {
+          "id": "elec-7",
+          "promptText": "Two positive charges are placed near each other. The force between them is:",
+          "type": "mcq",
+          "choices": ["Repulsive", "Attractive", "Zero", "Depends on distance"],
+          "correctAnswer": "Repulsive",
+          "explanation": "Like charges repel. Both are positive, so they push each other away.",
+          "timeLimitSeconds": 15
+        },
+        {
+          "id": "elec-8",
+          "promptText": "The electric potential at infinity is defined as:",
+          "type": "mcq",
+          "choices": ["Zero", "Maximum", "Undefined", "Depends on charge"],
+          "correctAnswer": "Zero",
+          "explanation": "By convention, electric potential is zero at infinity. V = kQ/r → 0 as r → ∞",
+          "timeLimitSeconds": 15
         }
       ]
     }
