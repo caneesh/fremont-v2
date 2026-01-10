@@ -245,6 +245,7 @@ export const STORAGE_KEYS = {
   USER_PREFERENCES: 'physiscaffold_user_preferences',
   USER_ID: 'physiscaffold_user',
   SESSION_ID: 'physiscaffold_session',
+  USER_PROFILE: 'physiscaffold_user_profile',
 
   // Learning analytics
   ERROR_PATTERNS: 'physiscaffold_error_patterns',
