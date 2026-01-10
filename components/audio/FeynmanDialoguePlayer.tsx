@@ -175,6 +175,11 @@ export default function FeynmanDialoguePlayer({ script, onClose }: FeynmanDialog
     }
 
     utterance.onerror = (event) => {
+      // "interrupted" is not an error - it's expected when cancel() is called
+      if (event.error === 'interrupted') {
+        console.log('🔇 Speech interrupted (expected when cancelled)')
+        return // Don't call onEnd - the new speech will handle progression
+      }
       console.error('❌ TTS error:', event.error)
       console.error('Error details:', event)
       setTimeout(() => onEnd?.(), 3000 / playbackSpeed)
