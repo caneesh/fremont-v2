@@ -27,6 +27,61 @@ export default function WarmUpGate({
   const totalBlocks = blocks.length
   const estimatedMinutes = Math.min(5, Math.max(2, totalBlocks * 2))
 
+  // If no blocks assigned, show a friendly "no warm-up needed" message
+  if (totalBlocks === 0) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-2xl shadow-xl dark:shadow-dark-lg border border-slate-200 dark:border-dark-border overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-3xl">✨</span>
+              <h2 className="text-2xl font-bold">You&apos;re All Set!</h2>
+            </div>
+            <p className="text-green-100 text-sm">
+              No warm-up needed today
+            </p>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-sm text-green-700 dark:text-green-300">
+              <div className="flex gap-2">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>
+                  All your topics are fresh! Start solving problems to build your learning history,
+                  and warm-ups will help you review rusty concepts in future sessions.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onSkip('No blocks assigned')}
+              disabled={isLoading}
+              className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  Continue to Dashboard
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-2xl shadow-xl dark:shadow-dark-lg border border-slate-200 dark:border-dark-border overflow-hidden">

@@ -155,14 +155,25 @@ export function useWarmUp(userId: string = 'anonymous'): UseWarmUpReturn {
         }
       } else {
         // Session assigned but not started
-        setState(prev => ({
-          ...prev,
-          phase: 'gate',
-          session: data.session,
-          progress: data.progress,
-          canSkip: data.canSkip ?? true,
-          isLoading: false,
-        }))
+        // If 0 blocks assigned, auto-complete (no warm-up needed for new users)
+        const assignedBlocks = data.session?.assignedBlocks || []
+        if (assignedBlocks.length === 0) {
+          setState(prev => ({
+            ...prev,
+            phase: 'complete',
+            session: data.session,
+            isLoading: false,
+          }))
+        } else {
+          setState(prev => ({
+            ...prev,
+            phase: 'gate',
+            session: data.session,
+            progress: data.progress,
+            canSkip: data.canSkip ?? true,
+            isLoading: false,
+          }))
+        }
       }
     } catch (error) {
       setState(prev => ({
