@@ -1,24 +1,27 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import DashboardTiles from './DashboardTiles'
 import DashboardHeroMetrics from './DashboardHeroMetrics'
 import TodayPlanEditor from './TodayPlanEditor'
 import TaskPickerModal from './TaskPickerModal'
 import WinsCard from './WinsCard'
 import CoverageSummary from './CoverageSummary'
+import DashboardDevPanel from './DashboardDevPanel'
+import DashboardEmptyState from './DashboardEmptyState'
 import { TodaysFocus } from './TodaysFocus'
 import { ProgressOverview } from './ProgressOverview'
 import { MistakeIntelligence } from './MistakeIntelligence'
 import { ActiveProblems } from './ActiveProblems'
 import { SystemSignals } from './SystemSignals'
 import { WarmUpGate, WarmUpPlayer, WarmUpResults } from '@/components/warmup'
-import { computeDashboardMetrics, getTopicCoverage, getWinsMessage } from '@/lib/dashboard/dashboardMetrics'
+import { getTopicCoverage, getWinsMessage } from '@/lib/dashboard/dashboardMetrics'
 import * as planService from '@/lib/dashboard/todayPlanService'
-import { authService } from '@/lib/auth/authService'
+import { useStudyDashboardModel } from '@/hooks/useStudyDashboardModel'
 import { useWarmUp } from '@/hooks/useWarmUp'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
-import type { DashboardMetrics, TodayPlan, TopicCoverage, TaskSuggestion } from '@/types/dashboard'
+import type { TodayPlan, TopicCoverage, TaskSuggestion } from '@/types/dashboard'
 
 interface DashboardV3Props {
   /**
@@ -29,53 +32,45 @@ interface DashboardV3Props {
 
 /**
  * Dashboard V3 - Planning-control first dashboard
+ *
+ * Uses useStudyDashboardModel() as single source of truth for state.
  */
 export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
   const router = useRouter()
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+
+  // Single source of truth for dashboard state
+  const { model, isLoading: modelLoading, error: modelError, refresh } = useStudyDashboardModel()
+
+  // Local UI state
   const [plan, setPlan] = useState<TodayPlan | null>(null)
   const [coverage, setCoverage] = useState<TopicCoverage[]>([])
   const [suggestions, setSuggestions] = useState<TaskSuggestion[]>([])
   const [isTaskPickerOpen, setIsTaskPickerOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
-  const userId = authService.getUser()?.userId || 'anonymous'
+  const userId = model.userId
 
   // Warm-up hook - only active when feature flag is enabled
   const warmUp = useWarmUp(userId)
 
-  // Load dashboard data
+  // Sync plan from model and load additional data
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      try {
-        // Compute metrics
-        const dashboardMetrics = computeDashboardMetrics()
-        setMetrics(dashboardMetrics)
+    if (modelLoading) return
 
-        // Load plan
-        const todayPlan = planService.getOrCreatePlan(userId)
-        setPlan(todayPlan)
+    // Convert model plan to TodayPlan format for existing components
+    const todayPlan = planService.getOrCreatePlan(userId)
+    setPlan(todayPlan)
 
-        // Get coverage
-        const topicCoverage = getTopicCoverage()
-        setCoverage(topicCoverage)
+    // Get coverage
+    const topicCoverage = getTopicCoverage()
+    setCoverage(topicCoverage)
 
-        // Get suggestions
-        const taskSuggestions = planService.getTaskSuggestions(userId)
-        setSuggestions(taskSuggestions)
+    // Get suggestions
+    const taskSuggestions = planService.getTaskSuggestions(userId)
+    setSuggestions(taskSuggestions)
 
-        // Cleanup old plans
-        planService.cleanupOldPlans(userId)
-      } catch (error) {
-        console.error('[DashboardV3] Error loading data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadData()
-  }, [userId])
+    // Cleanup old plans
+    planService.cleanupOldPlans(userId)
+  }, [userId, modelLoading, model.plan])
 
   // Plan management handlers
   const handleAddTask = useCallback(() => {
@@ -113,11 +108,23 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
     router.push(`${route}${route.includes('?') ? '&' : '?'}fromPlan=1&planDate=${plan.dateKey}`)
   }, [plan, router])
 
+  // Derive metrics from model for existing components
+  const metrics = {
+    daysPracticed: model.activityMetrics.daysPracticed,
+    totalDays: model.activityMetrics.totalDays,
+    problemsSolved: model.activityMetrics.problemsSolved,
+    problemsSolvedChange: model.activityMetrics.problemsSolvedChange,
+    avgMaxHintLevel: model.activityMetrics.avgHintLevel,
+    avgMaxHintLevelChange: model.activityMetrics.avgHintLevelChange,
+    topicsTouched: [] as string[],
+    computedAt: model.computedAt,
+  }
+
   // Get wins message
-  const winsMessage = metrics ? getWinsMessage(metrics) : null
+  const winsMessage = getWinsMessage(metrics)
 
   // Show loading state
-  if (isLoading || (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'loading')) {
+  if (modelLoading || (FEATURE_FLAGS.WARMUP_PROTOCOL && warmUp.phase === 'loading')) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -188,6 +195,26 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
     )
   }
 
+  // Show onboarding for new users
+  if (model.needsOnboarding) {
+    return (
+      <>
+        <DashboardEmptyState
+          state={{
+            reason: 'new_user',
+            title: 'Welcome to PhysiScaffold',
+            description: 'Begin your physics mastery journey with scaffolded problem-solving. We\'ll guide you step-by-step through complex problems.',
+            ctaLabel: 'Start Your First Problem',
+            ctaRoute: '/pattern-track',
+            icon: 'rocket',
+          }}
+          variant="full"
+        />
+        <DashboardDevPanel model={model} />
+      </>
+    )
+  }
+
   // Normal dashboard rendering (warm-up complete or disabled)
   return (
     <div className="space-y-6">
@@ -211,6 +238,10 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
         )}
       </div>
 
+      {/* Primary Dashboard Tiles - Current study state at a glance */}
+      {/* Links directly to: /solve?problemId=X&resume=1, /mistake-notebook?review=true, etc. */}
+      <DashboardTiles />
+
       {/* Wins Card */}
       {winsMessage && <WinsCard message={winsMessage} />}
 
@@ -218,14 +249,14 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
       <TodaysFocus />
 
       {/* Hero Metrics */}
-      {metrics && <DashboardHeroMetrics metrics={metrics} />}
+      <DashboardHeroMetrics metrics={metrics} />
 
       {/* Main Content - Two Column on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Takes 2 columns on desktop */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Plan Editor */}
-          {plan && (
+          {/* Plan Editor or Empty State */}
+          {plan ? (
             <TodayPlanEditor
               plan={plan}
               onAddTask={handleAddTask}
@@ -234,10 +265,16 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
               onMoveDown={handleMoveDown}
               onStartSession={handleStartSession}
             />
+          ) : model.emptyStates.plan && (
+            <DashboardEmptyState state={model.emptyStates.plan} variant="card" />
           )}
 
-          {/* Section 4: Active Problems */}
-          <ActiveProblems />
+          {/* Section 4: Active Problems or Empty State */}
+          {model.currentModule ? (
+            <ActiveProblems />
+          ) : model.emptyStates.currentModule && (
+            <DashboardEmptyState state={model.emptyStates.currentModule} variant="inline" />
+          )}
         </div>
 
         {/* Right Sidebar */}
@@ -263,6 +300,9 @@ export default function DashboardV3({ onSwitchToV1 }: DashboardV3Props) {
         onSelectTask={handleSelectTask}
         suggestions={suggestions}
       />
+
+      {/* Dev Panel - only visible in development */}
+      <DashboardDevPanel model={model} />
     </div>
   )
 }

@@ -354,9 +354,9 @@ export const FEATURE_FLAGS = {
    * - Today's plan editor with task reordering
    * - Session runner for guided daily practice
    *
-   * Default: OFF (can be enabled with NEXT_PUBLIC_FEATURE_DASHBOARD_V3=true)
+   * Default: ON (can be disabled with NEXT_PUBLIC_FEATURE_DASHBOARD_V3=false)
    */
-  DASHBOARD_V3: true,
+  DASHBOARD_V3: process.env.NEXT_PUBLIC_FEATURE_DASHBOARD_V3 !== 'false',
 
   /**
    * Socratic-First Step Interaction

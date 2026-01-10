@@ -8,6 +8,9 @@ import type { MicroTaskScaffoldData, MicroTaskStep } from '@/types/microTask'
 import { isMicroTaskScaffold } from '@/types/microTask'
 import type { StepProgress, ProblemProgress, MicroTaskStepProgress } from '@/types/history'
 import { problemHistoryService } from '@/lib/problemHistory'
+import { studyPathService } from '@/lib/studyPath/studyPathService'
+import { eventLogger } from '@/lib/storage/eventLogger'
+import { recordStepCompletionV2 } from '@/lib/studyPlanV2'
 import { generateProblemId, generateProblemTitle } from '@/lib/utils'
 import StepAccordion from './StepAccordion'
 import MicroTaskStepAccordion from './MicroTaskStepAccordion'
@@ -1592,6 +1595,10 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
       problemHistoryService.markSolved(problemId(), problemTitle(), progressWithReflection)
 
+      // Update study path progress - mark question as solved
+      const topicId = data.domain.toLowerCase()
+      studyPathService.markQuestionSolved(topicId, problemId())
+
       // Record mistake pattern for tracking
       const allHintLevels = Array.from(stepHintLevels.values())
       const maxHintLevel = allHintLevels.length > 0 ? Math.max(...allHintLevels) : 0
@@ -1892,6 +1899,19 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
     // Log to console for debugging (in production, this would go to analytics)
     console.log(`[Confidence-SRS] Step ${stepId}: ${confidence} confidence, outcome: ${outcome}`)
+
+    // Record step attempt for V2 analytics (confidence distribution, etc.)
+    // This writes to physiscaffold_v2_step_attempts for ProgressOverview
+    const stepTimeSpent = Math.floor((Date.now() - problemStartTime) / 1000)
+    recordStepCompletionV2({
+      problemId: problemId(),
+      stepIndex: stepId,
+      isCorrect,
+      hintCount: hintLevel,
+      usedReveal: hintLevel >= 5,
+      timeSpentSeconds: stepTimeSpent,
+      confidenceRating: confidence,
+    })
 
     // Record to localStorage for pattern analysis
     if (typeof window !== 'undefined') {
@@ -2423,9 +2443,11 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
   // Handle sanity check solved
   const handleSanityCheckSolved = useCallback(() => {
+    // Log sanity check completed event for dashboard metrics
+    eventLogger.sanityCheckCompleted(problemId(), true)
     // Trigger celebration and allow proceeding to Mark as Solved
     setShowCelebration(true)
-  }, [])
+  }, [problemId])
 
   // Pre-Flight Check handlers
   const handlePreFlightComplete = useCallback((passed: boolean, validation: PreFlightValidation) => {

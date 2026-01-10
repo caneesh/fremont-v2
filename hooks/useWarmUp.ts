@@ -97,12 +97,11 @@ export function useWarmUp(userId: string = 'anonymous'): UseWarmUpReturn {
       }
 
       if (!data.hasSession) {
-        // No warm-up assigned yet
+        // No warm-up session exists - skip directly to dashboard
         setState(prev => ({
           ...prev,
-          phase: 'gate',
+          phase: 'complete',
           session: null,
-          canSkip: data.canSkip ?? true,
           isLoading: false,
         }))
       } else if (data.session?.status === 'completed' || data.session?.status === 'skipped') {
