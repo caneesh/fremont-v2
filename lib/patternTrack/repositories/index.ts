@@ -6,7 +6,7 @@
  * V2: Uses Prisma/Postgres for patterns and questions
  */
 
-import type { IRepositoryFactory, IPatternRepository, IQuestionRepository } from './interfaces'
+import type { IRepositoryFactory, IPatternRepository, IQuestionRepository, IProgressRepository } from './interfaces'
 import { JsonPatternRepository } from './jsonPatternRepository'
 import { JsonLessonRepository } from './jsonLessonRepository'
 import { JsonQuestionRepository } from './jsonQuestionRepository'
@@ -14,6 +14,7 @@ import { LocalProgressRepository } from './localProgressRepository'
 import { LocalSessionRepository } from './localSessionRepository'
 import { PrismaPatternRepository } from './prismaPatternRepository'
 import { PrismaQuestionRepository } from './prismaQuestionRepository'
+import { PrismaProgressRepository } from './prismaProgressRepository'
 import { FEATURE_FLAGS } from '@/lib/featureFlags'
 
 // Export interfaces for external use
@@ -27,6 +28,7 @@ export { LocalProgressRepository } from './localProgressRepository'
 export { LocalSessionRepository } from './localSessionRepository'
 export { PrismaPatternRepository } from './prismaPatternRepository'
 export { PrismaQuestionRepository } from './prismaQuestionRepository'
+export { PrismaProgressRepository } from './prismaProgressRepository'
 
 /**
  * Default repository factory using JSON + localStorage
@@ -75,13 +77,13 @@ class JsonRepositoryFactory implements IRepositoryFactory {
 }
 
 /**
- * Hybrid repository factory using Prisma for patterns/questions, localStorage for progress
+ * Hybrid repository factory using Prisma for patterns/questions/progress
  */
 class PrismaRepositoryFactory implements IRepositoryFactory {
   private _patterns: PrismaPatternRepository | null = null
   private _lessons: JsonLessonRepository | null = null
   private _questions: PrismaQuestionRepository | null = null
-  private _progress: LocalProgressRepository | null = null
+  private _progress: PrismaProgressRepository | null = null
   private _sessions: LocalSessionRepository | null = null
 
   get patterns(): IPatternRepository {
@@ -106,9 +108,9 @@ class PrismaRepositoryFactory implements IRepositoryFactory {
     return this._questions
   }
 
-  get progress(): LocalProgressRepository {
+  get progress(): IProgressRepository {
     if (!this._progress) {
-      this._progress = new LocalProgressRepository()
+      this._progress = new PrismaProgressRepository()
     }
     return this._progress
   }

@@ -590,3 +590,102 @@ model PrecomputeJob {
   @@index([jobType, status])
   @@map("precompute_jobs")
 }
+
+// =============================================================================
+// PATTERN TRACK PROGRESS
+// =============================================================================
+
+// User's progress on a specific pattern
+model PatternProgress {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  patternId String @map("pattern_id")
+
+  // Progress metrics
+  masteryLevel             Int @default(0) @map("mastery_level")
+  totalAttempts            Int @default(0) @map("total_attempts")
+  successfulIdentifications Int @default(0) @map("successful_identifications")
+  missedIdentifications    Int @default(0) @map("missed_identifications")
+  falsePositives           Int @default(0) @map("false_positives")
+
+  // Streak tracking
+  currentStreak Int @default(0) @map("current_streak")
+  bestStreak    Int @default(0) @map("best_streak")
+
+  // SRS scheduling
+  lastPracticedAt DateTime? @map("last_practiced_at")
+  nextReviewAt    DateTime? @map("next_review_at")
+
+  // Practice history stored as JSONB
+  practiceHistory Json @default("[]") @map("practice_history") @db.JsonB
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, patternId])
+  @@index([userId])
+  @@index([patternId])
+  @@index([userId, masteryLevel])
+  @@index([userId, nextReviewAt])
+  @@map("pattern_progress")
+}
+
+// User's progress on a lesson
+model LessonProgressRecord {
+  id       String @id @default(cuid())
+  userId   String @map("user_id")
+  lessonId String @map("lesson_id")
+
+  // Progress tracking
+  status              String @default("not_started") // not_started | in_progress | completed
+  currentContentIndex Int    @default(0) @map("current_content_index")
+  timeSpentSeconds    Int    @default(0) @map("time_spent_seconds")
+
+  // Checkpoint scores as JSONB
+  checkpointScores Json @default("{}") @map("checkpoint_scores") @db.JsonB
+
+  // Completion
+  completedAt DateTime? @map("completed_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([userId, status])
+  @@map("lesson_progress")
+}
+
+// User's overall track progress (denormalized for fast dashboard)
+model TrackProgressRecord {
+  id     String @id @default(cuid())
+  userId String @unique @map("user_id")
+
+  // Overall stats
+  overallMastery    Int @default(0) @map("overall_mastery")
+  patternsMastered  Int @default(0) @map("patterns_mastered")
+  totalPatterns     Int @default(0) @map("total_patterns")
+  lessonsCompleted  Int @default(0) @map("lessons_completed")
+  totalLessons      Int @default(0) @map("total_lessons")
+  questionsAttempted Int @default(0) @map("questions_attempted")
+  questionsCorrect  Int @default(0) @map("questions_correct")
+
+  // Engagement
+  dailyStreak   Int       @default(0) @map("daily_streak")
+  lastActiveAt  DateTime? @map("last_active_at")
+
+  // Weak/strong patterns (for quick access)
+  weakPatternIds   String[] @default([]) @map("weak_pattern_ids")
+  strongPatternIds String[] @default([]) @map("strong_pattern_ids")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([overallMastery])
+  @@index([dailyStreak])
+  @@map("track_progress")
+}
