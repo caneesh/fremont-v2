@@ -104,10 +104,10 @@ export default function ReflectionStep({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
         <div className="flex items-center justify-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mr-3"></div>
-          <p className="text-gray-600">Generating reflection questions...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400 mr-3"></div>
+          <p className="text-gray-600 dark:text-dark-text-secondary">Generating reflection questions...</p>
         </div>
       </div>
     )
@@ -115,9 +115,9 @@ export default function ReflectionStep({
 
   if (error && !questions.length) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-300">{error}</p>
           <button
             onClick={loadReflectionQuestions}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -130,7 +130,7 @@ export default function ReflectionStep({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-purple-400">
+    <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-2 border-purple-400 dark:border-purple-600">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
@@ -139,18 +139,18 @@ export default function ReflectionStep({
             </svg>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
               Reflection: Strengthen Your Learning
             </h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
               Take a moment to reflect on your problem-solving process. This helps solidify your understanding.
             </p>
           </div>
         </div>
 
         {!isCompleted && (
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mt-4">
-            <p className="text-sm text-purple-900 font-medium">
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-3 mt-4">
+            <p className="text-sm text-purple-900 dark:text-purple-200 font-medium">
               Note: Reflection is mandatory. Answer both questions thoughtfully before proceeding.
             </p>
           </div>
@@ -159,13 +159,13 @@ export default function ReflectionStep({
 
       <div className="space-y-6">
         {questions.map((question, index) => (
-          <div key={index} className="bg-gray-50 border-2 border-gray-300 rounded-lg p-5">
+          <div key={index} className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
             <label className="block mb-3">
               <div className="flex items-start gap-2 mb-2">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">
                   {index + 1}
                 </span>
-                <p className="text-base font-semibold text-gray-900 flex-1">
+                <p className="text-base font-semibold text-gray-900 dark:text-dark-text-primary flex-1">
                   {question}
                 </p>
               </div>
@@ -176,8 +176,8 @@ export default function ReflectionStep({
                 placeholder="Write your reflection here..."
                 className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${
                   isCompleted
-                    ? 'bg-gray-100 border-gray-300 text-gray-700'
-                    : 'bg-white border-purple-300'
+                    ? 'bg-gray-100 dark:bg-dark-card-soft border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary'
+                    : 'bg-white dark:bg-dark-card border-purple-300 dark:border-purple-600 dark:text-dark-text-primary'
                 }`}
                 rows={3}
               />
@@ -187,14 +187,14 @@ export default function ReflectionStep({
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
       <div className="mt-6 flex justify-end">
         {isCompleted ? (
-          <div className="flex items-center gap-2 text-green-700">
+          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>

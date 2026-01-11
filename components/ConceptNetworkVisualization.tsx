@@ -191,10 +191,10 @@ export default function ConceptNetworkVisualization() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-8">
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading concept network...</p>
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 dark:border-primary-400 mb-4"></div>
+            <p className="text-gray-600 dark:text-dark-text-secondary font-medium">Loading concept network...</p>
           </div>
         </div>
       </div>
@@ -204,9 +204,9 @@ export default function ConceptNetworkVisualization() {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">{error}</p>
+        <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-8">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+            <p className="text-red-800 dark:text-red-300">{error}</p>
             <button
               onClick={loadNetwork}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -226,11 +226,11 @@ export default function ConceptNetworkVisualization() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">
               Physics Concept Network
             </h2>
             <button
@@ -239,12 +239,12 @@ export default function ConceptNetworkVisualization() {
                 localStorage.removeItem('concept-network-cache-timestamp')
                 loadNetwork()
               }}
-              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300"
+              className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-300 dark:border-dark-border"
             >
               Refresh Network
             </button>
           </div>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-dark-text-secondary">
             Explore how IIT-JEE Physics concepts interconnect and build on each other
           </p>
         </div>
@@ -255,8 +255,8 @@ export default function ConceptNetworkVisualization() {
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-lg border-2 font-medium transition-colors ${
               selectedCategory === null
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
+                : 'bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:border-gray-400 dark:hover:border-gray-500'
             }`}
           >
             All Topics ({networkData.network.nodes.length})
@@ -268,7 +268,7 @@ export default function ConceptNetworkVisualization() {
               className={`px-4 py-2 rounded-lg border-2 font-medium transition-colors ${
                 selectedCategory === category.id
                   ? 'text-white border-transparent'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                  : 'bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:border-gray-400 dark:hover:border-gray-500'
               }`}
               style={
                 selectedCategory === category.id
@@ -284,7 +284,7 @@ export default function ConceptNetworkVisualization() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Visualization */}
           <div className="lg:col-span-2">
-            <div className="bg-gray-50 rounded-lg border-2 border-gray-300 overflow-hidden">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-gray-300 dark:border-dark-border overflow-hidden">
               <svg
                 ref={svgRef}
                 width="800"
@@ -376,19 +376,19 @@ export default function ConceptNetworkVisualization() {
             </div>
 
             {/* Legend */}
-            <div className="mt-4 bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Legend</h3>
+            <div className="mt-4 bg-gray-50 dark:bg-dark-card-soft rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Legend</h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-0.5 bg-gray-400"></div>
-                  <span className="text-gray-700">Related</span>
+                  <span className="text-gray-700 dark:text-dark-text-secondary">Related</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-0.5 bg-gray-400"></div>
                   <svg width="12" height="12" viewBox="0 0 12 12">
                     <polygon points="0 4, 12 4, 6 10" fill="#9CA3AF" />
                   </svg>
-                  <span className="text-gray-700">Prerequisite</span>
+                  <span className="text-gray-700 dark:text-dark-text-secondary">Prerequisite</span>
                 </div>
               </div>
             </div>
@@ -397,14 +397,14 @@ export default function ConceptNetworkVisualization() {
           {/* Info Panel */}
           <div className="lg:col-span-1">
             {selectedNode ? (
-              <div className="bg-white border-2 border-gray-300 rounded-lg p-5">
+              <div className="bg-white dark:bg-dark-card border-2 border-gray-300 dark:border-dark-border rounded-lg p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary">
                     {selectedNode.name}
                   </h3>
                   <button
                     onClick={() => setSelectedNode(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -423,28 +423,28 @@ export default function ConceptNetworkVisualization() {
                     <span
                       className={`ml-2 inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                         selectedNode.difficulty === 'basic'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                           : selectedNode.difficulty === 'intermediate'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                       }`}
                     >
                       {selectedNode.difficulty}
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-700">{selectedNode.description}</p>
+                  <p className="text-sm text-gray-700 dark:text-dark-text-secondary">{selectedNode.description}</p>
 
                   {selectedNode.prerequisites.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-900 mb-2">Prerequisites:</h4>
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Prerequisites:</h4>
                       <ul className="space-y-1">
                         {selectedNode.prerequisites.map((prereqId) => {
                           const prereq = networkData.network.nodes.find(n => n.id === prereqId)
                           return prereq ? (
                             <li
                               key={prereqId}
-                              className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer"
+                              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
                               onClick={() => setSelectedNode(prereq)}
                             >
                               → {prereq.name}
@@ -460,7 +460,7 @@ export default function ConceptNetworkVisualization() {
                     .filter(e => e.relationship !== 'prerequisite' || e.target === selectedNode.id)
                     .length > 0 && (
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-900 mb-2">Connections:</h4>
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Connections:</h4>
                       <ul className="space-y-1">
                         {networkData.network.edges
                           .filter(e => e.source === selectedNode.id || e.target === selectedNode.id)
@@ -470,10 +470,10 @@ export default function ConceptNetworkVisualization() {
                             if (!otherNode) return null
 
                             return (
-                              <li key={idx} className="text-xs text-gray-600">
+                              <li key={idx} className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                 <span className="font-medium">{edge.relationship}:</span>{' '}
                                 <span
-                                  className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
                                   onClick={() => setSelectedNode(otherNode)}
                                 >
                                   {otherNode.name}
@@ -487,11 +487,11 @@ export default function ConceptNetworkVisualization() {
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <div className="bg-gray-50 dark:bg-dark-card-soft border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg p-8 text-center">
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                   Click on a concept to see details and connections
                 </p>
               </div>

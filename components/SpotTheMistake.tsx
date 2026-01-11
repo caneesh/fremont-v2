@@ -67,23 +67,23 @@ export default function SpotTheMistake({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 md:p-8 mb-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start gap-3 mb-4">
-            <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-100 flex items-center justify-center">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
                 Spot the Mistake
               </h2>
-              <p className="text-sm sm:text-base text-gray-700">
+              <p className="text-sm sm:text-base text-gray-700 dark:text-dark-text-secondary">
                 This solution looks mostly correct, but contains <strong>exactly ONE conceptual error</strong> that makes the final answer wrong.
               </p>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-2">
                 Can you find it? Read carefully and identify which step contains the mistake.
               </p>
             </div>
@@ -101,8 +101,8 @@ export default function SpotTheMistake({
           </button>
 
           {showHint && (
-            <div className="mt-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
-              <p className="text-sm text-blue-900">
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded">
+              <p className="text-sm text-blue-900 dark:text-blue-200">
                 <strong>Hint:</strong> Look for conceptual errors, not calculation mistakes. Common types: wrong reference frame, incorrect force identification, conservation law misapplication, sign errors, or mixing up concepts.
               </p>
             </div>
@@ -111,7 +111,7 @@ export default function SpotTheMistake({
 
         {/* Student Solution */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-4 pb-2 border-b-2 border-gray-200 dark:border-dark-border">
             {solution.title}
           </h3>
 
@@ -121,8 +121,8 @@ export default function SpotTheMistake({
                 key={index}
                 className={`p-4 border-2 rounded-lg transition-all cursor-pointer ${
                   selectedStep === index
-                    ? 'border-orange-500 bg-orange-50'
-                    : 'border-gray-200 hover:border-orange-300'
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'border-gray-200 dark:border-dark-border hover:border-orange-300 dark:hover:border-orange-600'
                 }`}
                 onClick={() => setSelectedStep(index)}
               >
@@ -130,16 +130,16 @@ export default function SpotTheMistake({
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                     selectedStep === index
                       ? 'bg-orange-500 text-white'
-                      : 'bg-gray-200 text-gray-700'
+                      : 'bg-gray-200 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary'
                   }`}>
                     {step.stepNumber}
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-2">{step.title}</h4>
-                    <p className="text-sm text-gray-700 mb-2">{renderLatex(step.content)}</p>
+                    <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">{step.title}</h4>
+                    <p className="text-sm text-gray-700 dark:text-dark-text-secondary mb-2">{renderLatex(step.content)}</p>
 
                     {step.equations && step.equations.length > 0 && (
-                      <div className="my-3 p-3 bg-gray-50 rounded border border-gray-200">
+                      <div className="my-3 p-3 bg-gray-50 dark:bg-dark-card-soft rounded border border-gray-200 dark:border-dark-border">
                         {step.equations.map((eq, eqIndex) => (
                           <div key={eqIndex} className="my-2">
                             {renderLatex(eq)}
@@ -148,7 +148,7 @@ export default function SpotTheMistake({
                       </div>
                     )}
 
-                    <p className="text-sm text-gray-600 italic">{renderLatex(step.reasoning)}</p>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary italic">{renderLatex(step.reasoning)}</p>
                   </div>
                 </div>
               </div>
@@ -156,19 +156,19 @@ export default function SpotTheMistake({
           </div>
 
           {/* Conclusion */}
-          <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-2">Conclusion</h4>
-            <p className="text-sm text-gray-800">{renderLatex(solution.conclusion)}</p>
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
+            <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Conclusion</h4>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{renderLatex(solution.conclusion)}</p>
           </div>
         </div>
 
         {/* Analysis Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
               Which step contains the mistake?
             </label>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-3">
               {selectedStep !== null
                 ? `You selected: Step ${selectedStep + 1} - ${solution.steps[selectedStep]?.title}`
                 : 'Click on a step above to select it, or choose "No mistake" if you think the solution is correct.'}
@@ -178,8 +178,8 @@ export default function SpotTheMistake({
               onClick={() => setSelectedStep(null)}
               className={`px-4 py-2 rounded-lg border-2 transition-colors text-sm ${
                 selectedStep === null
-                  ? 'border-gray-500 bg-gray-100 text-gray-900 font-semibold'
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                  ? 'border-gray-500 dark:border-gray-400 bg-gray-100 dark:bg-dark-card-soft text-gray-900 dark:text-dark-text-primary font-semibold'
+                  : 'border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary hover:border-gray-400 dark:hover:border-gray-500'
               }`}
             >
               No mistake - solution is correct
@@ -187,13 +187,13 @@ export default function SpotTheMistake({
           </div>
 
           <div>
-            <label htmlFor="explanation" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="explanation" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
               Explain the mistake (or why the solution is correct)
             </label>
             <textarea
               id="explanation"
               rows={4}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm bg-white dark:bg-dark-card dark:text-dark-text-primary"
               placeholder="Describe what's wrong with this step, or explain why you think there's no mistake..."
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -205,7 +205,7 @@ export default function SpotTheMistake({
           <button
             type="submit"
             disabled={isLoading || !explanation.trim()}
-            className="w-full px-6 py-4 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-base"
+            className="w-full px-6 py-4 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors text-base"
           >
             {isLoading ? 'Analyzing...' : 'Submit Analysis'}
           </button>

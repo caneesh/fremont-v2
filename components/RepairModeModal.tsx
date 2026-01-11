@@ -136,7 +136,7 @@ export default function RepairModeModal({
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 index <= currentIndex
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-500'
+                  : 'bg-gray-200 dark:bg-dark-card-soft text-gray-500 dark:text-dark-text-secondary'
               }`}
             >
               {index + 1}
@@ -144,7 +144,7 @@ export default function RepairModeModal({
             {index < steps.length - 2 && (
               <div
                 className={`w-12 h-1 ${
-                  index < currentIndex ? 'bg-blue-600' : 'bg-gray-200'
+                  index < currentIndex ? 'bg-blue-600' : 'bg-gray-200 dark:bg-dark-card-soft'
                 }`}
               />
             )}
@@ -157,10 +157,10 @@ export default function RepairModeModal({
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg p-8 max-w-2xl w-full">
+        <div className="bg-white dark:bg-dark-card rounded-lg p-8 max-w-2xl w-full">
           <div className="flex items-center justify-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-700">Loading repair curriculum...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+            <p className="text-gray-700 dark:text-dark-text-secondary">Loading repair curriculum...</p>
           </div>
         </div>
       </div>
@@ -170,9 +170,9 @@ export default function RepairModeModal({
   if (error || !curriculum) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg p-8 max-w-2xl w-full">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-700 mb-4">{error || 'No curriculum available for this concept.'}</p>
+        <div className="bg-white dark:bg-dark-card rounded-lg p-8 max-w-2xl w-full">
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
+          <p className="text-gray-700 dark:text-dark-text-secondary mb-4">{error || 'No curriculum available for this concept.'}</p>
           <button
             onClick={onClose}
             className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
@@ -186,16 +186,16 @@ export default function RepairModeModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg p-6 max-w-3xl w-full my-8 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-dark-card rounded-lg p-6 max-w-3xl w-full my-8 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Repair Mode</h2>
-            <p className="text-sm text-gray-600">{conceptName}</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">Repair Mode</h2>
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{conceptName}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
           >
             ✕
           </button>
@@ -209,11 +209,11 @@ export default function RepairModeModal({
           {/* Step 1: Concept Clarification */}
           {currentStep === 'clarification' && (
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                 📚 Concept Clarification
               </h3>
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-                <div className="text-gray-800 whitespace-pre-line">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6">
+                <div className="text-gray-800 dark:text-gray-200 whitespace-pre-line">
                   {renderLatex(curriculum.conceptClarification)}
                 </div>
               </div>
@@ -229,11 +229,11 @@ export default function RepairModeModal({
           {/* Step 2: Diagnostic Question */}
           {currentStep === 'diagnostic' && (
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                 🔍 Diagnostic Question
               </h3>
-              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-4">
-                <p className="text-gray-800 mb-4">{renderLatex(curriculum.diagnosticQuestion)}</p>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg p-6 mb-4">
+                <p className="text-gray-800 dark:text-gray-200 mb-4">{renderLatex(curriculum.diagnosticQuestion)}</p>
               </div>
 
               {!showDiagnosticAnswer ? (
@@ -245,9 +245,9 @@ export default function RepairModeModal({
                 </button>
               ) : (
                 <>
-                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-4">
-                    <h4 className="font-semibold text-green-900 mb-2">Answer:</h4>
-                    <div className="text-gray-800">{renderLatex(curriculum.diagnosticAnswer)}</div>
+                  <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700 rounded-lg p-6 mb-4">
+                    <h4 className="font-semibold text-green-900 dark:text-green-200 mb-2">Answer:</h4>
+                    <div className="text-gray-800 dark:text-gray-200">{renderLatex(curriculum.diagnosticAnswer)}</div>
                   </div>
                   <button
                     onClick={handleNext}
@@ -263,7 +263,7 @@ export default function RepairModeModal({
           {/* Steps 3-4: Practice Problems */}
           {(currentStep === 'practice1' || currentStep === 'practice2') && (
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                 ✏️ Practice Problem {currentStep === 'practice1' ? '1' : '2'}
               </h3>
 
@@ -273,24 +273,24 @@ export default function RepairModeModal({
 
                 return (
                   <>
-                    <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-6 mb-4">
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-6 mb-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm font-semibold text-purple-900">
+                        <span className="text-sm font-semibold text-purple-900 dark:text-purple-200">
                           Difficulty: {problem.difficulty.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-gray-800">{renderLatex(problem.problemText)}</p>
+                      <p className="text-gray-800 dark:text-gray-200">{renderLatex(problem.problemText)}</p>
                     </div>
 
                     {/* Hints */}
                     {currentHintIndex > 0 && (
-                      <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-4">
+                        <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
                           Hints ({currentHintIndex}/{problem.hints.length}):
                         </h4>
                         <ul className="list-disc list-inside space-y-1">
                           {problem.hints.slice(0, currentHintIndex).map((hint, index) => (
-                            <li key={index} className="text-sm text-gray-700">
+                            <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
                               {renderLatex(hint)}
                             </li>
                           ))}
@@ -311,9 +311,9 @@ export default function RepairModeModal({
                     </div>
 
                     {/* Solution (always visible for mock mode) */}
-                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-4">
-                      <h4 className="font-semibold text-green-900 mb-2">Solution:</h4>
-                      <div className="text-gray-800">{renderLatex(problem.solution)}</div>
+                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700 rounded-lg p-6 mb-4">
+                      <h4 className="font-semibold text-green-900 dark:text-green-200 mb-2">Solution:</h4>
+                      <div className="text-gray-800 dark:text-gray-200">{renderLatex(problem.solution)}</div>
                     </div>
 
                     <button
@@ -331,9 +331,9 @@ export default function RepairModeModal({
           {/* Step 5: Complete */}
           {currentStep === 'complete' && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-12 h-12 text-green-600"
+                  className="w-12 h-12 text-green-600 dark:text-green-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -346,10 +346,10 @@ export default function RepairModeModal({
                   />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
                 Repair Complete!
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
                 Great job working through {conceptName}. Keep practicing to build mastery!
               </p>
               <button

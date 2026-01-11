@@ -82,15 +82,15 @@ export default function LaTeXHelp() {
   const [activeTab, setActiveTab] = useState<'equations' | 'syntax'>('syntax')
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+    <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg border border-gray-200 dark:border-dark-border">
       {/* Tabs */}
-      <div className="border-b border-gray-200 flex">
+      <div className="border-b border-gray-200 dark:border-dark-border flex">
         <button
           onClick={() => setActiveTab('syntax')}
           className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
             activeTab === 'syntax'
-              ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+              : 'text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-card-soft'
           }`}
         >
           LaTeX Syntax
@@ -99,8 +99,8 @@ export default function LaTeXHelp() {
           onClick={() => setActiveTab('equations')}
           className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
             activeTab === 'equations'
-              ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+              : 'text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-card-soft'
           }`}
         >
           Physics Equations
@@ -113,17 +113,17 @@ export default function LaTeXHelp() {
           <div className="space-y-6">
             {LATEX_SYNTAX.map((section) => (
               <div key={section.category}>
-                <h3 className="text-sm font-bold text-gray-900 mb-3">{section.category}</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-dark-text-primary mb-3">{section.category}</h3>
                 <div className="space-y-2">
                   {section.items.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2 bg-gray-50 rounded text-sm">
-                      <div className="font-mono text-xs text-gray-700 bg-white px-2 py-1 rounded border border-gray-200 overflow-x-auto">
+                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2 bg-gray-50 dark:bg-dark-card-soft rounded text-sm">
+                      <div className="font-mono text-xs text-gray-700 dark:text-dark-text-secondary bg-white dark:bg-dark-card px-2 py-1 rounded border border-gray-200 dark:border-dark-border overflow-x-auto">
                         {item.syntax}
                       </div>
-                      <div className="flex items-center justify-center bg-white px-2 py-1 rounded border border-gray-200">
+                      <div className="flex items-center justify-center bg-white dark:bg-dark-card px-2 py-1 rounded border border-gray-200 dark:border-dark-border">
                         <MathRenderer text={item.example} enableCopy={false} />
                       </div>
-                      <div className="text-gray-600 flex items-center sm:justify-end">
+                      <div className="text-gray-600 dark:text-dark-text-secondary flex items-center sm:justify-end">
                         {item.description}
                       </div>
                     </div>
@@ -138,16 +138,16 @@ export default function LaTeXHelp() {
           <div className="space-y-6">
             {COMMON_PHYSICS_EQUATIONS.map((section) => (
               <div key={section.category}>
-                <h3 className="text-sm font-bold text-gray-900 mb-3">{section.category}</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-dark-text-primary mb-3">{section.category}</h3>
                 <div className="space-y-3">
                   {section.equations.map((eq, idx) => (
-                    <div key={idx} className="p-3 bg-gray-50 rounded border border-gray-200">
-                      <div className="font-semibold text-sm text-gray-900 mb-1">{eq.name}</div>
+                    <div key={idx} className="p-3 bg-gray-50 dark:bg-dark-card-soft rounded border border-gray-200 dark:border-dark-border">
+                      <div className="font-semibold text-sm text-gray-900 dark:text-dark-text-primary mb-1">{eq.name}</div>
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
                           <MathRenderer text={`$${eq.latex}$`} />
                         </div>
-                        <div className="text-xs text-gray-600">{eq.description}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary">{eq.description}</div>
                       </div>
                     </div>
                   ))}

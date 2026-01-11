@@ -36,9 +36,9 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
 
   const getTrendBadge = (trend: ErrorPatternSummary['trend']) => {
     const badges = {
-      improving: { label: 'Improving', color: 'bg-green-100 text-green-800' },
-      persistent: { label: 'Persistent', color: 'bg-yellow-100 text-yellow-800' },
-      worsening: { label: 'Worsening', color: 'bg-red-100 text-red-800' }
+      improving: { label: 'Improving', color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
+      persistent: { label: 'Persistent', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
+      worsening: { label: 'Worsening', color: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
     }
     const badge = badges[trend]
     return (
@@ -59,10 +59,10 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
 
   if (summaries.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-8 text-center">
         <div className="text-6xl mb-4">📊</div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">No Error Patterns Yet</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">No Error Patterns Yet</h2>
+        <p className="text-gray-600 dark:text-dark-text-secondary">
           Keep solving problems! Your error patterns will appear here as you learn.
         </p>
       </div>
@@ -73,54 +73,54 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
     <div className="space-y-6">
       {/* Statistics Overview */}
       <div className="bg-blue-50 dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Learning Analytics</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">Learning Analytics</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl font-bold text-blue-600">{stats.totalErrors}</div>
-            <div className="text-xs text-gray-600 mt-1">Total Errors</div>
+          <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.totalErrors}</div>
+            <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Total Errors</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl font-bold text-purple-600">{stats.uniquePatterns}</div>
-            <div className="text-xs text-gray-600 mt-1">Unique Patterns</div>
+          <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.uniquePatterns}</div>
+            <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Unique Patterns</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl font-bold text-green-600">{stats.masteredPatterns}</div>
-            <div className="text-xs text-gray-600 mt-1">Mastered</div>
+          <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.masteredPatterns}</div>
+            <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Mastered</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl font-bold text-red-600">{stats.criticalPatterns}</div>
-            <div className="text-xs text-gray-600 mt-1">Critical</div>
+          <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+            <div className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.criticalPatterns}</div>
+            <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Critical</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl font-bold text-indigo-600">{stats.improvementRate}%</div>
-            <div className="text-xs text-gray-600 mt-1">Improvement Rate</div>
+          <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{stats.improvementRate}%</div>
+            <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Improvement Rate</div>
           </div>
 
           {stats.mostCommonCategory && (
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-sm font-bold text-gray-900 truncate">
+            <div className="bg-white dark:bg-dark-card-soft rounded-lg p-4 shadow-sm dark:shadow-none">
+              <div className="text-sm font-bold text-gray-900 dark:text-dark-text-primary truncate">
                 {stats.mostCommonCategory.replace(/_/g, ' ')}
               </div>
-              <div className="text-xs text-gray-600 mt-1">Most Common</div>
+              <div className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">Most Common</div>
             </div>
           )}
         </div>
       </div>
 
       {/* Category Filter */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-4">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveCategory('all')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               activeCategory === 'all'
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'
             }`}
           >
             All ({summaries.length})
@@ -134,7 +134,7 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   activeCategory === cat
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'
                 }`}
               >
                 {cat.replace(/_/g, ' ')} ({count})
@@ -146,32 +146,32 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
 
       {/* Error Pattern List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary">
           {activeCategory === 'all' ? 'All Error Patterns' : activeCategory.replace(/_/g, ' ')}
         </h3>
 
         {filteredSummaries.map(summary => (
           <div
             key={summary.pattern.id}
-            className={`bg-white rounded-lg shadow-lg p-5 border-2 ${
+            className={`bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-5 border-2 ${
               summary.mastered
-                ? 'border-green-300 bg-green-50'
+                ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
                 : summary.pattern.severity === 'high'
-                ? 'border-red-300'
-                : 'border-gray-200'
+                ? 'border-red-300 dark:border-red-700'
+                : 'border-gray-200 dark:border-dark-border'
             }`}
           >
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-bold text-gray-900">
+                  <h4 className="font-bold text-gray-900 dark:text-dark-text-primary">
                     {summary.pattern.title}
                   </h4>
                   {summary.mastered && (
                     <span className="text-xl" title="Mastered!">✓</span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-2">
                   {summary.pattern.description}
                 </p>
               </div>
@@ -185,47 +185,47 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-              <div className="bg-gray-50 rounded p-2">
-                <div className="text-xs text-gray-600">Occurrences</div>
-                <div className="text-lg font-bold text-gray-900">{summary.occurrences}</div>
+              <div className="bg-gray-50 dark:bg-dark-card-soft rounded p-2">
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary">Occurrences</div>
+                <div className="text-lg font-bold text-gray-900 dark:text-dark-text-primary">{summary.occurrences}</div>
               </div>
-              <div className="bg-gray-50 rounded p-2">
-                <div className="text-xs text-gray-600">First Seen</div>
-                <div className="text-xs font-semibold text-gray-900">
+              <div className="bg-gray-50 dark:bg-dark-card-soft rounded p-2">
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary">First Seen</div>
+                <div className="text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
                   {new Date(summary.firstSeen).toLocaleDateString()}
                 </div>
               </div>
-              <div className="bg-gray-50 rounded p-2">
-                <div className="text-xs text-gray-600">Last Seen</div>
-                <div className="text-xs font-semibold text-gray-900">
+              <div className="bg-gray-50 dark:bg-dark-card-soft rounded p-2">
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary">Last Seen</div>
+                <div className="text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
                   {new Date(summary.lastSeen).toLocaleDateString()}
                 </div>
               </div>
-              <div className="bg-gray-50 rounded p-2">
-                <div className="text-xs text-gray-600">Category</div>
-                <div className="text-xs font-semibold text-gray-900">
+              <div className="bg-gray-50 dark:bg-dark-card-soft rounded p-2">
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary">Category</div>
+                <div className="text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
                   {summary.pattern.category.replace(/_/g, ' ')}
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-3 mb-3 border border-blue-200">
-              <p className="text-xs font-semibold text-blue-900 mb-1">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-3 border border-blue-200 dark:border-blue-700">
+              <p className="text-xs font-semibold text-blue-900 dark:text-blue-200 mb-1">
                 💡 How to fix this:
               </p>
-              <p className="text-xs text-gray-700">
+              <p className="text-xs text-gray-700 dark:text-gray-300">
                 {summary.pattern.remediation}
               </p>
             </div>
 
             {summary.pattern.relatedConcepts.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-700 mb-2">Related concepts:</p>
+                <p className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">Related concepts:</p>
                 <div className="flex flex-wrap gap-1">
                   {summary.pattern.relatedConcepts.map((concept, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700"
+                      className="px-2 py-1 bg-gray-100 dark:bg-dark-card-soft rounded text-xs text-gray-700 dark:text-dark-text-secondary"
                     >
                       {concept}
                     </span>

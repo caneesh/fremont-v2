@@ -20,9 +20,9 @@ export default function PullToRefreshIndicator({ pullDistance, isRefreshing }: P
         transition: pullDistance === 0 ? 'all 0.3s ease-out' : 'none',
       }}
     >
-      <div className="bg-white rounded-full p-3 shadow-lg">
+      <div className="bg-white dark:bg-dark-card rounded-full p-3 shadow-lg dark:shadow-dark-lg">
         <svg
-          className={`w-6 h-6 text-blue-600 ${isRefreshing ? 'animate-spin' : ''}`}
+          className={`w-6 h-6 text-blue-600 dark:text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

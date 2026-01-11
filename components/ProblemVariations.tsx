@@ -76,12 +76,12 @@ export default function ProblemVariations({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border-2 border-blue-400 overflow-hidden" data-testid="problem-variations">
+    <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg border-2 border-blue-400 dark:border-blue-600 overflow-hidden" data-testid="problem-variations">
       {/* Header - Always visible */}
       <button
         onClick={loadVariations}
         disabled={isLoading}
-        className="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between hover:bg-blue-50 transition-colors"
+        className="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
@@ -90,10 +90,10 @@ export default function ProblemVariations({
             </svg>
           </div>
           <div className="text-left">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-dark-text-primary">
               Practice Similar Problems
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
               {isExpanded
                 ? 'Test your understanding with variations of this concept'
                 : 'Generate new problems testing the same physics concept'}
@@ -120,8 +120,8 @@ export default function ProblemVariations({
       {/* Error State */}
       {error && (
         <div className="px-4 sm:px-6 pb-4 sm:pb-5">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
-            <p className="text-red-800 text-xs sm:text-sm">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3 sm:p-4">
+            <p className="text-red-800 dark:text-red-300 text-xs sm:text-sm">{error}</p>
             <button
               onClick={loadVariations}
               className="mt-3 px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs sm:text-sm font-medium"
@@ -134,10 +134,10 @@ export default function ProblemVariations({
 
       {/* Variations List */}
       {isExpanded && variations.length > 0 && (
-        <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-blue-200">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-blue-200 dark:border-blue-700">
           <div className="pt-4 sm:pt-5 space-y-3 sm:space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3">
-              <p className="text-xs sm:text-sm text-blue-900 font-medium">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-2.5 sm:p-3">
+              <p className="text-xs sm:text-sm text-blue-900 dark:text-blue-200 font-medium">
                 These problems test the same concept but with different setups. Try solving them to reinforce your understanding.
               </p>
             </div>
@@ -145,7 +145,7 @@ export default function ProblemVariations({
             {variations.map((variation, index) => (
               <div
                 key={index}
-                className="bg-gray-50 border-2 border-gray-300 rounded-lg p-3 sm:p-5 hover:border-blue-400 transition-colors"
+                className="bg-gray-50 dark:bg-dark-card-soft border-2 border-gray-300 dark:border-dark-border rounded-lg p-3 sm:p-5 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
               >
                 <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3">
                   <div className="flex items-start gap-2 sm:gap-3 flex-1">
@@ -153,10 +153,10 @@ export default function ProblemVariations({
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm sm:text-base text-gray-900 leading-relaxed mb-2">
+                      <p className="text-sm sm:text-base text-gray-900 dark:text-dark-text-primary leading-relaxed mb-2">
                         {variation.problemStatement}
                       </p>
-                      <p className="text-xs text-blue-700 bg-blue-100 border border-blue-200 rounded px-2 py-1 inline-block">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded px-2 py-1 inline-block">
                         <span className="font-semibold">What changed:</span> {variation.whyDifferent}
                       </p>
                     </div>
@@ -164,7 +164,7 @@ export default function ProblemVariations({
                 </div>
 
                 {onSelectVariation && (
-                  <div className="flex justify-end mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                  <div className="flex justify-end mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-dark-border">
                     <button
                       onClick={() => handleTryVariation(variation.problemStatement)}
                       className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-xs sm:text-sm flex items-center gap-2"
@@ -184,10 +184,10 @@ export default function ProblemVariations({
 
       {/* Loading State */}
       {isLoading && (
-        <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-blue-200">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-blue-200 dark:border-blue-700">
           <div className="flex items-center justify-center py-6 sm:py-8">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600 mr-2 sm:mr-3"></div>
-            <p className="text-sm sm:text-base text-gray-600">Generating problem variations...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600 dark:border-blue-400 mr-2 sm:mr-3"></div>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-dark-text-secondary">Generating problem variations...</p>
           </div>
         </div>
       )}
