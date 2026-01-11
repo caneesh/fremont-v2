@@ -28,7 +28,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+      <body className="font-sans antialiased bg-[#F7F8FA] dark:bg-dark-app text-gray-800 dark:text-dark-text-primary">
         <ThemeProvider>
           <ToastProvider>
             <AuthGate>{children}</AuthGate>

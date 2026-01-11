@@ -56,28 +56,30 @@
   margin: 0 0.2em;
 }
 
-/* Custom scrollbar for better UX */
+/* Custom scrollbar - calm neutrals */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #94A3B8;
 }
 
-/* Smooth transitions */
-* {
-  @apply transition-colors duration-200;
+/* Targeted transitions - only interactive elements, not everything */
+@layer base {
+  a, button, input, textarea, select, [role="button"] {
+    @apply transition-colors duration-150;
+  }
 }
 
 /* Mobile-specific utilities */
@@ -106,7 +108,7 @@
   }
 }
 
-/* Post-solve activity popup animations */
+/* Subtle animations for UI feedback */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -118,7 +120,7 @@
 
 @keyframes scale-in {
   from {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0;
   }
   to {
@@ -128,13 +130,12 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.2s ease-out;
+  animation: fade-in 0.15s ease-out;
 }
 
 .animate-scale-in {
-  animation: scale-in 0.2s ease-out;
+  animation: scale-in 0.15s ease-out;
 }
-
 
 /* Slide up animation for bottom sheets */
 @keyframes slide-up {
@@ -147,10 +148,10 @@
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out forwards;
+  animation: slide-up 0.25s ease-out forwards;
 }
 
-/* Indeterminate progress bar animation (honest loading indicator) */
+/* Indeterminate progress bar animation */
 @keyframes indeterminate-progress {
   0% {
     width: 30%;
@@ -171,24 +172,24 @@
 }
 
 /* ============================================
-   DARK MODE DESIGN SYSTEM
-   A layered, premium dark theme
+   DESIGN SYSTEM - Light & Dark Mode
+   Calm, focused educational theme
    ============================================ */
 
-/* CSS Custom Properties for dark mode */
+/* CSS Custom Properties */
 :root {
-  --bg-app: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-soft: #f1f5f9;
-  --bg-input: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-placeholder: #94a3b8;
-  --border-default: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --accent: #0ea5e9;
-  --accent-strong: #0284c7;
+  --bg-app: #F7F8FA;
+  --bg-card: #FFFFFF;
+  --bg-card-soft: #F1F5F9;
+  --bg-input: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-placeholder: #9CA3AF;
+  --border-default: #E5E7EB;
+  --border-strong: #D1D5DB;
+  --accent: #2563EB;
+  --accent-strong: #1D4ED8;
 }
 
 .dark {
@@ -202,8 +203,8 @@
   --text-placeholder: #64748B;
   --border-default: #475569;
   --border-strong: #64748B;
-  --accent: #38BDF8;
-  --accent-strong: #0EA5E9;
+  --accent: #60A5FA;
+  --accent-strong: #3B82F6;
 }
 
 /* Dark mode base overrides */
@@ -223,7 +224,7 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Dark mode scrollbar - refined */
+/* Dark mode scrollbar */
 .dark::-webkit-scrollbar-track {
   background: #1E293B;
 }
@@ -265,7 +266,6 @@
 }
 
 /* KaTeX dark mode - comprehensive styling */
-/* Using #f1f5f9 (slate-100) for maximum readability */
 .dark .katex,
 .dark .katex-display,
 .dark .katex-html,
@@ -306,17 +306,16 @@
   border-color: #f1f5f9 !important;
 }
 
-/* KaTeX colored elements in dark mode */
 .dark .katex .mord.text {
   color: #f1f5f9 !important;
 }
 
-/* Dark mode input focus states */
+/* Dark mode input focus states - subtle, not neon */
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.15);
   outline: none;
 }
 
@@ -326,7 +325,7 @@
   opacity: 1;
 }
 
-/* Dark mode card surfaces - layered approach */
+/* Dark mode card surfaces */
 .dark .bg-gray-50 {
   background-color: #1E293B;
 }
@@ -335,12 +334,7 @@
   background-color: #334155;
 }
 
-/* Dark mode primary button glow on hover */
-.dark .bg-primary-600:hover {
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-}
-
-/* Dark mode disabled states - clearly distinct */
+/* Dark mode disabled states */
 .dark button:disabled,
 .dark input:disabled,
 .dark textarea:disabled {
