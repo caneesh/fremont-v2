@@ -27,7 +27,7 @@ export default function AppShell({ children, userName, onLogout }: AppShellProps
   const isSolveMode = pathname === '/solve' || pathname === '/'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       {/* Desktop Layout */}
       <div className="hidden md:flex">
         {/* Sidebar - Desktop only */}

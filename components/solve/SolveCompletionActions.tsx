@@ -43,11 +43,11 @@ export default function SolveCompletionActions({
 
   return (
     <div
-      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-800 rounded-xl shadow-lg dark:shadow-dark-lg border border-emerald-200 dark:border-emerald-600/30 overflow-hidden"
+      className="bg-white dark:bg-dark-card rounded-lg border border-slate-200 dark:border-dark-border overflow-hidden"
       data-testid="solve-completion-actions"
     >
       {/* Header */}
-      <div className="px-6 py-5 bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600">
+      <div className="px-6 py-5 bg-emerald-600 dark:bg-emerald-700">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
             <svg
@@ -83,14 +83,10 @@ export default function SolveCompletionActions({
             onMouseLeave={() => setHoveredAction(null)}
             className={`
               w-full flex items-center gap-4 p-4 rounded-lg
-              bg-gradient-to-r from-emerald-500 to-teal-500
-              dark:from-emerald-600 dark:to-teal-600
-              hover:from-emerald-600 hover:to-teal-600
-              dark:hover:from-emerald-500 dark:hover:to-teal-500
+              bg-emerald-600 hover:bg-emerald-700
+              dark:bg-emerald-600 dark:hover:bg-emerald-500
               text-white font-medium
-              shadow-md hover:shadow-lg
-              transition-all duration-200
-              ${hoveredAction === 'continue-path' ? 'scale-[1.02]' : ''}
+              transition-colors
             `}
             data-testid="completion-action-continue-path"
           >

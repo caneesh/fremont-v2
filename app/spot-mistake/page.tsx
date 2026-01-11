@@ -141,7 +141,7 @@ export default function SpotMistakePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app py-6 md:py-8 px-4">
+    <main className="min-h-screen bg-slate-50 dark:bg-dark-app py-6 md:py-8 px-4">
       <MobileNav />
       <div className="container mx-auto">
         {/* Header */}

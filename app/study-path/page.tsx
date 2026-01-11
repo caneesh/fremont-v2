@@ -119,7 +119,7 @@ export default function StudyPathPage() {
     // So we just render the dashboard content directly
     const useDashboardLayout = FEATURE_FLAGS.DASHBOARD_V3
     return (
-      <div className={useDashboardLayout ? '' : 'min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card'}>
+      <div className={useDashboardLayout ? '' : 'min-h-screen bg-slate-50 dark:bg-dark-app'}>
         {!useDashboardLayout && <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />}
         {!useDashboardLayout && <MobileNav />}
         <div className="container mx-auto px-4 py-6 md:py-8">
@@ -132,7 +132,7 @@ export default function StudyPathPage() {
   // Show v2 dashboard if enabled
   if (showV2) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
         <MobileNav />
         <div className="container mx-auto px-4 py-6 md:py-8">
@@ -144,7 +144,7 @@ export default function StudyPathPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isPulling && pullDistance > 60} />
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
@@ -164,7 +164,7 @@ export default function StudyPathPage() {
             {FEATURE_FLAGS.STUDY_PLAN_V2 && (
               <button
                 onClick={() => setShowV2(true)}
-                className="px-4 py-2 text-sm bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md flex items-center gap-2"
+                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

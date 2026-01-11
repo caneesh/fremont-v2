@@ -67,7 +67,7 @@ export default function PatternTrackPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -79,7 +79,7 @@ export default function PatternTrackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
@@ -309,7 +309,7 @@ export default function PatternTrackPage() {
 
         {/* Quick Start Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div className="bg-gradient-to-br from-accent to-accent-strong rounded-lg shadow-lg p-6 text-white">
+          <div className="bg-primary-600 rounded-lg p-6 text-white">
             <h3 className="text-xl font-bold mb-2">Quick Practice</h3>
             <p className="text-white/80 mb-4">
               Jump into a mixed practice session with 10 random questions
@@ -322,7 +322,7 @@ export default function PatternTrackPage() {
             </button>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-lg p-6 text-white">
+          <div className="bg-primary-700 rounded-lg p-6 text-white">
             <h3 className="text-xl font-bold mb-2">Focused Review</h3>
             <p className="text-white/80 mb-4">
               Practice patterns you&apos;re struggling with

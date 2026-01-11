@@ -49,7 +49,7 @@ export default function PatternDetailPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -62,7 +62,7 @@ export default function PatternDetailPage({ params }: PageProps) {
 
   if (!pattern) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
@@ -82,7 +82,7 @@ export default function PatternDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
         {/* Header */}

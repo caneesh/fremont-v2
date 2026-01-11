@@ -9,7 +9,7 @@ export default function ErrorWatchlistPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         <PageHeader />

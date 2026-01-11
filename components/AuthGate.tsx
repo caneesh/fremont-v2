@@ -58,7 +58,7 @@ export default function AuthGate({ children }: AuthGateProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-accent mb-4"></div>
           <p className="text-gray-600 dark:text-dark-text-secondary">Loading...</p>
@@ -69,7 +69,7 @@ export default function AuthGate({ children }: AuthGateProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark-lg p-6 sm:p-8 border border-transparent dark:border-dark-border">
             {/* Logo/Header */}
@@ -140,7 +140,7 @@ export default function AuthGate({ children }: AuthGateProps) {
     const remaining = quotaService.getRemainingQuota(user?.userId || '', DEFAULT_QUOTA_LIMITS)
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark-lg p-6 sm:p-8 border border-transparent dark:border-dark-border">
             <div className="text-center mb-6">

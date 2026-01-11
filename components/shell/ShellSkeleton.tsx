@@ -15,7 +15,7 @@ interface ShellSkeletonProps {
 
 export default function ShellSkeleton({ variant = 'dashboard' }: ShellSkeletonProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       {/* Desktop Layout Skeleton */}
       <div className="hidden md:flex">
         {/* Sidebar Skeleton */}

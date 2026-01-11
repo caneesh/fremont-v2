@@ -19,14 +19,14 @@ export default function ErrorPatternsPage() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center">
         <div className="animate-pulse text-gray-500 dark:text-dark-text-muted">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-dark-app dark:via-dark-card dark:to-dark-app py-8 px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app py-8 px-4">
       <MobileNav />
       <div className="max-w-7xl mx-auto">
         {/* Header */}

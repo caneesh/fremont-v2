@@ -44,7 +44,7 @@ export default function TopicDetailPage() {
   }, [topicId])
 
   if (!topic) {
-    return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center">
+    return <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
         <p className="text-gray-600 dark:text-dark-text-secondary">Loading...</p>
@@ -59,7 +59,7 @@ export default function TopicDetailPage() {
   const progress = studyPathService.getTopicCompletionPercentage(topicId)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}

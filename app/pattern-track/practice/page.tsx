@@ -136,7 +136,7 @@ function PracticeContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -151,7 +151,7 @@ function PracticeContent() {
     const percentage = Math.round((results.correct / results.total) * 100)
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-8 text-center border border-transparent dark:border-dark-border">
@@ -208,7 +208,7 @@ function PracticeContent() {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <MobileNav />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
@@ -228,7 +228,7 @@ function PracticeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Progress Bar */}
@@ -447,7 +447,7 @@ function PracticeContent() {
 export default function PracticePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-card">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
