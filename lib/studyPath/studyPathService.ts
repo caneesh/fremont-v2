@@ -1,7 +1,7 @@
 import topicsData from '@/data/topics.json'
 import questionsData from '@/data/questions.json'
-import type { Topic, Question, StudyProgress, StudyStats, QuestionTrack } from '@/types/studyPath'
-import { questionMatchesTrack } from '@/types/studyPath'
+import type { Topic, Question, StudyProgress, StudyStats, QuestionTrack, TrackSelectionResult } from '@/types/studyPath'
+import { questionMatchesTrack, selectWithTrackFallback } from '@/types/studyPath'
 import { checkLocalStorageAvailable, hasLocalStorageSpace } from '@/lib/utils'
 
 const STORAGE_KEY_PROGRESS = 'physiscaffold_study_progress'
@@ -60,6 +60,15 @@ class StudyPathService {
   }
 
   /**
+   * Get all questions filtered by track with fallback support
+   * Returns questions from fallback track if primary track is empty
+   */
+  getQuestionsByTrackWithFallback(track: QuestionTrack): TrackSelectionResult<Question> {
+    const allQuestions = this.getAllQuestions()
+    return selectWithTrackFallback(allQuestions, track, questionMatchesTrack)
+  }
+
+  /**
    * Get questions by topic, filtered by track
    */
   getQuestionsByTopicAndTrack(topicId: string, track: QuestionTrack): Question[] {
@@ -68,11 +77,27 @@ class StudyPathService {
   }
 
   /**
+   * Get questions by topic, filtered by track with fallback support
+   */
+  getQuestionsByTopicAndTrackWithFallback(topicId: string, track: QuestionTrack): TrackSelectionResult<Question> {
+    const topicQuestions = this.getQuestionsByTopic(topicId)
+    return selectWithTrackFallback(topicQuestions, track, questionMatchesTrack)
+  }
+
+  /**
    * Get questions by subtopic, filtered by track
    */
   getQuestionsBySubtopicAndTrack(topicId: string, subtopicId: string, track: QuestionTrack): Question[] {
     const subtopicQuestions = this.getQuestionsBySubtopic(topicId, subtopicId)
     return subtopicQuestions.filter(q => questionMatchesTrack(q, track))
+  }
+
+  /**
+   * Get questions by subtopic, filtered by track with fallback support
+   */
+  getQuestionsBySubtopicAndTrackWithFallback(topicId: string, subtopicId: string, track: QuestionTrack): TrackSelectionResult<Question> {
+    const subtopicQuestions = this.getQuestionsBySubtopic(topicId, subtopicId)
+    return selectWithTrackFallback(subtopicQuestions, track, questionMatchesTrack)
   }
 
   /**
@@ -103,6 +128,37 @@ class StudyPathService {
     ]
 
     return prioritized.slice(0, limit)
+  }
+
+  /**
+   * Get recommended questions with track fallback support
+   * If no questions found for requested track, tries fallback tracks
+   */
+  getRecommendedQuestionsWithFallback(limit: number = 5, track: QuestionTrack): TrackSelectionResult<Question> & { recommended: Question[] } {
+    const stats = this.getStudyStats()
+    const allQuestions = this.getAllQuestions()
+
+    // Use fallback chain to find questions
+    const trackResult = selectWithTrackFallback(allQuestions, track, questionMatchesTrack)
+
+    // Find unattempted questions from the selected track
+    const unattempted = trackResult.items.filter(
+      q => !Object.values(stats.topicProgress).some(
+        p => p.questionsAttempted.includes(q.id)
+      )
+    )
+
+    // Prioritize: Easy -> Medium -> Hard
+    const prioritized = [
+      ...unattempted.filter(q => q.difficulty === 'Easy'),
+      ...unattempted.filter(q => q.difficulty === 'Medium'),
+      ...unattempted.filter(q => q.difficulty === 'Hard'),
+    ]
+
+    return {
+      ...trackResult,
+      recommended: prioritized.slice(0, limit),
+    }
   }
 
   /**

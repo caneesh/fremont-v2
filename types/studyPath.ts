@@ -54,6 +54,91 @@ export function questionMatchesTrack(question: Question, track: QuestionTrack): 
   return matchingTracks.includes(track)
 }
 
+/**
+ * Track fallback chain - defines which tracks to try if preferred track has no questions
+ *
+ * foundation1 -> foundation2 -> intermediate
+ * foundation2 -> intermediate -> foundation1
+ * intermediate -> foundation2 -> competitive
+ * competitive -> intermediate -> foundation2
+ */
+export function getTrackFallbackChain(track: QuestionTrack): QuestionTrack[] {
+  switch (track) {
+    case 'foundation1':
+      return ['foundation1', 'foundation2', 'intermediate']
+    case 'foundation2':
+      return ['foundation2', 'intermediate', 'foundation1']
+    case 'intermediate':
+      return ['intermediate', 'foundation2', 'competitive']
+    case 'competitive':
+      return ['competitive', 'intermediate', 'foundation2']
+  }
+}
+
+/**
+ * Get fallback track name for display
+ */
+export function getTrackDisplayName(track: QuestionTrack): string {
+  switch (track) {
+    case 'foundation1':
+      return 'Foundation 1'
+    case 'foundation2':
+      return 'Foundation 2'
+    case 'intermediate':
+      return 'Intermediate'
+    case 'competitive':
+      return 'Competitive'
+  }
+}
+
+/**
+ * Result of track-aware question selection
+ */
+export interface TrackSelectionResult<T> {
+  items: T[]
+  requestedTrack: QuestionTrack
+  actualTrack: QuestionTrack
+  usedFallback: boolean
+  fallbackMessage?: string
+}
+
+/**
+ * Select items with track fallback
+ * Returns items from first non-empty track in fallback chain
+ */
+export function selectWithTrackFallback<T>(
+  items: T[],
+  requestedTrack: QuestionTrack,
+  matchFn: (item: T, track: QuestionTrack) => boolean
+): TrackSelectionResult<T> {
+  const fallbackChain = getTrackFallbackChain(requestedTrack)
+
+  for (const track of fallbackChain) {
+    const matchingItems = items.filter(item => matchFn(item, track))
+    if (matchingItems.length > 0) {
+      const usedFallback = track !== requestedTrack
+      return {
+        items: matchingItems,
+        requestedTrack,
+        actualTrack: track,
+        usedFallback,
+        fallbackMessage: usedFallback
+          ? `No ${getTrackDisplayName(requestedTrack)} questions found; showing ${getTrackDisplayName(track)} instead`
+          : undefined,
+      }
+    }
+  }
+
+  // No items found in any track
+  return {
+    items: [],
+    requestedTrack,
+    actualTrack: requestedTrack,
+    usedFallback: false,
+    fallbackMessage: `No questions available for ${getTrackDisplayName(requestedTrack)} or fallback tracks`,
+  }
+}
+
 export interface Topic {
   id: string
   name: string
