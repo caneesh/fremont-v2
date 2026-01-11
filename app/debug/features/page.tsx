@@ -188,14 +188,14 @@ export default function DebugFeaturesPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 dark:from-dark-app dark:to-dark-card flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-dark-app flex items-center justify-center">
         <div className="text-gray-500 dark:text-dark-text-muted">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 dark:from-dark-app dark:to-dark-card">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-app">
       <MobileNav />
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}

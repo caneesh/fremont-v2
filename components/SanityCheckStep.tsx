@@ -250,7 +250,7 @@ export default function SanityCheckStep({
   // Render success state
   if (status === 'solved') {
     return (
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-green-400 dark:border-green-600">
+      <div className="bg-green-50 dark:bg-green-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-green-400 dark:border-green-600">
         <div className="flex items-center space-x-3 mb-6">
           <span className="text-4xl">🎉</span>
           <div>
@@ -308,7 +308,7 @@ export default function SanityCheckStep({
   // Render chat interface (debugging mode)
   if (status === 'chatting' || status === 'submitting') {
     return (
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-2 border-amber-400 dark:border-amber-600">
+      <div className="bg-amber-50 dark:bg-amber-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-6 border-2 border-amber-400 dark:border-amber-600">
         <div className="flex items-center space-x-3 mb-4">
           <span className="text-3xl">🧑‍🏫</span>
           <div>
@@ -406,7 +406,7 @@ export default function SanityCheckStep({
 
   // Render initial state (idle or analyzing)
   return (
-    <div data-testid="sanity-check" className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-indigo-300 dark:border-indigo-700">
+    <div data-testid="sanity-check" className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg shadow-lg dark:shadow-dark-lg p-8 border-2 border-indigo-300 dark:border-indigo-700">
       <div className="flex items-center space-x-3 mb-6">
         <span className="text-4xl">{getCheckTypeEmoji(sanityCheck.type)}</span>
         <div>

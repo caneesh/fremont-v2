@@ -94,7 +94,7 @@ export default function ProfileSettingsPage() {
           <div className="p-6 border-b border-gray-200 dark:border-dark-border">
             <div className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent to-accent-strong flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold">
                 {(profile?.displayName?.[0] || user?.name?.[0] || 'U').toUpperCase()}
               </div>
 

@@ -122,7 +122,7 @@ export default function LaTeXDemoPage() {
             </div>
 
             {/* Features */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border-2 border-blue-200 dark:border-blue-700">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border-2 border-blue-200 dark:border-blue-700">
               <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary mb-3">✨ Enhanced Features</h2>
               <ul className="space-y-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                 <li className="flex items-start gap-2">

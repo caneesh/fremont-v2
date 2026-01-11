@@ -151,7 +151,7 @@ export default function DrillPage() {
 
           {/* Drill info card */}
           <div className="bg-white dark:bg-dark-card rounded-2xl shadow-lg border border-slate-200 dark:border-dark-border overflow-hidden">
-            <div className="px-6 py-8 bg-gradient-to-r from-indigo-500 to-purple-500">
+            <div className="px-6 py-8 bg-indigo-500">
               <h1 className="text-2xl font-bold text-white mb-2">{drill.title}</h1>
               {drill.description && (
                 <p className="text-indigo-100">{drill.description}</p>

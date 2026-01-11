@@ -65,7 +65,7 @@ export default function ContinueBanner({ onContinue }: ContinueBannerProps) {
 
   return (
     <div className="mb-6 animate-fade-in">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-accent/10 dark:to-indigo-900/20 border border-blue-200 dark:border-accent/30 rounded-xl p-4 md:p-5 shadow-sm dark:shadow-dark-sm">
+      <div className="bg-blue-50 dark:bg-accent/10 border border-blue-200 dark:border-accent/30 rounded-xl p-4 md:p-5 shadow-sm dark:shadow-dark-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {/* Icon */}

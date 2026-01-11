@@ -207,7 +207,7 @@ export default function RevealReconstructValidate({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl dark:shadow-dark-lg overflow-hidden animate-scale-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+        <div className="flex items-center justify-between px-6 py-4 bg-indigo-500 text-white">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               {stage === 'reveal' && (

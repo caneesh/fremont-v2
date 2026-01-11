@@ -222,7 +222,7 @@ export default function ProjectileSimulation({
   return (
     <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg border border-gray-200 dark:border-dark-border overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 p-4 text-white">
+      <div className="bg-blue-600 dark:bg-blue-500 p-4 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">

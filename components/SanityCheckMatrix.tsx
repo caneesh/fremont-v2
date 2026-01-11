@@ -218,7 +218,7 @@ export default function SanityCheckMatrix({
   return (
     <div data-testid="sanity-check" className="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-500/30">
+      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-500/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">🧪</span>
@@ -450,7 +450,7 @@ export default function SanityCheckMatrix({
 
       {/* All Complete Celebration */}
       {completedCount === 3 && (
-        <div className="px-4 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-t border-green-200 dark:border-green-500/30">
+        <div className="px-4 py-4 bg-green-50 dark:bg-green-900/20 border-t border-green-200 dark:border-green-500/30">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🎉</span>
             <div>

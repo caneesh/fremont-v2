@@ -112,7 +112,7 @@ export default function MiniProblemSuggestion({
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-6">
+    <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">

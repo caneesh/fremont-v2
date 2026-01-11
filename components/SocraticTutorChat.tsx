@@ -212,7 +212,7 @@ export default function SocraticTutorChat({
 
   if (phase === 'loading') {
     return (
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
         <div className="flex items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center animate-pulse">
             <span className="text-xl">👨‍🏫</span>
@@ -228,7 +228,7 @@ export default function SocraticTutorChat({
   return (
     <div className="bg-white dark:bg-dark-card rounded-xl shadow-xl border-2 border-indigo-300 dark:border-indigo-600 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 px-4 py-3 flex items-center gap-3">
+      <div className="bg-indigo-600 dark:bg-indigo-500 px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <span className="text-2xl">👨‍🏫</span>
         </div>

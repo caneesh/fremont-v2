@@ -57,7 +57,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (!nextProblem && !isGenerating && !error) {
     return (
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300" data-testid="next-challenge">
+      <div className="bg-emerald-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300" data-testid="next-challenge">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-900 mb-2 flex items-center gap-2">
@@ -83,7 +83,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (isGenerating) {
     return (
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300">
+      <div className="bg-emerald-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
           <svg className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -118,7 +118,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (nextProblem) {
     return (
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-amber-400">
+      <div className="bg-amber-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-amber-400">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4 sm:mb-6">
           <div className="flex-1">
             <div className="flex items-start gap-2 sm:gap-3 mb-2">
@@ -201,7 +201,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={() => onAcceptChallenge(nextProblem.problemText)}
-            className="flex-1 px-4 sm:px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="flex-1 px-4 sm:px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

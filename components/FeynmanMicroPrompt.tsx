@@ -105,7 +105,7 @@ export default function FeynmanMicroPrompt({
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-5">
+    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-5">
       {/* Header */}
       <div className="flex items-start gap-3 mb-4">
         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">

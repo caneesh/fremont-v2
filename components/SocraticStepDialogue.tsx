@@ -412,7 +412,7 @@ export default function SocraticStepDialogue({
   // Render loading state
   if (state.phase === 'thinking_prompt' || (state.phase === 'socratic_exchange' && state.isProcessing && !state.currentQuestion)) {
     return (
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
         <div className="flex items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center animate-pulse">
             <span className="text-xl">🤔</span>
@@ -485,7 +485,7 @@ export default function SocraticStepDialogue({
         <button
           onClick={onProfessorExplains}
           disabled={isProfessorLoading}
-          className="w-full p-4 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:from-purple-300 disabled:to-indigo-300 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
+          className="w-full p-4 bg-purple-600 dark:bg-purple-500 text-white rounded-xl hover:bg-purple-700 disabled:bg-purple-300 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
         >
           {isProfessorLoading ? (
             <>
@@ -527,7 +527,7 @@ export default function SocraticStepDialogue({
       {questionData && (
         <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg border-2 border-indigo-200 dark:border-indigo-700 overflow-hidden">
           {/* Header with Progress */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 px-4 py-3">
+          <div className="bg-indigo-600 dark:bg-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">

@@ -164,7 +164,7 @@ export default function SocraticExchange({
   return (
     <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg border-2 border-indigo-200 dark:border-indigo-700 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 px-4 py-3 flex items-center gap-3">
+      <div className="bg-indigo-600 dark:bg-indigo-500 px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <span className="text-2xl">🤔</span>
         </div>

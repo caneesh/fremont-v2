@@ -45,7 +45,7 @@ export default function PostSolveActivity({
 
   // Orange color theme for Spot the Mistake
   const colors = {
-    gradient: 'from-orange-50 to-red-50',
+    bg: 'bg-orange-50',
     border: 'border-orange-400',
     icon: 'bg-orange-100 text-orange-600',
     button: 'bg-orange-600 hover:bg-orange-700',
@@ -55,7 +55,7 @@ export default function PostSolveActivity({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className={`bg-gradient-to-br ${colors.gradient} max-w-md w-full rounded-lg shadow-2xl border-2 ${colors.border} overflow-hidden animate-scale-in`}>
+      <div className={`${colors.bg} max-w-md w-full rounded-lg shadow-2xl border-2 ${colors.border} overflow-hidden animate-scale-in`}>
         {/* Header */}
         <div className="p-6 text-center">
           <div className="flex justify-end mb-2">

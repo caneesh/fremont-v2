@@ -135,8 +135,8 @@ export default function PatternFirstModal({
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        {/* Header with gradient and timer */}
-        <div className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 flex-shrink-0">
+        {/* Header with timer */}
+        <div className="px-6 py-4 bg-indigo-500 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2

@@ -58,7 +58,7 @@ export default function WarmUpResults({
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-2xl shadow-xl dark:shadow-dark-lg border border-slate-200 dark:border-dark-border overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white text-center">
+        <div className="bg-amber-500 p-6 text-white text-center">
           <div className="text-5xl mb-2">
             {accuracy >= 70 ? '🎉' : accuracy >= 50 ? '👍' : '📚'}
           </div>
@@ -164,7 +164,7 @@ export default function WarmUpResults({
           {/* Continue button */}
           <button
             onClick={onContinue}
-            className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            className="w-full py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
             Continue to Study
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

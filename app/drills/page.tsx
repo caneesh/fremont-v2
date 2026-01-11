@@ -92,7 +92,7 @@ export default function DrillsPage() {
                 className="block bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all group"
               >
                 {/* Card Header */}
-                <div className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500">
+                <div className="px-6 py-4 bg-indigo-500">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-lg font-bold text-white mb-1">

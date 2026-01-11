@@ -211,7 +211,7 @@ export default function ReadOnlyExplanationPopup({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-2xl">📖</span>
@@ -263,7 +263,7 @@ export default function ReadOnlyExplanationPopup({
               <div className="flex flex-col gap-3 pt-4">
                 <button
                   onClick={handleStartCheck}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   <span>🎯</span>
                   I&apos;ve read it - Check my understanding
@@ -310,7 +310,7 @@ export default function ReadOnlyExplanationPopup({
 
               {/* Current Question */}
               <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-2 border-indigo-200 dark:border-indigo-700">
+                <div className="max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-200 dark:border-indigo-700">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm">🤔</span>
                     <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Understanding Check</span>

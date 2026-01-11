@@ -741,7 +741,7 @@ export default function SubmissionCanvas({
                 {/* Progress bar */}
                 <div className="max-w-xs mx-auto bg-slate-700 rounded-full h-2 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
+                    className="h-full bg-indigo-500 transition-all duration-300"
                     style={{ width: `${Math.min(scanProgress, 100)}%` }}
                   />
                 </div>

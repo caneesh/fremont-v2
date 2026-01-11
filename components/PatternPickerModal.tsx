@@ -39,7 +39,7 @@ export default function PatternPickerModal({
       aria-labelledby="pattern-picker-title"
     >
       <div className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-800 to-slate-700 flex-shrink-0">
+        <div className="px-6 py-4 bg-slate-800 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 id="pattern-picker-title" className="text-xl font-bold text-white">

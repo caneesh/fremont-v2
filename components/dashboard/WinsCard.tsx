@@ -11,7 +11,7 @@ export default function WinsCard({ message }: WinsCardProps) {
   if (!message) return null
 
   return (
-    <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-md">
+    <div className="bg-green-500 rounded-xl p-4 text-white shadow-md">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-white/20 rounded-lg">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

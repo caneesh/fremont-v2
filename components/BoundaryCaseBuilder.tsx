@@ -98,10 +98,10 @@ export default function BoundaryCaseBuilder({
     <>
       {/* Entry Card */}
       {!isOpen && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border-2 border-amber-200 dark:border-amber-500/30 p-4">
+        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg border-2 border-amber-200 dark:border-amber-500/30 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg">
+              <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center text-white shadow-lg">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -127,7 +127,7 @@ export default function BoundaryCaseBuilder({
             </div>
             <button
               onClick={() => setIsOpen(true)}
-              className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"
@@ -166,7 +166,7 @@ export default function BoundaryCaseBuilder({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-2xl max-h-[90vh] overflow-auto bg-white dark:bg-dark-card rounded-xl shadow-2xl animate-scale-in">
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4 rounded-t-xl">
+            <div className="sticky top-0 bg-amber-500 px-6 py-4 rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -375,7 +375,7 @@ export default function BoundaryCaseBuilder({
                     <button
                       onClick={handleSubmitPrediction}
                       disabled={!prediction.trim()}
-                      className="flex-1 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-medium transition-all disabled:cursor-not-allowed"
+                      className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-medium transition-all disabled:cursor-not-allowed"
                     >
                       Check My Prediction
                     </button>
@@ -488,7 +488,7 @@ export default function BoundaryCaseBuilder({
                     </button>
                     <button
                       onClick={handleContinue}
-                      className="flex-1 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-lg font-medium transition-all"
+                      className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-all"
                     >
                       Continue
                     </button>

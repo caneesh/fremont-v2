@@ -35,7 +35,7 @@ export default function DrillResults({
       {/* Results card */}
       <div className="bg-white dark:bg-dark-card rounded-2xl shadow-lg border border-slate-200 dark:border-dark-border overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-8 bg-gradient-to-r from-indigo-500 to-purple-500 text-center">
+        <div className="px-6 py-8 bg-indigo-500 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Drill Complete!</h2>
           <p className="text-indigo-100">{drill.title}</p>
         </div>

@@ -33,7 +33,7 @@ export default function WarmUpGate({
       <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-2xl shadow-xl dark:shadow-dark-lg border border-slate-200 dark:border-dark-border overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
+          <div className="bg-green-500 p-6 text-white">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">✨</span>
               <h2 className="text-2xl font-bold">You&apos;re All Set!</h2>
@@ -60,7 +60,7 @@ export default function WarmUpGate({
             <button
               onClick={() => onSkip('No blocks assigned')}
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -86,7 +86,7 @@ export default function WarmUpGate({
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-dark-card rounded-2xl shadow-xl dark:shadow-dark-lg border border-slate-200 dark:border-dark-border overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+        <div className="bg-amber-500 p-6 text-white">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">🔥</span>
             <h2 className="text-2xl font-bold">Warm-Up Time!</h2>
@@ -155,7 +155,7 @@ export default function WarmUpGate({
             <button
               onClick={onStart}
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

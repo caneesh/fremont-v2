@@ -644,7 +644,7 @@ export default function ConceptContrastModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-dark-card rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-500/30 flex-shrink-0">
+        <div className="px-6 py-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-500/30 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-2xl">⚖️</span>
@@ -685,7 +685,7 @@ export default function ConceptContrastModal({
           </div>
           <div className="mt-2 h-2 bg-gray-200 dark:bg-dark-border rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
+              className="h-full bg-amber-500 transition-all duration-300"
               style={{ width: `${(acceptedCount / totalDistractors) * 100}%` }}
             />
           </div>

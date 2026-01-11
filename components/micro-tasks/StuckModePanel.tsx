@@ -224,7 +224,7 @@ export default function StuckModePanel({
   return (
     <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-700 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-600 px-4 py-3 flex items-center gap-3">
+      <div className="bg-amber-500 dark:bg-amber-600 px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <span className="text-2xl">🆘</span>
         </div>

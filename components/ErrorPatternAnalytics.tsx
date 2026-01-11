@@ -72,7 +72,7 @@ export default function ErrorPatternAnalytics({ studentId }: ErrorPatternAnalyti
   return (
     <div className="space-y-6">
       {/* Statistics Overview */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-6">
+      <div className="bg-blue-50 dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Learning Analytics</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

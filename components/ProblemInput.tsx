@@ -610,7 +610,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
 
           {/* Honest Indeterminate Loading Progress */}
           {isLoading && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-6">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-6">
               <div className="space-y-4">
                 {/* Status Message */}
                 <div className="flex items-center gap-3">
@@ -634,7 +634,7 @@ export default function ProblemInput({ onSubmit, isLoading, error, initialProble
 
                 {/* Indeterminate Progress Bar */}
                 <div className="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-2 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 dark:from-accent dark:via-purple-500 dark:to-accent rounded-full animate-indeterminate-progress"></div>
+                  <div className="h-full bg-blue-600 dark:bg-accent rounded-full animate-indeterminate-progress"></div>
                 </div>
 
                 {/* Tip */}

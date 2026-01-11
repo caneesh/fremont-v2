@@ -30,7 +30,7 @@ interface DashboardStats {
 
 function ThinkingObjective({ objective }: { objective: string }) {
   return (
-    <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl p-6 shadow-lg">
+    <div className="bg-purple-500 text-white rounded-xl p-6 shadow-lg">
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -110,7 +110,7 @@ export default function CoachToolsPanel({
         className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-dark-card shadow-2xl dark:shadow-dark-lg z-50 flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-200 dark:border-dark-border"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-border bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-border bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-indigo-500/20 dark:bg-indigo-500/30 flex items-center justify-center">
               <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

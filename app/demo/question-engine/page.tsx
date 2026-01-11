@@ -258,7 +258,7 @@ export default function QuestionEngineDemoPage() {
         </section>
 
         {/* Features */}
-        <section className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+        <section className="bg-blue-600 rounded-lg p-6 text-white">
           <h2 className="text-xl font-semibold mb-4">Key Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">

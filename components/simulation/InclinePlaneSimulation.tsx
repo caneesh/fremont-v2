@@ -280,7 +280,7 @@ export default function InclinePlaneSimulation({
   return (
     <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg dark:shadow-dark-lg border border-gray-200 dark:border-dark-border overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-teal-600 dark:from-green-500 dark:to-teal-500 p-4 text-white">
+      <div className="bg-green-600 dark:bg-green-500 p-4 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
