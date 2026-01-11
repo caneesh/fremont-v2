@@ -428,46 +428,23 @@ export default function SocraticStepDialogue({
   // Render complete state
   if (state.phase === 'complete') {
     return (
-      <div className="relative bg-gradient-to-br from-green-500/95 to-emerald-600/95 rounded-xl p-8 text-center animate-fade-in">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
-          {[...Array(30)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-3 h-3 animate-confetti"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: '-10px',
-                backgroundColor: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][Math.floor(Math.random() * 6)],
-                transform: `rotate(${Math.random() * 360}deg)`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
-              }}
-            />
-          ))}
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 text-center animate-fade-in">
+        <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+          <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-
-        <div className="text-6xl mb-4 animate-bounce">🎉</div>
-        <h2 className="text-2xl font-bold text-white mb-2">Excellent!</h2>
-        <p className="text-green-100 text-lg">
-          You demonstrated real understanding through our conversation.
+        <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">Step complete</h2>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">
+          You demonstrated understanding through our conversation.
         </p>
-        <div className="mt-4 flex items-center justify-center gap-2 text-white/80">
-          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <div className="mt-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-sm">Marking step as complete...</span>
+          <span className="text-xs">Marking step as complete...</span>
         </div>
-
-        <style jsx>{`
-          @keyframes confetti {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
-          }
-          .animate-confetti { animation: confetti 3s ease-out forwards; }
-          .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        `}</style>
       </div>
     )
   }
