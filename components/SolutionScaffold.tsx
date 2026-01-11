@@ -164,6 +164,15 @@ import { usePivot } from '@/hooks/usePivot'
 import { PivotModal } from '@/components/pivot'
 import { useConstraintHighlight } from '@/hooks/useConstraintHighlight'
 import ConstraintHighlightModal from './ConstraintHighlightModal'
+import { useUserProfile } from '@/lib/profile'
+import type { TrackGateState } from '@/types/trackGates'
+import {
+  getDefaultTrackGateState,
+  areTrackGatesComplete,
+  isStepBlockedByTrackGates,
+  getIncompleteGateMessage,
+} from '@/types/trackGates'
+import TrackGatePanel, { TrackGateWarning } from './TrackGatePanel'
 
 interface InterviewModeProps {
   enabled: boolean
@@ -296,6 +305,18 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
   const [currentConceptContrastChallenge, setCurrentConceptContrastChallenge] = useState<ConceptContrastChallenge | null>(null)
   const [passedConceptContrastSteps, setPassedConceptContrastSteps] = useState<Set<number>>(new Set())
   const [isLoadingConceptContrast, setIsLoadingConceptContrast] = useState(false)
+
+  // Track-based gates state (F1/F2 prerequisites)
+  const { track } = useUserProfile()
+  const [trackGateState, setTrackGateState] = useState<TrackGateState | null>(null)
+  const trackGatePanelRef = useRef<HTMLDivElement>(null)
+
+  // Initialize track gate state when track changes
+  useEffect(() => {
+    if (track) {
+      setTrackGateState(getDefaultTrackGateState(track))
+    }
+  }, [track])
 
   // Coach Tools panel state
   const coachToolsPanel = useCoachToolsPanel()
@@ -652,6 +673,16 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
     if (!gatingPolicy) return null
     return getStepDecisionGateState(gatingPolicy, stepId)
   }, [gatingPolicy])
+
+  // Track gates: Check if step is locked due to track prerequisites (F1/F2)
+  const isStepLockedByTrackGates = useCallback((stepIndex: number): boolean => {
+    return isStepBlockedByTrackGates(stepIndex, data.steps.length, trackGateState)
+  }, [data.steps.length, trackGateState])
+
+  // Scroll to track gate panel when user tries to access a gated step
+  const scrollToTrackGates = useCallback(() => {
+    trackGatePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [])
 
   // Track step-level errors (moved here to be available for decision gate callback)
   const recordStepError = useCallback((stepId: number) => {
@@ -3111,6 +3142,17 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
               </div>
             )}
 
+            {/* Track-based prerequisite gates (F1/F2) */}
+            {trackGateState && (track === 'foundation1' || track === 'foundation2') && (
+              <div ref={trackGatePanelRef}>
+                <TrackGatePanel
+                  gateState={trackGateState}
+                  onGateUpdate={setTrackGateState}
+                  problemText={data.problem}
+                />
+              </div>
+            )}
+
             <div className="space-y-3">
               {data.steps.map((step, index) => {
                 if (!visibleStepIndexes.includes(index)) return null
@@ -3127,6 +3169,15 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       : ''
                   }`}
                 >
+                  {/* Track gate warning when step is blocked by prerequisites */}
+                  {isStepLockedByTrackGates(index) && trackGateState && (
+                    <TrackGateWarning
+                      track={trackGateState.track}
+                      message={getIncompleteGateMessage(trackGateState) || 'Complete the prerequisite steps first.'}
+                      onScrollToGates={scrollToTrackGates}
+                    />
+                  )}
+
                   {/* Diagram steps get special treatment */}
                   {'diagramData' in step && step.stepType === 'diagram' && step.diagramData ? (
                     <DiagramStep
@@ -3134,7 +3185,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       stepNumber={index + 1}
                       isActive={currentStep === index}
                       isCompleted={completedSteps.includes(step.id)}
-                      isLocked={index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)}
+                      isLocked={(index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)) || isStepLockedByTrackGates(index)}
                       onComplete={() => handleMicroStepComplete(step.id)}
                       onActivate={() => setCurrentStep(index)}
                     />
@@ -3144,7 +3195,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       stepNumber={index + 1}
                       isActive={currentStep === index}
                       isCompleted={completedSteps.includes(step.id)}
-                      isLocked={index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)}
+                      isLocked={(index > 0 && !completedSteps.includes(data.steps[index - 1]?.id)) || isStepLockedByTrackGates(index)}
                       concepts={data.concepts}
                       progress={microTaskProgress.get(step.id)}
                       problemStatement={data.problem}
@@ -3172,7 +3223,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
                       stepNumber={index + 1}
                       isActive={currentStep === index}
                       isCompleted={completedSteps.includes(index)}
-                      isLocked={index > 0 && !completedSteps.includes(index - 1)}
+                      isLocked={(index > 0 && !completedSteps.includes(index - 1)) || isStepLockedByTrackGates(index)}
                       concepts={data.concepts}
                       userAnswer={stepAnswers.get(index) || ''}
                       currentHintLevel={stepHintLevels.get(index) || 0}
