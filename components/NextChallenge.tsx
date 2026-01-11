@@ -57,13 +57,13 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (!nextProblem && !isGenerating && !error) {
     return (
-      <div className="bg-emerald-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300" data-testid="next-challenge">
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300 dark:border-emerald-700" data-testid="next-challenge">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-900 mb-2 flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-900 dark:text-emerald-100 mb-2 flex items-center gap-2">
               🎯 Ready for the Next Challenge?
             </h3>
-            <p className="text-sm sm:text-base text-emerald-700">
+            <p className="text-sm sm:text-base text-emerald-700 dark:text-emerald-300">
               Great job solving this problem! Want to level up with a slightly harder version?
             </p>
           </div>
@@ -83,17 +83,17 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (isGenerating) {
     return (
-      <div className="bg-emerald-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300">
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 md:p-8 border-2 border-emerald-300 dark:border-emerald-700">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-          <svg className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <div className="text-center sm:text-left">
-            <p className="text-base sm:text-lg font-semibold text-emerald-900">
+            <p className="text-base sm:text-lg font-semibold text-emerald-900 dark:text-emerald-100">
               Curriculum Architect is designing your next challenge...
             </p>
-            <p className="text-xs sm:text-sm text-emerald-700">
+            <p className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300">
               Building on your success, adding one new complexity
             </p>
           </div>
@@ -104,8 +104,8 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (error) {
     return (
-      <div className="bg-red-50 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-red-300">
-        <p className="text-sm sm:text-base text-red-700">❌ {error}</p>
+      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 border-2 border-red-300 dark:border-red-700">
+        <p className="text-sm sm:text-base text-red-700 dark:text-red-300">❌ {error}</p>
         <button
           onClick={handleGenerateNext}
           className="mt-3 sm:mt-4 px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm sm:text-base"
@@ -118,26 +118,26 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
   if (nextProblem) {
     return (
-      <div className="bg-amber-50 rounded-lg shadow-lg p-4 sm:p-6 md:p-8 border-2 border-amber-400">
+      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg shadow-lg dark:shadow-dark-lg p-4 sm:p-6 md:p-8 border-2 border-amber-400 dark:border-amber-600">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4 sm:mb-6">
           <div className="flex-1">
             <div className="flex items-start gap-2 sm:gap-3 mb-2">
               <span className="text-2xl sm:text-3xl flex-shrink-0">🚀</span>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-amber-900">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-amber-900 dark:text-amber-100">
                 Next Challenge: {nextProblem.nextProblemTitle}
               </h3>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
               <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                 nextProblem.suggestedDifficulty === 'Easy'
-                  ? 'bg-green-100 text-green-800'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                   : nextProblem.suggestedDifficulty === 'Medium'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                  : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
               }`}>
                 {nextProblem.suggestedDifficulty}
               </span>
-              <span className="text-xs sm:text-sm text-amber-700">
+              <span className="text-xs sm:text-sm text-amber-700 dark:text-amber-300">
                 ⏱️ {nextProblem.estimatedTime} minutes
               </span>
             </div>
@@ -151,32 +151,32 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
         </div>
 
         {/* What Changed */}
-        <div className="bg-white rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200">
-          <h4 className="text-sm sm:text-base font-semibold text-amber-900 mb-2 flex items-center gap-2">
+        <div className="bg-white dark:bg-dark-card rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200 dark:border-amber-700">
+          <h4 className="text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
             <span>🔧</span> What&apos;s New:
           </h4>
-          <p className="text-xs sm:text-sm text-gray-800">{nextProblem.addedComplexity}</p>
+          <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200">{nextProblem.addedComplexity}</p>
         </div>
 
         {/* Why This Next */}
-        <div className="bg-white rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200">
-          <h4 className="text-sm sm:text-base font-semibold text-amber-900 mb-2 flex items-center gap-2">
+        <div className="bg-white dark:bg-dark-card rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200 dark:border-amber-700">
+          <h4 className="text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
             <span>💡</span> Why This Challenge:
           </h4>
-          <p className="text-xs sm:text-sm text-gray-800">{nextProblem.whyThisNext}</p>
+          <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200">{nextProblem.whyThisNext}</p>
         </div>
 
         {/* New Concepts */}
         {nextProblem.newConcepts.length > 0 && (
-          <div className="bg-white rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200">
-            <h4 className="text-sm sm:text-base font-semibold text-amber-900 mb-2 flex items-center gap-2">
+          <div className="bg-white dark:bg-dark-card rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-amber-200 dark:border-amber-700">
+            <h4 className="text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
               <span>📚</span> New Concepts:
             </h4>
             <div className="flex flex-wrap gap-2">
               {nextProblem.newConcepts.map((concept, idx) => (
                 <span
                   key={idx}
-                  className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-medium"
+                  className="px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs sm:text-sm font-medium"
                 >
                   {concept}
                 </span>
@@ -187,11 +187,11 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
 
         {/* Problem Statement (shown when details expanded) */}
         {showDetails && (
-          <div className="bg-white rounded-lg p-4 sm:p-6 mb-3 sm:mb-4 border-2 border-amber-300">
-            <h4 className="text-base sm:text-lg font-semibold text-amber-900 mb-3">
+          <div className="bg-white dark:bg-dark-card rounded-lg p-4 sm:p-6 mb-3 sm:mb-4 border-2 border-amber-300 dark:border-amber-600">
+            <h4 className="text-base sm:text-lg font-semibold text-amber-900 dark:text-amber-100 mb-3">
               📋 Full Problem Statement:
             </h4>
-            <p className="text-sm sm:text-base text-gray-900 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">
               {nextProblem.problemText}
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function NextChallenge({ currentProblem, topicTags, onAcceptChall
           </button>
           <button
             onClick={handleGenerateNext}
-            className="px-4 sm:px-6 py-3 bg-white border-2 border-amber-400 text-amber-900 rounded-lg hover:bg-amber-50 font-medium text-sm sm:text-base"
+            className="px-4 sm:px-6 py-3 bg-white dark:bg-dark-card border-2 border-amber-400 dark:border-amber-600 text-amber-900 dark:text-amber-100 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium text-sm sm:text-base"
           >
             Generate Different One
           </button>
