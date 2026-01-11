@@ -987,16 +987,18 @@ export default function StepAccordion({
                 {FEATURE_FLAGS.SOCRATIC_FIRST_MODE && !isSocraticMode && (
                   <button
                     onClick={() => setIsSocraticMode(true)}
-                    className="w-full mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex items-center gap-3"
+                    className="w-full mb-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700 rounded-lg hover:border-sky-400 dark:hover:border-sky-500 transition-colors flex items-center gap-3"
                   >
-                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center">
-                      <span className="text-xl">🤔</span>
+                    <div className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                     </div>
                     <div className="text-left flex-1">
-                      <h6 className="font-semibold text-indigo-900 dark:text-indigo-200 text-sm">Try Guided Discovery</h6>
-                      <p className="text-xs text-indigo-700 dark:text-indigo-300">Answer questions instead of reading hints</p>
+                      <h6 className="font-medium text-sky-900 dark:text-sky-200 text-sm">Try Guided Discovery</h6>
+                      <p className="text-xs text-sky-700 dark:text-sky-300">Answer questions instead of reading hints</p>
                     </div>
-                    <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -1071,16 +1073,18 @@ export default function StepAccordion({
               <button
                 onClick={handleAudioHint}
                 disabled={isLoadingAudio}
-                className="w-full mb-4 p-4 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-600 dark:hover:to-indigo-600 disabled:from-purple-300 disabled:to-indigo-300 dark:disabled:from-purple-400 dark:disabled:to-indigo-400 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full mb-4 p-4 bg-sky-600 dark:bg-sky-600 text-white rounded-lg hover:bg-sky-700 dark:hover:bg-sky-500 disabled:bg-sky-300 dark:disabled:bg-sky-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
-                      🎭
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      </svg>
                     </div>
                     <div className="text-left">
-                      <h6 className="font-bold text-base">Professor Explains</h6>
-                      <p className="text-purple-100 text-sm">
+                      <h6 className="font-medium text-base">Professor Explains</h6>
+                      <p className="text-sky-100 text-sm">
                         {isLoadingAudio ? 'Generating conversation...' : 'Hear a student-professor dialogue about this concept'}
                       </p>
                     </div>
@@ -1138,7 +1142,7 @@ export default function StepAccordion({
                   <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-dark-border rounded-full" />
                   {/* Progress Line Filled */}
                   <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all duration-500"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-500 rounded-full transition-all duration-500"
                     style={{ width: `${Math.max(0, (effectiveHintLevel - 1) / hintProgressDenominator) * 100}%` }}
                   />
 

@@ -25,10 +25,10 @@ function SolvePageContent() {
 export default function SolveRoute() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-sky-500 mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Loading...</p>
         </div>
       </main>
     }>
