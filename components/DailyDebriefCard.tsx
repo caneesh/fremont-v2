@@ -19,13 +19,13 @@ export default function DailyDebriefCard({
   const hasActivity = debrief.problemsAttempted > 0 || debrief.stepsCompleted > 0
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 overflow-hidden">
+    <div className="bg-sky-50 dark:bg-sky-900/20 rounded-lg border border-sky-200 dark:border-sky-800 overflow-hidden">
       {/* Header */}
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
@@ -56,7 +56,7 @@ export default function DailyDebriefCard({
         </div>
 
         {/* Encouragement */}
-        <p className="mt-4 text-indigo-700 dark:text-indigo-300 font-medium">
+        <p className="mt-4 text-sky-700 dark:text-sky-300 font-medium">
           {debrief.encouragement}
         </p>
 
@@ -124,7 +124,7 @@ export default function DailyDebriefCard({
       <div className="border-t border-indigo-200 dark:border-indigo-800">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full px-4 sm:px-6 py-3 flex items-center justify-between text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-colors"
+          className="w-full px-4 sm:px-6 py-3 flex items-center justify-between text-sm text-sky-600 dark:text-sky-400 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-colors"
         >
           <span>View detailed analysis</span>
           <svg
