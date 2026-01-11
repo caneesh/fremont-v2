@@ -11,6 +11,7 @@ import {
   generateQuickRewindResponse,
   logRewindEvent,
 } from '@/lib/socraticRewindService'
+import { useUserProfile } from '@/lib/profile'
 import MathRenderer from './MathRenderer'
 
 interface SocraticRewindModalProps {
@@ -45,6 +46,7 @@ export default function SocraticRewindModal({
   onReturnToStep,
   onProceed,
 }: SocraticRewindModalProps) {
+  const { track } = useUserProfile()
   const [state, setState] = useState<SocraticRewindState>('idle')
   const [response, setResponse] = useState<SocraticRewindResponse | null>(null)
   const [showNudge, setShowNudge] = useState(false)
@@ -57,7 +59,7 @@ export default function SocraticRewindModal({
       const res = await fetch('/api/socratic-rewind', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context }),
+        body: JSON.stringify({ context, track }), // Pass user's current track
       })
 
       if (res.ok) {

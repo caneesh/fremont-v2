@@ -6,6 +6,7 @@ import type {
   ComprehensionQuestion,
   SocraticAnalyzeResponse,
 } from '@/types/socraticTutor'
+import { useUserProfile } from '@/lib/profile'
 
 interface SocraticTutorChatProps {
   problemText: string
@@ -24,6 +25,7 @@ export default function SocraticTutorChat({
   onResolved,
   onSkip,
 }: SocraticTutorChatProps) {
+  const { track } = useUserProfile()
   const [phase, setPhase] = useState<'loading' | 'questions' | 'chat' | 'resolved'>('loading')
   const [questions, setQuestions] = useState<ComprehensionQuestion[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -55,6 +57,7 @@ export default function SocraticTutorChat({
           stepTitle,
           stepContent,
           concepts: requiredConcepts.join(', '),
+          track, // Pass user's current track
         })
 
         const response = await fetch(`/api/socratic-tutor?${params}`)
@@ -123,6 +126,7 @@ export default function SocraticTutorChat({
           question: questionText,
           studentAnswer: answer,
           chatHistory: chatHistory.filter(m => m.id !== 'intro'),
+          track, // Pass user's current track
         }),
       })
 

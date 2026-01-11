@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getTrackFromBody, logTrackUsage } from '@/lib/server/getTrackFromRequest'
 
 export interface StepExplainRequest {
   stepTitle: string
@@ -79,7 +80,12 @@ Be encouraging, use "you" to address the student, and focus on building intuitio
 
 export async function POST(request: NextRequest) {
   try {
-    const body: StepExplainRequest = await request.json()
+    const body = await request.json()
+
+    // Extract track from body (for future behavior customization)
+    const track = getTrackFromBody(body)
+    logTrackUsage('/api/scaffold/step/explain', track, body.track ? 'body' : 'default')
+
     const {
       stepTitle,
       stepType = 'physics_concept',
@@ -90,7 +96,7 @@ export async function POST(request: NextRequest) {
       previousStepTitle,
       nextStepTitle,
       detailed = false
-    } = body
+    } = body as StepExplainRequest
 
     // Validate required fields
     if (!stepTitle || !problemText) {

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import ThemeToggle from '@/components/ThemeToggle'
+import LevelBadge from '@/components/LevelBadge'
 
 interface TopBarProps {
   userName?: string
@@ -69,6 +70,9 @@ export default function TopBar({ showBreadcrumb = true }: TopBarProps) {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-3">
+          {/* Level Badge */}
+          <LevelBadge />
+
           {/* Help Link */}
           <a
             href="https://github.com/caneesh/fremont-v2/blob/main/docs/PILOT_USER_GUIDE.md"

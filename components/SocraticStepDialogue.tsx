@@ -14,6 +14,7 @@ import type {
   SocraticQuestionType,
   MCQOption,
 } from '@/types/socraticFirst'
+import { useUserProfile } from '@/lib/profile'
 import SocraticExchange from './micro-tasks/SocraticExchange'
 import StuckModePanel from './micro-tasks/StuckModePanel'
 import MathRenderer from './MathRenderer'
@@ -49,6 +50,7 @@ export default function SocraticStepDialogue({
   onProfessorExplains,
   isProfessorLoading = false,
 }: SocraticStepDialogueProps) {
+  const { track } = useUserProfile()
   const [state, setState] = useState<SocraticDialogueState>(INITIAL_STATE)
   // Multiple questions support
   const [allQuestions, setAllQuestions] = useState<QuestionData[]>([])
@@ -70,6 +72,7 @@ export default function SocraticStepDialogue({
         stepContent,
         problemText: problemStatement,
         concepts: concepts.join(', '),
+        track, // Pass user's current track
       })
 
       const response = await fetch(`/api/socratic-tutor/initial-prompt?${params}`)
@@ -242,6 +245,7 @@ export default function SocraticStepDialogue({
           studentAnswer: answer,
           selfReportedConfidence: confidence,
           previousExchanges: state.exchanges,
+          track, // Pass user's current track
         }),
       })
 

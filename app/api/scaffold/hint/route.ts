@@ -1,30 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getTrackFromQuery, logTrackUsage } from '@/lib/server/getTrackFromRequest'
+import {
+  buildTrackAwareHintPrompt,
+  getEffectiveHintLevel,
+  postProcessHint,
+  getF1SafeFallbackHint,
+} from '@/lib/server/trackAwarePrompts'
 
 const anthropic = new Anthropic()
-
-const HINT_LEVEL_DESCRIPTIONS: Record<number, { focus: string; style: string }> = {
-  1: {
-    focus: 'concept identification',
-    style: 'Ask what physics principle or concept applies here. Don\'t give the answer, just point to the relevant concept.',
-  },
-  2: {
-    focus: 'visualization',
-    style: 'Help the student picture the physical setup. Describe what to visualize or draw.',
-  },
-  3: {
-    focus: 'strategy',
-    style: 'Outline the general approach without giving specific equations. What steps should they take?',
-  },
-  4: {
-    focus: 'key equations',
-    style: 'Provide the main equation(s) needed, with brief explanation of each term.',
-  },
-  5: {
-    focus: 'full solution walkthrough',
-    style: 'Give a complete step-by-step solution with explanations.',
-  },
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,7 +16,14 @@ export async function GET(request: NextRequest) {
     const stepContent = searchParams.get('stepContent') || ''
     const problemText = searchParams.get('problemText') || ''
     const concepts = searchParams.get('concepts') || ''
-    const level = parseInt(searchParams.get('level') || '1', 10)
+    const requestedLevel = parseInt(searchParams.get('level') || '1', 10)
+
+    // Check if user explicitly requested higher level (e.g., "show equations")
+    const explicitRequest = searchParams.get('explicit') === 'true'
+
+    // Extract track from query params for track-specific behavior
+    const track = getTrackFromQuery(request)
+    logTrackUsage('/api/scaffold/hint', track, searchParams.has('track') ? 'query' : 'default')
 
     if (!stepContent && !problemText) {
       return NextResponse.json(
@@ -41,19 +32,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const levelConfig = HINT_LEVEL_DESCRIPTIONS[level] || HINT_LEVEL_DESCRIPTIONS[1]
+    // Apply track restrictions to hint level
+    const { level: effectiveLevel, wasRestricted } = getEffectiveHintLevel(
+      track,
+      requestedLevel,
+      explicitRequest
+    )
 
-    const systemPrompt = `You are a warm, encouraging physics tutor helping a student who is stuck.
-Generate a hint at level ${level} (${levelConfig.focus}).
-
-Style guidelines:
-- ${levelConfig.style}
-- Be concise but helpful
-- Use LaTeX for any math (wrap in $ or $$)
-- Never be condescending
-- Encourage the student
-
-The hint should be 1-3 sentences for levels 1-3, more detailed for levels 4-5.`
+    // Build track-aware system prompt
+    const systemPrompt = buildTrackAwareHintPrompt(track, requestedLevel, effectiveLevel)
 
     const userPrompt = `Problem: ${problemText}
 
@@ -61,7 +48,7 @@ Step being worked on: ${stepContent}
 
 Key concepts: ${concepts}
 
-Generate a level ${level} hint to help the student progress.`
+Generate a level ${effectiveLevel} hint to help the student progress.`
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -70,16 +57,44 @@ Generate a level ${level} hint to help the student progress.`
       messages: [{ role: 'user', content: userPrompt }],
     })
 
-    const hint = response.content[0].type === 'text'
+    let hint = response.content[0].type === 'text'
       ? response.content[0].text
       : 'Think about what physics principle applies to this situation.'
 
-    return NextResponse.json({ hint, level })
+    // Post-process hint to ensure track compliance (especially for F1)
+    const { hint: processedHint, wasModified, reason } = postProcessHint(track, effectiveLevel, hint)
+    hint = processedHint
+
+    // Log if hint was modified for debugging
+    if (wasModified) {
+      console.log(`[scaffold/hint] Track ${track}: Hint was modified. Reason: ${reason}`)
+    }
+
+    return NextResponse.json({
+      hint,
+      level: effectiveLevel,
+      requestedLevel,
+      wasRestricted,
+      track,
+    })
   } catch (error) {
     console.error('Error generating hint:', error)
 
-    // Fallback hints
+    // Track-aware fallback hints
+    const track = getTrackFromQuery(request)
     const level = parseInt(request.nextUrl.searchParams.get('level') || '1', 10)
+
+    // For F1, use safe fallbacks that don't contain equations
+    if (track === 'foundation1') {
+      return NextResponse.json({
+        hint: getF1SafeFallbackHint(level),
+        level,
+        track,
+        fallback: true,
+      })
+    }
+
+    // Generic fallbacks for other tracks
     const fallbackHints: Record<number, string> = {
       1: 'What physics concept or principle applies to this situation?',
       2: 'Try drawing a diagram of the physical setup. What forces or quantities are involved?',
@@ -91,6 +106,8 @@ Generate a level ${level} hint to help the student progress.`
     return NextResponse.json({
       hint: fallbackHints[level] || fallbackHints[1],
       level,
+      track,
+      fallback: true,
     })
   }
 }

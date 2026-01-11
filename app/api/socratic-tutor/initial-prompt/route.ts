@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getTrackFromQuery, logTrackUsage } from '@/lib/server/getTrackFromRequest'
+import {
+  buildSocraticQuestionPrompt,
+  containsEquationsForF1,
+  adaptQuestionsForF1,
+} from '@/lib/server/trackAwarePrompts'
 
 // Create client lazily to ensure env vars are available in serverless context
 function getAnthropicClient() {
@@ -32,7 +38,30 @@ export async function GET(request: NextRequest) {
     const problemText = searchParams.get('problemText') || ''
     const concepts = searchParams.get('concepts') || ''
 
-    const prompt = `You are a warm, encouraging Socratic guide helping a physics student. Generate 3 questions to guide them through understanding this step.
+    // Extract track from query params for track-specific behavior
+    const track = getTrackFromQuery(request)
+    logTrackUsage('/api/socratic-tutor/initial-prompt', track, searchParams.has('track') ? 'query' : 'default')
+
+    // Build track-aware system prompt
+    const trackPrompt = buildSocraticQuestionPrompt(track)
+
+    // Track-specific question format instructions
+    const questionFormatInstructions = track === 'foundation1'
+      ? `Generate exactly 3 questions in this order:
+1. **MCQ (multiple_choice)**: A conceptual question with 4 options. NO equations. Focus on "what happens when" or "which is greater".
+2. **Conceptual completion (fill_blank)**: A word or phrase completion (NOT an equation). E.g., "The force that opposes motion is called ___".
+3. **Open-ended (open_ended)**: A warm thinking prompt that encourages physical intuition.
+
+CRITICAL: NO equations, NO LaTeX, NO mathematical notation.`
+      : `Generate exactly 3 questions in this order:
+1. **MCQ (multiple_choice)**: A conceptual question with 4 options (a, b, c, d). Exactly one should be correct.
+2. **Fill-in-the-blank (fill_blank)**: An equation or short answer question. Use LaTeX for math (e.g., $F = ma$).
+3. **Open-ended (open_ended)**: A warm thinking prompt that encourages reflection.
+
+Guidelines:
+- Use LaTeX for math: $...$ for inline, $$...$$ for display`
+
+    const prompt = `${trackPrompt}
 
 ## Problem
 ${problemText}
@@ -44,24 +73,19 @@ ${stepContent}
 ${concepts}
 
 ## Your Task
-Generate exactly 3 questions in this order:
-1. **MCQ (multiple_choice)**: A conceptual question with 4 options (a, b, c, d). Exactly one should be correct.
-2. **Fill-in-the-blank (fill_blank)**: An equation or short answer question. Use LaTeX for math (e.g., $F = ma$).
-3. **Open-ended (open_ended)**: A warm thinking prompt that encourages reflection.
+${questionFormatInstructions}
 
-Guidelines:
+General guidelines:
 - Be warm and encouraging, never intimidating
 - MCQ options should test understanding, not just memory
-- Fill-blank should focus on a key relationship or value
 - Open-ended should invite genuine exploration
-- Use LaTeX for math: $...$ for inline, $$...$$ for display
 
 ### Respond with JSON:
 {
   "questions": [
     {
       "type": "multiple_choice",
-      "question": "Which principle best describes...?",
+      "question": "Your question here?",
       "options": [
         {"id": "a", "text": "Option A", "isCorrect": false},
         {"id": "b", "text": "Option B", "isCorrect": true},
@@ -71,12 +95,12 @@ Guidelines:
     },
     {
       "type": "fill_blank",
-      "question": "If the mass is $m$ and acceleration is $a$, the force is F = ___",
-      "blankAnswer": "$ma$"
+      "question": "Your fill-in question here ___",
+      "blankAnswer": "answer"
     },
     {
       "type": "open_ended",
-      "question": "What's your approach to this step?"
+      "question": "Your open-ended question?"
     }
   ]
 }
@@ -108,10 +132,47 @@ Respond with ONLY valid JSON.`
       throw new Error('Invalid response format')
     }
 
-    return NextResponse.json(result)
+    // Post-process for F1: ensure no equations slipped through
+    if (track === 'foundation1') {
+      result.questions = adaptQuestionsForF1(result.questions)
+    }
+
+    return NextResponse.json({ ...result, track })
   } catch (error) {
     console.error('Error generating questions:', error)
-    // Return sensible fallback questions
+
+    const track = getTrackFromQuery(request)
+
+    // Track-aware fallback questions
+    if (track === 'foundation1') {
+      return NextResponse.json({
+        questions: [
+          {
+            type: 'multiple_choice',
+            question: 'What physical concept is most relevant to this step?',
+            options: [
+              { id: 'a', text: 'Understanding the forces and their directions', isCorrect: true },
+              { id: 'b', text: 'Memorizing formulas', isCorrect: false },
+              { id: 'c', text: 'Guessing based on numbers', isCorrect: false },
+              { id: 'd', text: 'Skipping to the answer', isCorrect: false },
+            ],
+          },
+          {
+            type: 'fill_blank',
+            question: 'The physical principle that connects these quantities is called ___',
+            blankAnswer: 'conservation of energy (or similar)',
+          },
+          {
+            type: 'open_ended',
+            question: "What's your intuition about this step? Describe in words what you think is happening physically.",
+          },
+        ],
+        track,
+        fallback: true,
+      })
+    }
+
+    // Default fallback for other tracks
     return NextResponse.json({
       questions: [
         {
@@ -134,6 +195,8 @@ Respond with ONLY valid JSON.`
           question: "What's your approach to this step? Take a moment to think through how you'd tackle it.",
         },
       ],
+      track,
+      fallback: true,
     })
   }
 }

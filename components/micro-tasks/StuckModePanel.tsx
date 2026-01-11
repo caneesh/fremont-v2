@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { StuckModePanelProps, SelfReportConfidence } from '@/types/socraticFirst'
+import { useUserProfile } from '@/lib/profile'
 import MathRenderer from '../MathRenderer'
 
 const HINT_LEVELS = [
@@ -81,6 +82,7 @@ export default function StuckModePanel({
   isVerifying,
   verificationQuestion: externalVerificationQuestion,
 }: StuckModePanelProps) {
+  const { track } = useUserProfile()
   const [hintContent, setHintContent] = useState<Record<number, string>>({})
   const [loadingLevel, setLoadingLevel] = useState<number | null>(null)
   const [showVerification, setShowVerification] = useState(false)
@@ -114,6 +116,7 @@ export default function StuckModePanel({
         problemText: problemStatement,
         concepts: concepts.join(', '),
         level: level.toString(),
+        track, // Pass user's current track
       })
 
       const response = await fetch(`/api/scaffold/hint?${params}`)
@@ -149,6 +152,7 @@ export default function StuckModePanel({
           concepts,
           hintLevel: level,
           hintContent: hintContent[level],
+          track, // Pass user's current track
         }),
       })
 
@@ -183,6 +187,7 @@ export default function StuckModePanel({
           studentAnswer: verificationAnswer,
           selfReportedConfidence: verificationConfidence,
           hintLevelJustViewed: hintLevel,
+          track, // Pass user's current track
         }),
       })
 

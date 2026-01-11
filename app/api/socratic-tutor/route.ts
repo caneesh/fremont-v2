@@ -13,6 +13,16 @@ import type {
   SocraticExchangeRecord,
   SelfReportConfidence,
 } from '@/types/socraticFirst'
+import {
+  getTrackFromQuery,
+  getTrackFromBody,
+  logTrackUsage,
+} from '@/lib/server/getTrackFromRequest'
+import {
+  buildSocraticQuestionPrompt,
+  buildSocraticAnalysisPrompt,
+  containsEquationsForF1,
+} from '@/lib/server/trackAwarePrompts'
 
 // Create client lazily to ensure env vars are available in serverless context
 function getAnthropicClient() {
@@ -29,6 +39,10 @@ export async function GET(request: NextRequest) {
     const stepTitle = searchParams.get('stepTitle') || ''
     const stepContent = searchParams.get('stepContent') || ''
     const concepts = searchParams.get('concepts') || ''
+
+    // Extract track from query params (for future behavior customization)
+    const track = getTrackFromQuery(request)
+    logTrackUsage('/api/socratic-tutor GET', track, searchParams.has('track') ? 'query' : 'default')
 
     const prompt = `You are a Socratic physics tutor. Generate 1-2 short comprehension questions to check if a student truly understands a physics step they just completed.
 
@@ -104,9 +118,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // Extract track from body (for future behavior customization)
+    const track = getTrackFromBody(body)
+    logTrackUsage('/api/socratic-tutor POST', track, body.track ? 'body' : 'default')
+
     // Check if this is a Socratic-first mode request
     if (body.mode === 'verification' || body.mode === 'hint_check') {
-      return handleSocraticFirstMode(body as SocraticModeRequest)
+      return handleSocraticFirstMode(body as SocraticModeRequest, track)
     }
 
     // Legacy mode: original Socratic tutor flow
@@ -210,8 +228,10 @@ Respond with ONLY valid JSON.`
 
 /**
  * Handle Socratic-first mode requests (verification, hint_check)
+ * @param body - The request body
+ * @param track - User's current track for behavior customization
  */
-async function handleSocraticFirstMode(body: SocraticModeRequest): Promise<NextResponse> {
+async function handleSocraticFirstMode(body: SocraticModeRequest, track: import('@prisma/client').Track): Promise<NextResponse> {
   const {
     mode,
     problemText,
@@ -237,7 +257,28 @@ async function handleSocraticFirstMode(body: SocraticModeRequest): Promise<NextR
     ? `\n## Context\nThe student just viewed a Level ${hintLevelJustViewed} hint. We need to verify they understood it.\n`
     : ''
 
-  const prompt = `You are a warm, encouraging Socratic guide helping a physics student think through a problem. Your role is to verify their understanding and guide discovery.
+  // Build track-aware analysis prompt
+  const trackAnalysisPrompt = buildSocraticAnalysisPrompt(track)
+
+  // Track-specific feedback instructions
+  const trackFeedbackInstructions = track === 'foundation1'
+    ? `
+### CRITICAL F1 CONSTRAINTS FOR FEEDBACK
+- **NEVER use equations** in feedback or explanation (no F=ma, no $...$)
+- **Describe relationships in words** ("When mass goes up, acceleration goes down")
+- **Use everyday analogies** to explain concepts
+- **Focus on direction, comparison, cause-effect**
+- If follow-up question is needed, make it qualitative (never "calculate" or "plug in")`
+    : track === 'foundation2'
+    ? `
+### F2 FEEDBACK GUIDELINES
+- **Before giving equations**, validate their physical reasoning
+- **Explain each symbol's meaning** when introducing equations
+- Use LaTeX for math ($...$ for inline)
+- Connect math back to physical intuition`
+    : ''
+
+  const prompt = `${trackAnalysisPrompt}
 
 ## Problem
 ${problemText}
@@ -263,6 +304,7 @@ ${selfReportedConfidence} (guess = not sure at all, okay = somewhat confident, s
 3. Provide warm, encouraging feedback
 4. If not complete, generate a follow-up question to guide them deeper
 5. Identify any concept gaps
+${trackFeedbackInstructions}
 
 ### Answer Quality Guidelines:
 - "excellent": Shows deep understanding, could teach this to others
@@ -305,15 +347,6 @@ ${selfReportedConfidence} (guess = not sure at all, okay = somewhat confident, s
   "encouragement": "If complete, a celebratory message"
 }
 
-## Personality Rules (CRITICAL)
-- NEVER say "wrong", "incorrect", or "mistake"
-- Use: "Let's think about this...", "Almost there!", "Good thinking!", "You're getting warmer!"
-- For misconceptions: "Interesting approach! Let's explore that a bit more..."
-- For overconfidence: "You have good instincts! Let's double-check our reasoning together."
-- For underconfidence: "You know more than you think! That's actually quite good."
-- Celebrate early when they show real understanding
-- Mark as complete after 2-3 successful exchanges OR excellent first answer
-
 Respond with ONLY valid JSON.`
 
   try {
@@ -336,7 +369,24 @@ Respond with ONLY valid JSON.`
     }
 
     const result: SocraticModeResponse = JSON.parse(jsonMatch[0])
-    return NextResponse.json(result)
+
+    // Post-process for F1: ensure no equations in feedback/explanation
+    if (track === 'foundation1' && result.verification) {
+      if (containsEquationsForF1(result.verification.feedback || '')) {
+        console.log('[socratic-tutor] F1: Sanitizing feedback that contained equations')
+        result.verification.feedback = "You're on the right track! Think about what's happening physically here. What direction do the forces point? How does changing one quantity affect the others?"
+      }
+      if (containsEquationsForF1(result.verification.explanation || '')) {
+        console.log('[socratic-tutor] F1: Sanitizing explanation that contained equations')
+        result.verification.explanation = "This step involves understanding the physical relationship between the quantities. Think about cause and effect - when one thing changes, what happens to the others?"
+      }
+      if (result.verification.followUpQuestion && containsEquationsForF1(result.verification.followUpQuestion)) {
+        console.log('[socratic-tutor] F1: Sanitizing follow-up question that contained equations')
+        result.verification.followUpQuestion = "Can you describe in your own words what physical principle is at work here? Think about direction and magnitude."
+      }
+    }
+
+    return NextResponse.json({ ...result, track })
   } catch (error) {
     console.error('Error in Socratic-first mode:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

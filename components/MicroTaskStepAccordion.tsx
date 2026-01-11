@@ -6,6 +6,7 @@ import type { Concept, WarningBeacon } from '@/types/scaffold'
 import type { MicroTaskStepProgress } from '@/types/history'
 import type { StepLearningStatus, ValidationOutcome, RevealFlowEventMetadata } from '@/types/revealFlow'
 import type { FeynmanValidationResult } from '@/types/feynman'
+import { useUserProfile } from '@/lib/profile'
 import InsightCard from './micro-tasks/InsightCard'
 import CollectedInsights from './micro-tasks/CollectedInsights'
 import RevealReconstructValidate from './micro-tasks/RevealReconstructValidate'
@@ -84,6 +85,7 @@ export default function MicroTaskStepAccordion({
   maxTaskLevel,
   onSessionError,
 }: MicroTaskStepAccordionProps) {
+  const { track } = useUserProfile()
   // Get the outline step ID for difficulty tuning (from phased scaffold adapter)
   const outlineStepId = (step as MicroTaskStep & { _outlineStepId?: string })._outlineStepId || `s${step.id}`
 
@@ -629,6 +631,7 @@ export default function MicroTaskStepAccordion({
           stepPosition: stepNumber,
           totalSteps: totalTaskLevels,
           requiredConcepts: step.requiredConcepts,
+          track, // Pass user's current track
         }),
       })
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Concept } from '@/types/scaffold'
 import type { SelfReportConfidence, VerificationResult } from '@/types/socraticFirst'
+import { useUserProfile } from '@/lib/profile'
 import MathRenderer from './MathRenderer'
 
 interface ReadOnlyExplanationPopupProps {
@@ -41,6 +42,7 @@ export default function ReadOnlyExplanationPopup({
   onClose,
   onComplete,
 }: ReadOnlyExplanationPopupProps) {
+  const { track } = useUserProfile()
   const [phase, setPhase] = useState<'reading' | 'checking' | 'complete' | 'review'>('reading')
   const [understandingCheck, setUnderstandingCheck] = useState<UnderstandingCheck | null>(null)
   const [answer, setAnswer] = useState('')
@@ -67,6 +69,7 @@ export default function ReadOnlyExplanationPopup({
         stepContent,
         problemText: problemStatement,
         concepts: concepts.map(c => c.name).join(', '),
+        track, // Pass user's current track
       })
 
       const response = await fetch(`/api/socratic-tutor/initial-prompt?${params}`)
@@ -114,6 +117,7 @@ export default function ReadOnlyExplanationPopup({
           question: understandingCheck.question,
           studentAnswer: answer,
           selfReportedConfidence: selectedConfidence,
+          track, // Pass user's current track
           previousExchanges: exchangeHistory.map(e => ({
             question: e.question,
             studentAnswer: e.answer,

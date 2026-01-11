@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import type { SocraticRewindContext, SocraticRewindResponse } from '@/types/socraticRewind'
+import { getTrackFromBody, logTrackUsage } from '@/lib/server/getTrackFromRequest'
 
 // Create client lazily to ensure env vars are available in serverless context
 function getAnthropicClient() {
@@ -35,6 +36,11 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    // Extract track from body (for future behavior customization)
+    const track = getTrackFromBody(body)
+    logTrackUsage('/api/socratic-rewind', track, body.track ? 'body' : 'default')
+
     const { context } = body as { context: SocraticRewindContext }
 
     if (!context) {
