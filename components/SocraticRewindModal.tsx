@@ -72,7 +72,7 @@ export default function SocraticRewindModal({
     } finally {
       setIsLoadingAI(false)
     }
-  }, [context])
+  }, [context, track])
 
   // Generate response when modal opens
   useEffect(() => {

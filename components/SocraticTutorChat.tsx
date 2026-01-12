@@ -92,7 +92,7 @@ export default function SocraticTutorChat({
     }
 
     fetchQuestions()
-  }, [problemText, stepTitle, stepContent, requiredConcepts])
+  }, [problemText, stepTitle, stepContent, requiredConcepts, track])
 
   const handleSubmitAnswer = async () => {
     if (!answer.trim() || isAnalyzing) return

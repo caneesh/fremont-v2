@@ -91,7 +91,7 @@ export default function ReadOnlyExplanationPopup({
     } finally {
       setIsProcessing(false)
     }
-  }, [stepTitle, stepContent, problemStatement, concepts])
+  }, [stepTitle, stepContent, problemStatement, concepts, track])
 
   // Handle starting the understanding check
   const handleStartCheck = () => {

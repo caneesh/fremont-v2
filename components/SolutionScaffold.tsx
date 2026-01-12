@@ -1995,7 +1995,7 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
 
     // Trigger autosave with confidence data
     handleSaveDraft(true)
-  }, [data, useMicroTasks, handleSaveDraft, stepHintLevels, problemId])
+  }, [data, useMicroTasks, handleSaveDraft, stepHintLevels, problemId, problemStartTime])
 
   // Skip confidence rating (auto-skip or manual)
   const handleConfidenceSkipped = useCallback((stepId: number) => {

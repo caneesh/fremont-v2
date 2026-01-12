@@ -646,7 +646,7 @@ export default function MicroTaskStepAccordion({
     } finally {
       setIsLoadingWhyStep(false)
     }
-  }, [whyStepExplanation, showWhyStep, step.title, step.stepType, step.requiredConcepts, totalTaskLevels, problemStatement, stepNumber])
+  }, [whyStepExplanation, showWhyStep, step.title, step.stepType, step.requiredConcepts, totalTaskLevels, problemStatement, stepNumber, track])
 
   return (
     <div

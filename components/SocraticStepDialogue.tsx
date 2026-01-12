@@ -146,7 +146,7 @@ export default function SocraticStepDialogue({
         isProcessing: false,
       }))
     }
-  }, [stepTitle, stepContent, problemStatement, concepts])
+  }, [stepTitle, stepContent, problemStatement, concepts, track])
 
   // Fetch multiple questions on mount
   useEffect(() => {
@@ -315,7 +315,7 @@ export default function SocraticStepDialogue({
         error: 'Something went wrong. Please try again.',
       }))
     }
-  }, [state.currentQuestion, state.exchanges, state.isProcessing, problemStatement, stepTitle, stepContent, concepts, currentQuestionIndex, moveToNextQuestion])
+  }, [state.currentQuestion, state.exchanges, state.isProcessing, problemStatement, stepTitle, stepContent, concepts, currentQuestionIndex, moveToNextQuestion, track])
 
   const handleMCQSelect = (optionId: string) => {
     setSelectedMCQOption(optionId)
