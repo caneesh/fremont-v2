@@ -1,0 +1,864 @@
+{
+  "id": "n3l-content-pack-001",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0,
+    "createdAt": "2026-01-11T00:00:00Z",
+    "changelog": "Initial Newton's Third Law content pack for Foundation 1"
+  },
+  "conceptNode": "newtons_third_law",
+  "grade": "class9",
+  "module": "laws_of_motion",
+  "targetInsight": "Action-reaction force pairs act on different bodies and therefore do not cancel.",
+
+  "conceptCard": {
+    "id": "cc-n3l-001",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0,
+      "createdAt": "2026-01-11T00:00:00Z",
+      "changelog": "Initial concept card"
+    },
+    "conceptNode": "newtons_third_law",
+    "grade": "class9",
+    "module": "laws_of_motion",
+    "targetInsight": "Action-reaction force pairs act on different bodies and therefore do not cancel.",
+    "mentalModel": {
+      "description": "Every force is part of an interaction between two bodies. When body A pushes on body B, body B simultaneously pushes back on body A with equal magnitude but opposite direction. These two forces form an 'action-reaction pair' but they act on different objects, which is why they never cancel each other out.",
+      "anchors": [
+        "Two-body FBD with forces clearly on separate bodies",
+        "Hands pushing against each other",
+        "Feet pushing on ground while ground pushes back"
+      ],
+      "analogies": [
+        "Like two people pushing shopping carts against each other - each person feels a push but the pushes are on different carts",
+        "Like clapping - both hands feel the impact equally"
+      ]
+    },
+    "prerequisites": ["force_concept", "interaction_concept", "fbd_basics"],
+    "relatedNodes": ["newtons_first_law", "newtons_second_law", "friction"],
+    "foundationClassification": {
+      "level": "foundation1",
+      "focus": "Intuition and FBD separation",
+      "targetSkills": ["f1_qualitative_reasoning", "f1_representation", "f1_cause_effect"],
+      "prerequisites": ["force_concept", "fbd_basics"]
+    },
+    "ragMetadata": {
+      "contentType": "authoritative_fact",
+      "embeddable": true,
+      "priority": 10,
+      "retrievalTags": ["newton", "third_law", "action_reaction", "force_pairs"],
+      "exclusions": [],
+      "uncertainty": {
+        "confident": true
+      }
+    },
+    "difficulty": {
+      "conceptualLoad": {
+        "level": "developing",
+        "score": 2,
+        "rationale": "Two concepts: force pairs and different bodies"
+      },
+      "reasoningDepth": {
+        "level": "developing",
+        "score": 2,
+        "rationale": "Two-step reasoning: identify pair, then identify bodies"
+      },
+      "transferDistance": {
+        "level": "novice",
+        "score": 1,
+        "rationale": "Direct application in familiar contexts"
+      },
+      "representationSwitching": {
+        "level": "developing",
+        "score": 2,
+        "rationale": "Verbal to FBD mapping required"
+      },
+      "misconceptionRisk": {
+        "level": "proficient",
+        "score": 3,
+        "rationale": "Horse-cart paradox is a deep-seated misconception"
+      },
+      "composite": {
+        "overall": "developing",
+        "primaryChallenge": "misconceptionRisk"
+      }
+    },
+    "payoffTags": [
+      {
+        "type": "enables_class10",
+        "specificPayoff": "Enables understanding of friction as interaction between surfaces",
+        "prerequisiteFor": ["friction_analysis", "tension_in_ropes"]
+      },
+      {
+        "type": "enables_jee_intuition",
+        "specificPayoff": "Enables quick identification of internal vs external forces in systems",
+        "prerequisiteFor": ["system_analysis", "constraint_equations"]
+      }
+    ]
+  },
+
+  "misconceptionCards": [
+    {
+      "id": "mc-n3l-001",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "createdAt": "2026-01-11T00:00:00Z",
+        "changelog": "Horse-cart paradox misconception"
+      },
+      "conceptNode": "newtons_third_law",
+      "misconception": "If the horse pulls the cart with the same force the cart pulls the horse, they should cancel and nothing should move.",
+      "origin": "Students apply the cancellation logic of forces on the same body to forces on different bodies.",
+      "correctUnderstanding": "The two forces act on different bodies (horse and cart separately). For motion, we look at the net force on each body individually, not the sum of forces across bodies.",
+      "triggerSituations": [
+        "Any scenario where an object accelerates while apparently being pulled back equally",
+        "Tug-of-war situations",
+        "Pushing against a wall"
+      ],
+      "exposureQuestions": [
+        "If the forces cancel, why does anything ever move?",
+        "Draw the forces ON THE HORSE only. What do you see?",
+        "What other force acts on the horse besides the cart's pull?"
+      ],
+      "refutationStrategy": {
+        "probe": "If action equals reaction, how can anything accelerate?",
+        "conflict": "Draw separate FBDs for the horse and the cart. On which body does the ground's friction act?",
+        "reconstruction": "What determines whether the horse-cart system accelerates?"
+      },
+      "commonTraps": [
+        "Adding forces across different bodies",
+        "Forgetting the ground friction on the horse",
+        "Not drawing separate FBDs"
+      ],
+      "severity": "critical",
+      "foundationClassification": {
+        "level": "foundation1",
+        "focus": "FBD separation is essential to resolve this",
+        "targetSkills": ["f1_representation", "f1_cause_effect"],
+        "prerequisites": ["fbd_basics"]
+      },
+      "ragMetadata": {
+        "contentType": "misconception_trap",
+        "embeddable": true,
+        "priority": 8,
+        "retrievalTags": ["misconception", "horse_cart", "force_cancellation"],
+        "exclusions": ["use_as_correct_physics"],
+        "uncertainty": {
+          "confident": true
+        }
+      }
+    },
+    {
+      "id": "mc-n3l-002",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "createdAt": "2026-01-11T00:00:00Z",
+        "changelog": "Stronger object exerts more force misconception"
+      },
+      "conceptNode": "newtons_third_law",
+      "misconception": "The stronger or larger object exerts a greater force in an interaction.",
+      "origin": "Confusion between force and effect. A truck hitting a car causes more damage to the car, so students think the truck exerts more force.",
+      "correctUnderstanding": "Force magnitudes are always equal regardless of size or strength. The effects differ because acceleration depends on mass (a = F/m).",
+      "triggerSituations": [
+        "Collisions between objects of different sizes",
+        "A person pushing against a wall",
+        "Earth pulling on an apple"
+      ],
+      "exposureQuestions": [
+        "When a truck hits a car, which experiences more force?",
+        "If you push a wall and it doesn't move, did you exert any force on it?",
+        "Does the apple pull on the Earth?"
+      ],
+      "refutationStrategy": {
+        "probe": "Does a heavier object push harder on a lighter object during collision?",
+        "conflict": "If forces were unequal, what would Newton's Third Law say?",
+        "reconstruction": "Why does the car get damaged more if the forces are equal?"
+      },
+      "commonTraps": [
+        "Confusing force with acceleration",
+        "Confusing force with damage or deformation",
+        "Thinking mass determines force"
+      ],
+      "severity": "high",
+      "foundationClassification": {
+        "level": "foundation1",
+        "focus": "Separating force from effect",
+        "targetSkills": ["f1_qualitative_reasoning", "f1_comparison"],
+        "prerequisites": ["force_concept", "acceleration_basics"]
+      },
+      "ragMetadata": {
+        "contentType": "misconception_trap",
+        "embeddable": true,
+        "priority": 7,
+        "retrievalTags": ["misconception", "force_magnitude", "mass_confusion"],
+        "exclusions": ["use_as_correct_physics"],
+        "uncertainty": {
+          "confident": true
+        }
+      }
+    }
+  ],
+
+  "problemArchetypes": [
+    {
+      "id": "pa-n3l-001",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "createdAt": "2026-01-11T00:00:00Z",
+        "changelog": "Two-body horizontal push archetype"
+      },
+      "conceptNode": "newtons_third_law",
+      "surfaceFeatures": {
+        "context": "Person pushing a box on a floor",
+        "givenItems": ["Person applies force F on box", "Box has mass m", "Floor has friction"],
+        "askedItems": ["Force box exerts on person", "Whether box accelerates"],
+        "diagramType": "fbd"
+      },
+      "deepStructure": {
+        "coreInsight": "Action-reaction pairs act on different bodies; motion depends on net force on each body",
+        "requiredPatterns": ["force_identification", "fbd_construction", "net_force_analysis"],
+        "metaSkillsTested": ["f1_representation", "f1_cause_effect"]
+      },
+      "triggerCues": [
+        "Two objects in contact",
+        "One object pushing/pulling another",
+        "Question about forces between objects"
+      ],
+      "stepStrategy": [
+        {
+          "step": 1,
+          "reasoning": "Identify the two interacting bodies",
+          "insight": "The person and box are the interacting pair"
+        },
+        {
+          "step": 2,
+          "reasoning": "Draw separate FBDs for each body",
+          "insight": "Forces on person include: reaction from box, friction from ground. Forces on box include: push from person, friction from ground, weight, normal"
+        },
+        {
+          "step": 3,
+          "reasoning": "Apply Newton's Third Law to the interaction",
+          "insight": "Box pushes back on person with force F (equal magnitude, opposite direction)"
+        }
+      ],
+      "commonTraps": [
+        {
+          "trapId": "trap-001",
+          "description": "Drawing both forces on the same FBD",
+          "cause": "Not separating the two bodies in the diagram",
+          "recovery": "Which body does each force act ON?"
+        },
+        {
+          "trapId": "trap-002",
+          "description": "Saying forces cancel so nothing moves",
+          "cause": "Adding forces on different bodies",
+          "recovery": "Are these forces on the same body or different bodies?"
+        }
+      ],
+      "transferVariant": {
+        "description": "Person in ice skates pushing a wall",
+        "surfaceChange": "Vertical wall instead of horizontal box, ice surface instead of regular floor",
+        "deepStructurePreserved": "Action-reaction between person and wall; person accelerates because of unbalanced net force"
+      },
+      "foundationClassification": {
+        "level": "foundation1",
+        "focus": "FBD separation and force identification",
+        "targetSkills": ["f1_representation", "f1_cause_effect"],
+        "prerequisites": ["fbd_basics", "force_concept"]
+      },
+      "difficulty": {
+        "conceptualLoad": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Two-body interaction"
+        },
+        "reasoningDepth": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Three clear steps"
+        },
+        "transferDistance": {
+          "level": "novice",
+          "score": 1,
+          "rationale": "Familiar context"
+        },
+        "representationSwitching": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Verbal to FBD"
+        },
+        "misconceptionRisk": {
+          "level": "proficient",
+          "score": 3,
+          "rationale": "Cancellation misconception likely"
+        },
+        "composite": {
+          "overall": "developing",
+          "primaryChallenge": "misconceptionRisk"
+        }
+      },
+      "ragMetadata": {
+        "contentType": "example",
+        "embeddable": true,
+        "priority": 6,
+        "retrievalTags": ["archetype", "two_body", "push", "horizontal"],
+        "exclusions": [],
+        "uncertainty": {
+          "confident": true
+        }
+      }
+    },
+    {
+      "id": "pa-n3l-002",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "createdAt": "2026-01-11T00:00:00Z",
+        "changelog": "Vertical interaction archetype"
+      },
+      "conceptNode": "newtons_third_law",
+      "surfaceFeatures": {
+        "context": "Book resting on a table",
+        "givenItems": ["Book has weight W", "Table supports book"],
+        "askedItems": ["Reaction pair to book's weight", "Force table exerts on book"],
+        "diagramType": "fbd"
+      },
+      "deepStructure": {
+        "coreInsight": "Normal force and weight are NOT action-reaction pairs; they act on the same body",
+        "requiredPatterns": ["force_identification", "reaction_pair_identification"],
+        "metaSkillsTested": ["f1_representation", "f1_qualitative_reasoning"]
+      },
+      "triggerCues": [
+        "Object resting on surface",
+        "Vertical forces mentioned",
+        "Question about reaction to weight"
+      ],
+      "stepStrategy": [
+        {
+          "step": 1,
+          "reasoning": "Identify all forces on the book",
+          "insight": "Weight (Earth pulls book down) and Normal force (table pushes book up)"
+        },
+        {
+          "step": 2,
+          "reasoning": "For weight, identify the reaction pair",
+          "insight": "Book pulls Earth upward (gravitational interaction between book and Earth)"
+        },
+        {
+          "step": 3,
+          "reasoning": "Recognize normal and weight are NOT a pair",
+          "insight": "They both act on the same body (the book), so they cannot be action-reaction"
+        }
+      ],
+      "commonTraps": [
+        {
+          "trapId": "trap-003",
+          "description": "Saying normal force is reaction to weight",
+          "cause": "Both forces are vertical and equal in magnitude when at rest",
+          "recovery": "Do both forces act on the same body? Can action-reaction act on the same body?"
+        }
+      ],
+      "transferVariant": {
+        "description": "Magnet on a refrigerator door",
+        "surfaceChange": "Magnetic force instead of gravity, metal surface instead of table",
+        "deepStructurePreserved": "Normal force from door is not the reaction to magnetic attraction"
+      },
+      "foundationClassification": {
+        "level": "foundation1",
+        "focus": "Distinguishing action-reaction pairs from balanced forces",
+        "targetSkills": ["f1_qualitative_reasoning", "f1_representation"],
+        "prerequisites": ["weight_concept", "normal_force_concept"]
+      },
+      "difficulty": {
+        "conceptualLoad": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Must distinguish two different force pairings"
+        },
+        "reasoningDepth": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Three steps with subtle distinction"
+        },
+        "transferDistance": {
+          "level": "novice",
+          "score": 1,
+          "rationale": "Very familiar scenario"
+        },
+        "representationSwitching": {
+          "level": "developing",
+          "score": 2,
+          "rationale": "Verbal to FBD"
+        },
+        "misconceptionRisk": {
+          "level": "advanced",
+          "score": 4,
+          "rationale": "Normal-weight confusion is extremely common"
+        },
+        "composite": {
+          "overall": "developing",
+          "primaryChallenge": "misconceptionRisk"
+        }
+      },
+      "ragMetadata": {
+        "contentType": "example",
+        "embeddable": true,
+        "priority": 6,
+        "retrievalTags": ["archetype", "vertical", "normal_force", "weight"],
+        "exclusions": [],
+        "uncertainty": {
+          "confident": true
+        }
+      }
+    }
+  ],
+
+  "socraticTrees": [
+    {
+      "id": "st-n3l-001",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "createdAt": "2026-01-11T00:00:00Z",
+        "changelog": "High-confidence wrong answer tree"
+      },
+      "conceptNode": "newtons_third_law",
+      "targetProfile": "high_confidence_wrong",
+      "rootNodeId": "node-entry",
+      "nodes": {
+        "node-entry": {
+          "id": "node-entry",
+          "type": "entry_probe",
+          "question": "A horse pulls a cart forward. The cart pulls back on the horse with equal force. How does the cart move forward?",
+          "probeTarget": "Detect if student believes forces should cancel",
+          "responsePatterns": [
+            {
+              "pattern": "forces cancel|shouldn't move|doesn't make sense",
+              "interpretation": "misconception",
+              "nextNodeId": "node-detect"
+            },
+            {
+              "pattern": "different bodies|separate FBDs",
+              "interpretation": "correct",
+              "nextNodeId": "node-validate"
+            },
+            {
+              "pattern": "",
+              "interpretation": "no_response",
+              "nextNodeId": "node-scaffold"
+            }
+          ],
+          "fadingLevel": "high"
+        },
+        "node-detect": {
+          "id": "node-detect",
+          "type": "error_detection",
+          "question": "You mentioned the forces should cancel. On which body are you adding these forces?",
+          "probeTarget": "Make student realize they're adding forces on different bodies",
+          "responsePatterns": [
+            {
+              "pattern": "both|system|together",
+              "interpretation": "misconception",
+              "nextNodeId": "node-refute"
+            },
+            {
+              "pattern": "different|separate",
+              "interpretation": "partial",
+              "nextNodeId": "node-reconstruct"
+            }
+          ],
+          "fadingLevel": "high"
+        },
+        "node-refute": {
+          "id": "node-refute",
+          "type": "refutation",
+          "question": "Can you draw the forces acting ONLY on the horse? Not the cart, just the horse.",
+          "probeTarget": "Force separation of bodies in thinking",
+          "responsePatterns": [
+            {
+              "pattern": "cart pulls|ground pushes|friction",
+              "interpretation": "partial",
+              "nextNodeId": "node-reconstruct"
+            }
+          ],
+          "fadingLevel": "medium"
+        },
+        "node-reconstruct": {
+          "id": "node-reconstruct",
+          "type": "reconstruction",
+          "question": "Looking at your FBD of the horse alone, what is the net force on the horse? What about the cart?",
+          "probeTarget": "Build correct understanding through separate analysis",
+          "responsePatterns": [
+            {
+              "pattern": "net force|forward|friction|ground",
+              "interpretation": "correct",
+              "nextNodeId": "node-validate"
+            }
+          ],
+          "fadingLevel": "medium"
+        },
+        "node-validate": {
+          "id": "node-validate",
+          "type": "validation",
+          "question": "So why doesn't the 'cart pulling back' stop the horse from moving?",
+          "probeTarget": "Confirm understanding of separate-body analysis",
+          "responsePatterns": [
+            {
+              "pattern": "different body|ground friction|net force",
+              "interpretation": "correct",
+              "nextNodeId": "node-exit"
+            }
+          ],
+          "fadingLevel": "low"
+        },
+        "node-scaffold": {
+          "id": "node-scaffold",
+          "type": "fading_scaffold",
+          "question": "Let's start simpler. If I push a wall, what does the wall do to me?",
+          "probeTarget": "Build basic action-reaction intuition",
+          "responsePatterns": [
+            {
+              "pattern": "pushes back|reaction",
+              "interpretation": "partial",
+              "nextNodeId": "node-detect"
+            }
+          ],
+          "fadingLevel": "high"
+        },
+        "node-exit": {
+          "id": "node-exit",
+          "type": "validation",
+          "question": "Can you state the key insight in your own words?",
+          "probeTarget": "Student synthesis",
+          "responsePatterns": [],
+          "fadingLevel": "low"
+        }
+      },
+      "misconceptionBranches": [
+        {
+          "triggeredBy": "node-entry",
+          "branchRootId": "node-detect",
+          "targetMisconception": "Forces on different bodies cancel"
+        }
+      ],
+      "fadingProgression": [
+        {
+          "phase": 1,
+          "fadingLevel": "high",
+          "nodeIds": ["node-entry", "node-detect", "node-scaffold"]
+        },
+        {
+          "phase": 2,
+          "fadingLevel": "medium",
+          "nodeIds": ["node-refute", "node-reconstruct"]
+        },
+        {
+          "phase": 3,
+          "fadingLevel": "low",
+          "nodeIds": ["node-validate", "node-exit"]
+        }
+      ],
+      "foundationClassification": {
+        "level": "foundation1",
+        "focus": "FBD-based misconception resolution",
+        "targetSkills": ["f1_representation", "f1_cause_effect"],
+        "prerequisites": ["fbd_basics"]
+      },
+      "ragMetadata": {
+        "contentType": "socratic_prompt",
+        "embeddable": false,
+        "priority": 5,
+        "retrievalTags": ["socratic", "horse_cart", "misconception"],
+        "exclusions": ["direct_answer_retrieval"],
+        "uncertainty": {
+          "confident": true
+        }
+      }
+    }
+  ],
+
+  "masteryCheckSet": {
+    "id": "mk-n3l-001",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0,
+      "createdAt": "2026-01-11T00:00:00Z",
+      "changelog": "Initial mastery check set"
+    },
+    "conceptNode": "newtons_third_law",
+    "checks": {
+      "conceptual": {
+        "id": "mk-n3l-conceptual",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
+          "createdAt": "2026-01-11T00:00:00Z",
+          "changelog": "Conceptual mastery check"
+        },
+        "conceptNode": "newtons_third_law",
+        "type": "conceptual",
+        "prompt": "A small car and a large truck collide head-on. Compare the forces they exert on each other during the collision.",
+        "correctReasoning": {
+          "keyElements": [
+            "Forces are equal in magnitude",
+            "Forces are opposite in direction",
+            "This is true regardless of the sizes of the objects"
+          ],
+          "indicators": [
+            "Mentions Newton's Third Law or action-reaction",
+            "States forces are equal without hesitation",
+            "Distinguishes force from damage or acceleration"
+          ]
+        },
+        "incorrectReasoning": {
+          "patterns": [
+            "Truck exerts more force because it's bigger",
+            "Car exerts more force because it's moving faster",
+            "Forces depend on which object is heavier"
+          ],
+          "indicatedMisconceptions": [
+            "Confusing force with mass",
+            "Confusing force with momentum",
+            "Believing larger objects exert larger forces"
+          ]
+        },
+        "foundationClassification": {
+          "level": "foundation1",
+          "focus": "Core concept understanding",
+          "targetSkills": ["f1_qualitative_reasoning"],
+          "prerequisites": ["force_concept"]
+        },
+        "difficulty": {
+          "conceptualLoad": {
+            "level": "developing",
+            "score": 2,
+            "rationale": "Single concept application"
+          },
+          "reasoningDepth": {
+            "level": "novice",
+            "score": 1,
+            "rationale": "Direct recall"
+          },
+          "transferDistance": {
+            "level": "novice",
+            "score": 1,
+            "rationale": "Standard collision scenario"
+          },
+          "representationSwitching": {
+            "level": "novice",
+            "score": 1,
+            "rationale": "Verbal only"
+          },
+          "misconceptionRisk": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Size-force misconception common"
+          },
+          "composite": {
+            "overall": "developing",
+            "primaryChallenge": "misconceptionRisk"
+          }
+        },
+        "ragMetadata": {
+          "contentType": "socratic_prompt",
+          "embeddable": false,
+          "priority": 5,
+          "retrievalTags": ["mastery_check", "collision"],
+          "exclusions": [],
+          "uncertainty": {
+            "confident": true
+          }
+        }
+      },
+      "qualitative": {
+        "id": "mk-n3l-qualitative",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
+          "createdAt": "2026-01-11T00:00:00Z",
+          "changelog": "Qualitative reasoning check"
+        },
+        "conceptNode": "newtons_third_law",
+        "type": "qualitative",
+        "prompt": "You stand on a bathroom scale in an elevator. As the elevator accelerates upward, the scale reading increases. Identify the action-reaction pair for the normal force the scale exerts on you.",
+        "correctReasoning": {
+          "keyElements": [
+            "The reaction is the force YOU exert on the SCALE",
+            "This force acts on the scale, not on you",
+            "It equals the normal force in magnitude"
+          ],
+          "indicators": [
+            "Correctly identifies force on scale as reaction",
+            "Does not confuse with weight or elevator forces",
+            "Distinguishes the two bodies involved"
+          ]
+        },
+        "incorrectReasoning": {
+          "patterns": [
+            "Reaction is your weight",
+            "Reaction is the elevator pulling up",
+            "Reaction is Earth pulling you down"
+          ],
+          "indicatedMisconceptions": [
+            "Confusing normal force reaction with weight",
+            "Not identifying correct body receiving reaction",
+            "Mixing up different force pairs"
+          ]
+        },
+        "foundationClassification": {
+          "level": "foundation2",
+          "focus": "Non-obvious interaction identification",
+          "targetSkills": ["f2_constraint_identification", "f2_multi_step_reasoning"],
+          "prerequisites": ["normal_force_concept", "newtons_third_law_basics"]
+        },
+        "difficulty": {
+          "conceptualLoad": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Multiple forces involved"
+          },
+          "reasoningDepth": {
+            "level": "developing",
+            "score": 2,
+            "rationale": "Must trace force pair correctly"
+          },
+          "transferDistance": {
+            "level": "developing",
+            "score": 2,
+            "rationale": "Less familiar elevator context"
+          },
+          "representationSwitching": {
+            "level": "developing",
+            "score": 2,
+            "rationale": "Verbal with implicit FBD"
+          },
+          "misconceptionRisk": {
+            "level": "advanced",
+            "score": 4,
+            "rationale": "Normal-weight confusion very common"
+          },
+          "composite": {
+            "overall": "proficient",
+            "primaryChallenge": "misconceptionRisk"
+          }
+        },
+        "ragMetadata": {
+          "contentType": "socratic_prompt",
+          "embeddable": false,
+          "priority": 5,
+          "retrievalTags": ["mastery_check", "elevator", "normal_force"],
+          "exclusions": [],
+          "uncertainty": {
+            "confident": true
+          }
+        }
+      },
+      "transfer": {
+        "id": "mk-n3l-transfer",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0,
+          "createdAt": "2026-01-11T00:00:00Z",
+          "changelog": "Transfer mastery check"
+        },
+        "conceptNode": "newtons_third_law",
+        "type": "transfer",
+        "prompt": "A rocket in space expels gas downward to accelerate upward. The rocket and the expelled gas exert forces on each other. Using Newton's Third Law, explain why the rocket accelerates even though 'every action has an equal and opposite reaction'.",
+        "correctReasoning": {
+          "keyElements": [
+            "Rocket pushes gas down, gas pushes rocket up",
+            "These forces act on different objects",
+            "Net force on rocket is upward (nothing else is pushing down on it in space)"
+          ],
+          "indicators": [
+            "Correctly identifies rocket and gas as separate bodies",
+            "Notes absence of other forces on rocket",
+            "Applies Newton's Second Law to rocket alone"
+          ]
+        },
+        "incorrectReasoning": {
+          "patterns": [
+            "Forces cancel so rocket shouldn't accelerate",
+            "Gas pushes against space to move rocket",
+            "Rocket pushes against air"
+          ],
+          "indicatedMisconceptions": [
+            "Adding forces on different bodies",
+            "Thinking something needs to be pushed against",
+            "Forgetting no air in space"
+          ]
+        },
+        "foundationClassification": {
+          "level": "foundation2",
+          "focus": "Transfer to unfamiliar context",
+          "targetSkills": ["f2_multi_step_reasoning", "f2_constraint_identification"],
+          "prerequisites": ["newtons_third_law", "space_environment"]
+        },
+        "difficulty": {
+          "conceptualLoad": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Novel context requiring concept transfer"
+          },
+          "reasoningDepth": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Must reason about absent forces too"
+          },
+          "transferDistance": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Space is unfamiliar context"
+          },
+          "representationSwitching": {
+            "level": "developing",
+            "score": 2,
+            "rationale": "Verbal with conceptual model"
+          },
+          "misconceptionRisk": {
+            "level": "proficient",
+            "score": 3,
+            "rationale": "Push-against misconception"
+          },
+          "composite": {
+            "overall": "proficient",
+            "primaryChallenge": "transferDistance"
+          }
+        },
+        "ragMetadata": {
+          "contentType": "socratic_prompt",
+          "embeddable": false,
+          "priority": 5,
+          "retrievalTags": ["mastery_check", "rocket", "space", "transfer"],
+          "exclusions": [],
+          "uncertainty": {
+            "confident": true
+          }
+        }
+      }
+    },
+    "passingCriteria": {
+      "minimumCorrect": 2,
+      "requiredTypes": ["conceptual"]
+    }
+  },
+
+  "qualityFlags": {
+    "reviewed": false,
+    "approvalStatus": "pending"
+  }
+}
