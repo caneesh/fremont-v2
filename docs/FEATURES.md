@@ -703,6 +703,112 @@ This document describes all features with their implementation status, location 
 
 ---
 
+## Curriculum Management Features
+
+### 46. Curriculum Content Module
+
+**Status**: IMPLEMENTED
+
+**What it does**: Comprehensive curriculum content management system for Foundation 1/2 levels with atomic learning objects, difficulty taxonomy, and pedagogical auditing.
+
+**Where to find it in the UI**:
+- **Routes**: API-only (`/api/curriculum/*`)
+- **Navigation**: Backend service, not directly user-facing
+
+**Implementation**:
+- Types: `types/atomicLearning.ts`
+- Services: `lib/curriculum/` (7 modules)
+- Data: `data/curriculum/newtonsThirdLaw.json`
+
+**API Routes**:
+- `/api/curriculum/content-pack` - Fetch content packs by concept
+- `/api/curriculum/classify` - Foundation 1/2 classification
+- `/api/curriculum/difficulty` - Difficulty scoring and analysis
+- `/api/curriculum/audit` - Content auditing
+- `/api/curriculum/evolution` - Concept evolution maps
+- `/api/curriculum/rag` - RAG ingestion and annotation
+
+**Key Capabilities**:
+- **Atomic Learning Objects**: Concept Cards, Misconception Cards, Problem Archetypes, Socratic Trees, Mastery Checks
+- **5-Dimensional Difficulty Taxonomy**: Conceptual load, reasoning depth, transfer distance, representation switching, misconception risk
+- **Foundation Classification**: Automatic F1/F2 classification based on content characteristics
+- **Concept Evolution Maps**: Cross-grade progression from Class 9 to JEE Advanced
+- **Curriculum Auditing**: Pedagogical integrity checks (explanation-over-inquiry, formula leakage, hint dependency)
+- **RAG Integration**: Smart embedding decisions for Socratic tutoring context
+
+---
+
+### 47. Foundation 1/2 Classification
+
+**Status**: IMPLEMENTED
+
+**What it does**: Classifies curriculum content into Foundation 1 (intuition + FBD) or Foundation 2 (non-obvious interactions) based on difficulty and content characteristics.
+
+**Where to find it in the UI**:
+- **Route**: N/A (backend service)
+- **Navigation**: Used by curriculum authoring tools
+
+**Implementation**: `lib/curriculum/foundationClassification.ts`
+
+**API Routes**: `/api/curriculum/classify`
+
+**Classification Criteria**:
+| Level | Focus | Max Difficulty | Math Level | Reasoning Steps |
+|-------|-------|----------------|------------|-----------------|
+| Foundation 1 | Intuition + FBD | 2 (developing) | Arithmetic | ≤3 |
+| Foundation 2 | Non-obvious interactions | 3 (proficient) | Basic algebra | ≤5 |
+
+---
+
+### 48. Difficulty Taxonomy
+
+**Status**: IMPLEMENTED
+
+**What it does**: 5-dimensional difficulty scoring system for precise content calibration and student-content matching.
+
+**Where to find it in the UI**:
+- **Route**: N/A (backend service)
+- **Navigation**: Used during content authoring and question selection
+
+**Implementation**: `lib/curriculum/difficultyTaxonomy.ts`
+
+**API Routes**: `/api/curriculum/difficulty`
+
+**Dimensions**:
+1. **Conceptual Load**: Number of concepts involved (1-5 score)
+2. **Reasoning Depth**: Depth of logical chain required
+3. **Transfer Distance**: How far from learned context
+4. **Representation Switching**: Diagram ↔ equation ↔ graph transitions
+5. **Misconception Risk**: Probability of common errors
+
+---
+
+### 49. Concept Evolution Maps
+
+**Status**: IMPLEMENTED
+
+**What it does**: Tracks how physics concepts evolve across grade levels (Class 9 → JEE Advanced), enabling payoff messaging and readiness checking.
+
+**Where to find it in the UI**:
+- **Route**: N/A (backend service)
+- **Navigation**: Used for curriculum progression guidance
+
+**Implementation**: `lib/curriculum/conceptEvolution.ts`
+
+**API Routes**: `/api/curriculum/evolution`
+
+**Grade Progression**:
+```
+Class 9 → Class 10 → Class 11 → Class 12 → JEE Mains → JEE Advanced
+```
+
+**Features**:
+- Cross-level prerequisites mapping
+- Payoff tag generation ("This prepares you for...")
+- Student readiness checking for level transitions
+
+---
+
 ## Development-Only Features
 
 These features are only accessible when `NODE_ENV=development`.

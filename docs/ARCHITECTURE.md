@@ -146,10 +146,18 @@ lib/
 │   ├── warmupSelector.ts         # Session warm-up
 │   └── studyPlanV2/              # Pattern-first curriculum
 │
-└── Policy Engines
-    ├── gatingPolicyEngine.ts     # Feature availability
-    ├── sessionModePolicyEngine.ts # Exam vs practice
-    └── recoveryModePolicy.ts     # Error recovery
+├── Policy Engines
+│   ├── gatingPolicyEngine.ts     # Feature availability
+│   ├── sessionModePolicyEngine.ts # Exam vs practice
+│   └── recoveryModePolicy.ts     # Error recovery
+│
+└── Curriculum Services
+    ├── contentVersioning.ts      # Version management, deprecation
+    ├── difficultyTaxonomy.ts     # 5-dimensional difficulty scoring
+    ├── ragIngestion.ts           # RAG embedding decisions
+    ├── foundationClassification.ts # F1/F2 classification
+    ├── conceptEvolution.ts       # Cross-grade progression
+    └── curriculumAudit.ts        # Pedagogical integrity checks
 ```
 
 ### 2.4 Feature Flag System
@@ -321,6 +329,14 @@ app/api/
 │   ├── complete/route.ts     # Mark complete
 │   └── lifecycle/route.ts    # State transitions
 │
+├── curriculum/               # Curriculum management
+│   ├── content-pack/route.ts # Content pack fetching
+│   ├── classify/route.ts     # Foundation classification
+│   ├── difficulty/route.ts   # Difficulty analysis
+│   ├── audit/route.ts        # Content auditing
+│   ├── evolution/route.ts    # Concept evolution maps
+│   └── rag/route.ts          # RAG ingestion
+│
 └── ... (40+ additional endpoints)
 ```
 
@@ -458,9 +474,141 @@ Response {
 
 ---
 
-## 6. Adaptive Learning Architecture
+## 6. Curriculum Architecture
 
-### 6.1 Confidence-Weighted SRS
+### 6.1 Atomic Learning Objects
+
+The curriculum system is built on atomic, composable learning objects:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Content Pack                                  │
+│  (Complete curriculum bundle for a concept)                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐  ┌─────────────────┐  ┌──────────────────┐        │
+│  │  Concept    │  │  Misconception  │  │    Problem       │        │
+│  │   Cards     │  │     Cards       │  │   Archetypes     │        │
+│  │             │  │                 │  │                  │        │
+│  │ • Statement │  │ • Trap triggers │  │ • Canonical form │        │
+│  │ • Intuition │  │ • Correction    │  │ • Transfer vars  │        │
+│  │ • Mental    │  │ • Severity      │  │ • Solution path  │        │
+│  │   model     │  │                 │  │                  │        │
+│  └─────────────┘  └─────────────────┘  └──────────────────┘        │
+│                                                                     │
+│  ┌─────────────────────┐  ┌────────────────────────────────┐       │
+│  │   Socratic Trees    │  │      Mastery Checks            │       │
+│  │                     │  │                                │       │
+│  │ • Branching paths   │  │ • Conceptual questions         │       │
+│  │ • Adaptive fading   │  │ • Qualitative reasoning        │       │
+│  │ • Recovery routes   │  │ • Transfer application         │       │
+│  └─────────────────────┘  └────────────────────────────────┘       │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `types/atomicLearning.ts`, `lib/curriculum/`
+
+### 6.2 Five-Dimensional Difficulty Taxonomy
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Difficulty Dimensions                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Dimension                 │ Score Range │ Description              │
+│  ─────────────────────────┼─────────────┼────────────────────────  │
+│  Conceptual Load          │  1-5        │ # of concepts involved   │
+│  Reasoning Depth          │  1-5        │ Logical chain length     │
+│  Transfer Distance        │  1-5        │ Context similarity       │
+│  Representation Switching │  1-5        │ Diagram↔equation↔graph   │
+│  Misconception Risk       │  1-5        │ Probability of errors    │
+│                                                                     │
+│  Composite Score = weighted_average(dimensions)                     │
+│  Overall Level = scoreToLevel(composite)                            │
+│                                                                     │
+│  Levels: novice → developing → proficient → advanced → expert       │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `lib/curriculum/difficultyTaxonomy.ts`
+
+### 6.3 Foundation Classification
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│               Foundation 1 vs Foundation 2                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Foundation 1 (F1)                │  Foundation 2 (F2)              │
+│  ─────────────────────────────    │  ──────────────────────────    │
+│  Focus: Intuition + FBD           │  Focus: Non-obvious interactions│
+│  Max difficulty: 2 (developing)   │  Max difficulty: 3 (proficient) │
+│  Max reasoning steps: 3           │  Max reasoning steps: 5         │
+│  Math level: Arithmetic only      │  Math level: Basic algebra      │
+│  Requires FBD: Yes                │  Requires FBD: Yes              │
+│  Intuition-based: Yes             │  Non-obvious interactions: Yes  │
+│                                                                     │
+│  Target Skills:                   │  Target Skills:                 │
+│  • Qualitative reasoning          │  • Multi-step reasoning         │
+│  • Representation                 │  • Hidden force identification  │
+│  • Cause-effect                   │  • Quantitative prediction      │
+│  • Comparison                     │  • Constraint-based analysis    │
+│  • Limiting cases                 │  • Edge case handling           │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `lib/curriculum/foundationClassification.ts`
+
+### 6.4 Concept Evolution Maps
+
+Tracks concept progression across grade levels:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│              Newton's Laws Evolution Map                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Class 9          Class 11           JEE Mains       JEE Advanced   │
+│  ──────────       ──────────         ─────────       ────────────   │
+│  ┌─────────┐      ┌─────────┐       ┌─────────┐     ┌─────────┐    │
+│  │ N3L     │─────▶│ N3L +   │──────▶│ Pseudo  │────▶│ Variable│    │
+│  │ Basic   │      │ Systems │       │ Forces  │     │ Mass    │    │
+│  │ Pairs   │      │ FBD     │       │         │     │ Systems │    │
+│  └─────────┘      └─────────┘       └─────────┘     └─────────┘    │
+│       │                │                  │               │         │
+│       ▼                ▼                  ▼               ▼         │
+│  Prerequisites    Prerequisites     Prerequisites   Prerequisites   │
+│  - None           - F1 complete     - Class 11     - JEE Mains     │
+│                   - Horse-cart      - Multi-body   - Rotating      │
+│                     resolved                         frames        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation**: `lib/curriculum/conceptEvolution.ts`
+
+### 6.5 Curriculum Auditing
+
+Automated pedagogical integrity checks:
+
+| Check | Severity | Description |
+|-------|----------|-------------|
+| Explanation over Inquiry | High | Detects telling vs. asking ratio imbalance |
+| Formula Leakage | Critical | Prevents premature equation reveal |
+| Hint Dependency | Medium | Warns when progression requires hints |
+| Difficulty Calibration | High | Validates F1/F2 constraints |
+| Fading Balance | Low | Ensures scaffold withdrawal is gradual |
+
+**Implementation**: `lib/curriculum/curriculumAudit.ts`
+
+---
+
+## 7. Adaptive Learning Architecture
+
+### 7.1 Confidence-Weighted SRS
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -479,7 +627,7 @@ Response {
 
 **Implementation**: `lib/confidenceWeightedSRS.ts`
 
-### 6.2 Cognitive Load Governor
+### 7.2 Cognitive Load Governor
 
 Monitors session metrics and adjusts UI complexity:
 
@@ -500,7 +648,7 @@ When cognitiveLoadScore = 'high':
 
 **Implementation**: `lib/cognitiveLoadService.ts`
 
-### 6.3 Adaptive Preflight Gating
+### 7.3 Adaptive Preflight Gating
 
 Risk-based preflight checks before high-probability-of-error steps:
 

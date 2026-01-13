@@ -530,6 +530,61 @@ Browse all app features:
 
 ---
 
+## Curriculum System (For Content Authors)
+
+The curriculum system provides structured content management for Foundation 1/2 levels.
+
+### Content Structure
+
+Content is organized into **Content Packs** containing:
+
+| Component | Purpose |
+|-----------|---------|
+| **Concept Cards** | Core physics concepts with intuition hooks |
+| **Misconception Cards** | Common errors with triggers and corrections |
+| **Problem Archetypes** | Canonical problem types with transfer variants |
+| **Socratic Trees** | Branching dialogue for guided discovery |
+| **Mastery Checks** | Assessment questions at different levels |
+
+### Foundation Levels
+
+| Level | Focus | Characteristics |
+|-------|-------|-----------------|
+| **Foundation 1** | Intuition + FBD | Qualitative reasoning, ≤3 steps, arithmetic only |
+| **Foundation 2** | Non-obvious interactions | Multi-body systems, ≤5 steps, basic algebra |
+
+### Difficulty Dimensions
+
+Content is scored on 5 dimensions (1-5 scale):
+
+1. **Conceptual Load** - Number of concepts involved
+2. **Reasoning Depth** - Depth of logical chain required
+3. **Transfer Distance** - How far from learned context
+4. **Representation Switching** - Diagram ↔ equation ↔ graph transitions
+5. **Misconception Risk** - Probability of common errors
+
+### Concept Evolution
+
+Concepts evolve across grade levels:
+```
+Class 9 → Class 10 → Class 11 → Class 12 → JEE Mains → JEE Advanced
+```
+
+Each level builds on prerequisites from previous levels.
+
+### API Access
+
+Curriculum APIs are available at `/api/curriculum/*`:
+- `GET /api/curriculum/content-pack?concept=<id>` - Fetch content pack
+- `POST /api/curriculum/classify` - Classify content
+- `POST /api/curriculum/difficulty` - Analyze difficulty
+- `POST /api/curriculum/audit` - Audit content quality
+- `GET /api/curriculum/evolution?concept=<family>` - Get evolution map
+
+See [CURRICULUM_API.md](./CURRICULUM_API.md) for full API documentation.
+
+---
+
 ## Troubleshooting
 
 ### Scaffold won't generate
