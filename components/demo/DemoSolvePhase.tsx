@@ -56,22 +56,22 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
   return (
     <div className="space-y-6">
       {/* Problem Statement */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-gray-200 dark:border-dark-border">
         <div className="flex items-center gap-2 mb-3">
-          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded">
             {problem.exam}
           </span>
-          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary text-xs font-medium rounded">
             {problem.topic}
           </span>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Problem</h2>
-        <p className="text-gray-800 leading-relaxed">{problem.statement}</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-3">Problem</h2>
+        <p className="text-gray-800 dark:text-dark-text-primary leading-relaxed">{problem.statement}</p>
       </div>
 
       {/* Hints Section */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-gray-200 dark:border-dark-border">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
           <svg
             className="w-5 h-5 text-amber-500"
             fill="none"
@@ -99,15 +99,15 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
                 key={idx}
                 className={`rounded-lg border-2 transition-all ${
                   isRevealed
-                    ? 'border-green-300 bg-green-50'
+                    ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
                     : canReveal
-                    ? 'border-amber-300 bg-amber-50'
-                    : 'border-gray-200 bg-gray-50 opacity-60'
+                    ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20'
+                    : 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-card-soft opacity-60'
                 }`}
               >
                 <div className="p-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                    <h4 className="font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
                       <span>{label.icon}</span>
                       {label.title}
                     </h4>
@@ -118,14 +118,14 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
                         className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                           canReveal
                             ? 'bg-amber-500 text-white hover:bg-amber-600'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                         }`}
                       >
                         Reveal
                       </button>
                     )}
                     {isRevealed && (
-                      <span className="text-green-600 text-sm font-medium flex items-center gap-1">
+                      <span className="text-green-600 dark:text-green-400 text-sm font-medium flex items-center gap-1">
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -144,10 +144,10 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
                     )}
                   </div>
                   {isRevealed && (
-                    <p className="mt-3 text-gray-700 leading-relaxed">{hint}</p>
+                    <p className="mt-3 text-gray-700 dark:text-dark-text-secondary leading-relaxed">{hint}</p>
                   )}
                   {!isRevealed && !canReveal && (
-                    <p className="mt-2 text-sm text-gray-500 italic">
+                    <p className="mt-2 text-sm text-gray-500 dark:text-dark-text-muted italic">
                       Reveal previous hint first
                     </p>
                   )}
@@ -157,14 +157,14 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
           })}
         </div>
 
-        <p className="mt-4 text-sm text-gray-500 text-center">
+        <p className="mt-4 text-sm text-gray-500 dark:text-dark-text-muted text-center">
           Try to solve without hints first for the best learning experience
         </p>
       </div>
 
       {/* Answer Input Section */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 border border-blue-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-blue-50 dark:from-blue-900/20 to-indigo-50 dark:to-indigo-900/20 rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-blue-100 dark:border-blue-800">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
           <svg
             className="w-5 h-5 text-blue-500"
             fill="none"
@@ -183,7 +183,7 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="answer" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
               Enter your final answer (numerical value only)
             </label>
             <input
@@ -192,10 +192,10 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="e.g., 4 or 2.5"
-              className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors"
+              className="w-full px-4 py-3 text-lg border-2 border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none transition-colors"
               disabled={isSubmitting}
             />
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-dark-text-muted">
               Enter just the number without units
             </p>
           </div>
@@ -205,7 +205,7 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
             disabled={!userAnswer.trim() || isSubmitting}
             className={`w-full py-4 text-lg font-semibold rounded-lg transition-all ${
               !userAnswer.trim() || isSubmitting
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl'
             }`}
           >
@@ -240,9 +240,9 @@ export default function DemoSolvePhase({ problem, onSubmit }: DemoSolvePhaseProp
       </div>
 
       {/* Tips */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">Tips</h4>
-        <ul className="text-sm text-gray-600 space-y-1">
+      <div className="bg-gray-50 dark:bg-dark-card-soft rounded-lg p-4 border border-gray-200 dark:border-dark-border">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">Tips</h4>
+        <ul className="text-sm text-gray-600 dark:text-dark-text-secondary space-y-1">
           <li className="flex items-start gap-2">
             <span className="text-green-500">•</span>
             Double-check your arithmetic before submitting

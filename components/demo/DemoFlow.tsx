@@ -147,21 +147,21 @@ export default function DemoFlow() {
   }, [selectedProblem, handleSelectProblem, handleStartOver])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-dark-app dark:to-dark-app">
       {/* Header */}
-      <header className="bg-white border-b shadow-sm">
+      <header className="bg-white dark:bg-dark-card border-b dark:border-dark-border shadow-sm dark:shadow-dark-lg">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">PhysiScaffold Demo</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">PhysiScaffold Demo</h1>
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
                 Experience structured physics problem-solving
               </p>
             </div>
             {phase !== 'select' && (
               <button
                 onClick={handleStartOver}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-card-soft rounded-lg transition-colors"
               >
                 Start Over
               </button>
@@ -174,8 +174,8 @@ export default function DemoFlow() {
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
                   phase === 'thinking'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-green-100 text-green-700'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                 }`}
               >
                 <span className="w-5 h-5 rounded-full bg-current/20 flex items-center justify-center text-xs">
@@ -183,14 +183,14 @@ export default function DemoFlow() {
                 </span>
                 Think First
               </div>
-              <div className="w-8 h-0.5 bg-gray-300" />
+              <div className="w-8 h-0.5 bg-gray-300 dark:bg-dark-border" />
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
                   phase === 'solve'
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                     : phase === 'result'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'bg-gray-100 dark:bg-dark-card-soft text-gray-500 dark:text-dark-text-muted'
                 }`}
               >
                 <span className="w-5 h-5 rounded-full bg-current/20 flex items-center justify-center text-xs">
@@ -198,12 +198,12 @@ export default function DemoFlow() {
                 </span>
                 Solve
               </div>
-              <div className="w-8 h-0.5 bg-gray-300" />
+              <div className="w-8 h-0.5 bg-gray-300 dark:bg-dark-border" />
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
                   phase === 'result'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'bg-gray-100 dark:bg-dark-card-soft text-gray-500 dark:text-dark-text-muted'
                 }`}
               >
                 <span className="w-5 h-5 rounded-full bg-current/20 flex items-center justify-center text-xs">
@@ -253,11 +253,11 @@ export default function DemoFlow() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-auto">
-        <div className="max-w-4xl mx-auto px-4 py-4 text-center text-sm text-gray-500">
+      <footer className="border-t dark:border-dark-border bg-white dark:bg-dark-card mt-auto">
+        <div className="max-w-4xl mx-auto px-4 py-4 text-center text-sm text-gray-500 dark:text-dark-text-muted">
           <p>Demo Mode - No data is saved to your account</p>
           <p className="mt-1">
-            <Link href="/" className="text-blue-600 hover:underline">
+            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
               Return to Main App
             </Link>
           </p>

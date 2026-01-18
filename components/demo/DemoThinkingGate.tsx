@@ -71,21 +71,21 @@ export default function DemoThinkingGate({
   return (
     <div className="space-y-6">
       {/* Problem Statement */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-gray-200 dark:border-dark-border">
         <div className="flex items-center gap-2 mb-3">
-          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded">
             {problem.exam}
           </span>
-          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary text-xs font-medium rounded">
             {problem.topic}
           </span>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Problem</h2>
-        <p className="text-gray-800 leading-relaxed">{problem.statement}</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-3">Problem</h2>
+        <p className="text-gray-800 dark:text-dark-text-primary leading-relaxed">{problem.statement}</p>
       </div>
 
       {/* Thinking Gate Section */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl shadow-lg p-6 border border-indigo-100">
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-indigo-100 dark:border-indigo-800">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center">
             <svg
@@ -103,8 +103,8 @@ export default function DemoThinkingGate({
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-indigo-900">Think First</h3>
-            <p className="text-sm text-indigo-700">
+            <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-200">Think First</h3>
+            <p className="text-sm text-indigo-700 dark:text-indigo-300">
               Answer these conceptual questions before solving
             </p>
           </div>
@@ -112,13 +112,13 @@ export default function DemoThinkingGate({
 
         {/* Progress Bar */}
         <div className="mb-6">
-          <div className="flex justify-between text-sm text-indigo-700 mb-2">
+          <div className="flex justify-between text-sm text-indigo-700 dark:text-indigo-300 mb-2">
             <span>
               Question {Math.min(currentQuestion + 1, totalQuestions)} of {totalQuestions}
             </span>
             <span>{selectedAnswers.length} answered</span>
           </div>
-          <div className="h-2 bg-indigo-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-indigo-200 dark:bg-indigo-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-indigo-500 transition-all duration-300"
               style={{
@@ -131,8 +131,8 @@ export default function DemoThinkingGate({
         {/* Question Display */}
         {!isComplete && currentQ && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <p className="text-gray-900 font-medium">{currentQ.question}</p>
+            <div className="bg-white dark:bg-dark-card rounded-lg p-4 shadow-sm dark:shadow-dark-lg">
+              <p className="text-gray-900 dark:text-dark-text-primary font-medium">{currentQ.question}</p>
             </div>
 
             {/* Options */}
@@ -146,8 +146,8 @@ export default function DemoThinkingGate({
                     disabled={isAnimating}
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-sm'
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                        : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm'
                     } ${isAnimating ? 'opacity-75' : ''}`}
                   >
                     <div className="flex items-start gap-3">
@@ -155,12 +155,12 @@ export default function DemoThinkingGate({
                         className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
                           isSelected
                             ? 'bg-indigo-500 text-white'
-                            : 'bg-gray-100 text-gray-600'
+                            : 'bg-gray-100 dark:bg-dark-card-soft text-gray-600 dark:text-dark-text-secondary'
                         }`}
                       >
                         {String.fromCharCode(65 + idx)}
                       </span>
-                      <span className="text-gray-800">{option}</span>
+                      <span className="text-gray-800 dark:text-dark-text-primary">{option}</span>
                     </div>
                   </button>
                 )
@@ -174,8 +174,8 @@ export default function DemoThinkingGate({
                 disabled={currentQuestion === 0}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                   currentQuestion === 0
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-indigo-600 hover:bg-indigo-100'
+                    ? 'text-gray-400 dark:text-dark-text-muted cursor-not-allowed'
+                    : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
                 }`}
               >
                 Previous
@@ -189,8 +189,8 @@ export default function DemoThinkingGate({
                       idx === currentQuestion
                         ? 'bg-indigo-500'
                         : selectedAnswers[idx] !== undefined
-                        ? 'bg-indigo-300'
-                        : 'bg-gray-300'
+                        ? 'bg-indigo-300 dark:bg-indigo-600'
+                        : 'bg-gray-300 dark:bg-dark-border'
                     }`}
                     aria-label={`Go to question ${idx + 1}`}
                   />
@@ -204,9 +204,9 @@ export default function DemoThinkingGate({
         {/* Completion State */}
         {isComplete && (
           <div className="text-center py-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
               <svg
-                className="w-8 h-8 text-green-600"
+                className="w-8 h-8 text-green-600 dark:text-green-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -219,10 +219,10 @@ export default function DemoThinkingGate({
                 />
               </svg>
             </div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
               Great thinking!
             </h4>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
               You&apos;ve thought through the key concepts. Now let&apos;s solve the problem.
             </p>
             <button
@@ -236,11 +236,11 @@ export default function DemoThinkingGate({
       </div>
 
       {/* Why This Matters */}
-      <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0">
             <svg
-              className="w-5 h-5 text-amber-600"
+              className="w-5 h-5 text-amber-600 dark:text-amber-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -254,10 +254,10 @@ export default function DemoThinkingGate({
             </svg>
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-amber-800">
+            <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-200">
               Why the Thinking Gate?
             </h4>
-            <p className="text-sm text-amber-700 mt-1">
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
               Research shows that pausing to think about concepts before calculating
               dramatically reduces careless mistakes and builds deeper understanding.
               This is not a test - it&apos;s a thinking exercise.

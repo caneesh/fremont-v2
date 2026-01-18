@@ -33,20 +33,20 @@ export default function DemoResult({
     <div className="space-y-6">
       {/* Result Banner */}
       <div
-        className={`rounded-xl shadow-lg p-8 text-center ${
+        className={`rounded-xl shadow-lg dark:shadow-dark-lg p-8 text-center ${
           isCorrect
-            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200'
-            : 'bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200'
+            ? 'bg-gradient-to-br from-green-50 dark:from-green-900/20 to-emerald-50 dark:to-emerald-900/20 border border-green-200 dark:border-green-800'
+            : 'bg-gradient-to-br from-amber-50 dark:from-amber-900/20 to-orange-50 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800'
         }`}
       >
         <div
           className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
-            isCorrect ? 'bg-green-100' : 'bg-amber-100'
+            isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-amber-100 dark:bg-amber-900/30'
           }`}
         >
           {isCorrect ? (
             <svg
-              className="w-10 h-10 text-green-600"
+              className="w-10 h-10 text-green-600 dark:text-green-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -60,7 +60,7 @@ export default function DemoResult({
             </svg>
           ) : (
             <svg
-              className="w-10 h-10 text-amber-600"
+              className="w-10 h-10 text-amber-600 dark:text-amber-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -76,40 +76,40 @@ export default function DemoResult({
         </div>
         <h2
           className={`text-2xl font-bold mb-2 ${
-            isCorrect ? 'text-green-800' : 'text-amber-800'
+            isCorrect ? 'text-green-800 dark:text-green-200' : 'text-amber-800 dark:text-amber-200'
           }`}
         >
           {isCorrect ? 'Excellent Work!' : 'Good Attempt!'}
         </h2>
-        <p className={isCorrect ? 'text-green-700' : 'text-amber-700'}>
+        <p className={isCorrect ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}>
           {isCorrect
             ? 'You solved the problem correctly!'
             : "Let's understand what went wrong."}
         </p>
         <div className="mt-4 flex justify-center gap-4 text-sm">
-          <div className="px-4 py-2 bg-white/60 rounded-lg">
+          <div className="px-4 py-2 bg-white/60 dark:bg-white/10 rounded-lg text-gray-900 dark:text-dark-text-primary">
             <span className="font-medium">Your Answer:</span> {userAnswer}
           </div>
-          <div className="px-4 py-2 bg-white/60 rounded-lg">
+          <div className="px-4 py-2 bg-white/60 dark:bg-white/10 rounded-lg text-gray-900 dark:text-dark-text-primary">
             <span className="font-medium">Correct Answer:</span> {problem.expectedAnswer}
           </div>
         </div>
       </div>
 
       {/* Thinking Gate Performance */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-gray-200 dark:border-dark-border">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
           <span className="text-xl">🤔</span>
           Thinking Gate Performance
         </h3>
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-700">Conceptual Questions</span>
-            <span className="font-medium text-gray-900">
+            <span className="text-gray-700 dark:text-dark-text-secondary">Conceptual Questions</span>
+            <span className="font-medium text-gray-900 dark:text-dark-text-primary">
               {correctThinkingCount} / {problem.thinkingGate.length} correct
             </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-dark-border rounded-full overflow-hidden">
             <div
               className="h-full bg-indigo-500"
               style={{
@@ -118,7 +118,7 @@ export default function DemoResult({
             />
           </div>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
           {correctThinkingCount === problem.thinkingGate.length
             ? 'Great conceptual understanding! This solid foundation helps prevent errors.'
             : 'Reviewing the conceptual questions can help strengthen your understanding.'}
@@ -126,10 +126,10 @@ export default function DemoResult({
       </div>
 
       {/* Explanation */}
-      <div className="bg-blue-50 rounded-xl shadow-lg p-6 border border-blue-200">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-blue-200 dark:border-blue-800">
+        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
           <svg
-            className="w-5 h-5 text-blue-600"
+            className="w-5 h-5 text-blue-600 dark:text-blue-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -143,14 +143,14 @@ export default function DemoResult({
           </svg>
           Solution Explanation
         </h3>
-        <p className="text-blue-800 leading-relaxed">{problem.explanation}</p>
+        <p className="text-blue-800 dark:text-blue-300 leading-relaxed">{problem.explanation}</p>
       </div>
 
       {/* Common Mistake */}
-      <div className="bg-rose-50 rounded-xl shadow-lg p-6 border border-rose-200">
-        <h3 className="text-lg font-semibold text-rose-900 mb-4 flex items-center gap-2">
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-rose-200 dark:border-rose-800">
+        <h3 className="text-lg font-semibold text-rose-900 dark:text-rose-200 mb-4 flex items-center gap-2">
           <svg
-            className="w-5 h-5 text-rose-600"
+            className="w-5 h-5 text-rose-600 dark:text-rose-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -164,14 +164,14 @@ export default function DemoResult({
           </svg>
           Common Mistake to Avoid
         </h3>
-        <p className="text-rose-800 leading-relaxed">
+        <p className="text-rose-800 dark:text-rose-300 leading-relaxed">
           {problem.commonMistakeExplained}
         </p>
       </div>
 
       {/* CTA Buttons */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+      <div className="bg-white dark:bg-dark-card rounded-xl shadow-lg dark:shadow-dark-lg p-6 border border-gray-200 dark:border-dark-border">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4 text-center">
           What would you like to do next?
         </h3>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -196,7 +196,7 @@ export default function DemoResult({
           </button>
           <button
             onClick={onStartOver}
-            className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors border border-gray-300"
+            className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 dark:bg-dark-card-soft text-gray-700 dark:text-dark-text-secondary font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-dark-border transition-colors border border-gray-300 dark:border-dark-border"
           >
             <svg
               className="w-5 h-5"
@@ -216,12 +216,12 @@ export default function DemoResult({
         </div>
 
         {/* Sign Up CTA */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
+        <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 dark:from-indigo-900/20 to-purple-50 dark:to-purple-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800">
           <div className="text-center">
-            <h4 className="font-semibold text-gray-900 mb-2">
+            <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
               Want to track your progress?
             </h4>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
               Create a free account to save your progress, access more problems, and get
               personalized recommendations.
             </p>
