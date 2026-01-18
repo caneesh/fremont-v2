@@ -1059,10 +1059,9 @@ export default function SolutionScaffold({ data, onReset, onLoadNewProblem, onSo
               }
               // Skip completion for steps with no tasks (unexpanded phased scaffold steps)
             } else {
-              // Only restore if we have a valid hint level (user actually worked on this step)
-              if (sp.currentHintLevel && sp.currentHintLevel > 0) {
-                completed.push(sp.stepId)
-              }
+              // For hint-based mode, restore completion if explicitly marked complete
+              // Note: Don't require hint usage - users may complete steps without hints
+              completed.push(sp.stepId)
             }
           }
           if (sp.currentHintLevel) {
