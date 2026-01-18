@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { authService } from '@/lib/auth/authService'
 import { quotaService } from '@/lib/auth/quotaService'
 import { DEFAULT_QUOTA_LIMITS } from '@/types/auth'
@@ -14,15 +14,28 @@ interface AuthGateProps {
   children: React.ReactNode
 }
 
+// Routes that bypass authentication
+const PUBLIC_ROUTES = ['/demo']
+
 export default function AuthGate({ children }: AuthGateProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [accessCode, setAccessCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [showWelcome, setShowWelcome] = useState(false)
 
+  // Check if current route is public (bypasses auth)
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname?.startsWith(route))
+
   useEffect(() => {
+    // Skip auth check for public routes
+    if (isPublicRoute) {
+      setIsLoading(false)
+      return
+    }
+
     // Check if already authenticated
     const session = authService.getSession()
     if (session) {
@@ -31,7 +44,7 @@ export default function AuthGate({ children }: AuthGateProps) {
       quotaService.cleanOldQuotas()
     }
     setIsLoading(false)
-  }, [])
+  }, [isPublicRoute])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +78,11 @@ export default function AuthGate({ children }: AuthGateProps) {
         </div>
       </div>
     )
+  }
+
+  // Render children directly for public routes (no auth wrapper)
+  if (isPublicRoute) {
+    return <>{children}</>
   }
 
   if (!isAuthenticated) {
