@@ -110,7 +110,7 @@ Respond with ONLY valid JSON.`
     const client = getAnthropicClient()
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
+      max_tokens: 1500, // Increased from 1000 to avoid truncation
       temperature: 0.6,
       messages: [{ role: 'user', content: prompt }],
     })
@@ -120,12 +120,24 @@ Respond with ONLY valid JSON.`
       throw new Error('Unexpected response type')
     }
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('Failed to parse JSON')
+    // Check if response was truncated
+    if (response.stop_reason === 'max_tokens') {
+      console.warn('Socratic initial-prompt: Response was truncated due to max_tokens')
     }
 
-    const result = JSON.parse(jsonMatch[0])
+    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error('Failed to extract JSON from response')
+    }
+
+    // Wrap JSON.parse in try-catch to handle malformed/truncated JSON
+    let result
+    try {
+      result = JSON.parse(jsonMatch[0])
+    } catch (parseError) {
+      console.error('Failed to parse JSON response:', jsonMatch[0].substring(0, 200))
+      throw new Error('Failed to parse JSON response from AI')
+    }
 
     // Validate and ensure we have questions array
     if (!result.questions || !Array.isArray(result.questions)) {
